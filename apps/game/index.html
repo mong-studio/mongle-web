@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>몽글마을 집중 시간</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="game"></div>
+      <header class="hud top-status" aria-label="몽글마을 상태">
+        <div>
+          <p class="tiny-label">MONGLE VILLAGE</p>
+          <h1>몽글마을</h1>
+        </div>
+        <div class="status-chip"><span>USER</span><strong>GUEST</strong></div>
+        <div class="status-chip"><span>사과</span><strong id="apple-count">5</strong></div>
+        <div class="status-chip"><span>주민</span><strong id="resident-count">3/10</strong></div>
+        <div class="status-chip"><span>퀘스트</span><strong id="quest-quota">0/5</strong></div>
+      </header>
+
+      <section class="hud timer-panel" aria-label="집중 타이머">
+        <div class="sun-icon" aria-hidden="true"></div>
+        <div>
+          <p class="tiny-label">FOCUS TIME</p>
+          <p id="timer" class="timer">25:00</p>
+          <p id="cycle-label" class="cycles">0 CYCLES</p>
+        </div>
+        <div class="timer-actions">
+          <button id="start-btn" type="button">START</button>
+          <button id="reset-btn" type="button">RESET</button>
+        </div>
+      </section>
+
+      <section class="hud todo-panel" aria-label="오늘의 할 일">
+        <div class="panel-head">
+          <div>
+            <p id="date-label" class="date">2026.05.24</p>
+            <h2 id="weekday-label">SUN</h2>
+          </div>
+          <button id="add-todo-btn" class="square-btn" type="button" aria-label="할 일 추가">+</button>
+        </div>
+        <form id="todo-form" class="todo-form">
+          <input id="todo-input" type="text" maxlength="200" placeholder="오늘 할 일을 자연어로 적어보세요" />
+          <button id="ai-todo-btn" type="button">AI 정리</button>
+        </form>
+        <p id="todo-status" class="todo-status" aria-live="polite"></p>
+        <ul id="todo-list" class="todo-list"></ul>
+      </section>
+
+      <section class="hud resident-panel" aria-label="캐릭터">
+        <div class="panel-head compact">
+          <div>
+            <p class="tiny-label">CHARACTERS</p>
+            <h2>주민</h2>
+          </div>
+          <button id="new-character-btn" class="square-btn" type="button" aria-label="캐릭터 생성">+</button>
+        </div>
+        <div id="resident-list" class="resident-list"></div>
+        <p id="character-limit" class="panel-note">생성 0/3 · 보유 3/10</p>
+      </section>
+
+      <section class="hud quest-panel" aria-label="퀘스트와 피드">
+        <div class="tabs">
+          <button id="quest-tab" class="is-active" type="button">퀘스트</button>
+          <button id="feed-tab" type="button">피드</button>
+          <button id="retro-tab" type="button">회고</button>
+        </div>
+        <div id="quest-view" class="stack-view">
+          <p class="panel-note">오늘 TODO 확정 시 캐릭터에게 1:1 퀘스트가 배정됩니다.</p>
+          <ul id="quest-list" class="quest-list"></ul>
+        </div>
+        <div id="feed-view" class="stack-view is-hidden">
+          <p class="panel-note">퀘스트 완료 시 캐릭터가 피드를 올립니다.</p>
+          <div id="feed-list" class="feed-list"></div>
+        </div>
+        <div id="retro-view" class="stack-view is-hidden">
+          <p class="panel-note">하루 1회 회고를 남기면 사과를 받을 수 있어요.</p>
+          <textarea id="good-points" maxlength="160" placeholder="잘한 점"></textarea>
+          <textarea id="improve-points" maxlength="160" placeholder="개선할 점"></textarea>
+          <button id="save-reflection-btn" type="button">회고 저장</button>
+          <p id="reflection-status" class="panel-note"></p>
+        </div>
+      </section>
+
+      <section id="entity-card" class="hud entity-card is-visible" aria-live="polite">
+        <p class="card-role">CHEF</p>
+        <div id="entity-portrait" class="portrait chef"></div>
+        <h2 id="entity-title">CHEF HOUSE</h2>
+      </section>
+
+      <section class="hud dialogue" aria-label="대화">
+        <div id="dialogue-portrait" class="dialogue-portrait chef"></div>
+        <div class="dialogue-main">
+          <button id="close-dialogue" class="dialogue-close" type="button" aria-label="대화 닫기">×</button>
+          <p id="dialogue-text">안녕! 오늘은 뭘 도와줄까?</p>
+          <div id="dialogue-options" class="dialogue-options"></div>
+        </div>
+      </section>
+
+      <section id="feature-modal" class="hud feature-modal is-hidden" aria-label="몽글 기능">
+        <button id="modal-close" class="dialogue-close" type="button" aria-label="닫기">×</button>
+        <p id="modal-label" class="tiny-label">MONGLE AI</p>
+        <h2 id="modal-title">TODO 생성</h2>
+
+        <div id="todo-create-view" class="modal-view">
+          <textarea id="todo-ai-prompt" maxlength="200" placeholder="예) 정처기 1단계 끝내고, 청소하고, 강아지 산책 두 번"></textarea>
+          <button id="todo-ai-submit" type="button">TODO 후보 생성</button>
+          <div id="todo-ai-result" class="modal-result"></div>
+        </div>
+
+        <div id="planner-view" class="modal-view is-hidden">
+          <div id="planner-history" class="planner-history"></div>
+          <textarea id="planner-message" maxlength="600" placeholder="예) 3일 후 시험을 준비해야 해. 하루 2시간 가능해."></textarea>
+          <button id="planner-submit" type="button">이장님에게 보내기</button>
+        </div>
+
+        <div id="character-create-view" class="modal-view is-hidden">
+          <input id="character-name" maxlength="50" placeholder="새 주민 이름" />
+          <textarea id="character-persona" maxlength="500" placeholder="어떤 성격과 배경을 가진 주민인가요?"></textarea>
+          <div class="keyword-row">
+            <label><input type="checkbox" value="다정한" />다정한</label>
+            <label><input type="checkbox" value="부지런한" />부지런한</label>
+            <label><input type="checkbox" value="명랑한" />명랑한</label>
+          </div>
+          <button id="character-submit" type="button">새 주민 생성</button>
+          <p id="character-result" class="modal-result"></p>
+        </div>
+      </section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

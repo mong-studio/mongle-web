@@ -1,0 +1,15 @@
+{
+  "name": "mongle-web-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run ai:api & npm run web:dev",
+    "web:install": "npm install --prefix apps/game",
+    "web:dev": "npm run dev --prefix apps/game",
+    "web:build": "npm run build --prefix apps/game",
+    "web:preview": "npm run preview --prefix apps/game",
+    "ai:api": "cd packages/ai && uv run python -m api.server",
+    "ai:test": "cd packages/ai && uv run pytest",
+    "ai:demo": "cd packages/ai && uv run streamlit run streamlit_app/app.py"
+  }
+}
