@@ -1,16 +1,11 @@
 :root {
   color-scheme: light;
-  font-family:
-    "Courier New", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-family: "DotGothic16", "Apple SD Gothic Neo", "Malgun Gothic", monospace;
   color: #382719;
   background: #1d2a20;
-  font-synthesis: none;
-  text-rendering: geometricPrecision;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html,
 body,
@@ -18,35 +13,14 @@ body,
   width: 100%;
   min-width: 320px;
   height: 100%;
-  min-height: 100vh;
   margin: 0;
 }
 
-body {
-  overflow: hidden;
-}
-
+body { overflow: hidden; }
 button,
 input,
-textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.62;
-}
-
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid #ffe27a;
-  outline-offset: 2px;
-}
+textarea { font: inherit; }
+button { cursor: pointer; }
 
 .appShell {
   position: relative;
@@ -75,13 +49,13 @@ textarea:focus-visible {
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(34, 52, 35, 0.15), transparent 28%),
-    linear-gradient(0deg, rgba(27, 35, 22, 0.35), transparent 42%);
+    linear-gradient(180deg, rgba(34, 52, 35, 0.2), transparent 30%),
+    linear-gradient(0deg, rgba(27, 35, 22, 0.4), transparent 45%);
 }
 
 .townNav {
   position: absolute;
-  z-index: 5;
+  z-index: 8;
   top: 14px;
   left: 18px;
   right: 18px;
@@ -94,23 +68,16 @@ textarea:focus-visible {
   text-shadow: 0 2px 0 rgba(43, 27, 18, 0.65);
 }
 
-.townNav nav {
-  display: flex;
-  gap: 8px;
-  min-width: 0;
-}
+.townNav nav { display: flex; gap: 8px; min-width: 0; }
 
 .townNav h1 {
   margin: 0;
   padding: 8px 24px;
   border: 3px solid #553827;
-  box-shadow:
-    inset 0 0 0 3px #f5d48c,
-    0 4px 0 rgba(50, 33, 22, 0.5);
+  box-shadow: inset 0 0 0 3px #f5d48c, 0 4px 0 rgba(50, 33, 22, 0.5);
   background: #98643f;
   color: #fff5ce;
   font-size: clamp(1.2rem, 2.2vw, 2rem);
-  letter-spacing: 0;
   white-space: nowrap;
 }
 
@@ -118,12 +85,13 @@ textarea:focus-visible {
 .focusActions button,
 .questPanel > button,
 .primaryButton,
-.talkButton {
+.talkButton,
+.plannerComposer button,
+.planResult button,
+.candidateBlock li button {
   min-height: 34px;
   border: 3px solid #453023;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 244, 196, 0.55),
-    0 3px 0 rgba(50, 33, 22, 0.55);
+  box-shadow: inset 0 0 0 2px rgba(255, 244, 196, 0.55), 0 3px 0 rgba(50, 33, 22, 0.55);
   background: #8a5b38;
   color: #fff5d1;
   font-weight: 900;
@@ -135,10 +103,7 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
-.loginButton {
-  justify-self: end;
-  min-width: 84px;
-}
+.loginButton { justify-self: end; min-width: 84px; }
 
 .focusPanel,
 .questPanel,
@@ -148,20 +113,21 @@ textarea:focus-visible {
 .residentPanel,
 .featureModal {
   border: 4px solid #4b2f1f;
-  box-shadow:
-    inset 0 0 0 3px rgba(255, 246, 202, 0.45),
-    0 6px 0 rgba(44, 28, 20, 0.55),
-    0 18px 34px rgba(23, 22, 16, 0.28);
+  box-shadow: inset 0 0 0 3px rgba(255, 246, 202, 0.45), 0 6px 0 rgba(44, 28, 20, 0.55), 0 18px 34px rgba(23, 22, 16, 0.28);
   image-rendering: pixelated;
 }
 
-.focusPanel {
+.leftRail {
   position: absolute;
-  z-index: 4;
-  top: 92px;
+  z-index: 6;
+  top: 90px;
   left: 22px;
-  width: 180px;
-  min-height: 184px;
+  width: 210px;
+  display: grid;
+  gap: 12px;
+}
+
+.focusPanel {
   display: grid;
   justify-items: center;
   gap: 8px;
@@ -178,19 +144,11 @@ textarea:focus-visible {
   background: #ffe279;
   color: #8f4c24;
   font-size: 1.5rem;
-  line-height: 1;
 }
 
-.focusPanel strong {
-  font-size: 2.05rem;
-  color: #3d2a1d;
-}
-
+.focusPanel strong { font-size: 2rem; color: #3d2a1d; }
 .focusPanel span,
-.focusPanel small {
-  color: #7a4b2d;
-  font-weight: 900;
-}
+.focusPanel small { color: #7a4b2d; font-weight: 900; }
 
 .focusActions {
   display: grid;
@@ -199,18 +157,75 @@ textarea:focus-visible {
   width: 100%;
 }
 
-.focusActions button {
-  min-width: 0;
-  padding: 0 6px;
-  font-size: 0.72rem;
+.residentPanel {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: #f7df9e;
 }
+
+.residentPanel b { color: #4b3021; font-size: 0.78rem; }
+
+.residentPanel div,
+.residentList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.residentPanel span,
+.residentList span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 2px solid #8e6038;
+  background: #fff4c5;
+  color: #5b3925;
+  font-size: 0.7rem;
+  font-weight: 950;
+}
+
+.residentPanel span img,
+.residentList span img {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #7b4d2b;
+  image-rendering: pixelated;
+  object-fit: cover;
+}
+
+.noticeBubble {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  background: #fff1bd;
+  color: #4b3021;
+}
+
+.noticeBubble b { color: #7b3d29; }
+.noticeBubble span { font-size: 0.78rem; line-height: 1.35; }
+
+.appleCounter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 12px;
+  background: #f7df9e;
+}
+
+.appleCounter span { font-size: 1.3rem; }
+.appleCounter b { font-size: 1.15rem; }
 
 .questPanel {
   position: absolute;
-  z-index: 4;
+  z-index: 6;
   top: 92px;
   right: 22px;
-  width: min(300px, calc(100vw - 44px));
+  width: min(320px, calc(100vw - 44px));
   display: grid;
   gap: 12px;
   padding: 14px;
@@ -226,20 +241,12 @@ textarea:focus-visible {
   border-bottom: 3px solid #8f5c34;
 }
 
-.panelHeader span {
-  color: #3d2a1d;
-  font-size: 1rem;
-  font-weight: 950;
-}
-
-.panelHeader b {
-  color: #7c4d2c;
-  font-size: 0.72rem;
-  white-space: nowrap;
-}
+.panelHeader span { color: #3d2a1d; font-size: 1rem; font-weight: 950; }
+.panelHeader b { color: #7c4d2c; font-size: 0.72rem; white-space: nowrap; }
 
 .questPanel ul,
-.todoSheet ul {
+.todoSheet ul,
+.planResult ul {
   display: grid;
   gap: 8px;
   list-style: none;
@@ -261,11 +268,6 @@ textarea:focus-visible {
 
 .checkButton,
 .todoSheet li > span {
-  color: #5c3722;
-  font-weight: 950;
-}
-
-.checkButton {
   width: 24px;
   height: 24px;
   padding: 0;
@@ -273,129 +275,28 @@ textarea:focus-visible {
   background: transparent;
   box-shadow: none;
   color: #5c3722;
+  font-weight: 950;
 }
 
 .questPanel li b,
 .questPanel li p,
-.questPanel li small {
-  margin: 0;
-}
-
-.questPanel li p {
-  margin-top: 2px;
-  color: #5c4635;
-  font-size: 0.82rem;
-}
-
-.questPanel li small {
-  display: block;
-  margin-top: 3px;
-  color: #8a6040;
-  font-size: 0.68rem;
-  line-height: 1.25;
-}
-
-.questPanel li.isDone {
-  opacity: 0.72;
-}
-
-.questPanel li.isDone p {
-  text-decoration: line-through;
-}
-
-.questPanel > button {
-  width: 100%;
-}
-
-.residentPanel {
-  position: absolute;
-  z-index: 4;
-  top: 292px;
-  left: 22px;
-  width: 180px;
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-  background: #f7df9e;
-}
-
-.residentPanel b {
-  color: #4b3021;
-  font-size: 0.78rem;
-}
-
-.residentPanel div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.residentPanel span,
-.residentList span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  padding: 3px 8px;
-  border: 2px solid #8e6038;
-  background: #fff4c5;
-  color: #5b3925;
-  font-size: 0.72rem;
-  font-weight: 950;
-}
-
-.appleCounter {
-  position: absolute;
-  z-index: 4;
-  left: 22px;
-  bottom: 26px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 92px;
-  min-height: 44px;
-  padding: 6px 12px;
-  background: #f7df9e;
-}
-
-.appleCounter span {
-  font-size: 1.3rem;
-}
-
-.appleCounter b {
-  font-size: 1.2rem;
-}
-
-.noticeBubble {
-  position: absolute;
-  z-index: 4;
-  right: 22px;
-  bottom: 30px;
-  width: min(260px, calc(100vw - 44px));
-  display: grid;
-  gap: 4px;
-  padding: 12px;
-  background: #fff1bd;
-  color: #4b3021;
-}
-
-.noticeBubble b {
-  color: #7b3d29;
-}
-
-.noticeBubble span {
-  line-height: 1.35;
-  font-size: 0.82rem;
-}
+.questPanel li small { margin: 0; }
+.questPanel li p { margin-top: 2px; color: #5c4635; font-size: 0.82rem; }
+.questPanel li small { display: block; margin-top: 3px; color: #8a6040; font-size: 0.68rem; line-height: 1.25; }
+.questPanel li.isDone,
+.todoSheet li.isDone { opacity: 0.72; }
+.questPanel li.isDone p,
+.todoSheet li.isDone b { text-decoration: line-through; }
 
 .dialogueBox {
   position: absolute;
-  z-index: 6;
+  z-index: 7;
   left: 50%;
-  bottom: 26px;
-  width: min(860px, calc(100vw - 260px));
-  min-height: 170px;
+  bottom: 22px;
+  width: min(920px, calc(100vw - 280px));
+  min-height: 180px;
   display: grid;
-  grid-template-columns: 112px minmax(160px, 1fr) minmax(300px, 1.2fr);
+  grid-template-columns: 112px minmax(160px, 1fr) minmax(320px, 1.2fr);
   gap: 14px;
   align-items: stretch;
   padding: 14px;
@@ -404,9 +305,7 @@ textarea:focus-visible {
 }
 
 .dialogueBox img,
-.pixelPreview img {
-  image-rendering: pixelated;
-}
+.pixelPreview img { image-rendering: pixelated; }
 
 .dialogueBox img {
   width: 112px;
@@ -414,16 +313,8 @@ textarea:focus-visible {
   object-fit: cover;
   object-position: center 18%;
   align-self: end;
-  padding: 7px;
   border: 3px solid #7b4d2b;
   background: #fff3c0;
-}
-
-.dialogueBox .chiefPortrait {
-  aspect-ratio: 3 / 4;
-  height: 132px;
-  padding: 0;
-  background: #f2d59b;
 }
 
 .dialogueText {
@@ -436,30 +327,11 @@ textarea:focus-visible {
   background: #fff4c5;
 }
 
-.dialogueText span {
-  color: #8d3f28;
-  font-size: 0.82rem;
-  font-weight: 950;
-}
+.dialogueText span { color: #8d3f28; font-size: 0.82rem; font-weight: 950; }
+.dialogueText p { margin: 0; color: #3f2d21; font-size: 1.02rem; font-weight: 900; line-height: 1.5; }
+.dialogueText small { color: #7b5a3e; font-size: 0.72rem; font-weight: 900; }
 
-.dialogueText p {
-  margin: 0;
-  color: #3f2d21;
-  font-size: 1.02rem;
-  font-weight: 900;
-  line-height: 1.6;
-}
-
-.dialogueText small {
-  color: #7b5a3e;
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.dialogueOptions {
-  display: grid;
-  gap: 8px;
-}
+.dialogueOptions { display: grid; gap: 8px; }
 
 .dialogueOptions button {
   display: grid;
@@ -470,59 +342,24 @@ textarea:focus-visible {
   background: #fff4c5;
   color: #3f2d21;
   text-align: left;
-  box-shadow: inset 0 0 0 2px rgba(139, 92, 51, 0.12);
 }
 
-.dialogueOptions button:hover,
-.questPanel > button:hover,
-.primaryButton:hover,
-.talkButton:hover,
-.townNav button:hover {
-  filter: brightness(1.07);
-  transform: translateY(-1px);
-}
-
-.dialogueOptions b {
-  font-size: 0.92rem;
-}
-
-.dialogueOptions span {
-  color: #765338;
-  font-size: 0.72rem;
-  line-height: 1.25;
-}
-
-.dialogueClose,
-.closeButton {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 3px solid #4b2f1f;
-  background: #8a5b38;
-  color: #fff5d1;
-  font-weight: 950;
-}
-
-.dialogueClose {
-  top: -18px;
-  right: -18px;
-}
+.dialogueOptions b { font-size: 0.92rem; }
+.dialogueOptions span { color: #765338; font-size: 0.72rem; line-height: 1.25; }
 
 .talkButton {
   position: absolute;
-  z-index: 5;
+  z-index: 7;
   left: 50%;
-  bottom: 36px;
-  min-width: 150px;
+  bottom: 30px;
+  min-width: 160px;
   transform: translateX(-50%);
 }
 
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 30;
   display: grid;
   place-items: center;
   padding: 26px;
@@ -531,45 +368,30 @@ textarea:focus-visible {
 
 .featureModal {
   position: relative;
-  width: min(620px, 100%);
+  width: min(700px, 100%);
   max-height: min(760px, calc(100vh - 52px));
   overflow: auto;
   padding: 24px;
-  background:
-    linear-gradient(90deg, rgba(122, 79, 39, 0.12), transparent 12%, transparent 88%, rgba(122, 79, 39, 0.12)),
-    #f8dea1;
+  background: #f8dea1;
 }
 
 .closeButton {
+  position: absolute;
   top: 12px;
   right: 12px;
-}
-
-.modalKicker,
-.featureMeta {
-  font-size: 0.76rem;
+  width: 34px;
+  height: 34px;
+  border: 3px solid #4b2f1f;
+  background: #8a5b38;
+  color: #fff5d1;
   font-weight: 950;
 }
 
-.modalKicker {
-  margin: 0 0 8px;
-  color: #8d3f28;
-}
-
-.featureModal h2 {
-  margin: 0;
-  color: #3e2a1d;
-  font-size: clamp(1.45rem, 3vw, 2.25rem);
-  line-height: 1.15;
-}
-
-.modalLine {
-  margin: 12px 0 0;
-  color: #5f442d;
-  font-weight: 850;
-  line-height: 1.55;
-}
-
+.modalKicker,
+.featureMeta { font-size: 0.76rem; font-weight: 950; }
+.modalKicker { margin: 0 0 8px; color: #8d3f28; }
+.featureModal h2 { margin: 0; color: #3e2a1d; font-size: clamp(1.45rem, 3vw, 2.25rem); }
+.modalLine { margin: 12px 0 0; color: #5f442d; font-weight: 850; line-height: 1.5; }
 .featureMeta {
   display: inline-flex;
   margin-top: 12px;
@@ -581,25 +403,9 @@ textarea:focus-visible {
 
 .characterSheet,
 .todoSheet,
-.plannerSheet {
-  display: grid;
-  gap: 14px;
-  margin-top: 20px;
-}
+.plannerSheet { display: grid; gap: 14px; margin-top: 20px; }
 
-.uploadDropzone {
-  padding: 12px;
-  border: 3px dashed #8e6038;
-  background: #fff4c5;
-}
-
-.uploadDropzone input {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
+.uploadDropzone { padding: 12px; border: 3px dashed #8e6038; background: #fff4c5; }
 .uploadPreview {
   display: grid;
   place-items: center;
@@ -608,30 +414,9 @@ textarea:focus-visible {
   background: #f1d18c;
   overflow: hidden;
 }
+.uploadPreview img { width: 100%; height: 170px; object-fit: contain; image-rendering: auto; }
 
-.uploadPreview img {
-  width: 100%;
-  height: 170px;
-  object-fit: contain;
-  image-rendering: auto;
-}
-
-.uploadPreview strong {
-  color: #75482c;
-}
-
-.uploadDropzone small {
-  color: #6c4d36;
-  line-height: 1.35;
-}
-
-label {
-  display: grid;
-  gap: 7px;
-  color: #4a2e1f;
-  font-weight: 950;
-}
-
+label { display: grid; gap: 7px; color: #4a2e1f; font-weight: 950; }
 input,
 textarea {
   width: 100%;
@@ -639,95 +424,45 @@ textarea {
   background: #fff6ca;
   color: #382719;
   padding: 11px 12px;
-  box-shadow: inset 0 0 0 2px rgba(139, 92, 51, 0.12);
 }
+textarea { min-height: 128px; resize: vertical; }
+.primaryButton { min-height: 42px; }
 
-textarea {
-  min-height: 128px;
-  resize: vertical;
+.keywordCategoryBlock {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
 }
-
-.primaryButton {
-  min-height: 42px;
+.keywordCategoryBlock b { color: #7b3d29; }
+.keywordChips { display: flex; flex-wrap: wrap; gap: 8px; }
+.keywordChips button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 2px solid #6e4329;
+  background: #ffe9b4;
+  color: #4d2f1f;
+  font-weight: 900;
+  box-shadow: none;
 }
+.keywordChips button.isSelected { background: #8a5b38; color: #fff5d1; }
 
 .pixelPreview {
   display: grid;
+  justify-items: center;
   gap: 10px;
   padding: 14px;
   border: 3px solid #8e6038;
   background: #fff4c5;
 }
-
-.pixelPreview {
-  justify-items: center;
-}
-
-.pixelPreview img {
-  width: 96px;
-  height: 112px;
-  object-fit: cover;
-  object-position: center;
-}
-
-.pixelPreview p {
-  margin: 0;
-  color: #5f442d;
-  line-height: 1.45;
-  text-align: center;
-}
-
-.residentList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
+.pixelPreview img { width: 96px; height: 112px; object-fit: cover; }
+.pixelPreview p { margin: 0; color: #5f442d; text-align: center; }
 
 .candidateBlock,
 .planResult,
-.chatStack {
-  display: grid;
-  gap: 10px;
-}
-
-.candidateBlock {
-  padding-top: 6px;
-}
-
-.candidateBlock > b,
-.planResult > b {
-  color: #7b3d29;
-}
-
-.candidateBlock li {
-  grid-template-columns: 24px 1fr auto;
-}
-
-.candidateBlock li button,
-.planResult button {
-  min-height: 30px;
-  padding: 0 10px;
-  border: 3px solid #6e4329;
-  background: #8a5b38;
-  color: #fff5d1;
-  font-size: 0.76rem;
-  font-weight: 950;
-}
-
-.todoSheet li.isDone {
-  opacity: 0.7;
-}
-
-.todoSheet li.isDone b {
-  text-decoration: line-through;
-}
-
-.todoSheet li small {
-  display: block;
-  margin-top: 4px;
-  color: #7b5a3e;
-  font-size: 0.72rem;
-}
+.chatStack { display: grid; gap: 10px; }
+.candidateBlock li { grid-template-columns: 24px 1fr auto; }
 
 .chatStack {
   min-height: 320px;
@@ -738,185 +473,48 @@ textarea {
   border: 3px solid #8e6038;
   background: #fffdf5;
 }
-
 .chatBubble {
   width: fit-content;
   max-width: min(78%, 420px);
   padding: 11px 14px;
   border: 3px solid rgba(67, 48, 35, 0.2);
-  color: #fffdf4;
   line-height: 1.45;
-  box-shadow: 0 3px 0 rgba(50, 33, 22, 0.18);
 }
+.chatBubble p { margin: 0; }
+.chatBubble.fromChief { justify-self: start; background: #b6dc32; color: #2d2e15; }
+.chatBubble.fromUser { justify-self: end; background: #24b5c6; color: #fffdf4; }
 
-.chatBubble p {
-  margin: 0;
-}
-
-.chatBubble.fromChief {
-  justify-self: start;
-  border-radius: 2px 14px 14px 14px;
-  background: #b6dc32;
-}
-
-.chatBubble.fromUser {
-  justify-self: end;
-  border-radius: 14px 2px 14px 14px;
-  background: #24b5c6;
-}
-
-.plannerComposer {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 110px;
-  gap: 10px;
-  align-items: stretch;
-}
-
-.plannerComposer input {
-  min-height: 44px;
-  background: #fffdf5;
-}
-
-.plannerComposer button {
-  min-height: 44px;
-  border: 3px solid #6e4329;
-  background: #8a5b38;
-  color: #fff5d1;
-  font-weight: 950;
-}
-
-.planResult {
-  padding: 14px;
-  border: 3px solid #8e6038;
-  background: #fff4c5;
-}
-
-.planResult section {
-  display: grid;
-  gap: 8px;
-}
-
-.planResult section > strong {
-  color: #5b3925;
-}
-
-.planResult ul {
-  display: grid;
-  gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.planResult li {
-  display: grid;
-  gap: 4px;
-  padding: 8px;
-  border: 2px solid rgba(142, 96, 56, 0.65);
-  background: #fff9d7;
-}
-
-.planResult li span {
-  color: #6c4d36;
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
+.plannerComposer { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 10px; }
+.planResult { padding: 14px; border: 3px solid #8e6038; background: #fff4c5; }
+.planResult li { display: grid; gap: 4px; padding: 8px; border: 2px solid rgba(142, 96, 56, 0.65); background: #fff9d7; }
+.planResult li span { color: #6c4d36; font-size: 0.78rem; }
 
 @media (max-width: 1060px) {
+  .leftRail { top: 80px; width: 184px; }
+  .questPanel { width: 280px; }
   .dialogueBox {
-    width: min(720px, calc(100vw - 44px));
+    width: min(760px, calc(100vw - 28px));
     grid-template-columns: 88px 1fr;
-    grid-template-areas:
-      "portrait text"
-      "options options";
+    grid-template-areas: "portrait text" "options options";
   }
-
-  .dialogueBox img {
-    grid-area: portrait;
-    width: 88px;
-    height: 104px;
-  }
-
-  .dialogueText {
-    grid-area: text;
-  }
-
-  .dialogueOptions {
-    grid-area: options;
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .noticeBubble {
-    display: none;
-  }
-
-  .residentPanel {
-    display: none;
-  }
+  .dialogueBox img { grid-area: portrait; width: 88px; height: 104px; }
+  .dialogueText { grid-area: text; }
+  .dialogueOptions { grid-area: options; grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 760px) {
-  body {
-    overflow: auto;
-  }
-
-  .appShell {
-    min-height: 900px;
-    height: auto;
-  }
-
-  .townNav {
-    grid-template-columns: 1fr auto;
-  }
-
-  .townNav nav {
-    display: none;
-  }
-
-  .townNav h1 {
-    justify-self: start;
-    font-size: 1.25rem;
-  }
-
-  .focusPanel {
-    top: 84px;
-    left: 14px;
-    width: 150px;
-  }
-
-  .questPanel {
-    top: 288px;
-    left: 14px;
-    right: auto;
-    width: calc(100vw - 28px);
-  }
-
-  .appleCounter {
-    top: 84px;
-    right: 14px;
-    bottom: auto;
-    left: auto;
-  }
-
-  .dialogueBox {
-    left: 14px;
-    right: 14px;
-    bottom: 18px;
-    width: auto;
+  body { overflow: auto; }
+  .appShell { min-height: 960px; height: auto; }
+  .townNav { grid-template-columns: 1fr auto; }
+  .townNav nav { display: none; }
+  .leftRail,
+  .questPanel,
+  .dialogueBox,
+  .talkButton {
+    position: static;
     transform: none;
-    grid-template-columns: 72px 1fr;
+    width: auto;
+    margin: 10px;
   }
-
-  .dialogueBox img {
-    width: 72px;
-    height: 90px;
-  }
-
-  .dialogueOptions {
-    grid-template-columns: 1fr;
-  }
-
-  .dialogueOptions span {
-    display: none;
-  }
+  .dialogueBox { grid-template-columns: 1fr; }
 }

@@ -6,6 +6,20 @@ const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = "http://127.0.0.1:8010";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
+const PERSONALITY_CATEGORIES = [
+  "모험적인",
+  "차분한",
+  "호기심많은",
+  "다정한",
+  "장난스러운",
+  "부지런한",
+  "강력한",
+  "몽환적인",
+  "분노가 많은",
+  "용감한",
+  "온화한",
+  "명랑한",
+] as const;
 
 type FeatureId = "character" | "todo" | "planner";
 type TodoStatus = "candidate" | "saved" | "done";
@@ -23,6 +37,7 @@ type Resident = {
   name: string;
   personality: string;
   speechStyle: string;
+  avatarUrl?: string;
 };
 
 type TodoItem = {
@@ -84,18 +99,21 @@ const INITIAL_RESIDENTS: Resident[] = [
     name: "두부",
     personality: "차분한 기록 담당",
     speechStyle: "짧고 다정한 조언체",
+    avatarUrl: "/assets/mongle_chief.png",
   },
   {
     id: "resident-kong",
     name: "콩이",
     personality: "활기찬 실행 담당",
     speechStyle: "밝게 응원하는 말투",
+    avatarUrl: "/assets/mongle_chief.png",
   },
   {
     id: "resident-bambi",
     name: "밤비",
     personality: "느긋한 회고 담당",
     speechStyle: "부드럽게 묻는 말투",
+    avatarUrl: "/assets/mongle_chief.png",
   },
 ];
 
@@ -118,22 +136,6 @@ const INITIAL_TODOS: TodoItem[] = [
 
 function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function localSplitTodos(prompt: string): TodoItem[] {
-  const separators = /\n|,|，|그리고|하고|랑|와\s|과\s/g;
-  return prompt
-    .split(separators)
-    .map((item) => item.trim().replace(/[.!?。]+$/, ""))
-    .filter(Boolean)
-    .slice(0, 8)
-    .map((title) => ({
-      id: createId("todo"),
-      title: title.slice(0, 80),
-      dueDate: "2026-05-26",
-      tags: [],
-      status: "candidate",
-    }));
 }
 
 function buildQuest(todo: TodoItem, resident: Resident): Quest {
@@ -183,8 +185,13 @@ function App() {
     "계획을 세우고 작은 실천을 응원하는 마을 주민",
   );
   const [characterKeywords, setCharacterKeywords] = useState("차분함, 응원, 계획형");
+  const [selectedKeywordCategories, setSelectedKeywordCategories] = useState<string[]>([
+    "차분한",
+    "명랑한",
+  ]);
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
+  const [generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
   const [plannerInput, setPlannerInput] = useState("");
   const [plannerMessages, setPlannerMessages] = useState<PlannerMessage[]>([
     {
@@ -196,7 +203,6 @@ function App() {
   const [notice, setNotice] = useState("오늘의 사과 보상은 20개까지 받을 수 있어요.");
   const [isBusy, setIsBusy] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
-
   const active = useMemo(
     () => (activeFeature ? FEATURES[activeFeature] : null),
     [activeFeature],
@@ -204,7 +210,10 @@ function App() {
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
   const residentNames = residents.map((resident) => resident.name).join("|");
-  const godotSrc = `${GODOT_EXPORT_PATH}?residents=${residents.length}&names=${encodeURIComponent(residentNames)}&v=${villageVersion}`;
+  const residentAvatars = JSON.stringify(
+    residents.map((resident) => resident.avatarUrl || ""),
+  );
+  const godotSrc = `${GODOT_EXPORT_PATH}?residents=${residents.length}&names=${encodeURIComponent(residentNames)}&avatars=${encodeURIComponent(residentAvatars)}&v=${villageVersion}`;
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -236,6 +245,19 @@ function App() {
     setActiveFeature(feature);
   }
 
+  function toggleKeywordCategory(keyword: string) {
+    setSelectedKeywordCategories((current) => {
+      if (current.includes(keyword)) {
+        return current.filter((item) => item !== keyword);
+      }
+      if (current.length >= 3) {
+        setNotice("성격 카테고리는 최대 3개까지 선택할 수 있어요.");
+        return current;
+      }
+      return [...current, keyword];
+    });
+  }
+
   function assignQuest(todo: TodoItem, residentPool = residents) {
     const resident = residentPool[quests.length % residentPool.length] ?? INITIAL_RESIDENTS[0];
     setQuests((current) => [buildQuest(todo, resident), ...current]);
@@ -265,10 +287,9 @@ function App() {
       }));
       setTodoCandidates(candidates);
       setNotice("AI가 TODO 후보를 나눴어요. 저장하면 퀘스트가 배정됩니다.");
-    } catch {
-      const candidates = localSplitTodos(prompt);
-      setTodoCandidates(candidates);
-      setNotice("AI API가 꺼져 있어 로컬 규칙으로 TODO 후보를 만들었어요.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "원인 미상";
+      setNotice(`TODO 분리 실패: ${message}`);
     } finally {
       setIsBusy(false);
     }
@@ -296,16 +317,13 @@ function App() {
 
     setIsBusy(true);
     try {
-      const keywords = characterKeywords
-        .split(",")
-        .map((keyword) => keyword.trim())
-        .filter(Boolean)
-        .slice(0, 3);
+      const keywords = selectedKeywordCategories.slice(0, 3);
       const result = await postJson<{
         character_id: string;
         name: string;
         personality: string;
         speech_style: string;
+        image_url?: string;
       }>("/api/characters/create", {
         user_id: "demo-user",
         name,
@@ -313,27 +331,26 @@ function App() {
         source_image_data_url: sourceImagePreview,
         personality_keywords: keywords,
       });
+      if (!result.image_url) {
+        throw new Error("AI 이미지 URL이 비어 있어 캐릭터를 생성하지 못했어요.");
+      }
       const resident: Resident = {
         id: result.character_id,
         name: result.name,
         personality: result.personality,
         speechStyle: result.speech_style,
+        avatarUrl: result.image_url.startsWith("http")
+          ? result.image_url
+          : `${AI_API_BASE}${result.image_url}`,
       };
       setResidents((current) => [...current, resident].slice(0, 10));
+      setGeneratedCharacterPreview(resident.avatarUrl || "");
       setNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
       setActiveFeature(null);
-    } catch {
-      const resident: Resident = {
-        id: createId("resident"),
-        name,
-        personality: `${characterKeywords.split(",")[0]?.trim() || "다정한"} 성향의 주민`,
-        speechStyle: "짧고 따뜻하게 응원하는 말투",
-      };
-      setResidents((current) => [...current, resident].slice(0, 10));
-      setNotice("AI API가 꺼져 있어 로컬 주민으로 생성했어요.");
-      setVillageVersion((current) => current + 1);
-      setActiveFeature(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "원인 미상";
+      setNotice(`캐릭터 생성 실패: ${message}`);
     } finally {
       setIsBusy(false);
     }
@@ -352,6 +369,7 @@ function App() {
     reader.onload = () => {
       setSourceImageName(file.name);
       setSourceImagePreview(String(reader.result || ""));
+      setGeneratedCharacterPreview("");
       setNotice("애착인형 사진을 불러왔어요. 이 이미지를 기반으로 주민을 만들게요.");
     };
     reader.readAsDataURL(file);
@@ -494,12 +512,11 @@ function App() {
         src={godotSrc}
         allow="fullscreen; gamepad; autoplay"
       />
-
       <div className="shadeLayer" aria-hidden="true" />
 
       <header className="townNav">
         <nav aria-label="몽글마을 메뉴">
-          <button type="button" onClick={() => setNotice("이장님댁에서 기능을 선택해보세요.")}>
+          <button type="button" onClick={() => setNotice("이장님 메뉴에서 기능을 선택해보세요.")}>
             TOWN INFO
           </button>
           <button type="button" onClick={() => openFeature("character")}>
@@ -515,20 +532,44 @@ function App() {
         </button>
       </header>
 
-      <section className="focusPanel" aria-label="집중 시간">
-        <div className="sunBadge">☀</div>
-        <strong>{isFocusing ? "24:59" : "25:00"}</strong>
-        <span>{isFocusing ? "FOCUSING" : "FOCUS TIME"}</span>
-        <div className="focusActions">
-          <button type="button" onClick={toggleFocus}>
-            {isFocusing ? "PAUSE" : "START"}
-          </button>
-          <button type="button" onClick={resetFocus}>
-            RESET
-          </button>
+      <div className="leftRail">
+        <section className="focusPanel" aria-label="집중 시간">
+          <div className="sunBadge">☀</div>
+          <strong>{isFocusing ? "24:59" : "25:00"}</strong>
+          <span>{isFocusing ? "FOCUSING" : "FOCUS TIME"}</span>
+          <div className="focusActions">
+            <button type="button" onClick={toggleFocus}>
+              {isFocusing ? "PAUSE" : "START"}
+            </button>
+            <button type="button" onClick={resetFocus}>
+              RESET
+            </button>
+          </div>
+          <small>{cycles} / 4 cycles</small>
+        </section>
+
+        <aside className="residentPanel" aria-label="마을 주민">
+          <b>RESIDENTS {residents.length}/10</b>
+          <div>
+            {residents.slice(0, 8).map((resident) => (
+              <span key={resident.id}>
+                {resident.avatarUrl ? <img src={resident.avatarUrl} alt="" /> : null}
+                {resident.name}
+              </span>
+            ))}
+          </div>
+        </aside>
+
+        <aside className="noticeBubble">
+          <b>알림</b>
+          <span>{notice}</span>
+        </aside>
+
+        <div className="appleCounter" aria-label="사과 보상">
+          <span>🍎</span>
+          <b>{apples}</b>
         </div>
-        <small>{cycles} / 4 cycles</small>
-      </section>
+      </div>
 
       <aside className="questPanel" aria-label="오늘의 퀘스트">
         <div className="panelHeader">
@@ -536,7 +577,7 @@ function App() {
           <b>{TODAY_LABEL}</b>
         </div>
         <ul>
-          {quests.slice(0, 5).map((quest) => (
+          {quests.slice(0, 8).map((quest) => (
             <li key={quest.id} className={quest.done ? "isDone" : ""}>
               <button
                 type="button"
@@ -559,25 +600,6 @@ function App() {
         </button>
       </aside>
 
-      <aside className="residentPanel" aria-label="마을 주민">
-        <b>RESIDENTS {residents.length}/10</b>
-        <div>
-          {residents.slice(0, 4).map((resident) => (
-            <span key={resident.id}>{resident.name}</span>
-          ))}
-        </div>
-      </aside>
-
-      <div className="appleCounter" aria-label="사과 보상">
-        <span>🍎</span>
-        <b>{apples}</b>
-      </div>
-
-      <aside className="noticeBubble">
-        <b>알림</b>
-        <span>{notice}</span>
-      </aside>
-
       {dialogueOpen ? (
         <section className="dialogueBox" aria-label="마을 이장님 대화">
           <img
@@ -587,7 +609,7 @@ function App() {
           />
           <div className="dialogueText">
             <span>몽글이장님</span>
-            <p>이장님댁에 잘 왔어. 오늘은 어떤 일을 시작해볼까?</p>
+            <p>안녕! 오늘은 어떤 걸 먼저 정리해볼까?</p>
             <small>
               완료 {doneQuestCount}개 · TODO {savedTodos.length}개 · 주민 {residents.length}명
             </small>
@@ -604,14 +626,6 @@ function App() {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="dialogueClose"
-            aria-label="대화창 닫기"
-            onClick={() => setDialogueOpen(false)}
-          >
-            x
-          </button>
         </section>
       ) : (
         <button
@@ -680,20 +694,41 @@ function App() {
                   />
                 </label>
                 <label>
-                  성격 키워드
+                  성격 키워드 메모
                   <input
                     value={characterKeywords}
                     onChange={(event) => setCharacterKeywords(event.target.value)}
-                    placeholder="차분함, 응원, 계획형"
+                    placeholder="자유 메모 (선택)"
                   />
                 </label>
+                <div className="keywordCategoryBlock">
+                  <b>성격 카테고리 (최대 3개)</b>
+                  <div className="keywordChips">
+                    {PERSONALITY_CATEGORIES.map((keyword) => (
+                      <button
+                        key={keyword}
+                        type="button"
+                        className={selectedKeywordCategories.includes(keyword) ? "isSelected" : ""}
+                        onClick={() => toggleKeywordCategory(keyword)}
+                      >
+                        {keyword}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="pixelPreview">
-                  <img src={sourceImagePreview || "/assets/mongle_chief_8bit.png"} alt="" />
+                  <img
+                    src={generatedCharacterPreview || sourceImagePreview || "/assets/mongle_chief.png"}
+                    alt=""
+                  />
                   <p>{characterName || "새 주민"}의 8bit 정면 캐릭터 생성 미리보기</p>
                 </div>
                 <div className="residentList">
                   {residents.map((resident) => (
-                    <span key={resident.id}>{resident.name}</span>
+                    <span key={resident.id}>
+                      {resident.avatarUrl ? <img src={resident.avatarUrl} alt="" /> : null}
+                      {resident.name}
+                    </span>
                   ))}
                 </div>
                 <button
