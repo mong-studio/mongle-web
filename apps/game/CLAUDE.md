@@ -4,7 +4,7 @@ This file is for AI coding agents working on this project.
 
 ## Project Intent
 
-Build and maintain a cozy pixel village focus/todo game MVP. The target feeling is a dense, readable, warm top-down farming RPG scene with a focus timer and lightweight productivity UI.
+Build and maintain a cozy pixel village focus/todo game MVP. The web app is a React/Vite shell that embeds a Godot Web export in an iframe.
 
 Do not copy the reference screenshot's exact assets, characters, or layout. Treat `legacy/reference/reference-screenshot.png` as visual direction only.
 
@@ -13,32 +13,31 @@ Do not copy the reference screenshot's exact assets, characters, or layout. Trea
 Use these before handing off changes:
 
 ```bash
-npm run build
+npm run godot:export --prefix apps/game
+npm run web:build
 ```
 
 For local development:
 
 ```bash
-npm install
-npm run dev
+npm run web:dev
 ```
 
 ## Important Files
 
-- `src/main.ts`: Phaser scene, generated pixel textures, map layout, game state, timer/todo interactions.
-- `src/style.css`: HUD, dialogue, todo panel, responsive CSS, pixel rendering rules.
-- `public/assets/kenney/`: runtime third-party CC0 asset files.
+- `src/main.tsx`: React iframe shell.
+- `src/style.css`: full-viewport iframe styling.
+- `godot/project.godot`: Godot project settings and main scene pointer.
+- `godot/scenes/main.tscn`: main scene shell.
+- `godot/scripts/village.gd`: map composition, game state, timer/todo interactions, and HUD.
+- `godot/assets/`: runtime third-party asset files.
 - `legacy/`: reference-only material. Do not import from here in app code.
 - `docs/`: handoff, risks, QA, and reference notes.
 
 ## Engineering Rules
 
 - Keep runtime code independent from `legacy/`.
-- Preserve pixel crispness:
-  - Phaser `pixelArt: true`
-  - `roundPixels: true`
-  - CSS `image-rendering: pixelated`
-  - avoid fractional canvas scaling when possible
+- Preserve pixel crispness with nearest-neighbor texture filtering, pixel snapping, and whole-number sprite scaling.
 - Keep the MVP small and shippable. Prefer visual polish over adding large new systems.
 - Do not add copied Stardew Valley or screenshot-derived assets.
 - If adding external assets, document license and source in `ASSET_CREDITS.md` and `docs/REFERENCES.md`.
@@ -52,11 +51,11 @@ Before finalizing visual work, inspect:
 - HUD text is readable over the map.
 - UI panels do not overlap awkwardly at laptop width.
 - Pixel art is not blurry.
-- New art does not clash with Kenney assets.
+- New art does not clash with the selected runtime asset folders.
 
 ## Current Risks
 
 - Procedural sprites are useful for prototyping but can look homemade.
 - More free asset packs may clash unless normalized to the same tile size, palette, and outline style.
-- Phaser's bundle is large; acceptable for this MVP, but production may need code splitting or a lighter build strategy.
-- Todo persistence is browser-local only.
+- Godot Web export needs export templates and browser QA before sharing a web build.
+- Todo persistence is local to Godot `user://` storage only.

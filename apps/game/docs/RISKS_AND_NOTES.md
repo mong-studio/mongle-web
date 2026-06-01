@@ -17,15 +17,18 @@ Avoid mixing many free packs without normalization. Different packs often disagr
 
 Do not copy or trace the reference screenshot. It is archived only as visual direction. Use assets with clear licenses and record every source.
 
-Current runtime third-party asset:
+Current runtime third-party assets are listed in `ASSET_CREDITS.md`. The Godot scene primarily uses:
 
-- Kenney Roguelike/RPG Pack, CC0
+- `godot/assets/grass_tileset/`
+- `godot/assets/lpc-flowers-plants-fungi-wood/`
+- `godot/assets/lpc-terrains/`
+- `godot/assets/submission_daneeklu/`
 
 ## Technical Risk
 
-- Phaser adds a large JavaScript bundle. This is fine for MVP, but production may need chunking or lazy loading.
-- The map is currently hardcoded in `src/main.ts`; a larger game should move to Tiled JSON.
-- Todos use `localStorage`; clearing browser data deletes them.
+- Godot Web export requires local export templates and should be checked inside the React iframe, not only editor play mode.
+- The map is currently assembled in `godot/scripts/village.gd`; a larger game should move to Godot TileMap/TileSet resources.
+- Todos use `user://`; clearing the Godot app/profile data deletes them.
 - There is no save schema migration because the stored data is tiny and local-only.
 - No collision/player controller exists yet.
 

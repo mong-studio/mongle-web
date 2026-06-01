@@ -1,9 +1,45 @@
-.DS_Store
-node_modules/
-dist/
-.venv/
-.pytest_cache/
-.coverage
+# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtualenv
+.venv/
+venv/
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Local tool state
+.omc/
+.reports/
+.ruff_cache/
+.claude/
+
+# Data (synced via S3 — see data/README.md)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/
+data/interim/
+
+# Local storage outputs (LocalStorage adapter & character-creation debug logs)
+data/local_storage/
+
+# SFT training data (large files, managed separately)
+data/sft/
+
+# IDE extensions list
+vscode-extensions.txt

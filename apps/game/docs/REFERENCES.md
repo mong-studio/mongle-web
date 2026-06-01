@@ -2,24 +2,24 @@
 
 ## Runtime Dependencies
 
-- Phaser 3: https://phaser.io/
+- Godot Engine: https://godotengine.org/
+- React: https://react.dev/
 - Vite: https://vite.dev/
-- TypeScript: https://www.typescriptlang.org/
 
 ---
 
 ## Runtime Art
 
-본 프로젝트의 마을 화면 및 타일맵 구성에는 `public/assets` 폴더에 포함된 에셋을 우선 사용한다.
+본 프로젝트의 Godot 마을 화면 및 타일맵 구성에는 `godot/assets` 폴더에 포함된 에셋을 우선 사용한다.
 
 ### Primary Asset Folders
 
 아래 폴더의 에셋을 우선적으로 사용한다.
 
-- `public/assets/grass_tileset/`
-- `public/assets/lpc-flowers-plants-fungi-wood/`
-- `public/assets/lpc-terrains/`
-- `public/assets/submission_daneeklu/`
+- `godot/assets/grass_tileset/`
+- `godot/assets/lpc-flowers-plants-fungi-wood/`
+- `godot/assets/lpc-terrains/`
+- `godot/assets/submission_daneeklu/`
 
 위 폴더들은 몽글마을의 지형, 풀밭, 식물, 나무, 장식 오브젝트, 자연물 배치에 사용할 수 있는 주요 에셋 저장소이다.
 
@@ -185,7 +185,7 @@ Guidelines:
 
 Use:
 - `submission_daneeklu/`
-- 필요 시 다른 `public/assets` 하위 폴더
+- 필요 시 다른 `godot/assets` 하위 폴더
 
 For:
 - 마을 소품
@@ -203,12 +203,12 @@ Guidelines:
 
 When implementing or modifying the tilemap, follow these rules.
 
-1. Load runtime assets primarily from `public/assets`.
+1. Load runtime assets primarily from `godot/assets`.
 2. Prefer the following folders:
-   - `public/assets/grass_tileset/`
-   - `public/assets/lpc-flowers-plants-fungi-wood/`
-   - `public/assets/lpc-terrains/`
-   - `public/assets/submission_daneeklu/`
+   - `godot/assets/grass_tileset/`
+   - `godot/assets/lpc-flowers-plants-fungi-wood/`
+   - `godot/assets/lpc-terrains/`
+   - `godot/assets/submission_daneeklu/`
 3. Use `legacy/reference/village1.png` only as a visual reference for natural composition.
 4. Do not copy the reference image directly.
 5. Avoid placing the same decorative asset repeatedly in a grid-like pattern.

@@ -5,7 +5,7 @@
 ```text
 .
 ├── apps/
-│   └── game/                      # Phaser/Vite browser game
+│   └── game/                      # React shell embedding Godot Web export
 ├── packages/
 │   └── ai/                        # Python AI/domain package + local API
 ├── package.json                   # Root convenience scripts
@@ -18,10 +18,12 @@ The projects are integrated in one workspace but keep separate runtimes.
 
 The frontend should own:
 
-- Phaser/Vite app shell
-- village screen rendering
-- browser interactions
-- client-side UI state
+- React/Vite app shell
+- iframe embedding for the Godot Web export
+- Godot scene and project settings under `godot/`
+- village screen rendering inside Godot
+- web shell interactions around the game frame
+- local UI state
 - calls to local/API endpoints
 
 The AI/domain project should own:
@@ -38,7 +40,9 @@ The AI/domain project should own:
 A small local API layer connects the game screen to the Python agents.
 
 ```text
-apps/game Phaser screen
+apps/game React shell
+  -> iframe /godot/index.html
+    -> apps/game/godot Godot Web export
   -> http://127.0.0.1:8010/api/todos/split
     -> packages/ai agents.todo_creation.single_turn
       -> model/storage adapters
@@ -48,9 +52,10 @@ This keeps the screen implementation free from Python runtime details while allo
 
 ## Why Not Flatten More
 
-Putting TypeScript/Vite files directly inside the Python package would blur package ownership:
+Putting game engine files directly inside the Python package would blur package ownership:
 
-- `package.json`, `tsconfig.json`, and Vite assets belong to the browser app.
+- `package.json`, React source, and Vite config belong to the web shell.
+- `godot/project.godot`, scenes, scripts, and runtime assets belong to the Godot app.
 - `pyproject.toml`, `uv.lock`, `agents/`, and `tests/` belong to the Python app.
 - Tests and build commands are different.
 - Deployment will likely be different.

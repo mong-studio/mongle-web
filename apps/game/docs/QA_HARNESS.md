@@ -5,36 +5,32 @@ This project does not yet have automated Playwright tests. Until those are added
 ## Build Harness
 
 ```bash
-npm run build
+npm run godot:export --prefix apps/game
+npm run web:build
 ```
 
 Pass condition:
 
-- TypeScript compiles.
-- Vite build completes.
-- No runtime assets are missing from `public/`.
+- Godot loads the project under `apps/game/godot`.
+- Web export completes when export templates are installed.
+- React/Vite build completes.
+- No runtime assets are missing from `godot/assets/`.
 
 ## Browser Harness
 
 Run:
 
 ```bash
-npm run dev
-```
-
-Open:
-
-```text
-http://127.0.0.1:5173/
+npm run web:dev
 ```
 
 Check:
 
-- Canvas renders a nonblank pixel village.
+- The iframe renders a nonblank Godot pixel village.
 - Timer starts, changes to pause, and reset works.
 - Todo input adds an item with `+` or Enter.
 - Todo complete toggle works.
-- Todo remains after reload.
+- Todo remains after restarting the Godot run.
 - NPC/building click changes dialogue and card text.
 
 ## Visual Harness
@@ -60,5 +56,5 @@ Recommended future tests:
 
 - Playwright screenshot smoke test at desktop and mobile widths.
 - Canvas nonblank pixel sample.
-- DOM checks for timer, todos, and dialogue.
-- `localStorage` persistence test.
+- UI checks for timer, todos, and dialogue.
+- `user://` persistence test.
