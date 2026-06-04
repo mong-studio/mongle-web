@@ -507,11 +507,8 @@ button {
 
 .characterSheet,
 .todoSheet,
-.plannerSheet {
-  display: grid;
-  gap: 14px;
-  margin-top: 20px;
-}
+.plannerSheet,
+.signupSheet { display: grid; gap: 14px; margin-top: 20px; }
 
 .uploadDropzone {
   padding: 12px;
@@ -553,6 +550,54 @@ textarea {
 }
 .primaryButton {
   min-height: 42px;
+}
+
+.signupModal { width: min(620px, 100%); }
+.inlineAction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 8px;
+}
+.inlineAction button,
+.termsBox {
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+}
+.inlineAction button {
+  color: #fff5d1;
+  background: #8a5b38;
+  font-weight: 950;
+}
+.signupGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.termsBox {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+.termsBox label {
+  display: flex;
+  grid-template-columns: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+.termsBox input {
+  width: auto;
+  accent-color: #8a5b38;
+}
+.signupMessage {
+  margin: 0;
+  padding: 10px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+  color: #7b3d29;
+  font-size: 0.82rem;
+  font-weight: 950;
+  line-height: 1.4;
 }
 
 .keywordCategoryBlock {
@@ -715,7 +760,7 @@ textarea {
     width: auto;
     margin: 10px;
   }
-  .dialogueBox {
-    grid-template-columns: 1fr;
-  }
+  .dialogueBox { grid-template-columns: 1fr; }
+  .signupGrid,
+  .inlineAction { grid-template-columns: 1fr; }
 }
