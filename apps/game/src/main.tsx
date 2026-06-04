@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 
-const GODOT_EXPORT_PATH = "/godot/index.html";
-const AI_API_BASE = "http://127.0.0.1:8010";
+const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
+const AI_API_BASE = import.meta.env.VITE_AI_API_BASE ?? "http://127.0.0.1:8010";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
 const PERSONALITY_CATEGORIES = [
@@ -59,6 +59,7 @@ type Quest = {
 };
 
 type PlannerMessage = {
+  id: string;
   role: PlannerMessageRole;
   text: string;
 };
@@ -195,6 +196,7 @@ function App() {
   const [plannerInput, setPlannerInput] = useState("");
   const [plannerMessages, setPlannerMessages] = useState<PlannerMessage[]>([
     {
+      id: createId("msg"),
       role: "chief",
       text: "목표를 알려주면 기간, 우선순위, 반복 여부를 물어보고 플랜으로 정리할게.",
     },
@@ -203,16 +205,11 @@ function App() {
   const [notice, setNotice] = useState("오늘의 사과 보상은 20개까지 받을 수 있어요.");
   const [isBusy, setIsBusy] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
-  const active = useMemo(
-    () => (activeFeature ? FEATURES[activeFeature] : null),
-    [activeFeature],
-  );
+  const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
   const residentNames = residents.map((resident) => resident.name).join("|");
-  const residentAvatars = JSON.stringify(
-    residents.map((resident) => resident.avatarUrl || ""),
-  );
+  const residentAvatars = JSON.stringify(residents.map((resident) => resident.avatarUrl || ""));
   const godotSrc = `${GODOT_EXPORT_PATH}?residents=${residents.length}&names=${encodeURIComponent(residentNames)}&avatars=${encodeURIComponent(residentAvatars)}&v=${villageVersion}`;
 
   useEffect(() => {
@@ -382,7 +379,10 @@ function App() {
       return;
     }
 
-    const nextMessages = [...plannerMessages, { role: "user" as const, text: message }];
+    const nextMessages = [
+      ...plannerMessages,
+      { id: createId("msg"), role: "user" as const, text: message },
+    ];
     setPlannerMessages(nextMessages);
     setPlannerInput("");
     setIsBusy(true);
@@ -403,6 +403,7 @@ function App() {
         setPlannerMessages((current) => [
           ...current,
           {
+            id: createId("msg"),
             role: "chief",
             text: result.summary_text || "실행 가능한 플랜으로 정리했어요.",
           },
@@ -412,6 +413,7 @@ function App() {
         setPlannerMessages((current) => [
           ...current,
           {
+            id: createId("msg"),
             role: "chief",
             text: result.text || "조금 더 구체적으로 알려주세요.",
           },
@@ -434,6 +436,7 @@ function App() {
       setPlannerMessages((current) => [
         ...current,
         {
+          id: createId("msg"),
           role: "chief",
           text: "AI API가 꺼져 있어 로컬 플랜으로 먼저 정리했어요.",
         },
@@ -461,7 +464,9 @@ function App() {
     }
 
     setTodos((current) => [...nextTodos, ...current]);
-    nextTodos.forEach((todo) => assignQuest(todo));
+    nextTodos.forEach((todo) => {
+      assignQuest(todo);
+    });
     setNotice(`${nextTodos.length}개의 플랜 TODO를 퀘스트로 배정했어요.`);
   }
 
@@ -472,15 +477,11 @@ function App() {
     }
 
     setQuests((current) =>
-      current.map((item) =>
-        item.id === questId ? { ...item, done: !item.done } : item,
-      ),
+      current.map((item) => (item.id === questId ? { ...item, done: !item.done } : item)),
     );
     setTodos((current) =>
       current.map((todo) =>
-        todo.id === quest.todoId
-          ? { ...todo, status: quest.done ? "saved" : "done" }
-          : todo,
+        todo.id === quest.todoId ? { ...todo, status: quest.done ? "saved" : "done" } : todo,
       ),
     );
 
@@ -565,7 +566,7 @@ function App() {
           <span>{notice}</span>
         </aside>
 
-        <div className="appleCounter" aria-label="사과 보상">
+        <div className="appleCounter" role="img" aria-label="사과 보상">
           <span>🍎</span>
           <b>{apples}</b>
         </div>
@@ -602,11 +603,7 @@ function App() {
 
       {dialogueOpen ? (
         <section className="dialogueBox" aria-label="마을 이장님 대화">
-          <img
-            className="chiefPortrait"
-            src="/assets/mongle_chief.png"
-            alt="몽글마을 이장님"
-          />
+          <img className="chiefPortrait" src="/assets/mongle_chief.png" alt="몽글마을 이장님" />
           <div className="dialogueText">
             <span>몽글이장님</span>
             <p>안녕! 오늘은 어떤 걸 먼저 정리해볼까?</p>
@@ -616,11 +613,7 @@ function App() {
           </div>
           <div className="dialogueOptions">
             {Object.values(FEATURES).map((feature) => (
-              <button
-                type="button"
-                key={feature.id}
-                onClick={() => openFeature(feature.id)}
-              >
+              <button type="button" key={feature.id} onClick={() => openFeature(feature.id)}>
                 <b>{feature.title}</b>
                 <span>{feature.npcLine}</span>
               </button>
@@ -628,11 +621,7 @@ function App() {
           </div>
         </section>
       ) : (
-        <button
-          type="button"
-          className="talkButton"
-          onClick={() => setDialogueOpen(true)}
-        >
+        <button type="button" className="talkButton" onClick={() => setDialogueOpen(true)}>
           이장님과 대화
         </button>
       )}
@@ -675,7 +664,8 @@ function App() {
                     )}
                   </div>
                   <small>
-                    {sourceImageName || "사진을 올리면 외형을 분석해서 8bit 주민 생성에 사용합니다."}
+                    {sourceImageName ||
+                      "사진을 올리면 외형을 분석해서 8bit 주민 생성에 사용합니다."}
                   </small>
                 </label>
                 <label>
@@ -718,7 +708,9 @@ function App() {
                 </div>
                 <div className="pixelPreview">
                   <img
-                    src={generatedCharacterPreview || sourceImagePreview || "/assets/mongle_chief.png"}
+                    src={
+                      generatedCharacterPreview || sourceImagePreview || "/assets/mongle_chief.png"
+                    }
                     alt=""
                   />
                   <p>{characterName || "새 주민"}의 8bit 정면 캐릭터 생성 미리보기</p>
@@ -800,9 +792,9 @@ function App() {
             {activeFeature === "planner" ? (
               <div className="plannerSheet">
                 <div className="chatStack">
-                  {plannerMessages.map((message, index) => (
+                  {plannerMessages.map((message) => (
                     <div
-                      key={`${message.role}-${index}`}
+                      key={message.id}
                       className={`chatBubble ${message.role === "user" ? "fromUser" : "fromChief"}`}
                     >
                       <p>{message.text}</p>
@@ -820,11 +812,7 @@ function App() {
                     }}
                     placeholder="계획하고 싶은 일을 입력하세요."
                   />
-                  <button
-                    type="button"
-                    onClick={sendPlannerMessage}
-                    disabled={isBusy}
-                  >
+                  <button type="button" onClick={sendPlannerMessage} disabled={isBusy}>
                     ENTER
                   </button>
                 </div>

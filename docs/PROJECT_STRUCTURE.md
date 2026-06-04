@@ -6,11 +6,12 @@
 .
 ├── apps/
 │   └── game/                      # React shell embedding Godot Web export
-├── packages/
-│   └── ai/                        # Python AI/domain package + local API
 ├── package.json                   # Root convenience scripts
 └── docs/                          # Workspace-level notes
 ```
+
+This repository is the **frontend** workspace. AI features are provided by the
+separate `mongle-ai` service, which the web app calls over HTTP.
 
 ## Runtime Boundary
 
@@ -20,48 +21,57 @@ The frontend should own:
 
 - React/Vite app shell
 - iframe embedding for the Godot Web export
+- Vite environment values for web-facing paths and local API URLs
 - Godot scene and project settings under `godot/`
 - village screen rendering inside Godot
 - web shell interactions around the game frame
 - local UI state
 - calls to local/API endpoints
 
-The AI/domain project should own:
+The separate `mongle-ai` service owns:
 
 - character generation
 - TODO parsing and planning
 - quest assignment
 - feed generation
 - AI model rules, schemas, tests, and adapters
-- local HTTP API wrappers for game integration
+- the HTTP API the game integrates with
 
 ## Current Integration Path
 
-A small local API layer connects the game screen to the Python agents.
+The web app calls the `mongle-ai` HTTP API. The base URL is configured through
+`VITE_AI_API_BASE` (default `http://127.0.0.1:8010`).
 
 ```text
 apps/game React shell
   -> iframe /godot/index.html
     -> apps/game/godot Godot Web export
-  -> http://127.0.0.1:8010/api/todos/split
-    -> packages/ai agents.todo_creation.single_turn
-      -> model/storage adapters
+  -> fetch VITE_AI_API_BASE/api/todos/split
+    -> mongle-ai service (separate repo/runtime)
 ```
 
-This keeps the screen implementation free from Python runtime details while allowing the UI to use the real AI features.
+This keeps the web shell free from AI runtime details while allowing the UI to use the real AI features.
+The React app also has local fallback behavior, so the web shell remains usable when the AI API is not running.
 
-## Why Not Flatten More
+## Root Commands
 
-Putting game engine files directly inside the Python package would blur package ownership:
+```bash
+npm run web:install    # install the React/Vite app dependencies
+npm run web:dev        # run the React shell
+npm run web:typecheck  # run TypeScript checks
+npm run web:build      # typecheck and build the Vite app
+npm run web:godot      # open the Godot project
+npm run web:godot:export
+```
+
+## Why `apps/game`
+
+Keeping the web shell under `apps/game` leaves room for additional frontend
+apps or shared `packages/` later, without mixing the React/Vite/Godot toolchain
+into the repository root.
 
 - `package.json`, React source, and Vite config belong to the web shell.
 - `godot/project.godot`, scenes, scripts, and runtime assets belong to the Godot app.
-- `pyproject.toml`, `uv.lock`, `agents/`, and `tests/` belong to the Python app.
-- Tests and build commands are different.
-- Deployment will likely be different.
 
-The `apps/` and `packages/` layout gives one clean directory tree without forcing unrelated toolchains into the same package.
-
-## Git Note
-
-`packages/ai/` currently contains its own `.git` directory and uncommitted work inherited from the original AI folder. Do not delete or flatten that repository until its changes are committed or intentionally migrated into the root repository.
+AI code, tests, and deployment live in the separate `mongle-ai` repository, so
+no Python toolchain is needed to work in this repo.

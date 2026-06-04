@@ -1,3 +1,6 @@
+# Node
+node_modules/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -21,7 +24,9 @@ venv/
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Local tool state
 .omc/

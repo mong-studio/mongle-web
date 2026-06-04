@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc && vite build",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "godot:edit": "\"$HOME/Downloads/Godot.app/Contents/MacOS/Godot\" --path godot",
     "godot:export": "\"$HOME/Downloads/Godot.app/Contents/MacOS/Godot\" --headless --path godot --export-debug Web ../public/godot/index.html"
