@@ -3,15 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm run ai:api & npm run web:dev",
+    "dev": "npm run web:dev",
     "web:install": "npm install --prefix apps/game",
     "web:dev": "npm run dev --prefix apps/game",
+    "web:typecheck": "npm run typecheck --prefix apps/game",
     "web:build": "npm run build --prefix apps/game",
     "web:preview": "npm run preview --prefix apps/game",
     "web:godot": "npm run godot:edit --prefix apps/game",
     "web:godot:export": "npm run godot:export --prefix apps/game",
-    "ai:api": "cd packages/ai && uv run python -m api.server",
-    "ai:test": "cd packages/ai && uv run pytest",
-    "ai:demo": "cd packages/ai && uv run streamlit run streamlit_app/app.py"
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "ci-check": "biome ci . && npm run web:typecheck && npm run web:build",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@commitlint/cli": "21.0.2",
+    "@commitlint/config-conventional": "21.0.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.0.7"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css}": "biome check --write --no-errors-on-unmatched"
   }
 }
