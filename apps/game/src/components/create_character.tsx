@@ -1,4 +1,4 @@
-import "./CharacterModal.css";
+import "./create_character.css";
 
 const PERSONALITY_CATEGORIES = [
   "모험적인",

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
-import { CharacterModal } from "./CharacterModal.js";
+import { CharacterModal } from "./components/create_character.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = "http://127.0.0.1:8010";
