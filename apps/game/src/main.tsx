@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
-import { CharacterModal } from "./CharacterModal";
+import { CharacterModal } from "./CharacterModal.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = "http://127.0.0.1:8010";
@@ -205,7 +205,7 @@ function App() {
   ]);
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
-  const [generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
+  const [_generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
   const [plannerInput, setPlannerInput] = useState("");
   const [plannerMessages, setPlannerMessages] = useState<PlannerMessage[]>([
     {
@@ -232,10 +232,7 @@ function App() {
   const [signupAiConsent, setSignupAiConsent] = useState(false);
   const [signupMessage, setSignupMessage] = useState("");
   const [signedUpUserName, setSignedUpUserName] = useState("");
-  const active = useMemo(
-    () => (activeFeature ? FEATURES[activeFeature] : null),
-    [activeFeature],
-  );
+  const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
   const residentNames = residents.map((resident) => resident.name).join("|");
@@ -536,7 +533,12 @@ function App() {
   }
 
   function ensureSignupRequiredFields() {
-    if (!signupEmail.trim() || !signupPassword || !signupPasswordConfirm || !signupUserName.trim()) {
+    if (
+      !signupEmail.trim() ||
+      !signupPassword ||
+      !signupPasswordConfirm ||
+      !signupUserName.trim()
+    ) {
       setSignupMessage("이메일, 비밀번호, 비밀번호 확인, 닉네임을 모두 입력해 주세요.");
       return false;
     }
@@ -936,11 +938,7 @@ function App() {
                     }}
                     placeholder="user@example.com"
                   />
-                  <button
-                    type="button"
-                    onClick={requestSignupEmailVerification}
-                    disabled={isBusy}
-                  >
+                  <button type="button" onClick={requestSignupEmailVerification} disabled={isBusy}>
                     코드 발송
                   </button>
                 </span>
@@ -1055,7 +1053,9 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Root element not found");
+createRoot(rootElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,

@@ -1,9 +1,18 @@
 import "./CharacterModal.css";
 
 const PERSONALITY_CATEGORIES = [
-  "모험적인", "차분한", "호기심많은", "다정한",
-  "열정적인", "섬세한", "활발한", "느긋한",
-  "유쾌한", "수줍은", "장난꾸러기", "야무진",
+  "모험적인",
+  "차분한",
+  "호기심많은",
+  "다정한",
+  "열정적인",
+  "섬세한",
+  "활발한",
+  "느긋한",
+  "유쾌한",
+  "수줍은",
+  "장난꾸러기",
+  "야무진",
 ] as const;
 
 type Resident = {
@@ -60,10 +69,14 @@ export function CharacterModal({
         <div className="bookPanelHeader">
           <span className="bookTagRow">몽글빌리지 그림책</span>
           <h2 className="bookTitle">
-            새로운 친구가<br />찾아왔어요
+            새로운 친구가
+            <br />
+            찾아왔어요
           </h2>
           <p className="bookIntro">
-            어느 맑은 좋은 날, 작은 마을에<br />반가운 친구가 도착했답니다.
+            어느 맑은 좋은 날, 작은 마을에
+            <br />
+            반가운 친구가 도착했답니다.
           </p>
         </div>
 
@@ -109,7 +122,9 @@ export function CharacterModal({
         <div className="bookPanelHeader bookPanelHeaderRight">
           <span className="bookTagRow">친구를 소개해요</span>
           <h3 className="bookTitle">
-            이 친구는<br />어떤 아이인가요?
+            이 친구는
+            <br />
+            어떤 아이인가요?
           </h3>
         </div>
 
@@ -141,7 +156,9 @@ export function CharacterModal({
 
         <div className="bookField">
           <div className="bookFieldLabel">
-            <span>🌿 성격 키워드 메모 <em>선택</em></span>
+            <span>
+              🌿 성격 키워드 메모 <em>선택</em>
+            </span>
             <span className="bookFieldCount">{characterKeywords.length} / 100</span>
           </div>
           <input
@@ -172,9 +189,7 @@ export function CharacterModal({
         </div>
 
         <div className="bookSubmitRow">
-          <p className="stampHint">
-            도장을 '쾅!' 찍으면 그림책 마을에 등장해요.
-          </p>
+          <p className="stampHint">도장을 '쾅!' 찍으면 그림책 마을에 등장해요.</p>
           <button
             type="button"
             className="stampButton"
