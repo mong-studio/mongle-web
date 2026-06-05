@@ -508,7 +508,11 @@ button {
 .characterSheet,
 .todoSheet,
 .plannerSheet,
-.signupSheet { display: grid; gap: 14px; margin-top: 20px; }
+.signupSheet {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
 
 .uploadDropzone {
   padding: 12px;
@@ -552,7 +556,9 @@ textarea {
   min-height: 42px;
 }
 
-.signupModal { width: min(620px, 100%); }
+.signupModal {
+  width: min(620px, 100%);
+}
 .inlineAction {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 112px;
@@ -760,7 +766,11 @@ textarea {
     width: auto;
     margin: 10px;
   }
-  .dialogueBox { grid-template-columns: 1fr; }
+  .dialogueBox {
+    grid-template-columns: 1fr;
+  }
   .signupGrid,
-  .inlineAction { grid-template-columns: 1fr; }
+  .inlineAction {
+    grid-template-columns: 1fr;
+  }
 }

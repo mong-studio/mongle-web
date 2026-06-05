@@ -1,26 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
+import { CharacterModal } from "./CharacterModal.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = "http://127.0.0.1:8010";
 const AUTH_API_BASE = "";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
-const PERSONALITY_CATEGORIES = [
-  "모험적인",
-  "차분한",
-  "호기심많은",
-  "다정한",
-  "장난스러운",
-  "부지런한",
-  "강력한",
-  "몽환적인",
-  "분노가 많은",
-  "용감한",
-  "온화한",
-  "명랑한",
-] as const;
 
 type FeatureId = "character" | "todo" | "planner";
 type TodoStatus = "candidate" | "saved" | "done";
@@ -218,7 +205,7 @@ function App() {
   ]);
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
-  const [generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
+  const [_generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
   const [plannerInput, setPlannerInput] = useState("");
   const [plannerMessages, setPlannerMessages] = useState<PlannerMessage[]>([
     {
@@ -245,10 +232,7 @@ function App() {
   const [signupAiConsent, setSignupAiConsent] = useState(false);
   const [signupMessage, setSignupMessage] = useState("");
   const [signedUpUserName, setSignedUpUserName] = useState("");
-  const active = useMemo(
-    () => (activeFeature ? FEATURES[activeFeature] : null),
-    [activeFeature],
-  );
+  const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
   const residentNames = residents.map((resident) => resident.name).join("|");
@@ -549,7 +533,12 @@ function App() {
   }
 
   function ensureSignupRequiredFields() {
-    if (!signupEmail.trim() || !signupPassword || !signupPasswordConfirm || !signupUserName.trim()) {
+    if (
+      !signupEmail.trim() ||
+      !signupPassword ||
+      !signupPasswordConfirm ||
+      !signupUserName.trim()
+    ) {
       setSignupMessage("이메일, 비밀번호, 비밀번호 확인, 닉네임을 모두 입력해 주세요.");
       return false;
     }
@@ -763,109 +752,46 @@ function App() {
       {active ? (
         <div className="modalBackdrop" role="presentation">
           <section
-            className="featureModal"
+            className={`featureModal${activeFeature === "character" ? " characterModal" : ""}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="feature-title"
           >
-            <button
-              type="button"
-              className="closeButton"
-              onClick={() => setActiveFeature(null)}
-              aria-label="닫기"
-            >
-              x
-            </button>
-            <p className="modalKicker">MONGLE VILLAGE</p>
-            <h2 id="feature-title">{active.title}</h2>
-            <p className="modalLine">{active.npcLine}</p>
-            <span className="featureMeta">{active.meta}</span>
-
-            {activeFeature === "character" ? (
-              <div className="characterSheet">
-                <label className="uploadDropzone">
-                  <span>애착인형 사진</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => handleSourceImageUpload(event.target.files?.[0])}
-                  />
-                  <div className="uploadPreview">
-                    {sourceImagePreview ? (
-                      <img src={sourceImagePreview} alt="업로드한 애착인형" />
-                    ) : (
-                      <strong>사진 업로드</strong>
-                    )}
-                  </div>
-                  <small>
-                    {sourceImageName ||
-                      "사진을 올리면 외형을 분석해서 8bit 주민 생성에 사용합니다."}
-                  </small>
-                </label>
-                <label>
-                  주민 이름
-                  <input
-                    value={characterName}
-                    maxLength={50}
-                    onChange={(event) => setCharacterName(event.target.value)}
-                  />
-                </label>
-                <label>
-                  페르소나
-                  <textarea
-                    value={characterPersona}
-                    onChange={(event) => setCharacterPersona(event.target.value)}
-                  />
-                </label>
-                <label>
-                  성격 키워드 메모
-                  <input
-                    value={characterKeywords}
-                    onChange={(event) => setCharacterKeywords(event.target.value)}
-                    placeholder="자유 메모 (선택)"
-                  />
-                </label>
-                <div className="keywordCategoryBlock">
-                  <b>성격 카테고리 (최대 3개)</b>
-                  <div className="keywordChips">
-                    {PERSONALITY_CATEGORIES.map((keyword) => (
-                      <button
-                        key={keyword}
-                        type="button"
-                        className={selectedKeywordCategories.includes(keyword) ? "isSelected" : ""}
-                        onClick={() => toggleKeywordCategory(keyword)}
-                      >
-                        {keyword}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="pixelPreview">
-                  <img
-                    src={
-                      generatedCharacterPreview || sourceImagePreview || "/assets/mongle_chief.png"
-                    }
-                    alt=""
-                  />
-                  <p>{characterName || "새 주민"}의 8bit 정면 캐릭터 생성 미리보기</p>
-                </div>
-                <div className="residentList">
-                  {residents.map((resident) => (
-                    <span key={resident.id}>
-                      {resident.avatarUrl ? <img src={resident.avatarUrl} alt="" /> : null}
-                      {resident.name}
-                    </span>
-                  ))}
-                </div>
+            {activeFeature !== "character" ? (
+              <>
                 <button
                   type="button"
-                  className="primaryButton"
-                  onClick={createCharacter}
-                  disabled={isBusy || residents.length >= 10}
+                  className="closeButton"
+                  onClick={() => setActiveFeature(null)}
+                  aria-label="닫기"
                 >
-                  {isBusy ? "생성 중..." : "주민 초대하기"}
+                  ×
                 </button>
-              </div>
+                <p className="modalKicker">MONGLE VILLAGE</p>
+                <h2 id="feature-title">{active.title}</h2>
+                <p className="modalLine">{active.npcLine}</p>
+                <span className="featureMeta">{active.meta}</span>
+              </>
+            ) : null}
+
+            {activeFeature === "character" ? (
+              <CharacterModal
+                residents={residents}
+                sourceImagePreview={sourceImagePreview}
+                sourceImageName={sourceImageName}
+                characterName={characterName}
+                characterPersona={characterPersona}
+                characterKeywords={characterKeywords}
+                selectedKeywordCategories={selectedKeywordCategories}
+                isBusy={isBusy}
+                onImageUpload={handleSourceImageUpload}
+                onNameChange={setCharacterName}
+                onPersonaChange={setCharacterPersona}
+                onKeywordsChange={setCharacterKeywords}
+                onToggleKeyword={toggleKeywordCategory}
+                onSubmit={createCharacter}
+                onClose={() => setActiveFeature(null)}
+              />
             ) : null}
 
             {activeFeature === "todo" ? (
@@ -1012,11 +938,7 @@ function App() {
                     }}
                     placeholder="user@example.com"
                   />
-                  <button
-                    type="button"
-                    onClick={requestSignupEmailVerification}
-                    disabled={isBusy}
-                  >
+                  <button type="button" onClick={requestSignupEmailVerification} disabled={isBusy}>
                     코드 발송
                   </button>
                 </span>
@@ -1131,7 +1053,9 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Root element not found");
+createRoot(rootElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
