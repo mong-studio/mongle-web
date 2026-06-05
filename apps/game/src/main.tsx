@@ -1,26 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
+import { CharacterModal } from "./CharacterModal";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = "http://127.0.0.1:8010";
 const AUTH_API_BASE = "";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
-const PERSONALITY_CATEGORIES = [
-  "모험적인",
-  "차분한",
-  "호기심많은",
-  "다정한",
-  "장난스러운",
-  "부지런한",
-  "강력한",
-  "몽환적인",
-  "분노가 많은",
-  "용감한",
-  "온화한",
-  "명랑한",
-] as const;
 
 type FeatureId = "character" | "todo" | "planner";
 type TodoStatus = "candidate" | "saved" | "done";
@@ -763,11 +750,12 @@ function App() {
       {active ? (
         <div className="modalBackdrop" role="presentation">
           <section
-            className="featureModal"
+            className={`featureModal${activeFeature === "character" ? " characterModal" : ""}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="feature-title"
           >
+<<<<<<< Updated upstream
             <button
               type="button"
               className="closeButton"
@@ -857,15 +845,43 @@ function App() {
                     </span>
                   ))}
                 </div>
+=======
+            {activeFeature !== "character" ? (
+              <>
+>>>>>>> Stashed changes
                 <button
                   type="button"
-                  className="primaryButton"
-                  onClick={createCharacter}
-                  disabled={isBusy || residents.length >= 10}
+                  className="closeButton"
+                  onClick={() => setActiveFeature(null)}
+                  aria-label="닫기"
                 >
-                  {isBusy ? "생성 중..." : "주민 초대하기"}
+                  ×
                 </button>
-              </div>
+                <p className="modalKicker">MONGLE VILLAGE</p>
+                <h2 id="feature-title">{active.title}</h2>
+                <p className="modalLine">{active.npcLine}</p>
+                <span className="featureMeta">{active.meta}</span>
+              </>
+            ) : null}
+
+            {activeFeature === "character" ? (
+              <CharacterModal
+                residents={residents}
+                sourceImagePreview={sourceImagePreview}
+                sourceImageName={sourceImageName}
+                characterName={characterName}
+                characterPersona={characterPersona}
+                characterKeywords={characterKeywords}
+                selectedKeywordCategories={selectedKeywordCategories}
+                isBusy={isBusy}
+                onImageUpload={handleSourceImageUpload}
+                onNameChange={setCharacterName}
+                onPersonaChange={setCharacterPersona}
+                onKeywordsChange={setCharacterKeywords}
+                onToggleKeyword={toggleKeywordCategory}
+                onSubmit={createCharacter}
+                onClose={() => setActiveFeature(null)}
+              />
             ) : null}
 
             {activeFeature === "todo" ? (
