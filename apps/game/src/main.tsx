@@ -9,7 +9,7 @@ import {
 } from "./auth/api.js";
 import { LoginModal } from "./auth/LoginModal.js";
 import { useAuthStore } from "./auth/store.js";
-import { CharacterModal } from "./components/createCharacter.js";
+import { CharacterModal } from "./components/createCharacter/createCharacter.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = "http://127.0.0.1:8010";
