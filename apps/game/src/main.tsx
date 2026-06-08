@@ -1,11 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
+import {
+  confirmEmailVerification,
+  requestEmailVerification,
+  signup as signupRequest,
+  toUserMessage,
+} from "./auth/api.js";
+import { LoginModal } from "./auth/LoginModal.js";
+import { useAuthStore } from "./auth/store.js";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
-const AI_API_BASE = import.meta.env.VITE_AI_API_BASE ?? "http://127.0.0.1:8010";
-const AUTH_API_BASE = import.meta.env.VITE_AUTH_API_BASE ?? "http://127.0.0.1:8000";
+const AI_API_BASE = "http://127.0.0.1:8010";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
 
@@ -62,13 +69,6 @@ type PlannerDay = {
 };
 
 type SignupStep = "form" | "code" | "verified";
-
-type SignupResponse = {
-  user_id: string;
-  email: string;
-  user_name: string;
-  token_balance: number;
-};
 
 const FEATURES: Record<FeatureId, Feature> = {
   character: {
@@ -163,22 +163,6 @@ async function postJson<T>(path: string, payload: unknown): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function postAuthJson<T>(path: string, payload: unknown): Promise<T> {
-  const response = await fetch(`${AUTH_API_BASE}${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.error?.message || "회원가입 요청에 실패했어요.");
-  }
-
-  return response.json() as Promise<T>;
-}
-
 function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
@@ -231,7 +215,16 @@ function App() {
   const [signupPrivacyAgreed, setSignupPrivacyAgreed] = useState(false);
   const [signupAiConsent, setSignupAiConsent] = useState(false);
   const [signupMessage, setSignupMessage] = useState("");
-  const [signedUpUserName, setSignedUpUserName] = useState("");
+  const authStatus = useAuthStore((state) => state.status);
+  const authUser = useAuthStore((state) => state.user);
+  const logoutSession = useAuthStore((state) => state.logout);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [verificationToken, setVerificationToken] = useState("");
+
+  useEffect(() => {
+    void useAuthStore.getState().restoreSession();
+  }, []);
+
   const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
@@ -557,14 +550,11 @@ function App() {
     setIsBusy(true);
     setSignupMessage("");
     try {
-      await postAuthJson("/auth/email-verification", {
-        email: signupEmail.trim(),
-        purpose: "SIGNUP",
-      });
+      await requestEmailVerification(signupEmail.trim());
       setSignupStep("code");
       setSignupMessage("인증 코드를 발송했어요. Django 콘솔 로그에서 코드를 확인해 주세요.");
     } catch (error) {
-      setSignupMessage(error instanceof Error ? error.message : "인증 코드 발송에 실패했어요.");
+      setSignupMessage(toUserMessage(error));
     } finally {
       setIsBusy(false);
     }
@@ -579,15 +569,15 @@ function App() {
     setIsBusy(true);
     setSignupMessage("");
     try {
-      await postAuthJson("/auth/email-verification/confirm", {
-        email: signupEmail.trim(),
-        purpose: "SIGNUP",
-        code: signupCode.trim().toUpperCase(),
-      });
+      const result = await confirmEmailVerification(
+        signupEmail.trim(),
+        signupCode.trim().toUpperCase(),
+      );
+      setVerificationToken(result.verification_token);
       setSignupStep("verified");
       setSignupMessage("이메일 인증이 완료됐어요. 입력값 확인 후 가입을 완료해 주세요.");
     } catch (error) {
-      setSignupMessage(error instanceof Error ? error.message : "이메일 인증에 실패했어요.");
+      setSignupMessage(toUserMessage(error));
     } finally {
       setIsBusy(false);
     }
@@ -605,19 +595,20 @@ function App() {
     setIsBusy(true);
     setSignupMessage("");
     try {
-      const user = await postAuthJson<SignupResponse>("/auth/signup", {
+      const user = await signupRequest({
         email: signupEmail.trim(),
         password: signupPassword,
         user_name: signupUserName.trim(),
         job: signupJob.trim(),
-        birth: signupBirth || null,
+        birth: signupBirth || "",
         is_aiconsent: signupAiConsent,
+        verification_token: verificationToken,
       });
-      setSignedUpUserName(user.user_name);
       setSignupOpen(false);
       setNotice(`${user.user_name}님 가입 완료! 시작 토큰 ${user.token_balance}개가 지급됐어요.`);
+      setLoginOpen(true);
     } catch (error) {
-      setSignupMessage(error instanceof Error ? error.message : "회원가입에 실패했어요.");
+      setSignupMessage(toUserMessage(error));
     } finally {
       setIsBusy(false);
     }
@@ -646,9 +637,15 @@ function App() {
           </button>
         </nav>
         <h1>몽글마을</h1>
-        <button type="button" className="loginButton" onClick={() => setSignupOpen(true)}>
-          {signedUpUserName || "GUEST"}
-        </button>
+        {authStatus === "authenticated" && authUser ? (
+          <button type="button" className="loginButton" onClick={() => void logoutSession()}>
+            {authUser.userName}님 · 로그아웃
+          </button>
+        ) : authStatus === "anonymous" ? (
+          <button type="button" className="loginButton" onClick={() => setLoginOpen(true)}>
+            로그인 / 회원가입
+          </button>
+        ) : null}
       </header>
 
       <div className="leftRail">
@@ -1044,6 +1041,15 @@ function App() {
           </section>
         </div>
       ) : null}
+
+      <LoginModal
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSwitchToSignup={() => {
+          setLoginOpen(false);
+          setSignupOpen(true);
+        }}
+      />
     </main>
   );
 }
