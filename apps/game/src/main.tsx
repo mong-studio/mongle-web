@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
-import { CharacterModal } from "./components/createCharacter.js";
+import { CharacterModal } from "./components/createCharacter/createCharacter.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
-const AI_API_BASE = "http://127.0.0.1:8010";
-const AUTH_API_BASE = "";
+const AI_API_BASE = import.meta.env.VITE_AI_API_BASE ?? "http://127.0.0.1:8010";
+const AUTH_API_BASE = import.meta.env.VITE_AUTH_API_BASE ?? "http://127.0.0.1:8000";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
 
