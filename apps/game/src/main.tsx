@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
-import { MyPageModal } from "./components/myPage/myPage.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = import.meta.env.VITE_AI_API_BASE ?? "http://127.0.0.1:8010";
@@ -10,7 +9,7 @@ const AUTH_API_BASE = import.meta.env.VITE_AUTH_API_BASE ?? "http://127.0.0.1:80
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
 
-type FeatureId = "character" | "todo" | "planner" | "myPage";
+type FeatureId = "character" | "todo" | "planner";
 type TodoStatus = "candidate" | "saved" | "done";
 type PlannerMessageRole = "chief" | "user";
 
@@ -89,12 +88,6 @@ const FEATURES: Record<FeatureId, Feature> = {
     title: "플래너 챗봇이랑 계획 짜기",
     npcLine: "목표가 흐릿하면 내가 질문하면서 일정으로 정리해줄게.",
     meta: "한국어 플랜 · 태그 추천 · 확인 후 저장",
-  },
-  myPage: {
-    id: "myPage",
-    title: "마이페이지",
-    npcLine: "나의 몽글 일지를 확인해봐!",
-    meta: "나의 기록 · 마을 주민 · 통계",
   },
 };
 
@@ -754,12 +747,12 @@ function App() {
       {active ? (
         <div className="modalBackdrop" role="presentation">
           <section
-            className={`featureModal${activeFeature === "character" ? " characterModal" : ""}${activeFeature === "myPage" ? " myPageModal" : ""}`}
+            className={`featureModal${activeFeature === "character" ? " characterModal" : ""}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="feature-title"
           >
-            {activeFeature !== "character" && activeFeature !== "myPage" ? (
+            {activeFeature !== "character" ? (
               <>
                 <button
                   type="button"
@@ -793,20 +786,6 @@ function App() {
                 onToggleKeyword={toggleKeywordCategory}
                 onSubmit={createCharacter}
                 onClose={() => setActiveFeature(null)}
-              />
-            ) : null}
-
-            {activeFeature === "myPage" ? (
-              <MyPageModal
-                userName="몽글러"
-                joinDate="2026.01.01"
-                residents={residents}
-                totalTodosDone={quests.filter((q) => q.done).length}
-                totalApples={apples}
-                streakDays={cycles}
-                recentActivities={[]}
-                onClose={() => setActiveFeature(null)}
-                onLogout={() => setActiveFeature(null)}
               />
             ) : null}
 
