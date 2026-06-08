@@ -334,11 +334,6 @@ function App() {
       setNotice("주민 이름과 페르소나를 모두 적어주세요.");
       return;
     }
-    if (!sourceImagePreview) {
-      setNotice("애착인형 사진을 먼저 올려주세요.");
-      return;
-    }
-
     setIsBusy(true);
     try {
       const keywords = selectedKeywordCategories.slice(0, 3);
