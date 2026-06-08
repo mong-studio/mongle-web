@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import "./createCharacter.css";
 
 const PERSONALITY_CATEGORIES = [
@@ -13,6 +14,7 @@ const PERSONALITY_CATEGORIES = [
   "수줍은",
   "장난꾸러기",
   "야무진",
+  "명랑한",
 ] as const;
 
 type Resident = {
@@ -58,25 +60,42 @@ export function CharacterModal({
   onSubmit,
   onClose,
 }: Props) {
-  return (
-    <div className="characterBook">
-      {/* 왼쪽 패널 */}
-      <div className="bookLeft">
-        <button type="button" className="bookCloseButton" onClick={onClose} aria-label="닫기">
-          ×
-        </button>
+  const bookRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
+  useEffect(() => {
+    selectedKeywordCategories.forEach((k) => {
+      if (!PERSONALITY_CATEGORIES.includes(k as (typeof PERSONALITY_CATEGORIES)[number])) {
+        onToggleKeyword(k);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (bookRef.current && !bookRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  return (
+    <div className="characterBook" ref={bookRef}>
+      {/* ── 왼쪽 콘텐츠 ── */}
+      <div className="bookLeft">
         <div className="bookPanelHeader">
-          <span className="bookTagRow">몽글빌리지 그림책</span>
+          <span className="bookTagRow">몽글마을 주민등록</span>
           <h2 className="bookTitle">
             새로운 친구가
             <br />
-            찾아왔어요
+            찾아왔어요!!
           </h2>
           <p className="bookIntro">
-            어느 맑은 좋은 날, 작은 마을에
+            어느 맑은 좋은 날, 몽글 마을에
             <br />
-            반가운 친구가 도착했답니다.
+            반가운 친구가 도착했답니다!!
           </p>
         </div>
 
@@ -97,40 +116,58 @@ export function CharacterModal({
             accept="image/*"
             onChange={(e) => onImageUpload(e.target.files?.[0])}
           />
-          <span className="bookUploadTitle">애착인형 사진 올리기</span>
-          <small>{sourceImageName || "귀여운 토끼 드래그 · PNG·JPG"}</small>
+          <span className="bookUploadTitle">
+            애착인형 사진 올리기 <em className="bookUploadOptional">선택</em>
+          </span>
+          <small>{sourceImageName || "PNG · JPG · JPEG · 드래그도 괜찮아요"}</small>
+          <span className="bookUploadHint">
+            인형이 혼자 담긴 사진이 좋아요 🌿<br />
+            하얀 배경이면 더 예쁜 친구가 태어난답니다
+          </span>
         </label>
 
-        <div className="bookResidents">
-          <span className="bookResidentsLabel">이미 마을에 사는 친구들</span>
-          <div className="bookResidentRow">
-            {residents.map((r) => (
-              <span key={r.id} className="bookResidentChip">
-                {r.avatarUrl ? <img src={r.avatarUrl} alt="" /> : null}
-                {r.name}
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* ── 왼쪽 하단: 각주 ── */}
+        <p className="bookLeftFootnote">
+          🌱 사진이 없어도 걱정 마세요~!
+          <br />
+          페르소나에 외형을 살짝 적어주면 그 모습 그대로 뿅 나타나요 ✨<br />
+          <em>예시: 보들보들한 크림색 털에 까만 콩 눈, 귀에 노란 리본이 달려 있어요 🎀</em>
+        </p>
       </div>
 
-      {/* 책등 구분선 */}
+      {/* ── 책등 ── */}
       <div className="bookSpine" aria-hidden="true" />
 
-      {/* 오른쪽 패널 */}
+      {/* ── 오른쪽 콘텐츠 ── */}
       <div className="bookRight">
-        <div className="bookPanelHeader bookPanelHeaderRight">
-          <span className="bookTagRow">친구를 소개해요</span>
-          <h3 className="bookTitle">
+        <div className="bookBookmark" aria-hidden="true" />
+        <button type="button" className="bookCloseButton" onClick={onClose} aria-label="닫기">
+          ×
+        </button>
+
+        <div className="bookPanelHeaderRight">
+          <span className="bookTagRowRight">친구를 소개해요</span>
+          <h3 className="bookTitleRight">
             이 친구는
             <br />
             어떤 아이인가요?
           </h3>
+          <div className="bookDecorDots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
         </div>
 
         <div className="bookField">
           <div className="bookFieldLabel">
-            <span>🌿 이름</span>
+            <div className="bookFieldLabelLeft">
+              <span className="bookLeafIcon" aria-hidden="true">
+                🌿
+              </span>
+              <span>이름</span>
+            </div>
             <span className="bookFieldCount">{characterName.length} / 50</span>
           </div>
           <input
@@ -143,7 +180,12 @@ export function CharacterModal({
 
         <div className="bookField">
           <div className="bookFieldLabel">
-            <span>🌿 페르소나</span>
+            <div className="bookFieldLabelLeft">
+              <span className="bookLeafIcon" aria-hidden="true">
+                🌿
+              </span>
+              <span>페르소나</span>
+            </div>
             <span className="bookFieldCount">{characterPersona.length} / 300</span>
           </div>
           <textarea
@@ -156,9 +198,14 @@ export function CharacterModal({
 
         <div className="bookField">
           <div className="bookFieldLabel">
-            <span>
-              🌿 성격 키워드 메모 <em>선택</em>
-            </span>
+            <div className="bookFieldLabelLeft">
+              <span className="bookLeafIcon" aria-hidden="true">
+                🌿
+              </span>
+              <span>
+                성격 키워드 메모 <em>선택</em>
+              </span>
+            </div>
             <span className="bookFieldCount">{characterKeywords.length} / 100</span>
           </div>
           <input
@@ -171,15 +218,27 @@ export function CharacterModal({
 
         <div className="bookField">
           <div className="bookFieldLabel">
-            <span>🌿 성격 키워드</span>
-            <span className="bookFieldCount">{selectedKeywordCategories.length} / 3</span>
+            <div className="bookFieldLabelLeft">
+              <span className="bookLeafIcon" aria-hidden="true">
+                🌿
+              </span>
+              <span>성격 키워드</span>
+            </div>
+            <span className="bookFieldCount">
+              {
+                selectedKeywordCategories.filter((k) =>
+                  PERSONALITY_CATEGORIES.includes(k as (typeof PERSONALITY_CATEGORIES)[number]),
+                ).length
+              }{" "}
+              / 3
+            </span>
           </div>
           <div className="bookKeywordChips">
             {PERSONALITY_CATEGORIES.map((kw) => (
               <button
                 key={kw}
                 type="button"
-                className={selectedKeywordCategories.includes(kw) ? "isSelected" : ""}
+                className={`bookKeywordChip${selectedKeywordCategories.includes(kw) ? " isSelected" : ""}`}
                 onClick={() => onToggleKeyword(kw)}
               >
                 {kw}
@@ -188,13 +247,19 @@ export function CharacterModal({
           </div>
         </div>
 
+        {/* ── 오른쪽 하단: 입주 도장 ── */}
         <div className="bookSubmitRow">
-          <p className="stampHint">도장을 '쾅!' 찍으면 그림책 마을에 등장해요.</p>
+          <p className="stampHint">
+            도장을 '쾅!' 찍으면
+            <br />
+            몽글마을에 입주가 가능해요!
+          </p>
           <button
             type="button"
             className="stampButton"
             onClick={onSubmit}
             disabled={isBusy || residents.length >= 10}
+            aria-label="입주 도장"
           >
             {isBusy ? "생성 중" : "입주\n도장"}
           </button>
