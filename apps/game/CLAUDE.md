@@ -42,6 +42,12 @@ npm run web:dev
 - Do not add copied Stardew Valley or screenshot-derived assets.
 - If adding external assets, document license and source in `ASSET_CREDITS.md` and `docs/REFERENCES.md`.
 
+## Design System
+
+For color values, read `src/style.css` — do not introduce hex values not already present there.
+
+When building a new component read `docs/design/components.md`. When reviewing UI read `docs/design/rules.md`.
+
 ## Visual Quality Bar
 
 Before finalizing visual work, inspect:
