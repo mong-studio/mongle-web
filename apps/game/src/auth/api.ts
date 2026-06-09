@@ -99,6 +99,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   INVALID_VERIFICATION_CODE: "인증 코드가 올바르지 않아요.",
   VERIFICATION_CODE_EXPIRED: "인증 코드가 만료됐어요. 다시 요청해 주세요.",
   EMAIL_VERIFICATION_RATE_LIMITED: "잠시 후 다시 인증 코드를 요청해 주세요.",
+  LOGIN_RATE_LIMITED: "로그인 시도가 너무 많아요. 잠시 후 다시 시도해 주세요.",
+  INVALID_REFRESH_TOKEN: "세션이 만료됐어요. 다시 로그인해 주세요.",
+  REFRESH_TOKEN_EXPIRED: "세션이 만료됐어요. 다시 로그인해 주세요.",
 };
 
 /** 서버 공통 에러 형식 {error:{code,message,details}}를 사용자 메시지로 변환. */

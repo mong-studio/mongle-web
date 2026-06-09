@@ -593,7 +593,35 @@ textarea {
 }
 .termsBox input {
   width: auto;
-  accent-color: #8a5b38;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  border: 0.1875rem solid #8e6038;
+  background: #fff6ca;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  padding: 0;
+}
+input[type="checkbox"]:checked {
+  background: #8a5b38;
+  border-color: #453023;
+}
+input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff5d1;
+  font-size: 0.8125rem;
+  font-weight: 900;
+  line-height: 1;
 }
 .signupMessage {
   margin: 0;
@@ -605,7 +633,6 @@ textarea {
   font-weight: 950;
   line-height: 1.4;
 }
-
 .keywordCategoryBlock {
   display: grid;
   gap: 8px;
