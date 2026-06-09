@@ -11,6 +11,7 @@ import { LoginModal } from "./auth/LoginModal.js";
 import { type AuthState, useAuthStore } from "./auth/store.js";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
+import { MyPageWrapper } from "./components/myPage/MyPageWrapper.js";
 import { PlannerChat } from "./components/plannerChat/plannerChat.js";
 
 const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
@@ -203,6 +204,7 @@ function App() {
   const [signupPrivacyAgreed, setSignupPrivacyAgreed] = useState(false);
   const [signupAiConsent, setSignupAiConsent] = useState(false);
   const [signupMessage, setSignupMessage] = useState("");
+  const [showMyPage, setShowMyPage] = useState(false);
   const authStatus = useAuthStore((state: AuthState) => state.status);
   const authUser = useAuthStore((state: AuthState) => state.user);
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
@@ -505,15 +507,22 @@ function App() {
           </button>
         </nav>
         <h1>몽글마을</h1>
-        {authStatus === "authenticated" && authUser ? (
-          <button type="button" className="loginButton" onClick={() => void logoutSession()}>
-            {authUser.userName}님 · 로그아웃
-          </button>
-        ) : authStatus === "anonymous" ? (
-          <button type="button" className="loginButton" onClick={() => setLoginOpen(true)}>
-            로그인 / 회원가입
-          </button>
-        ) : null}
+        <div className="navUserArea">
+          {authStatus === "authenticated" && authUser ? (
+            <>
+              <button type="button" className="loginButton" onClick={() => setShowMyPage(true)}>
+                {authUser.userName}님 · 마이페이지
+              </button>
+              <button type="button" className="loginButton" onClick={() => void logoutSession()}>
+                로그아웃
+              </button>
+            </>
+          ) : authStatus === "anonymous" ? (
+            <button type="button" className="loginButton" onClick={() => setLoginOpen(true)}>
+              로그인 / 회원가입
+            </button>
+          ) : null}
+        </div>
       </header>
 
       <div className="leftRail">
@@ -833,6 +842,14 @@ function App() {
             </div>
           </section>
         </div>
+      ) : null}
+
+      {showMyPage ? (
+        <MyPageWrapper
+          residents={residents}
+          onClose={() => setShowMyPage(false)}
+          onNotice={setNotice}
+        />
       ) : null}
 
       <LoginModal

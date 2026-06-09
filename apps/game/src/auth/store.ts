@@ -21,6 +21,7 @@ export type AuthState = {
 };
 
 const REFRESH_MARGIN_SECONDS = 60;
+const SESSION_KEY = "mongle_access";
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -34,6 +35,7 @@ function clearRefreshTimer(): void {
 export const useAuthStore = create<AuthState>((set, get) => {
   const clearSession = (): void => {
     clearRefreshTimer();
+    sessionStorage.removeItem(SESSION_KEY);
     set({ user: null, accessToken: null, status: "anonymous" });
   };
 
@@ -52,6 +54,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
   const refreshSession = async (): Promise<boolean> => {
     try {
       const data = await authApi.refreshToken();
+      sessionStorage.setItem(SESSION_KEY, data.access_token);
       set({ accessToken: data.access_token, status: "authenticated" });
       scheduleRefresh(data.expires_in_seconds);
       return true;
@@ -73,6 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     login: async (email, password, rememberMe) => {
       const data = await authApi.login(email, password, rememberMe);
+      sessionStorage.setItem(SESSION_KEY, data.access_token);
       set({
         user: {
           userId: data.users.user_id,
@@ -96,6 +100,18 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     restoreSession: async () => {
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      if (saved) {
+        set({ accessToken: saved, status: "authenticated" });
+        try {
+          const me = await authApi.fetchMe();
+          set({ user: { userId: me.user_id, email: me.email, userName: me.user_name } });
+        } catch {
+          // access token이 만료된 경우 interceptor가 refresh를 시도하므로 여기선 무시.
+        }
+        return;
+      }
+
       const refreshed = await refreshSession();
       if (!refreshed) {
         clearSession();
@@ -103,9 +119,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }
       try {
         const me = await authApi.fetchMe();
-        set({
-          user: { userId: me.user_id, email: me.email, userName: me.user_name },
-        });
+        set({ user: { userId: me.user_id, email: me.email, userName: me.user_name } });
       } catch {
         // user 정보 조회 실패해도 토큰 세션은 유효하므로 유지한다.
       }

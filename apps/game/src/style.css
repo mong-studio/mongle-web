@@ -119,8 +119,18 @@ button {
   white-space: nowrap;
 }
 
-.loginButton {
+.navUserArea {
   justify-self: end;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.loginButton {
+  min-width: 84px;
+}
+
+.myPageButton {
   min-width: 84px;
 }
 
@@ -218,8 +228,8 @@ button {
   font-weight: 950;
 }
 
-.residentPanel span img,
-.residentList span img {
+.residentPanel img,
+.residentList img {
   width: 18px;
   height: 18px;
   border: 1px solid #7b4d2b;
@@ -326,9 +336,9 @@ button {
   font-weight: 950;
 }
 
-.questPanel li b,
-.questPanel li p,
-.questPanel li small {
+.questPanel b,
+.questPanel p,
+.questPanel small {
   margin: 0;
 }
 .questPanel li p {

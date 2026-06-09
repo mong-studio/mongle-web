@@ -22,6 +22,10 @@ venv/
 # OS
 .DS_Store
 
+# Vim
+*.swp
+*.swo
+
 # IDE
 .idea/
 .vscode/*
