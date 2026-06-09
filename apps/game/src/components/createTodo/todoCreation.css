@@ -1,0 +1,436 @@
+.todoReplica {
+  width: min(1460px, calc(100vw - 64px));
+  margin: 0 auto;
+  color: #5a371f;
+  font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+.todoOuterFrame {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 7px solid #8a6018;
+  outline: 3px solid #d4a840;
+  outline-offset: -11px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #edd8ab 0%, #e3c07b 100%);
+  box-shadow:
+    0 24px 64px rgba(50, 30, 5, 0.32),
+    0 6px 16px rgba(50, 30, 5, 0.18),
+    inset 0 0 0 2px rgba(255, 235, 150, 0.2);
+}
+
+.todoHeroCard,
+.todoPanel,
+.todoFooterNote {
+  position: relative;
+  border: 2px solid #e0ba74;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.94), rgba(255, 248, 228, 0.92) 54%, rgba(252, 241, 210, 0.98)),
+    #fff8ea;
+  box-shadow:
+    inset 0 0 18px rgba(219, 171, 84, 0.1),
+    0 4px 12px rgba(114, 76, 32, 0.05);
+}
+
+.todoHeroCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  padding: 18px 20px;
+  align-items: start;
+}
+
+.todoHeroCopy {
+  max-width: 560px;
+}
+
+.todoHeroKicker {
+  margin: 0 0 10px;
+  color: #a77733;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.todoHeroCard h3 {
+  margin: 0;
+  color: #52311c;
+  font-size: clamp(1.4rem, 2vw, 1.95rem);
+  line-height: 1.26;
+  font-weight: 700;
+}
+
+.todoHeroLead {
+  margin: 12px 0 0;
+  color: #6a472d;
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.todoUsageChip,
+.todoDateChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1.5px solid #dcb66b;
+  border-radius: 999px;
+  background: rgba(255, 248, 230, 0.98);
+  color: #8d622c;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.todoUsageChip {
+  margin-top: 16px;
+  width: fit-content;
+}
+
+.todoDateChip {
+  min-width: 118px;
+}
+
+.todoSplitLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.todoPanel {
+  padding: 16px;
+}
+
+.todoPanelTitle {
+  color: #5a371f;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.todoMemoCard,
+.todoCandidateCard,
+.todoSavedCard {
+  display: grid;
+  gap: 12px;
+}
+
+.todoMemoField textarea {
+  width: 100%;
+  min-height: 148px;
+  resize: none;
+  padding: 14px 16px;
+  border: 1.5px solid #d8c088;
+  border-radius: 14px;
+  background: rgba(255, 255, 253, 0.95);
+  color: #5e3b22;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 244, 220, 0.42),
+    0 3px 10px rgba(148, 102, 43, 0.05);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.todoMemoField textarea::placeholder {
+  color: #b3956d;
+}
+
+.todoMemoFooter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.todoMemoFooter p {
+  margin: 0;
+  color: #856238;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.todoSplitButton {
+  min-width: 124px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 2px solid #7d4c1f;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ae7741, #88541f);
+  color: #fff6df;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(127, 78, 32, 0.12);
+}
+
+.todoSplitButton:disabled,
+.todoAddButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.todoCandidateHeader,
+.todoSavedHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.todoCandidateHeader span,
+.todoSavedHeader span {
+  color: #9b7748;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.todoCandidateList,
+.todoSavedList {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1.5px solid rgba(216, 192, 136, 0.9);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 252, 244, 0.92);
+}
+
+.todoCandidateRow,
+.todoSavedList li {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(222, 194, 142, 0.72);
+}
+
+.todoCandidateRow:last-child,
+.todoSavedList li:last-child {
+  border-bottom: 0;
+}
+
+.todoCandidateRow {
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+}
+
+.todoSavedList li {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.todoCandidateEmpty {
+  padding: 26px 16px;
+  color: #9d7c52;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.todoMiniIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: #f3e2bf;
+  box-shadow: inset 0 0 0 1.5px rgba(213, 177, 104, 0.45);
+}
+
+.todoMiniIcon.is-work {
+  background: linear-gradient(180deg, #f8ddc0, #f5c89c);
+}
+
+.todoMiniIcon.is-life {
+  background: linear-gradient(180deg, #e1e8be, #d0db9b);
+}
+
+.todoMiniIcon.is-health {
+  background: linear-gradient(180deg, #d9e8fb, #b7cef5);
+}
+
+.todoCandidateText,
+.todoSavedLead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.todoCandidateText b,
+.todoSavedLead b {
+  color: #462b18;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.todoTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.todoTag.tone-work {
+  background: #f7e6c8;
+  color: #9f6c2d;
+}
+
+.todoTag.tone-life {
+  background: #edf0d4;
+  color: #84924f;
+}
+
+.todoTag.tone-health {
+  background: #dfe9fb;
+  color: #5077b9;
+}
+
+.todoTag.tone-default {
+  background: #f1eadc;
+  color: #8a7258;
+}
+
+.todoAddButton {
+  min-width: 82px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1.5px solid #d7ae63;
+  border-radius: 999px;
+  background: #fff8eb;
+  color: #9b6322;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.todoCheckBadge {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  flex: 0 0 22px;
+  border: 1.5px solid #bf8832;
+  background: linear-gradient(180deg, #ddb15c, #c99037);
+  position: relative;
+}
+
+.todoCheckBadge::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  width: 6px;
+  height: 10px;
+  border-right: 2px solid #fff8eb;
+  border-bottom: 2px solid #fff8eb;
+  transform: rotate(40deg);
+}
+
+.todoSavedLead {
+  overflow: hidden;
+}
+
+.todoSavedList li.isDone {
+  opacity: 0.72;
+}
+
+.todoMenuButton {
+  border: 0;
+  background: transparent;
+  color: #9f6e30;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.todoFooterNote {
+  padding: 14px 18px;
+}
+
+.todoFooterNote p {
+  margin: 0;
+  color: #856238;
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+  .todoReplica {
+    width: min(100%, calc(100vw - 14px));
+  }
+
+  .todoOuterFrame {
+    padding: 8px;
+    gap: 10px;
+    border-radius: 14px;
+    outline: 2px solid #d4a840;
+    outline-offset: -8px;
+  }
+
+  .todoHeroCard,
+  .todoPanel,
+  .todoFooterNote {
+    border-radius: 12px;
+  }
+
+  .todoHeroCard,
+  .todoSplitLayout,
+  .todoCandidateHeader,
+  .todoSavedHeader,
+  .todoMemoFooter,
+  .todoSavedList li,
+  .todoCandidateRow {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .todoHeroCard {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .todoDateChip {
+    width: fit-content;
+  }
+
+  .todoUsageChip {
+    margin-top: 12px;
+  }
+
+  .todoHeroCard h3 {
+    font-size: 1.34rem;
+  }
+
+  .todoHeroLead,
+  .todoFooterNote p,
+  .todoMemoFooter p {
+    font-size: 0.74rem;
+  }
+
+  .todoMemoField textarea {
+    min-height: 122px;
+  }
+
+  .todoCandidateRow,
+  .todoSavedList li {
+    min-height: auto;
+    padding: 12px;
+  }
+
+  .todoAddButton,
+  .todoSplitButton {
+    width: 100%;
+  }
+
+  .todoCandidateText,
+  .todoSavedLead {
+    flex-wrap: wrap;
+  }
+}

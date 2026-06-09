@@ -8,17 +8,22 @@ import {
   toUserMessage,
 } from "./auth/api.js";
 import { LoginModal } from "./auth/LoginModal.js";
-import { useAuthStore } from "./auth/store.js";
+import { useAuthStore, type AuthState } from "./auth/store.js";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
+import {
+  TodoCreation,
+  type TodoCommitResult,
+} from "./components/createTodo/todoCreation.js";
+import { PlannerChat } from "./components/plannerChat/plannerChat.js";
 
-const GODOT_EXPORT_PATH = "/godot/index.html";
-const AI_API_BASE = "http://127.0.0.1:8010";
+const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
+const DEMO_USER_ID = "00000000-0000-0000-0000-000000000001";
 
 type FeatureId = "character" | "todo" | "planner";
 type TodoStatus = "candidate" | "saved" | "done";
-type PlannerMessageRole = "chief" | "user";
 
 type Feature = {
   id: FeatureId;
@@ -51,21 +56,6 @@ type Quest = {
   todoTitle: string;
   questText: string;
   done: boolean;
-};
-
-type PlannerMessage = {
-  id: string;
-  role: PlannerMessageRole;
-  text: string;
-};
-
-type PlannerDay = {
-  date: string;
-  tasks: {
-    title: string;
-    detail?: string;
-    tags?: string[];
-  }[];
 };
 
 type SignupStep = "form" | "code" | "verified";
@@ -148,21 +138,38 @@ function buildQuest(todo: TodoItem, resident: Resident): Quest {
   };
 }
 
-async function postJson<T>(path: string, payload: unknown): Promise<T> {
-  const response = await fetch(`${AI_API_BASE}${path}`, {
+function buildApiUrl(path: string) {
+  return `${API_BASE}${path}`;
+}
+
+async function postApiJson<T>(path: string, payload: unknown): Promise<T> {
+  const response = await fetch(buildApiUrl(path), {
     method: "POST",
     headers: { "content-type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 
+  const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.error || "AI API 요청에 실패했어요.");
+    const record = body as { error?: string | { message?: string } };
+    throw new Error(
+      typeof record.error === "string"
+        ? record.error
+        : record.error?.message || "API 요청에 실패했어요.",
+    );
   }
 
-  return response.json() as Promise<T>;
+  if (
+    body &&
+    typeof body === "object" &&
+    "status" in body &&
+    "result" in body
+  ) {
+    return (body as { result: T }).result;
+  }
+  return body as T;
 }
-
 function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
@@ -176,8 +183,6 @@ function App() {
   const [apples, setApples] = useState(12);
   const [cycles, setCycles] = useState(2);
   const [isFocusing, setIsFocusing] = useState(false);
-  const [todoPrompt, setTodoPrompt] = useState("");
-  const [todoCandidates, setTodoCandidates] = useState<TodoItem[]>([]);
   const [characterName, setCharacterName] = useState("몽글러");
   const [characterPersona, setCharacterPersona] = useState(
     "계획을 세우고 작은 실천을 응원하는 마을 주민",
@@ -190,15 +195,6 @@ function App() {
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
   const [_generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
-  const [plannerInput, setPlannerInput] = useState("");
-  const [plannerMessages, setPlannerMessages] = useState<PlannerMessage[]>([
-    {
-      id: createId("msg"),
-      role: "chief",
-      text: "목표를 알려주면 기간, 우선순위, 반복 여부를 물어보고 플랜으로 정리할게.",
-    },
-  ]);
-  const [plannerDays, setPlannerDays] = useState<PlannerDay[]>([]);
   const [notice, setNotice] = useState("오늘의 사과 보상은 20개까지 받을 수 있어요.");
   const [isBusy, setIsBusy] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
@@ -215,9 +211,9 @@ function App() {
   const [signupPrivacyAgreed, setSignupPrivacyAgreed] = useState(false);
   const [signupAiConsent, setSignupAiConsent] = useState(false);
   const [signupMessage, setSignupMessage] = useState("");
-  const authStatus = useAuthStore((state) => state.status);
-  const authUser = useAuthStore((state) => state.user);
-  const logoutSession = useAuthStore((state) => state.logout);
+  const authStatus = useAuthStore((state: AuthState) => state.status);
+  const authUser = useAuthStore((state: AuthState) => state.user);
+  const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
 
@@ -275,49 +271,27 @@ function App() {
     });
   }
 
-  function assignQuest(todo: TodoItem, residentPool = residents) {
-    const resident = residentPool[quests.length % residentPool.length] ?? INITIAL_RESIDENTS[0];
-    setQuests((current) => [buildQuest(todo, resident), ...current]);
-  }
-
-  async function splitTodoPrompt() {
-    const prompt = todoPrompt.trim();
-    if (!prompt) {
-      setNotice("먼저 오늘 할 일을 적어주세요.");
+  function handleCommittedTodos(result: TodoCommitResult) {
+    setTodos((current) => [...result.todos, ...current]);
+    if (result.questPreviews.length === 0) {
       return;
     }
 
-    setIsBusy(true);
-    try {
-      const result = await postJson<{
-        todos: { title: string; due_date: string; tags?: string[] }[];
-      }>("/api/todos/split", {
-        user_id: "demo-user",
-        prompt,
-      });
-      const candidates = result.todos.map((todo) => ({
-        id: createId("todo"),
-        title: todo.title,
-        dueDate: todo.due_date,
-        tags: todo.tags ?? [],
-        status: "candidate" as const,
-      }));
-      setTodoCandidates(candidates);
-      setNotice("AI가 TODO 후보를 나눴어요. 저장하면 퀘스트가 배정됩니다.");
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "원인 미상";
-      setNotice(`TODO 분리 실패: ${message}`);
-    } finally {
-      setIsBusy(false);
-    }
-  }
-
-  function saveTodoCandidate(candidate: TodoItem) {
-    const savedTodo = { ...candidate, status: "saved" as const };
-    setTodos((current) => [savedTodo, ...current]);
-    setTodoCandidates((current) => current.filter((todo) => todo.id !== candidate.id));
-    assignQuest(savedTodo);
-    setNotice(`${candidate.title} TODO가 저장되고 퀘스트가 생성됐어요.`);
+    const fallbackResident = residents[quests.length % residents.length] ?? INITIAL_RESIDENTS[0];
+    const nextQuests = result.questPreviews.map((preview) => {
+      const linkedResident =
+        residents.find((resident) => resident.id === preview.characterId) ?? fallbackResident;
+      return {
+        id: preview.questId,
+        ownerId: linkedResident.id,
+        ownerName: linkedResident.name,
+        todoId: preview.todoId,
+        todoTitle: preview.todoTitle,
+        questText: preview.content,
+        done: false,
+      };
+    });
+    setQuests((current) => [...nextQuests, ...current]);
   }
 
   async function createCharacter() {
@@ -330,17 +304,17 @@ function App() {
     setIsBusy(true);
     try {
       const keywords = selectedKeywordCategories.slice(0, 3);
-      const result = await postJson<{
+      const result = await postApiJson<{
         character_id: string;
         name: string;
         personality: string;
         speech_style: string;
         image_url?: string;
-      }>("/api/characters/create", {
+      }>("/api/v1/character", {
         user_id: "demo-user",
         name,
         persona,
-        source_image_data_url: sourceImagePreview,
+        source_image_url: sourceImagePreview || null,
         personality_keywords: keywords,
       });
       if (!result.image_url) {
@@ -353,7 +327,7 @@ function App() {
         speechStyle: result.speech_style,
         avatarUrl: result.image_url.startsWith("http")
           ? result.image_url
-          : `${AI_API_BASE}${result.image_url}`,
+          : buildApiUrl(result.image_url),
       };
       setResidents((current) => [...current, resident].slice(0, 10));
       setGeneratedCharacterPreview(resident.avatarUrl || "");
@@ -387,103 +361,6 @@ function App() {
     reader.readAsDataURL(file);
   }
 
-  async function sendPlannerMessage() {
-    const message = plannerInput.trim();
-    if (!message) {
-      setNotice("플래너에게 목표나 고민을 한 문장으로 알려주세요.");
-      return;
-    }
-
-    const nextMessages = [
-      ...plannerMessages,
-      { id: createId("msg"), role: "user" as const, text: message },
-    ];
-    setPlannerMessages(nextMessages);
-    setPlannerInput("");
-    setIsBusy(true);
-
-    try {
-      const result = await postJson<{
-        kind: "question" | "plan";
-        text?: string;
-        summary_text?: string;
-        days?: PlannerDay[];
-      }>("/api/planner/chat", {
-        user_id: "demo-user",
-        message,
-        history: nextMessages,
-      });
-      if (result.kind === "plan") {
-        setPlannerDays(result.days ?? []);
-        setPlannerMessages((current) => [
-          ...current,
-          {
-            id: createId("msg"),
-            role: "chief",
-            text: result.summary_text || "실행 가능한 플랜으로 정리했어요.",
-          },
-        ]);
-        setNotice("플래너가 일자별 실행안을 만들었어요.");
-      } else {
-        setPlannerMessages((current) => [
-          ...current,
-          {
-            id: createId("msg"),
-            role: "chief",
-            text: result.text || "조금 더 구체적으로 알려주세요.",
-          },
-        ]);
-      }
-    } catch {
-      const fallbackDays = [
-        {
-          date: "2026-05-26",
-          tasks: [
-            {
-              title: `${message.slice(0, 24)} 시작점 정리`,
-              detail: "25분 안에 끝낼 수 있는 첫 작업으로 쪼개요.",
-              tags: ["계획"],
-            },
-          ],
-        },
-      ];
-      setPlannerDays(fallbackDays);
-      setPlannerMessages((current) => [
-        ...current,
-        {
-          id: createId("msg"),
-          role: "chief",
-          text: "AI API가 꺼져 있어 로컬 플랜으로 먼저 정리했어요.",
-        },
-      ]);
-      setNotice("플래너 결과를 TODO로 저장할 수 있어요.");
-    } finally {
-      setIsBusy(false);
-    }
-  }
-
-  function savePlannerTasks() {
-    const nextTodos = plannerDays.flatMap((day) =>
-      day.tasks.map((task) => ({
-        id: createId("todo"),
-        title: task.title,
-        dueDate: day.date,
-        tags: task.tags ?? [],
-        status: "saved" as const,
-      })),
-    );
-
-    if (nextTodos.length === 0) {
-      setNotice("저장할 플랜이 아직 없어요.");
-      return;
-    }
-
-    setTodos((current) => [...nextTodos, ...current]);
-    nextTodos.forEach((todo) => {
-      assignQuest(todo);
-    });
-    setNotice(`${nextTodos.length}개의 플랜 TODO를 퀘스트로 배정했어요.`);
-  }
 
   function toggleQuest(questId: string) {
     const quest = quests.find((item) => item.id === questId);
@@ -744,12 +621,22 @@ function App() {
       {active ? (
         <div className="modalBackdrop" role="presentation">
           <section
-            className={`featureModal${activeFeature === "character" ? " characterModal" : ""}`}
+            className={`featureModal${activeFeature === "character" ? " characterModal" : ""}${activeFeature === "planner" ? " plannerModalShell" : ""}${activeFeature === "todo" ? " todoModalShell" : ""}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="feature-title"
           >
-            {activeFeature !== "character" ? (
+            {activeFeature === "planner" || activeFeature === "todo" ? (
+              <button
+                type="button"
+                className={`closeButton ${activeFeature === "planner" ? "plannerCloseButton" : "todoCloseButton"}`}
+                onClick={() => setActiveFeature(null)}
+                aria-label="닫기"
+              >
+                ×
+              </button>
+            ) : null}
+            {activeFeature !== "character" && activeFeature !== "planner" && activeFeature !== "todo" ? (
               <>
                 <button
                   type="button"
@@ -787,109 +674,22 @@ function App() {
             ) : null}
 
             {activeFeature === "todo" ? (
-              <div className="todoSheet">
-                <label>
-                  자연어 TODO
-                  <textarea
-                    value={todoPrompt}
-                    maxLength={200}
-                    onChange={(event) => setTodoPrompt(event.target.value)}
-                    placeholder="예: 회의록 정리하고 장보기, 운동 15분 하기"
-                  />
-                </label>
-                <button
-                  type="button"
-                  className="primaryButton"
-                  onClick={splitTodoPrompt}
-                  disabled={isBusy}
-                >
-                  {isBusy ? "분리 중..." : "TODO 후보 만들기"}
-                </button>
-                {todoCandidates.length > 0 ? (
-                  <div className="candidateBlock">
-                    <b>저장할 TODO 후보</b>
-                    <ul>
-                      {todoCandidates.map((todo) => (
-                        <li key={todo.id}>
-                          <span>□</span>
-                          <div>
-                            <b>{todo.title}</b>
-                            <small>{todo.dueDate}</small>
-                          </div>
-                          <button type="button" onClick={() => saveTodoCandidate(todo)}>
-                            저장
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                <div className="candidateBlock">
-                  <b>저장된 TODO</b>
-                  <ul>
-                    {savedTodos.map((todo) => (
-                      <li key={todo.id} className={todo.status === "done" ? "isDone" : ""}>
-                        <span>{todo.status === "done" ? "✓" : "□"}</span>
-                        <div>
-                          <b>{todo.title}</b>
-                          <small>{todo.tags.join(", ") || "태그 없음"}</small>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+              <TodoCreation
+                apiBase={API_BASE}
+                userId={DEMO_USER_ID}
+                savedTodos={savedTodos}
+                onNotice={setNotice}
+                onTodosSaved={handleCommittedTodos}
+              />
             ) : null}
 
             {activeFeature === "planner" ? (
-              <div className="plannerSheet">
-                <div className="chatStack">
-                  {plannerMessages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`chatBubble ${message.role === "user" ? "fromUser" : "fromChief"}`}
-                    >
-                      <p>{message.text}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="plannerComposer">
-                  <input
-                    value={plannerInput}
-                    onChange={(event) => setPlannerInput(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        sendPlannerMessage();
-                      }
-                    }}
-                    placeholder="계획하고 싶은 일을 입력하세요."
-                  />
-                  <button type="button" onClick={sendPlannerMessage} disabled={isBusy}>
-                    ENTER
-                  </button>
-                </div>
-                {plannerDays.length > 0 ? (
-                  <div className="planResult">
-                    <b>플랜 결과</b>
-                    {plannerDays.map((day) => (
-                      <section key={day.date}>
-                        <strong>{day.date}</strong>
-                        <ul>
-                          {day.tasks.map((task) => (
-                            <li key={task.title}>
-                              <b>{task.title}</b>
-                              <span>{task.detail || "실행 가능한 작은 작업"}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </section>
-                    ))}
-                    <button type="button" onClick={savePlannerTasks}>
-                      플랜을 TODO로 저장
-                    </button>
-                  </div>
-                ) : null}
-              </div>
+              <PlannerChat
+                apiBase={API_BASE}
+                userId={DEMO_USER_ID}
+                onNotice={setNotice}
+                onTodosSaved={handleCommittedTodos}
+              />
             ) : null}
           </section>
         </div>

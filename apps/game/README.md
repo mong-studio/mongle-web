@@ -45,7 +45,7 @@ npm run web:dev
 
 AI TODO integration:
 
-AI features are provided by the separate `mongle-ai` service. The TODO input's `AI 정리` button calls `VITE_AI_API_BASE` (default `http://127.0.0.1:8010`), e.g. `/api/todos/split`.
+AI features are provided through the Django backend, which calls the separate `mongle-ai` service. The TODO UI calls `VITE_API_BASE` (default same-origin), e.g. `/api/v1/todos/generate/`, `/api/v1/todos/chat/`, and `/api/v1/todos/commit/`.
 If that service is not running, the React app keeps working and uses the local fallback splitter.
 
 Environment values for the web shell can be copied from `.env.example`:
@@ -55,7 +55,7 @@ cp .env.example .env.local
 ```
 
 - `VITE_GODOT_EXPORT_PATH` controls the iframe URL for the Godot Web export.
-- `VITE_AI_API_BASE` controls the local AI API base URL.
+- `VITE_API_BASE` controls the Django API base URL.
 
 Export the Godot screen for the iframe:
 

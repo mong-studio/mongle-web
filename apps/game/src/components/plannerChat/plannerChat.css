@@ -1,0 +1,462 @@
+.plannerReplica {
+  width: min(780px, calc(100vw - 40px));
+  margin: 0 auto;
+  color: #5a371f;
+  font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+.plannerOuterFrame {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 7px solid #8a6018;
+  outline: 3px solid #d4a840;
+  outline-offset: -11px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #edd8ab 0%, #e3c07b 100%);
+  box-shadow:
+    0 24px 64px rgba(50, 30, 5, 0.32),
+    0 6px 16px rgba(50, 30, 5, 0.18),
+    inset 0 0 0 2px rgba(255, 235, 150, 0.2);
+}
+
+.plannerHeroCard,
+.plannerChatCard,
+.plannerLedgerCard {
+  position: relative;
+  border: 2px solid #e3b96c;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.94), rgba(255, 248, 228, 0.92) 54%, rgba(252, 241, 210, 0.98)),
+    #fff8ea;
+  box-shadow:
+    inset 0 0 18px rgba(219, 171, 84, 0.1),
+    0 4px 12px rgba(114, 76, 32, 0.05);
+}
+
+.plannerHeroCard {
+  min-height: 132px;
+  padding: 20px 84px 18px 24px;
+}
+
+.plannerHeroCopy {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.plannerHeroKicker {
+  margin: 0 0 8px;
+  color: #a77733;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+.plannerHeroCard h3 {
+  margin: 0;
+  color: #52311c;
+  font-size: clamp(1.4rem, 2vw, 1.95rem);
+  line-height: 1.26;
+  text-align: center;
+  word-break: keep-all;
+  font-weight: 700;
+}
+
+.plannerHeroLead {
+  margin: 12px 0 0;
+  color: #6a472d;
+  font-size: 0.76rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.bookmarkFlag {
+  position: absolute;
+  top: 0;
+  right: 44px;
+  width: 30px;
+  height: 90px;
+  background: linear-gradient(180deg, #d63c22, #b72217);
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 58%, 0 75%);
+  box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.18);
+}
+
+.bookmarkFlag::after {
+  display: none;
+}
+
+.plannerChatCard {
+  padding: 16px 18px 14px;
+}
+
+.plannerSectionHeading {
+  margin-bottom: 10px;
+  color: #7a5028;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.plannerConversation {
+  display: grid;
+  gap: 12px;
+  min-height: 212px;
+  max-height: 250px;
+  padding: 2px 0 8px;
+  overflow: auto;
+}
+
+.plannerMessageRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.plannerMessageRow.isUser {
+  justify-content: flex-end;
+}
+
+.plannerChiefAvatarWrap {
+  flex: 0 0 54px;
+}
+
+.plannerChiefAvatar {
+  display: block;
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  border: 2px solid #e2b76b;
+  border-radius: 999px;
+  background: #fff6df;
+  box-shadow: 0 4px 12px rgba(143, 100, 53, 0.1);
+}
+
+.plannerSpeech {
+  position: relative;
+  max-width: 70%;
+  padding: 11px 14px;
+  border: 1.5px solid rgba(216, 192, 136, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 3px 10px rgba(150, 104, 48, 0.06);
+}
+
+.plannerSpeech p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.plannerSpeech.fromChief {
+  background: linear-gradient(180deg, #fffef9, #fff8ea);
+}
+
+.plannerSpeech.fromChief::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  bottom: 16px;
+  width: 12px;
+  height: 14px;
+  border-left: 1.5px solid rgba(216, 192, 136, 0.92);
+  border-bottom: 1.5px solid rgba(216, 192, 136, 0.92);
+  border-bottom-left-radius: 10px;
+  background: #fffdf5;
+  transform: skewX(-26deg);
+}
+
+.plannerSpeech.fromUser {
+  background: linear-gradient(180deg, #fff6da, #ffefbe);
+}
+
+.plannerSpeech.fromUser::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  bottom: 16px;
+  width: 12px;
+  height: 14px;
+  border-right: 1.5px solid rgba(216, 192, 136, 0.92);
+  border-bottom: 1.5px solid rgba(216, 192, 136, 0.92);
+  border-bottom-right-radius: 10px;
+  background: #fff0c3;
+  transform: skewX(26deg);
+}
+
+.plannerReplicaComposer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 108px;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.plannerReplicaComposer input {
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1.5px solid #d8c088;
+  border-radius: 14px;
+  background: rgba(255, 255, 253, 0.95);
+  color: #5e3b22;
+  font-size: 0.82rem;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 244, 220, 0.42),
+    0 3px 10px rgba(148, 102, 43, 0.05);
+}
+
+.plannerReplicaComposer input::placeholder {
+  color: #a17a55;
+}
+
+.plannerSendButton,
+.plannerPrimaryAction,
+.plannerSecondaryAction {
+  min-height: 46px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.plannerSendButton,
+.plannerPrimaryAction {
+  border: 2px solid #7d4c1f;
+  background: linear-gradient(180deg, #ae7741, #88541f);
+  color: #fff6df;
+  box-shadow: 0 4px 10px rgba(127, 78, 32, 0.12);
+}
+
+.plannerSecondaryAction {
+  border: 1.5px solid #d6b367;
+  background: linear-gradient(180deg, #fff8e5, #fff0ca);
+  color: #8a5b24;
+}
+
+.plannerSendButton:disabled,
+.plannerPrimaryAction:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.plannerLedgerCard {
+  padding: 16px 18px 14px;
+}
+
+.plannerLedgerMeta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1.5px solid rgba(216, 192, 136, 0.9);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 249, 232, 0.96), rgba(255, 241, 204, 0.96));
+}
+
+.plannerLedgerMeta span {
+  color: #7e552d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.plannerLedgerDays {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.plannerLedgerDayCard {
+  min-height: 132px;
+  padding: 12px 12px 10px;
+  border: 1.5px solid rgba(216, 192, 136, 0.92);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 254, 249, 0.98), rgba(255, 245, 220, 0.96));
+}
+
+.plannerLedgerDayCard strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #6b4424;
+  font-size: 0.74rem;
+  text-align: center;
+}
+
+.plannerLedgerDayCard ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plannerLedgerDayCard li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #57341c;
+}
+
+.plannerLedgerDayCard li b {
+  font-size: 0.74rem;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.plannerTodoDot {
+  flex: 0 0 16px;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #d9ab54;
+  border-radius: 999px;
+  background: #fffef9;
+}
+
+.plannerMoreTasks {
+  margin: 10px 0 0;
+  color: #ab7d49;
+  font-size: 0.66rem;
+  text-align: right;
+}
+
+.plannerLedgerEmpty {
+  min-height: 110px;
+  margin-top: 12px;
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed rgba(168, 136, 64, 0.86);
+  border-radius: 14px;
+  background: rgba(255, 250, 238, 0.78);
+  color: #8f673b;
+  text-align: center;
+}
+
+.plannerLedgerEmpty p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.plannerLedgerFooter {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.plannerLedgerFooter p {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(216, 192, 136, 0.9);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 250, 234, 0.96), rgba(255, 244, 211, 0.96));
+  color: #866033;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.plannerLedgerActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .plannerReplica {
+    width: min(100%, calc(100vw - 24px));
+  }
+
+  .plannerOuterFrame {
+    padding: 10px;
+    outline-offset: -9px;
+  }
+
+  .plannerHeroCard {
+    padding: 18px 64px 16px 18px;
+  }
+
+  .plannerLedgerMeta,
+  .plannerLedgerDays {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .plannerReplica {
+    width: min(100%, calc(100vw - 14px));
+  }
+
+  .plannerOuterFrame {
+    gap: 10px;
+    padding: 8px;
+    border-radius: 14px;
+    outline: 2px solid #d4a840;
+    outline-offset: -8px;
+  }
+
+  .plannerHeroCard,
+  .plannerChatCard,
+  .plannerLedgerCard {
+    border-radius: 12px;
+  }
+
+  .plannerHeroCard {
+    min-height: auto;
+    padding: 24px 18px 22px;
+  }
+
+  .bookmarkFlag {
+    display: none;
+  }
+
+  .plannerHeroKicker {
+    font-size: 0.82rem;
+  }
+
+  .plannerHeroCard h3 {
+    font-size: 1.34rem;
+  }
+
+  .plannerHeroLead {
+    font-size: 0.74rem;
+  }
+
+  .plannerChatCard,
+  .plannerLedgerCard {
+    padding: 18px;
+  }
+
+  .plannerConversation {
+    min-height: 180px;
+    max-height: 220px;
+  }
+
+  .plannerChiefAvatarWrap {
+    flex-basis: 46px;
+  }
+
+  .plannerChiefAvatar {
+    width: 46px;
+    height: 46px;
+  }
+
+  .plannerSpeech {
+    max-width: calc(100% - 24px);
+    padding: 10px 12px;
+  }
+
+  .plannerSpeech p {
+    font-size: 0.76rem;
+  }
+
+  .plannerReplicaComposer,
+  .plannerLedgerActions {
+    grid-template-columns: 1fr;
+  }
+
+  .plannerReplicaComposer input,
+  .plannerSendButton,
+  .plannerPrimaryAction,
+  .plannerSecondaryAction {
+    min-height: 44px;
+  }
+}

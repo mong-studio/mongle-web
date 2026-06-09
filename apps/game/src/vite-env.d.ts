@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_GODOT_EXPORT_PATH?: string;
-  readonly VITE_AI_API_BASE?: string;
+  readonly VITE_API_BASE?: string;
 }
 
 interface ImportMeta {
