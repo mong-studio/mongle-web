@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
+import { Tag } from "../components/Tag/index.js";
 import type { CalHook } from "./CalendarCore.js";
-import { Check, Tag } from "./CalendarCore.js";
+import { Check } from "./CalendarCore.js";
 import { WD } from "./calEngine.js";
 
 const todayListVariants = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };

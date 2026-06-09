@@ -2,8 +2,9 @@ import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
+import { Tag } from "../components/Tag/index.js";
 import type { CalHook } from "./CalendarCore.js";
-import { Check, Tag } from "./CalendarCore.js";
+import { Check } from "./CalendarCore.js";
 import { serial, serialToMD, toYMDStr, WD, ymdStrToSerial } from "./calEngine.js";
 import { TagEditorForm } from "./TagEditorForm.js";
 import type { TagItem } from "./types.js";
@@ -50,6 +51,7 @@ export function DayModal({
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [editingTagId, setEditingTagId] = useState<number | null>(null);
   const [editTagName, setEditTagName] = useState("");
   const [editTagColor, setEditTagColor] = useState("#8478C0");
@@ -67,6 +69,7 @@ export function DayModal({
     setNewTagName("");
     setNewTagColor("#8478C0");
     setEditingTagId(null);
+    setSaveError("");
     const s = toYMDStr(ymd.y, ymd.m, ymd.d);
     setStart(s);
     setEnd(s);
@@ -87,6 +90,7 @@ export function DayModal({
   const submit = async () => {
     if (!title.trim() || saving) return;
     setSaving(true);
+    setSaveError("");
     try {
       const tagId = isCreatingTag ? null : selectedTagId;
       const newTag = isCreatingTag
@@ -97,6 +101,8 @@ export function DayModal({
       setIsCreatingTag(tags.length === 0);
       setNewTagName("");
       inputRef.current?.focus();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "일정 추가에 실패했어요.");
     } finally {
       setSaving(false);
     }
@@ -764,6 +770,21 @@ export function DayModal({
                   </span>
                 )}
               </div>
+              {saveError && (
+                <p
+                  style={{
+                    margin: "0 0 4px",
+                    padding: "9px 12px",
+                    borderRadius: "var(--r-sm)",
+                    background: "#fee2e2",
+                    color: "#b91c1c",
+                    fontFamily: "var(--font-body)",
+                    fontSize: 13,
+                  }}
+                >
+                  {saveError}
+                </p>
+              )}
               <div style={{ display: "flex", gap: 9 }}>
                 <button
                   type="button"
