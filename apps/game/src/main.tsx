@@ -8,10 +8,10 @@ import {
   toUserMessage,
 } from "./auth/api.js";
 import { LoginModal } from "./auth/LoginModal.js";
+import { MyPageWrapper } from "./auth/MyPageWrapper.js";
 import { type AuthState, useAuthStore } from "./auth/store.js";
-import { CharacterModal } from "./components/createCharacter/createCharacter.js";
+import { CharacterModal } from "./character/createCharacter.js";
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
-import { MyPageWrapper } from "./components/myPage/MyPageWrapper.js";
 import { PlannerChat } from "./components/plannerChat/plannerChat.js";
 
 const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
