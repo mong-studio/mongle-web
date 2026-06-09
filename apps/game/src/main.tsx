@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
+import { MyPageWrapper } from "./components/myPage/MyPageWrapper.js";
 
 const GODOT_EXPORT_PATH = "/godot/index.html";
 const AI_API_BASE = import.meta.env.VITE_AI_API_BASE ?? "http://127.0.0.1:8010";
@@ -231,7 +232,17 @@ function App() {
   const [signupPrivacyAgreed, setSignupPrivacyAgreed] = useState(false);
   const [signupAiConsent, setSignupAiConsent] = useState(false);
   const [signupMessage, setSignupMessage] = useState("");
-  const [signedUpUserName, setSignedUpUserName] = useState("");
+  const authStatus = useAuthStore((state) => state.status);
+  const authUser = useAuthStore((state) => state.user);
+  const logoutSession = useAuthStore((state) => state.logout);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [verificationToken, setVerificationToken] = useState("");
+  const [showMyPage, setShowMyPage] = useState(false);
+
+  useEffect(() => {
+    void useAuthStore.getState().restoreSession();
+  }, []);
+
   const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
@@ -646,9 +657,22 @@ function App() {
           </button>
         </nav>
         <h1>몽글마을</h1>
-        <button type="button" className="loginButton" onClick={() => setSignupOpen(true)}>
-          {signedUpUserName || "GUEST"}
-        </button>
+        <div className="navUserArea">
+          {authStatus === "authenticated" && authUser ? (
+            <>
+              <button type="button" className="loginButton" onClick={() => setShowMyPage(true)}>
+                {authUser.userName}님 · 마이페이지
+              </button>
+              <button type="button" className="loginButton" onClick={() => void logoutSession()}>
+                로그아웃
+              </button>
+            </>
+          ) : authStatus === "anonymous" ? (
+            <button type="button" className="loginButton" onClick={() => setLoginOpen(true)}>
+              로그인 / 회원가입
+            </button>
+          ) : null}
+        </div>
       </header>
 
       <div className="leftRail">
@@ -1044,6 +1068,23 @@ function App() {
           </section>
         </div>
       ) : null}
+
+      {showMyPage ? (
+        <MyPageWrapper
+          residents={residents}
+          onClose={() => setShowMyPage(false)}
+          onNotice={setNotice}
+        />
+      ) : null}
+
+      <LoginModal
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSwitchToSignup={() => {
+          setLoginOpen(false);
+          setSignupOpen(true);
+        }}
+      />
     </main>
   );
 }

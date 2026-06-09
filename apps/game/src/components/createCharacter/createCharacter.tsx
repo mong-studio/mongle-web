@@ -93,7 +93,7 @@ export function CharacterModal({
             찾아왔어요!!
           </h2>
           <p className="bookIntro">
-            어느 맑은 좋은 날, 몽글 마을에
+            날씨가 좋은 어느 날, 몽글 마을에
             <br />
             반가운 친구가 도착했답니다!!
           </p>
