@@ -107,7 +107,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
           const me = await authApi.fetchMe();
           set({ user: { userId: me.user_id, email: me.email, userName: me.user_name } });
         } catch {
-          // access token이 만료된 경우 interceptor가 refresh를 시도하므로 여기선 무시.
+          // interceptor가 refresh를 시도했음에도 실패하면 세션 만료로 처리한다.
+          clearSession();
         }
         return;
       }
