@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import type { CalHook } from "./CalendarCore.js";
@@ -18,6 +18,8 @@ type CalendarWindowProps = {
     startStr: string,
     endStr: string,
   ) => Promise<void>;
+  onDeleteTag: (id: number) => Promise<void>;
+  onEditTag: (id: number, content: string, color: string) => Promise<void>;
   isRefreshing: boolean;
   tags: TagItem[];
 };
@@ -27,6 +29,8 @@ export function CalendarWindow({
   onClose,
   onToggle,
   onAddEvent,
+  onDeleteTag,
+  onEditTag,
   isRefreshing,
   tags,
 }: CalendarWindowProps) {
@@ -108,6 +112,8 @@ export function CalendarWindow({
           >
             <button
               type="button"
+              className="calBtn-nav"
+              aria-label="이전 달"
               onClick={() => {
                 setDir(-1);
                 cal.step(-1);
@@ -136,6 +142,8 @@ export function CalendarWindow({
             </span>
             <button
               type="button"
+              className="calBtn-nav"
+              aria-label="다음 달"
               onClick={() => {
                 setDir(1);
                 cal.step(1);
@@ -155,6 +163,7 @@ export function CalendarWindow({
           <div style={{ flex: 1 }} />
           <button
             type="button"
+            className="calBtn-ghost"
             onClick={cal.toToday}
             style={{
               display: "inline-flex",
@@ -176,6 +185,8 @@ export function CalendarWindow({
           </button>
           <button
             type="button"
+            className="calBtn-ghost"
+            aria-label="닫기"
             onClick={onClose}
             style={{
               width: 44,
@@ -191,7 +202,9 @@ export function CalendarWindow({
               boxShadow: "0 2px 0 var(--line-soft)",
             }}
           >
-            {iconPath("M3 3l8 8M11 3l-8 8")}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+            </svg>
           </button>
         </div>
 
@@ -227,6 +240,8 @@ export function CalendarWindow({
           onToggle={onToggle}
           tags={tags}
           onAddEvent={onAddEvent}
+          onDeleteTag={onDeleteTag}
+          onEditTag={onEditTag}
         />
       </motion.div>
     </div>
