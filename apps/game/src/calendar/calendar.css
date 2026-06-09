@@ -178,7 +178,7 @@
     transform 0.12s;
 }
 .calBtn-nav:hover {
-  background: var(--accent-soft) !important;
+  background: var(--accent-soft);
   transform: scale(1.15);
 }
 .calBtn-nav:active {
@@ -247,7 +247,7 @@
 }
 .calBtn-dashed:hover {
   filter: brightness(0.96);
-  border-color: var(--accent) !important;
+  border-color: var(--accent);
   transform: translateY(-1px);
 }
 .calBtn-dashed:active {
@@ -322,5 +322,5 @@
 }
 .calBtn-submit:disabled {
   opacity: 0.55;
-  cursor: default !important;
+  cursor: default;
 }
