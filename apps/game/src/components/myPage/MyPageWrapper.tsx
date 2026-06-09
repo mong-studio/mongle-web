@@ -26,14 +26,8 @@ export function MyPageWrapper({ residents, onClose, onNotice }: Props) {
     apiClient
       .get<UserProfile>("/auth/me/")
       .then((res) => setUserProfile(res.data))
-      .catch(() => {});
-  }, []);
-
-  async function handleLogout() {
-    await logoutSession();
-    onClose();
-    onNotice("로그아웃됐어요.");
-  }
+      .catch(() => onNotice("프로필 정보를 불러오지 못했어요."));
+  }, [onNotice]);
 
   async function handleWithdraw() {
     try {
@@ -85,7 +79,6 @@ export function MyPageWrapper({ residents, onClose, onNotice }: Props) {
       joinDate={userProfile?.created_at ?? ""}
       residents={residents}
       onClose={onClose}
-      onLogout={handleLogout}
       onWithdraw={handleWithdraw}
       onUpdateProfile={handleUpdateProfile}
       onUpdatePassword={handleUpdatePassword}

@@ -32,7 +32,6 @@ export type TodoCommitResult = {
 
 type TodoCreationProps = {
   apiBase: string;
-  userId: string;
   savedTodos: TodoItem[];
   onNotice: (message: string) => void;
   onTodosSaved: (result: TodoCommitResult) => void;
@@ -49,13 +48,7 @@ function getTagTone(tag?: string) {
   return "default";
 }
 
-export function TodoCreation({
-  apiBase,
-  userId,
-  savedTodos,
-  onNotice,
-  onTodosSaved,
-}: TodoCreationProps) {
+export function TodoCreation({ apiBase, savedTodos, onNotice, onTodosSaved }: TodoCreationProps) {
   const [prompt, setPrompt] = useState("");
   const [candidates, setCandidates] = useState<TodoItem[]>([]);
   const [isBusy, setIsBusy] = useState(false);

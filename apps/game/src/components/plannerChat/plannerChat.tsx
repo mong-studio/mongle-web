@@ -1,9 +1,8 @@
 import { useState } from "react";
 import "./plannerChat.css";
-import type { TodoCommitResult, TodoItem } from "../createTodo/todoCreation.js";
+import type { TodoCommitResult } from "../createTodo/todoCreation.js";
 import {
   buildCommitPayload,
-  formatTodayIso,
   groupPlannerDays,
   type PlannerDay,
   postWebJson,
@@ -20,7 +19,6 @@ type PlannerMessage = {
 
 type PlannerChatProps = {
   apiBase: string;
-  userId: string;
   onNotice: (message: string) => void;
   onTodosSaved: (result: TodoCommitResult) => void;
 };
@@ -51,7 +49,7 @@ function buildPeriodLabel(days: PlannerDay[]) {
   return `${formatPlannerDate(days[0].date)} ~ ${formatPlannerDate(days[days.length - 1].date)}`;
 }
 
-export function PlannerChat({ apiBase, userId, onNotice, onTodosSaved }: PlannerChatProps) {
+export function PlannerChat({ apiBase, onNotice, onTodosSaved }: PlannerChatProps) {
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<PlannerMessage[]>([

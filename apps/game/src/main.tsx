@@ -7,6 +7,7 @@ import {
   signup as signupRequest,
   toUserMessage,
 } from "./auth/api.js";
+import { apiClient } from "./auth/client.js";
 import { LoginModal } from "./auth/LoginModal.js";
 import { type AuthState, useAuthStore } from "./auth/store.js";
 import { CalendarBulletinBoard } from "./calendar/CalendarBulletinBoard.js";
@@ -20,7 +21,6 @@ const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/inde
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
-const DEMO_USER_ID = "00000000-0000-0000-0000-000000000001";
 
 type FeatureId = "character" | "todo" | "planner";
 type TodoStatus = "candidate" | "saved" | "done";
@@ -140,30 +140,6 @@ function buildQuest(todo: TodoItem, resident: Resident): Quest {
 
 function buildApiUrl(path: string) {
   return `${API_BASE}${path}`;
-}
-
-async function postApiJson<T>(path: string, payload: unknown): Promise<T> {
-  const response = await fetch(buildApiUrl(path), {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const record = body as { error?: string | { message?: string } };
-    throw new Error(
-      typeof record.error === "string"
-        ? record.error
-        : record.error?.message || "API 요청에 실패했어요.",
-    );
-  }
-
-  if (body && typeof body === "object" && "status" in body && "result" in body) {
-    return (body as { result: T }).result;
-  }
-  return body as T;
 }
 function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
@@ -308,14 +284,13 @@ function App() {
     setIsBusy(true);
     try {
       const keywords = selectedKeywordCategories.slice(0, 3);
-      const result = await postApiJson<{
+      const { data: result } = await apiClient.post<{
         character_id: string;
         name: string;
         personality: string;
         speech_style: string;
         image_url?: string;
-      }>("/api/v1/character", {
-        user_id: "demo-user",
+      }>("/characters/generate/", {
         name,
         persona,
         source_image_url: sourceImagePreview || null,
@@ -707,7 +682,6 @@ function App() {
             {activeFeature === "todo" ? (
               <TodoCreation
                 apiBase={API_BASE}
-                userId={DEMO_USER_ID}
                 savedTodos={savedTodos}
                 onNotice={setNotice}
                 onTodosSaved={handleCommittedTodos}
@@ -717,7 +691,6 @@ function App() {
             {activeFeature === "planner" ? (
               <PlannerChat
                 apiBase={API_BASE}
-                userId={DEMO_USER_ID}
                 onNotice={setNotice}
                 onTodosSaved={handleCommittedTodos}
               />

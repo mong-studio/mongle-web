@@ -17,15 +17,13 @@ type Props = {
   tokenBalance: number;
   residents: Resident[];
   onClose: () => void;
-  onLogout: () => void;
   onWithdraw: () => void;
-  onUpdateProfile: (nickname: string, job: string, birth: string) => void;
-  onUpdatePassword: (current: string, next: string, confirm: string) => void;
+  onUpdateProfile: (nickname: string, job: string, birth: string) => Promise<void>;
+  onUpdatePassword: (current: string, next: string, confirm: string) => Promise<void>;
 };
 
 const JOB_OPTIONS = [
-  "회사원 (사무직)",
-  "회사원 (기술/생상/현장직 등)",
+  "회사원 ",
   "전문직 (의사, 변호사, 회계사 등)",
   "사업자/자영업자",
   "공무원/교직원",
@@ -64,7 +62,7 @@ export function MyPageModal({
   const [tab, setTab] = useState<TabId>("residents");
   const [nickname, setNickname] = useState(userName);
   const [job, setJob] = useState<string>(
-    (JOB_OPTIONS as readonly string[]).includes(userJob) ? userJob : "기타",
+    (JOB_OPTIONS as readonly string[]).includes(userJob) ? userJob : "무직/기타",
   );
   const [birth, setBirth] = useState(userBirth);
   const [currentPw, setCurrentPw] = useState("");
@@ -74,10 +72,10 @@ export function MyPageModal({
     null,
   );
 
-  function handleSave() {
-    onUpdateProfile(nickname, job, birth);
+  async function handleSave() {
+    await onUpdateProfile(nickname, job, birth);
     if (currentPw || newPw || confirmPw) {
-      onUpdatePassword(currentPw, newPw, confirmPw);
+      await onUpdatePassword(currentPw, newPw, confirmPw);
     }
   }
 
