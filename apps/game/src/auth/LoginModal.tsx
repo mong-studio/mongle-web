@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toUserMessage } from "./api.js";
-import { useAuthStore, type AuthState } from "./store.js";
+import { type AuthState, useAuthStore } from "./store.js";
 
 type LoginModalProps = {
   open: boolean;

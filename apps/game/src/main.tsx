@@ -8,12 +8,9 @@ import {
   toUserMessage,
 } from "./auth/api.js";
 import { LoginModal } from "./auth/LoginModal.js";
-import { useAuthStore, type AuthState } from "./auth/store.js";
+import { type AuthState, useAuthStore } from "./auth/store.js";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
-import {
-  TodoCreation,
-  type TodoCommitResult,
-} from "./components/createTodo/todoCreation.js";
+import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
 import { PlannerChat } from "./components/plannerChat/plannerChat.js";
 
 const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
@@ -160,12 +157,7 @@ async function postApiJson<T>(path: string, payload: unknown): Promise<T> {
     );
   }
 
-  if (
-    body &&
-    typeof body === "object" &&
-    "status" in body &&
-    "result" in body
-  ) {
+  if (body && typeof body === "object" && "status" in body && "result" in body) {
     return (body as { result: T }).result;
   }
   return body as T;
@@ -360,7 +352,6 @@ function App() {
     };
     reader.readAsDataURL(file);
   }
-
 
   function toggleQuest(questId: string) {
     const quest = quests.find((item) => item.id === questId);
@@ -636,7 +627,9 @@ function App() {
                 ×
               </button>
             ) : null}
-            {activeFeature !== "character" && activeFeature !== "planner" && activeFeature !== "todo" ? (
+            {activeFeature !== "character" &&
+            activeFeature !== "planner" &&
+            activeFeature !== "todo" ? (
               <>
                 <button
                   type="button"

@@ -1,16 +1,16 @@
 import { useState } from "react";
 import "./plannerChat.css";
+import type { TodoCommitResult, TodoItem } from "../createTodo/todoCreation.js";
 import {
   buildCommitPayload,
   formatTodayIso,
   groupPlannerDays,
-  postWebJson,
   type PlannerDay,
+  postWebJson,
   type TodoChatFollowUpResult,
   type TodoCommitResponse,
   type TodoGenerateResult,
 } from "../todoApi.js";
-import type { TodoCommitResult, TodoItem } from "../createTodo/todoCreation.js";
 
 type PlannerMessage = {
   id: string;
@@ -89,18 +89,23 @@ export function PlannerChat({ apiBase, userId, onNotice, onTodosSaved }: Planner
       return;
     }
 
-    const nextMessages = [...messages, { id: createId("msg"), role: "user" as const, text: message }];
+    const nextMessages = [
+      ...messages,
+      { id: createId("msg"), role: "user" as const, text: message },
+    ];
     setMessages(nextMessages);
     setInput("");
     setIsBusy(true);
 
     try {
-      const result = await postWebJson<
-        TodoChatFollowUpResult | TodoGenerateResult
-      >(apiBase, "/api/v1/todos/chat/", {
-        message,
-        thread_id: threadId,
-      });
+      const result = await postWebJson<TodoChatFollowUpResult | TodoGenerateResult>(
+        apiBase,
+        "/api/v1/todos/chat/",
+        {
+          message,
+          thread_id: threadId,
+        },
+      );
       if ("thread_id" in result && typeof result.thread_id === "string") {
         setThreadId(result.thread_id);
       }
@@ -243,7 +248,9 @@ export function PlannerChat({ apiBase, userId, onNotice, onTodosSaved }: Planner
                     />
                   </div>
                 ) : null}
-                <div className={`plannerSpeech ${message.role === "user" ? "fromUser" : "fromChief"}`}>
+                <div
+                  className={`plannerSpeech ${message.role === "user" ? "fromUser" : "fromChief"}`}
+                >
                   <p>{message.text}</p>
                 </div>
               </div>

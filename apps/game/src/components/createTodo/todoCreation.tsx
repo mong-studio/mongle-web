@@ -189,7 +189,10 @@ export function TodoCreation({
               {candidates.length > 0 ? (
                 candidates.map((todo) => (
                   <li key={todo.id} className="todoCandidateRow">
-                    <div className={`todoMiniIcon is-${getTagTone(todo.tags[0])}`} aria-hidden="true" />
+                    <div
+                      className={`todoMiniIcon is-${getTagTone(todo.tags[0])}`}
+                      aria-hidden="true"
+                    />
                     <div className="todoCandidateText">
                       <b>{todo.title}</b>
                       <span className={`todoTag tone-${getTagTone(todo.tags[0])}`}>
