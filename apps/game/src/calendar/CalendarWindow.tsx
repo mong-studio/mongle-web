@@ -181,7 +181,7 @@ export function CalendarWindow({
               boxShadow: "0 2px 0 var(--line-soft)",
             }}
           >
-            오늘로
+            오늘
           </button>
           <button
             type="button"
