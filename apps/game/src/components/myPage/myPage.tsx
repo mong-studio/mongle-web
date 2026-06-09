@@ -72,6 +72,13 @@ export function MyPageModal({
     null,
   );
 
+  const initialJob = (JOB_OPTIONS as readonly string[]).includes(userJob) ? userJob : "무직/기타";
+  const isDirty =
+    nickname !== userName ||
+    job !== initialJob ||
+    birth !== userBirth ||
+    !!(currentPw || newPw || confirmPw);
+
   async function handleSave() {
     await onUpdateProfile(nickname, job, birth);
     if (currentPw || newPw || confirmPw) {
@@ -310,7 +317,12 @@ export function MyPageModal({
                   />
                 </div>
 
-                <button type="button" className="mpSaveBtn" onClick={handleSave}>
+                <button
+                  type="button"
+                  className="mpSaveBtn"
+                  onClick={handleSave}
+                  disabled={!isDirty}
+                >
                   저장하기
                 </button>
               </div>

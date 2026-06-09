@@ -673,6 +673,15 @@
   transform: translateY(1px);
 }
 
+.mpSaveBtn:disabled {
+  background: #e8dcc8;
+  border-color: #c8b898;
+  color: #a08060;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 /* ── 설정 탭 ── */
 .mpSettings {
   display: flex;
