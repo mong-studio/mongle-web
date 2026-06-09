@@ -9,6 +9,8 @@ import {
 } from "./auth/api.js";
 import { LoginModal } from "./auth/LoginModal.js";
 import { type AuthState, useAuthStore } from "./auth/store.js";
+import { CalendarBulletinBoard } from "./calendar/CalendarBulletinBoard.js";
+import { CalendarModal } from "./calendar/CalendarModal.js";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
 import { MyPageWrapper } from "./components/myPage/MyPageWrapper.js";
@@ -209,11 +211,19 @@ function App() {
   const authUser = useAuthStore((state: AuthState) => state.user);
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
 
   useEffect(() => {
     void useAuthStore.getState().restoreSession();
   }, []);
+
+  useEffect(() => {
+    if (authStatus === "authenticated" && authUser?.hasCharacter === false) {
+      setCharacterSetupOpen(true);
+    }
+  }, [authStatus, authUser]);
 
   const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
@@ -327,6 +337,7 @@ function App() {
       setGeneratedCharacterPreview(resident.avatarUrl || "");
       setNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
+      setCharacterSetupOpen(false);
       setActiveFeature(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
@@ -593,6 +604,8 @@ function App() {
         </button>
       </aside>
 
+      <CalendarBulletinBoard todos={todos} onOpen={() => setCalendarOpen(true)} />
+
       {dialogueOpen ? (
         <section className="dialogueBox" aria-label="마을 이장님 대화">
           <img className="chiefPortrait" src="/assets/mongle_chief.png" alt="몽글마을 이장님" />
@@ -858,6 +871,40 @@ function App() {
         onSwitchToSignup={() => {
           setLoginOpen(false);
           setSignupOpen(true);
+        }}
+      />
+
+      {characterSetupOpen ? (
+        <div className="modalBackdrop" role="presentation">
+          <section className="featureModal characterModal" role="dialog" aria-modal="true">
+            <CharacterModal
+              residents={residents}
+              sourceImagePreview={sourceImagePreview}
+              sourceImageName={sourceImageName}
+              characterName={characterName}
+              characterPersona={characterPersona}
+              characterKeywords={characterKeywords}
+              selectedKeywordCategories={selectedKeywordCategories}
+              isBusy={isBusy}
+              onImageUpload={handleSourceImageUpload}
+              onNameChange={setCharacterName}
+              onPersonaChange={setCharacterPersona}
+              onKeywordsChange={setCharacterKeywords}
+              onToggleKeyword={toggleKeywordCategory}
+              onSubmit={createCharacter}
+              onClose={() => {}}
+            />
+          </section>
+        </div>
+      ) : null}
+
+      <CalendarModal
+        isOpen={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
+        isAuthenticated={authStatus === "authenticated"}
+        onOpenLogin={() => {
+          setCalendarOpen(false);
+          setLoginOpen(true);
         }}
       />
     </main>

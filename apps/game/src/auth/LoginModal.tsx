@@ -63,12 +63,15 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
   }
 
   return (
-    <div className="modalBackdrop" role="presentation">
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
+    <div className="modalBackdrop" role="presentation" onClick={onClose}>
       <section
         className="featureModal signupModal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="login-title"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <button type="button" className="closeButton" onClick={onClose} aria-label="닫기">
           ×
