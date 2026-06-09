@@ -1,23 +1,12 @@
-import { motion } from "framer-motion";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import { motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { CalHook } from "./CalendarCore.js";
 import { Check, Tag } from "./CalendarCore.js";
 import { serial, serialToMD, toYMDStr, WD, ymdStrToSerial } from "./calEngine.js";
+import { TagEditorForm } from "./TagEditorForm.js";
 import type { TagItem } from "./types.js";
-
-const TAG_COLORS = [
-  "#8478C0",
-  "#62A256",
-  "#5790C4",
-  "#CF7E97",
-  "#D9943C",
-  "#E06060",
-  "#40A080",
-  "#A07848",
-  "#7C7C9C",
-  "#5AA4A0",
-];
 
 const staggerContainer = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const staggerItem = {
@@ -38,9 +27,20 @@ type DayModalProps = {
     startStr: string,
     endStr: string,
   ) => Promise<void>;
+  onDeleteTag: (id: number) => Promise<void>;
+  onEditTag: (id: number, content: string, color: string) => Promise<void>;
 };
 
-export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayModalProps) {
+export function DayModal({
+  ymd,
+  cal,
+  onClose,
+  onToggle,
+  tags,
+  onAddEvent,
+  onDeleteTag,
+  onEditTag,
+}: DayModalProps) {
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
@@ -50,6 +50,9 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingTagId, setEditingTagId] = useState<number | null>(null);
+  const [editTagName, setEditTagName] = useState("");
+  const [editTagColor, setEditTagColor] = useState("#8478C0");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { selAdd } = cal;
@@ -63,6 +66,7 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
     setIsCreatingTag(tags.length === 0);
     setNewTagName("");
     setNewTagColor("#8478C0");
+    setEditingTagId(null);
     const s = toYMDStr(ymd.y, ymd.m, ymd.d);
     setStart(s);
     setEnd(s);
@@ -222,6 +226,8 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
           </div>
           <button
             type="button"
+            className="calBtn-ghost"
+            aria-label="닫기"
             onClick={onClose}
             style={{
               width: 36,
@@ -237,17 +243,8 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
               justifyContent: "center",
             }}
           >
-            <svg
-              aria-hidden="true"
-              width="15"
-              height="15"
-              viewBox="0 0 14 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-            >
-              <path d="M3 3l8 8M11 3l-8 8" />
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         </div>
@@ -280,6 +277,8 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
                   <motion.div
                     key={e.id}
                     variants={staggerItem}
+                    whileHover={{ x: 1 }}
+                    whileTap={{ scale: 0.99 }}
                     role="button"
                     tabIndex={0}
                     onClick={() => onToggle(e.id)}
@@ -357,6 +356,7 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
           {!adding ? (
             <button
               type="button"
+              className="calBtn-dashed"
               onClick={() => setAdding(true)}
               style={{
                 width: "100%",
@@ -414,48 +414,231 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
               <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
                 {tags.map((t) => {
                   const isSel = !isCreatingTag && selectedTagId === t.id;
+                  const fg = isSel ? t.color : "var(--ink-3)";
                   return (
-                    <button
+                    <div
                       key={t.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedTagId(t.id);
-                        setIsCreatingTag(false);
-                      }}
+                      className="calTagGroup"
                       style={{
-                        padding: "6px 12px",
-                        borderRadius: 999,
-                        cursor: "pointer",
-                        fontFamily: "var(--font-display)",
-                        fontSize: 13,
-                        whiteSpace: "nowrap",
-                        border: isSel ? `2px solid ${t.color}` : "2px solid var(--line-soft)",
-                        background: isSel ? `${t.color}22` : "var(--cream-0)",
-                        color: isSel ? t.color : "var(--ink-3)",
-                        display: "flex",
+                        display: "inline-flex",
                         alignItems: "center",
-                        gap: 5,
-                        transition: "all .14s",
+                        border: isSel ? `2px solid ${t.color}` : "2px solid var(--line-soft)",
+                        borderRadius: 999,
+                        background: isSel ? `${t.color}22` : "var(--cream-0)",
+                        overflow: "hidden",
+                        transition: "border-color .14s, background .14s",
                       }}
                     >
-                      <span
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          background: t.color,
-                          flexShrink: 0,
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedTagId(t.id);
+                          setIsCreatingTag(false);
+                          setEditingTagId(null);
                         }}
-                      />
-                      #{t.content}
-                    </button>
+                        style={{
+                          padding: "6px 10px 6px 12px",
+                          border: "none",
+                          background: "transparent",
+                          color: fg,
+                          cursor: "pointer",
+                          fontFamily: "var(--font-display)",
+                          fontSize: 13,
+                          lineHeight: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 5,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            background: t.color,
+                            flexShrink: 0,
+                          }}
+                        />
+                        {t.content}
+                      </button>
+                      <div style={{ display: "flex", alignItems: "center", paddingRight: 7 }}>
+                        <button
+                          type="button"
+                          aria-label="태그 수정"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingTagId(t.id);
+                            setEditTagName(t.content);
+                            setEditTagColor(t.color);
+                            setIsCreatingTag(false);
+                          }}
+                          style={{
+                            padding: "3px 1px",
+                            border: "none",
+                            background: "transparent",
+                            cursor: "pointer",
+                            color: fg,
+                            lineHeight: 1,
+                            borderRadius: 3,
+                            opacity: 0.7,
+                            transition: "opacity .12s",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 14 14"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <g transform="rotate(45, 7, 7)">
+                              <path d="M7 1.5L8.5 3V10L7 13L5.5 10V3Z" />
+                            </g>
+                          </svg>
+                        </button>
+                        <AlertDialog.Root>
+                          <AlertDialog.Trigger asChild>
+                            <button
+                              type="button"
+                              aria-label="태그 삭제"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: "3px 5px 3px 1px",
+                                border: "none",
+                                background: "transparent",
+                                cursor: "pointer",
+                                color: fg,
+                                fontFamily: "var(--font-display)",
+                                fontSize: 14,
+                                lineHeight: 1,
+                                borderRadius: 3,
+                                opacity: 0.55,
+                                transition: "opacity .12s",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <svg
+                                width="11"
+                                height="11"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                aria-hidden="true"
+                              >
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                              </svg>
+                            </button>
+                          </AlertDialog.Trigger>
+                          <AlertDialog.Portal>
+                            <AlertDialog.Overlay
+                              style={{
+                                position: "fixed",
+                                inset: 0,
+                                zIndex: 80,
+                                background: "rgba(70,48,22,0.34)",
+                              }}
+                            />
+                            <AlertDialog.Content
+                              style={{
+                                position: "fixed",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                zIndex: 81,
+                                width: "90%",
+                                maxWidth: 360,
+                                background: "var(--cream-1)",
+                                borderRadius: "var(--r-xl)",
+                                border: "2px solid var(--line)",
+                                boxShadow: "var(--sh-pop)",
+                                padding: "24px 22px 20px",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 12,
+                              }}
+                            >
+                              <AlertDialog.Title
+                                style={{
+                                  fontFamily: "var(--font-display)",
+                                  fontSize: 18,
+                                  color: "var(--ink-1)",
+                                  margin: 0,
+                                }}
+                              >
+                                태그를 삭제할까요?
+                              </AlertDialog.Title>
+                              <AlertDialog.Description
+                                style={{
+                                  fontFamily: "var(--font-body)",
+                                  fontSize: 14,
+                                  color: "var(--ink-2)",
+                                  margin: 0,
+                                  lineHeight: 1.5,
+                                }}
+                              >
+                                이 태그를 삭제하면 되돌릴 수 없어요.
+                              </AlertDialog.Description>
+                              <div style={{ display: "flex", gap: 9, marginTop: 4 }}>
+                                <AlertDialog.Cancel asChild>
+                                  <button
+                                    type="button"
+                                    style={{
+                                      flex: 1,
+                                      padding: "10px",
+                                      borderRadius: "var(--r-md)",
+                                      cursor: "pointer",
+                                      border: "2px solid var(--line)",
+                                      background: "var(--cream-1)",
+                                      color: "var(--ink-2)",
+                                      fontFamily: "var(--font-display)",
+                                      fontSize: 14,
+                                    }}
+                                  >
+                                    취소
+                                  </button>
+                                </AlertDialog.Cancel>
+                                <AlertDialog.Action asChild>
+                                  <button
+                                    type="button"
+                                    onClick={() => void onDeleteTag(t.id)}
+                                    style={{
+                                      flex: 2,
+                                      padding: "10px",
+                                      borderRadius: "var(--r-md)",
+                                      cursor: "pointer",
+                                      border: "none",
+                                      background: "#E06060",
+                                      color: "#fff",
+                                      fontFamily: "var(--font-display)",
+                                      fontSize: 14,
+                                      boxShadow: "inset 0 -2px 0 rgba(0,0,0,.13)",
+                                    }}
+                                  >
+                                    삭제
+                                  </button>
+                                </AlertDialog.Action>
+                              </div>
+                            </AlertDialog.Content>
+                          </AlertDialog.Portal>
+                        </AlertDialog.Root>
+                      </div>
+                    </div>
                   );
                 })}
                 <button
                   type="button"
+                  className="calBtn-tag"
                   onClick={() => {
                     setIsCreatingTag(true);
                     setSelectedTagId(null);
+                    setEditingTagId(null);
                   }}
                   style={{
                     padding: "6px 12px",
@@ -463,6 +646,7 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
                     cursor: "pointer",
                     fontFamily: "var(--font-display)",
                     fontSize: 13,
+                    lineHeight: 1,
                     whiteSpace: "nowrap",
                     border: isCreatingTag
                       ? "2px solid var(--accent)"
@@ -475,111 +659,28 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
                   ＋ 새 태그
                 </button>
               </div>
-              {isCreatingTag && (
-                <div
-                  style={{
-                    padding: "11px 12px",
-                    background: "var(--cream-1)",
-                    borderRadius: "var(--r-md)",
-                    border: "1.5px solid var(--line-soft)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 9,
+              {editingTagId !== null && (
+                <TagEditorForm
+                  name={editTagName}
+                  color={editTagColor}
+                  onNameChange={setEditTagName}
+                  onColorChange={setEditTagColor}
+                  onCancel={() => setEditingTagId(null)}
+                  onConfirm={() => {
+                    const id = editingTagId;
+                    setEditingTagId(null);
+                    void onEditTag(id, editTagName.trim() || "태그", editTagColor);
                   }}
-                >
-                  <input
-                    value={newTagName}
-                    onChange={(e) => setNewTagName(e.target.value)}
-                    placeholder="태그 이름"
-                    style={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      padding: "8px 11px",
-                      borderRadius: "var(--r-md)",
-                      border: "2px solid var(--line-soft)",
-                      background: "var(--cream-0)",
-                      color: "var(--ink-1)",
-                      fontFamily: "var(--font-display)",
-                      fontSize: 15,
-                      outline: "none",
-                    }}
-                  />
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    {TAG_COLORS.map((c) => (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => setNewTagColor(c)}
-                        style={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: "50%",
-                          background: c,
-                          border:
-                            newTagColor === c ? "3px solid var(--ink-1)" : "2px solid transparent",
-                          outline: newTagColor === c ? `2px solid ${c}` : "none",
-                          outlineOffset: 2,
-                          cursor: "pointer",
-                          padding: 0,
-                          flexShrink: 0,
-                        }}
-                      />
-                    ))}
-                    <label
-                      title="직접 색상 선택"
-                      style={{
-                        position: "relative",
-                        width: 24,
-                        height: 24,
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        flexShrink: 0,
-                        cursor: "pointer",
-                        border: "2px solid var(--line-soft)",
-                      }}
-                    >
-                      <input
-                        type="color"
-                        value={newTagColor}
-                        onChange={(e) => setNewTagColor(e.target.value)}
-                        style={{
-                          position: "absolute",
-                          opacity: 0,
-                          inset: 0,
-                          cursor: "pointer",
-                          padding: 0,
-                        }}
-                      />
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          background: "conic-gradient(red,yellow,lime,cyan,blue,magenta,red)",
-                        }}
-                      />
-                    </label>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        background: newTagColor,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontFamily: "var(--font-display)",
-                        fontSize: 13,
-                        color: "var(--ink-2)",
-                      }}
-                    >
-                      #{newTagName.trim() || "새태그"} 미리보기
-                    </span>
-                  </div>
-                </div>
+                  confirmLabel="저장"
+                />
+              )}
+              {isCreatingTag && (
+                <TagEditorForm
+                  name={newTagName}
+                  color={newTagColor}
+                  onNameChange={setNewTagName}
+                  onColorChange={setNewTagColor}
+                />
               )}
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
@@ -666,6 +767,7 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
               <div style={{ display: "flex", gap: 9 }}>
                 <button
                   type="button"
+                  className="calBtn-cancel"
                   onClick={() => setAdding(false)}
                   style={{
                     flex: 1,
@@ -683,6 +785,7 @@ export function DayModal({ ymd, cal, onClose, onToggle, tags, onAddEvent }: DayM
                 </button>
                 <button
                   type="button"
+                  className="calBtn-submit"
                   onClick={() => void submit()}
                   disabled={!title.trim() || saving}
                   style={{
