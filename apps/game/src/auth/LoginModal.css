@@ -1,3 +1,11 @@
+.modalBackdropClose {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
 .fieldError {
   color: #7b3d29;
   font-size: 0.78rem;

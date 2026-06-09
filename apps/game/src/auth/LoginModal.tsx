@@ -64,6 +64,12 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
 
   return (
     <div className="modalBackdrop" role="presentation">
+      <button
+        type="button"
+        className="modalBackdropClose"
+        onClick={onClose}
+        aria-label="모달 닫기"
+      />
       <section
         className="featureModal signupModal"
         role="dialog"
