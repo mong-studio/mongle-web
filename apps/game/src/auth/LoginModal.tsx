@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toUserMessage } from "./api.js";
-import { useAuthStore } from "./store.js";
+import { type AuthState, useAuthStore } from "./store.js";
 
 type LoginModalProps = {
   open: boolean;
@@ -9,7 +9,7 @@ type LoginModalProps = {
 };
 
 export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps) {
-  const login = useAuthStore((state) => state.login);
+  const login = useAuthStore((state: AuthState) => state.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);

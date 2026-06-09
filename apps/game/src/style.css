@@ -464,6 +464,38 @@ button {
   background: #f8dea1;
 }
 
+.plannerModalShell {
+  width: min(1120px, 100%);
+  max-height: min(860px, calc(100vh - 40px));
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.todoModalShell {
+  width: min(1520px, 100%);
+  max-height: calc(100vh - 28px);
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: auto;
+}
+
+.plannerCloseButton {
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+}
+
+.todoCloseButton {
+  top: 18px;
+  right: 18px;
+  z-index: 5;
+}
+
 .closeButton {
   position: absolute;
   top: 12px;

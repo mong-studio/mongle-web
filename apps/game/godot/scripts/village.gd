@@ -265,9 +265,6 @@ func _resident_names() -> Array[String]:
 			if trimmed != "":
 				names.append(trimmed)
 
-	if names.is_empty():
-		names = ["두부", "콩이", "밤비"]
-
 	if names.size() > MAX_RESIDENTS:
 		names.resize(MAX_RESIDENTS)
 
@@ -390,6 +387,10 @@ func _try_apply_remote_avatar(sprite: Sprite2D, avatar_url: String) -> void:
 	if trimmed == "":
 		return
 
+	if trimmed.begins_with("data:"):
+		_apply_data_avatar(sprite, trimmed)
+		return
+
 	var resolved_url := _resolve_avatar_url(trimmed)
 	if resolved_url == "":
 		return
@@ -405,6 +406,8 @@ func _try_apply_remote_avatar(sprite: Sprite2D, avatar_url: String) -> void:
 func _resolve_avatar_url(url: String) -> String:
 	if url.begins_with("http://") or url.begins_with("https://"):
 		return url
+	if url.begins_with("data:"):
+		return url
 	if url.begins_with("/generated/"):
 		if OS.has_feature("web"):
 			var origin: Variant = JavaScriptBridge.eval(
@@ -417,6 +420,38 @@ func _resolve_avatar_url(url: String) -> String:
 			var app_origin: Variant = JavaScriptBridge.eval("window.location.origin;", true)
 			return str(app_origin) + url
 	return ""
+
+
+func _apply_data_avatar(sprite: Sprite2D, data_url: String) -> void:
+	var comma_index := data_url.find(",")
+	if comma_index < 0:
+		return
+
+	var meta := data_url.substr(5, comma_index - 5)
+	var encoded := data_url.substr(comma_index + 1)
+	var body := Marshalls.base64_to_raw(encoded)
+	if body.is_empty():
+		return
+
+	var image := Image.new()
+	var load_err := ERR_FILE_UNRECOGNIZED
+	if meta.find("image/png") >= 0:
+		load_err = image.load_png_from_buffer(body)
+	elif meta.find("image/jpeg") >= 0 or meta.find("image/jpg") >= 0:
+		load_err = image.load_jpg_from_buffer(body)
+	elif meta.find("image/webp") >= 0:
+		load_err = image.load_webp_from_buffer(body)
+	if load_err != OK:
+		return
+
+	var texture := ImageTexture.create_from_image(image)
+	if texture == null:
+		return
+
+	sprite.texture = texture
+	var scale_size := float(sprite.get_meta("scale_size", 0.16))
+	var longest_side := maxf(texture.get_width(), texture.get_height())
+	sprite.scale = Vector2.ONE * ((VIEWPORT_SIZE.y * scale_size) / longest_side)
 
 
 func _on_avatar_download_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray, sprite: Sprite2D, request_url: String, req: HTTPRequest) -> void:

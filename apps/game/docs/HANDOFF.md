@@ -11,7 +11,7 @@ Implemented systems:
 - Focus timer.
 - Todo list with Godot `user://` persistence.
 - Pixel-style UI panels.
-- Local TODO splitting request to `http://127.0.0.1:8010/api/todos/split`.
+- TODO generation/chat/commit requests to Django `api/v1/todos/*`, which forwards to `mongle-ai` api/v1 endpoints.
 
 ## How To Evaluate It
 

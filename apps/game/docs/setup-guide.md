@@ -78,11 +78,11 @@ http://127.0.0.1:5173/
 
 ## AI 기능 사용하기
 
-할 일 입력창의 **`AI 정리`** 버튼은 AI API를 호출합니다. 이 API는 별도의
-**`mongle-ai` 서비스**가 제공하며, 이 저장소에서 실행하지 않습니다.
+할 일 입력창의 **`AI 정리`** 버튼과 플래너 챗봇은 Django API를 호출합니다.
+Django 서버가 별도의 **`mongle-ai` 서비스** api/v1 API로 요청을 전달합니다.
 
-- AI 기능을 직접 확인하려면 `mongle-ai` 저장소의 안내대로 서비스를 먼저 띄웁니다.
-- 화면은 `VITE_AI_API_BASE`(기본 `http://127.0.0.1:8010`) 주소로 요청을 보냅니다.
+- AI 기능을 직접 확인하려면 `mongle-server`와 `mongle-ai` 서비스를 먼저 띄웁니다.
+- 화면은 `VITE_API_BASE`(기본 same-origin) 기준 `/api/v1/todos/*` 주소로 요청을 보냅니다.
 
 > AI API가 꺼져 있어도 화면은 정상 동작합니다. 이때는 앱에 내장된
 > **로컬 대체 로직(fallback)**으로 할 일을 나눕니다. 그래서 화면만 개발할
@@ -99,7 +99,7 @@ cp apps/game/.env.example apps/game/.env.local
 | 변수 | 필수 | 기본값 | 설명 |
 | --- | --- | --- | --- |
 | `VITE_GODOT_EXPORT_PATH` | 아니오 | `/godot/index.html` | iframe이 불러올 Godot 화면 경로 |
-| `VITE_AI_API_BASE` | 아니오 | `http://127.0.0.1:8010` | AI API 기본 주소 |
+| `VITE_API_BASE` | 아니오 | same-origin | Django API 기본 주소 |
 
 > `.env.local`은 개인 로컬 설정이라 Git에 커밋하지 않습니다. (이미 무시 처리됨)
 > `VITE_`로 시작하는 변수만 화면 코드에서 읽을 수 있습니다(Vite 규칙).
