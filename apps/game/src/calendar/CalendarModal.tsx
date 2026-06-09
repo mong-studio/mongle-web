@@ -4,8 +4,9 @@ import { useCalendar } from "./CalendarCore.js";
 import { CalendarWindow } from "./CalendarWindow.js";
 import type { CalEvent } from "./calEngine.js";
 import { ymdStrToSerial } from "./calEngine.js";
-import type { CalSchedule, CalTag, CalTodo, TagItem } from "./types.js";
+import type { CalSchedule, CalTodo } from "./types.js";
 import { scheduleToEvent, todoToEvent } from "./types.js";
+import { useTagManager } from "./useTagManager.js";
 import "./calendar.css";
 
 type Props = {
@@ -18,9 +19,10 @@ type Props = {
 export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }: Props) {
   const [todos, setTodos] = useState<CalTodo[]>([]);
   const [schedules, setSchedules] = useState<CalSchedule[]>([]);
-  const [tags, setTags] = useState<CalTag[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+
+  const { tagItems, fetchTags, createTag, deleteTag, editTag } = useTagManager(isAuthenticated);
 
   const baseEvents = useMemo<CalEvent[]>(
     () => [...todos.map(todoToEvent), ...schedules.map(scheduleToEvent)],
@@ -28,11 +30,6 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
   );
 
   const cal = useCalendar(baseEvents);
-
-  const tagItems = useMemo<TagItem[]>(
-    () => tags.map((t) => ({ id: t.tag_id, content: t.content, color: t.color })),
-    [tags],
-  );
 
   const fetchCalendar = useCallback(
     async (showSpinner: boolean) => {
@@ -64,16 +61,6 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
     [isAuthenticated, cal.view.y, cal.view.m],
   );
 
-  const fetchTags = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const res = await apiClient.get("/todos/tags/");
-      setTags(res.data as CalTag[]);
-    } catch {
-      /* ignore */
-    }
-  }, [isAuthenticated]);
-
   useEffect(() => {
     if (isOpen && isAuthenticated) {
       void fetchCalendar(!hasLoaded);
@@ -82,7 +69,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
 
   useEffect(() => {
     if (isOpen && isAuthenticated) void fetchTags();
-  }, [isOpen, isAuthenticated, fetchTags]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, isAuthenticated, fetchTags]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -120,17 +107,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
     ) => {
       let resolvedTagId = tagId;
       if (newTag) {
-        try {
-          const res = await apiClient.post("/todos/tags/", {
-            content: newTag.name,
-            color: newTag.color,
-          });
-          const created = res.data as CalTag;
-          setTags((prev) => [...prev, created]);
-          resolvedTagId = created.tag_id;
-        } catch {
-          /* proceed without tag */
-        }
+        resolvedTagId = await createTag(newTag.name, newTag.color);
       }
       const tagParam = resolvedTagId !== null ? { tag_id: resolvedTagId } : {};
       const sSerial = ymdStrToSerial(startStr);
@@ -153,7 +130,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
         setSchedules((prev) => [...prev, res.data as CalSchedule]);
       }
     },
-    [],
+    [createTag],
   );
 
   if (!isOpen) return null;
@@ -229,6 +206,8 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
             onClose={onClose}
             onToggle={handleToggle}
             onAddEvent={handleAddEvent}
+            onDeleteTag={deleteTag}
+            onEditTag={editTag}
             isRefreshing={isLoading && hasLoaded}
             tags={tagItems}
           />

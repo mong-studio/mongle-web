@@ -90,6 +90,7 @@ export function MonthCard({ cal, dir }: MonthCardProps) {
                     // biome-ignore lint/a11y/noStaticElementInteractions: conditional role for in-month cells
                     <div
                       key={`${c.y}-${c.m}-${c.d}-bg`}
+                      className={c.inMonth ? "calDay" : undefined}
                       role={c.inMonth ? "button" : undefined}
                       tabIndex={c.inMonth ? 0 : undefined}
                       onClick={() => c.inMonth && cal.setSel({ y: c.y, m: c.m, d: c.d })}
@@ -116,7 +117,7 @@ export function MonthCard({ cal, dir }: MonthCardProps) {
                     </div>
                   ))}
                 </div>
-                <div style={{ position: "relative", padding: "7px 0 6px" }}>
+                <div style={{ position: "relative", padding: "7px 0 6px", pointerEvents: "none" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)" }}>
                     {week.map((c) => (
                       <div
@@ -182,6 +183,7 @@ export function MonthCard({ cal, dir }: MonthCardProps) {
                           <button
                             key={`${b.ev.id}-${b.startCol}`}
                             type="button"
+                            className="calEventBar"
                             tabIndex={0}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -204,6 +206,7 @@ export function MonthCard({ cal, dir }: MonthCardProps) {
                               gridRow: b.lane + 1,
                               cursor: "pointer",
                               border: "none",
+                              pointerEvents: "auto",
                               height: BAR_H - 2,
                               display: "flex",
                               alignItems: "center",
@@ -245,19 +248,11 @@ export function MonthCard({ cal, dir }: MonthCardProps) {
                       const shown = singles.slice(0, 2);
                       const more = singles.length - shown.length;
                       return (
-                        // biome-ignore lint/a11y/noStaticElementInteractions: conditional role for in-month cells
                         <div
                           key={`${c.y}-${c.m}-${c.d}-singles`}
-                          role={c.inMonth ? "button" : undefined}
-                          tabIndex={c.inMonth ? 0 : undefined}
-                          onClick={() => c.inMonth && cal.setSel({ y: c.y, m: c.m, d: c.d })}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && c.inMonth && cal.setSel({ y: c.y, m: c.m, d: c.d })
-                          }
                           style={{
                             padding: "0 8px 2px",
                             minHeight: 30,
-                            cursor: c.inMonth ? "pointer" : "default",
                             display: "flex",
                             flexDirection: "column",
                             gap: 4,
