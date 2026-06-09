@@ -11,7 +11,7 @@ export type SessionUser = {
 
 export type AuthStatus = "loading" | "authenticated" | "anonymous";
 
-type AuthState = {
+export type AuthState = {
   user: SessionUser | null;
   accessToken: string | null;
   status: AuthStatus;
