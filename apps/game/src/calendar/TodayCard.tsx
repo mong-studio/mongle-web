@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import type { CalHook } from "./CalendarCore.js";
 import { Check, Tag } from "./CalendarCore.js";
 import { WD } from "./calEngine.js";
@@ -75,6 +75,7 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
         <div style={{ flex: 1 }} />
         <button
           type="button"
+          className="calBtn-accent"
           onClick={() => !isRefreshing && cal.openAdd({ y: ty, m: tm, d: td })}
           style={{
             width: 34,
@@ -145,6 +146,8 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
             <motion.div
               key={e.id}
               variants={todayItemVariants}
+              whileHover={{ x: 2 }}
+              whileTap={{ scale: 0.98 }}
               role="button"
               tabIndex={0}
               onClick={() => onToggle(e.id)}
@@ -152,7 +155,7 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 11,
+                gap: 7,
                 padding: "12px 2px",
                 cursor: "pointer",
                 borderTop: i ? "1px solid var(--line-soft)" : "none",
