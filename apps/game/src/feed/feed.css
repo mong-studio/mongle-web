@@ -596,3 +596,443 @@
     transform: translateY(-8px) scale(0.96);
   }
 }
+
+/* ── profile screen overlay ─────────────────────────────────────────────── */
+.pf-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  animation: screenIn 0.24s cubic-bezier(0.34, 1.1, 0.5, 1);
+}
+.pd-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 31;
+  display: flex;
+  flex-direction: column;
+  animation: screenIn 0.24s cubic-bezier(0.34, 1.1, 0.5, 1);
+}
+@keyframes screenIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+/* ── shared topbar ───────────────────────────────────────────────────────── */
+.pf-topbar,
+.pd-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 52px 12px 11px;
+  border-bottom: 1px solid;
+}
+.pf-iconbtn,
+.pd-iconbtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.pf-iconbtn:active,
+.pd-iconbtn:active {
+  opacity: 0.6;
+}
+.pf-topbar-center {
+  flex: 1;
+  text-align: center;
+  line-height: 1.1;
+}
+.pf-topbar-name {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+}
+.pf-topbar-sub {
+  font-size: 11px;
+  margin-top: 2px;
+}
+.pd-topbar-title {
+  flex: 1;
+  text-align: center;
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+}
+
+/* ── shared scroll ───────────────────────────────────────────────────────── */
+.pf-scroll,
+.pd-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 14px 28px;
+  scrollbar-width: thin;
+}
+.pf-scroll::-webkit-scrollbar,
+.pd-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.pf-scroll::-webkit-scrollbar-thumb,
+.pd-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120, 90, 60, 0.2);
+  border-radius: 9px;
+}
+
+/* ── profile: avatar + stats ─────────────────────────────────────────────── */
+.pf-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 4px 2px;
+}
+.pf-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(155deg, #fbe7d2, #f4d2b4);
+  font-size: 38px;
+  line-height: 1;
+  user-select: none;
+}
+.pf-stats {
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+}
+.pf-stat {
+  text-align: center;
+  line-height: 1.2;
+}
+.pf-stat-val {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+}
+.pf-stat-label {
+  font-size: 11.5px;
+  margin-top: 2px;
+}
+
+/* ── profile: name + bio + location ─────────────────────────────────────── */
+.pf-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 13px 4px 0;
+}
+.pf-name {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+}
+.pf-badge {
+  font-family: "Jua", sans-serif;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.pf-bio {
+  padding: 8px 4px 0;
+}
+.pf-bio p {
+  font-size: 13.5px;
+  line-height: 1.62;
+  margin: 0;
+}
+.pf-loc {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 4px 0;
+  font-size: 12.5px;
+}
+
+/* ── profile: follow button ──────────────────────────────────────────────── */
+.pf-actions {
+  display: flex;
+  padding: 14px 4px 4px;
+}
+.pf-btn {
+  flex: 1;
+  height: 42px;
+  border-radius: 13px;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+  letter-spacing: 0.2px;
+}
+.pf-btn:active {
+  transform: translateY(2px);
+}
+.pf-btn.pf-btn-ghost {
+  background: transparent;
+  border: 1.5px solid;
+}
+
+/* ── profile: post grid ──────────────────────────────────────────────────── */
+.pf-grid-wrap {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1.5px solid;
+}
+.pf-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.pf-grid-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.pf-grid-img {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 5px;
+}
+.pf-grid-heart {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  font-size: 11px;
+  color: #fff;
+  font-family: "Jua", sans-serif;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ── post detail: card ───────────────────────────────────────────────────── */
+.pd-post {
+  border: 2px solid;
+  border-radius: 22px;
+  padding: 14px;
+  box-shadow: 0 4px 0 rgba(80, 55, 30, 0.06);
+  margin-bottom: 16px;
+}
+.pd-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.pd-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(155deg, #fbe7d2, #f4d2b4);
+  font-size: 22px;
+}
+.pd-author-txt {
+  min-width: 0;
+}
+.pd-author-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+}
+.pd-badge {
+  font-family: "Jua", sans-serif;
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.pd-author-meta {
+  font-size: 12px;
+  margin-top: 3px;
+}
+.pd-img {
+  margin: 12px 0 4px;
+}
+.pd-body {
+  padding: 9px 2px 4px;
+}
+.pd-body p {
+  font-size: 13.5px;
+  line-height: 1.62;
+  margin: 0;
+}
+
+/* ── post detail: meta cards ─────────────────────────────────────────────── */
+.pd-meta {
+  display: flex;
+  align-items: stretch;
+  margin-top: 10px;
+  border: 1.5px solid;
+  border-radius: 13px;
+  overflow: hidden;
+}
+.pd-meta-key {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 108px;
+  flex-shrink: 0;
+  padding: 10px 11px;
+  font-family: "Jua", sans-serif;
+  font-size: 12.5px;
+  line-height: 1.3;
+  border-right: 1.5px solid;
+}
+.pd-meta-ic {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.pd-meta-val {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.pd-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.pd-chip {
+  font-size: 12px;
+  padding: 3px 9px 2px;
+  border-radius: 8px;
+}
+
+/* ── post detail: footer ─────────────────────────────────────────────────── */
+.pd-foot {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1.5px dashed;
+}
+.pd-react {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+.pd-heart svg {
+  transition: transform 0.18s cubic-bezier(0.5, 1.7, 0.6, 1);
+}
+.pd-heart.on svg {
+  transform: scale(1.14);
+}
+
+/* ── post detail: comments ───────────────────────────────────────────────── */
+.pd-comments {
+  padding: 2px 2px 0;
+}
+.pd-comments-h {
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  margin-bottom: 11px;
+}
+.pd-comments-empty {
+  font-size: 13px;
+  line-height: 1.6;
+  padding-bottom: 8px;
+}
+.pd-comment {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.pd-comment-av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(155deg, #fbe7d2, #f4d2b4);
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+}
+.pd-comment-bubble {
+  border-radius: 4px 14px 14px 14px;
+  padding: 8px 11px;
+  font-size: 13px;
+  line-height: 1.5;
+  border: 1px solid;
+}
+.pd-comment-bubble b {
+  font-weight: 400;
+  margin-right: 6px;
+}
+
+/* ── post detail: comment input ──────────────────────────────────────────── */
+.pd-ci {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 6px 2px 2px;
+}
+.pd-ci-av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(155deg, #fbe7d2, #f4d2b4);
+  font-size: 15px;
+}
+.pd-ci-field {
+  flex: 1;
+  border-radius: 14px;
+  padding: 8px 14px;
+  font-size: 13px;
+  border: 1.5px solid;
+  font-family: inherit;
+}
+.pd-ci-send {
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
