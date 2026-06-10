@@ -8,6 +8,7 @@ interface FeedPostProps {
   th: ThemeTokens;
   pixelMode: boolean;
   notify: (msg: string, icon: string) => void;
+  onAuthorClick?: () => void;
 }
 
 function Tag({ text, th }: { text: string; th: ThemeTokens }) {
@@ -58,7 +59,7 @@ const MENU_ITEMS = [
   ["🙈", "이 게시물 숨기기"],
 ] as const;
 
-export function FeedPost({ post, th, pixelMode, notify }: FeedPostProps) {
+export function FeedPost({ post, th, pixelMode, notify, onAuthorClick }: FeedPostProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -85,39 +86,56 @@ export function FeedPost({ post, th, pixelMode, notify }: FeedPostProps) {
     <article className="mg-post" style={{ background: th.cardBg, borderColor: th.cardEdge }}>
       {/* header */}
       <header className="mg-post-head">
-        <div
-          className="mg-avatar"
+        <button
+          type="button"
           style={{
-            width: 52,
-            height: 52,
-            borderRadius: 16,
-            background: post.tint,
-            flexShrink: 0,
-            boxShadow: "0 2px 0 rgba(80,55,30,0.08)",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontSize: 22,
-            userSelect: "none",
+            gap: 11,
+            flex: 1,
+            minWidth: 0,
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: onAuthorClick ? "pointer" : "default",
+            textAlign: "left",
           }}
-          aria-hidden="true"
+          onClick={onAuthorClick}
         >
-          {post.name[0]}
-        </div>
+          <div
+            className="mg-avatar"
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 16,
+              background: post.tint,
+              flexShrink: 0,
+              boxShadow: "0 2px 0 rgba(80,55,30,0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 22,
+              userSelect: "none",
+            }}
+            aria-hidden="true"
+          >
+            {post.name[0]}
+          </div>
 
-        <div className="mg-post-id">
-          <div className="mg-post-namerow">
-            <span className="mg-name" style={{ color: th.ink }}>
-              {post.name}
-            </span>
-            <span className="mg-badge" style={{ background: th.badgeBg, color: th.badgeInk }}>
-              {post.role}
-            </span>
+          <div className="mg-post-id">
+            <div className="mg-post-namerow">
+              <span className="mg-name" style={{ color: th.ink }}>
+                {post.name}
+              </span>
+              <span className="mg-badge" style={{ background: th.badgeBg, color: th.badgeInk }}>
+                {post.role}
+              </span>
+            </div>
+            <div className="mg-meta" style={{ color: th.inkSoft }}>
+              {post.time} · {post.place}
+            </div>
           </div>
-          <div className="mg-meta" style={{ color: th.inkSoft }}>
-            {post.time} · {post.place}
-          </div>
-        </div>
+        </button>
 
         <div className="mg-menu-wrap">
           <button
