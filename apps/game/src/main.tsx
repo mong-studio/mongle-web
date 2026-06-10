@@ -16,6 +16,7 @@ import { CharacterModal } from "./components/createCharacter/createCharacter.js"
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
 import { MyPageWrapper } from "./components/myPage/MyPageWrapper.js";
 import { PlannerChat } from "./components/plannerChat/plannerChat.js";
+import { FeedModal } from "./feed/FeedModal.js";
 
 const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -189,6 +190,7 @@ function App() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
+  const [feedOpen, setFeedOpen] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
 
   useEffect(() => {
@@ -490,6 +492,9 @@ function App() {
           </button>
           <button type="button" onClick={() => setDialogueOpen((current) => !current)}>
             SETTINGS
+          </button>
+          <button type="button" onClick={() => setFeedOpen(true)}>
+            피드
           </button>
         </nav>
         <h1>몽글마을</h1>
@@ -904,6 +909,14 @@ function App() {
           setLoginOpen(true);
         }}
       />
+
+      {feedOpen ? (
+        // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop dismiss
+        // biome-ignore lint/a11y/useKeyWithClickEvents: modal backdrop dismiss
+        <div className="modalBackdrop" role="presentation" onClick={() => setFeedOpen(false)}>
+          <FeedModal onClose={() => setFeedOpen(false)} />
+        </div>
+      ) : null}
     </main>
   );
 }
