@@ -122,6 +122,156 @@ export interface FeedPostData {
   commentList: FeedComment[];
 }
 
+export interface CharacterProfile {
+  id: string;
+  name: string;
+  role: string;
+  emoji: string;
+  location: string;
+  bio: string;
+  stats: { posts: number; hearts: number; followers: number };
+}
+
+export interface MongsilPost {
+  id: string;
+  food: string;
+  title: string;
+  time: string;
+  location: string;
+  body: string;
+  quest: string;
+  tags: string[];
+  hearts: number;
+  commentList: { who: string; text: string }[];
+}
+
+export const MONGSIL: CharacterProfile = {
+  id: "mongsil",
+  name: "몽실이",
+  role: "요리 연구가",
+  emoji: "🐑",
+  location: "몽글마을 집 앞 텃밭",
+  bio: "매일 새로운 레시피를 연구하는 몽글마을 요리사 🥕\n따뜻한 한 그릇을 함께 나눠요.",
+  stats: { posts: 18, hearts: 246, followers: 9 },
+};
+
+export const MONGSIL_POSTS: MongsilPost[] = [
+  {
+    id: "mp1",
+    food: "🥕",
+    title: "갓 수확한 당근 수프",
+    time: "1분 전",
+    location: "몽글마을 집 앞 텃밭",
+    body: "새로운 레시피 연구는 언제나 두근두근해!\n오늘은 텃밭에서 갓 수확한 당근으로 당근 수프를 만들어봤어 🥕\n따뜻한 향이 마을 전체에 퍼지는 것 같아서 기분이 좋아졌어!\n다음엔 어떤 재료를 써볼까? 히히 🙂",
+    quest: "새로운 요리 레시피 연구 중이야! 🥕",
+    tags: ["요리연구", "당근수프", "오늘의실험", "몽실이의하루"],
+    hearts: 24,
+    commentList: [
+      { who: "두부", text: "향이 여기까지 나는 것 같아요…☺️" },
+      { who: "콩이", text: "나도 한 그릇 줘!! 🏃" },
+    ],
+  },
+  {
+    id: "mp2",
+    food: "🍓",
+    title: "딸기잼 한 병",
+    time: "3시간 전",
+    location: "몽글마을 부엌",
+    body: "아침 일찍 딸기를 졸여서 잼을 만들었어 🍓\n뭉근하게 끓이는 동안 부엌이 온통 달콤한 냄새로 가득!\n내일 아침엔 갓 구운 빵에 발라 먹을 거야.",
+    quest: "겨울나기 저장식 만들기 🍓",
+    tags: ["딸기잼", "저장식", "달콤주의"],
+    hearts: 31,
+    commentList: [{ who: "밤비", text: "한 병만 나눠주면 안 될까…🥺" }],
+  },
+  {
+    id: "mp3",
+    food: "🍞",
+    title: "허브 통밀빵",
+    time: "어제",
+    location: "몽글마을 부엌",
+    body: "반죽을 천천히 발효시키는 시간이 제일 좋아.\n텃밭 허브를 듬뿍 넣어서 향긋한 통밀빵을 구웠어 🌿\n겉은 바삭, 속은 폭신하게 잘 나왔어!",
+    quest: "천연발효빵 굽기 🍞",
+    tags: ["베이킹", "통밀빵", "허브"],
+    hearts: 19,
+    commentList: [],
+  },
+  {
+    id: "mp4",
+    food: "🎃",
+    title: "단호박 그라탕",
+    time: "2일 전",
+    location: "몽글마을 부엌",
+    body: "통통하게 익은 단호박을 통째로 구워서 그라탕을 만들었어 🎃\n치즈가 보글보글 녹는 순간을 제일 좋아해!\n쌀쌀해진 저녁에 딱 어울리는 한 그릇.",
+    quest: "가을 제철요리 연구 🎃",
+    tags: ["단호박", "그라탕", "가을요리"],
+    hearts: 27,
+    commentList: [{ who: "두부", text: "기록해두고 싶은 레시피네요 ✍️" }],
+  },
+  {
+    id: "mp5",
+    food: "🍲",
+    title: "버섯 리조또",
+    time: "3일 전",
+    location: "몽글마을 숲길",
+    body: "숲길에서 캐온 버섯으로 리조또를 끓였어 🍄\n쌀알 하나하나에 향이 스며들 때까지 천천히 저어주는 게 비결!",
+    quest: "숲 재료 활용하기 🍄",
+    tags: ["리조또", "버섯", "숲의선물"],
+    hearts: 22,
+    commentList: [],
+  },
+  {
+    id: "mp6",
+    food: "🍎",
+    title: "사과 타르트",
+    time: "4일 전",
+    location: "몽글마을 부엌",
+    body: "마을에서 받은 사과로 타르트를 구웠어 🍎\n얇게 썬 사과를 한 장 한 장 올리는 시간이 명상 같아.\n달콤한 보상으로 사과 12개를 받았지 뭐야!",
+    quest: "사과 보상 디저트 만들기 🍎",
+    tags: ["사과타르트", "디저트", "오늘의보상"],
+    hearts: 35,
+    commentList: [
+      { who: "콩이", text: "비주얼 미쳤다 🤩" },
+      { who: "밤비", text: "한 조각의 행복…" },
+    ],
+  },
+  {
+    id: "mp7",
+    food: "🌽",
+    title: "옥수수 수프",
+    time: "5일 전",
+    location: "몽글마을 집 앞 텃밭",
+    body: "노랗게 잘 익은 옥수수를 갈아서 고소한 수프를 만들었어 🌽\n한 입 먹으면 마음까지 따뜻해지는 맛!",
+    quest: "텃밭 수확물 요리하기 🌽",
+    tags: ["옥수수수프", "고소함", "텃밭일기"],
+    hearts: 18,
+    commentList: [],
+  },
+  {
+    id: "mp8",
+    food: "🍵",
+    title: "캐모마일 허브티",
+    time: "6일 전",
+    location: "몽글마을 집 앞 텃밭",
+    body: "오늘은 불 앞에 오래 서 있어서 잠깐 쉬어가는 시간 🍵\n직접 말린 캐모마일로 차를 우렸어. 향이 정말 포근해.",
+    quest: "허브 말리기 🌼",
+    tags: ["허브티", "쉬어가기", "포근"],
+    hearts: 26,
+    commentList: [{ who: "두부", text: "차분해지는 사진이네요 ☕" }],
+  },
+  {
+    id: "mp9",
+    food: "🍅",
+    title: "토마토 파스타",
+    time: "1주 전",
+    location: "몽글마을 부엌",
+    body: "잘 익은 토마토를 푹 끓여 소스를 만들었어 🍅\n새콤달콤한 향이 부엌을 가득 채웠지!\n다 같이 모여서 한 그릇씩 나눠 먹었어.",
+    quest: "마을 나눔 요리 🍝",
+    tags: ["파스타", "토마토", "함께먹기"],
+    hearts: 29,
+    commentList: [],
+  },
+];
+
 export const POSTS: FeedPostData[] = [
   {
     id: "mongsil",
