@@ -305,7 +305,6 @@ function App() {
         speech_style: string;
         image_url?: string;
       }>("/api/v1/character", {
-        user_id: "demo-user",
         name,
         persona,
         source_image_url: sourceImagePreview || null,
