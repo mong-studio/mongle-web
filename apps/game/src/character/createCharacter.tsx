@@ -258,7 +258,9 @@ export function CharacterModal({
             type="button"
             className="stampButton"
             onClick={onSubmit}
-            disabled={isBusy || residents.length >= 10}
+            disabled={
+              isBusy || residents.length >= 10 || !characterName.trim() || !characterPersona.trim()
+            }
             aria-label="입주 도장"
           >
             {isBusy ? "생성 중" : "입주\n도장"}

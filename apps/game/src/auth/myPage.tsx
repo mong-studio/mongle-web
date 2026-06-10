@@ -85,8 +85,11 @@ export function MyPageModal({
 
   const initialJob = (JOB_OPTIONS as readonly string[]).includes(userJob) ? userJob : "무직/기타";
   const pwMismatch = !!(newPw && confirmPw && newPw !== confirmPw);
+  const pwCurrentMissing = !!((newPw || confirmPw) && !currentPw);
   const isDirty =
     !pwMismatch &&
+    !pwCurrentMissing &&
+    !!nickname.trim() &&
     (nickname !== userName ||
       job !== initialJob ||
       birth !== userBirth ||
@@ -317,6 +320,7 @@ export function MyPageModal({
                     onChange={(e) => setCurrentPw(e.target.value)}
                     placeholder="현재 비밀번호"
                   />
+                  {pwCurrentMissing && <p className="mpPwError">현재 비밀번호를 입력해 주세요.</p>}
                   <input
                     type="password"
                     value={newPw}
