@@ -282,7 +282,7 @@ function App() {
       setCharacterSetupOpen(false);
       setActiveFeature(null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "원인 미상";
+      const message = error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요.";
       setNotice(`새 친구를 마을에 데려오지 못했어요. ${message}`);
     } finally {
       setIsBusy(false);

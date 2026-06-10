@@ -211,7 +211,7 @@ export function CharacterModal({
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="예: 몽글아"
           />
-          {!characterName.trim() && <p className="bookFieldError">이름을 입력해 주세요.</p>}
+          {!characterName.trim() && <p className="bookFieldError">주민 이름을 적어주세요.</p>}
         </div>
 
         <div className="bookField">
@@ -230,7 +230,9 @@ export function CharacterModal({
             onChange={(e) => onPersonaChange(e.target.value)}
             placeholder="어떤 성격과 이야기를 가진 친구인지 들려주세요."
           />
-          {!characterPersona.trim() && <p className="bookFieldError">페르소나를 입력해 주세요.</p>}
+          {!characterPersona.trim() && (
+            <p className="bookFieldError">어떤 친구인지 소개해 주세요.</p>
+          )}
         </div>
 
         <div className="bookField">
