@@ -1,30 +1,41 @@
+import { useEffect, useState } from "react";
+import { type ApiPost, fetchPostDetail } from "./api.js";
 import type { ThemeTokens } from "./feedData.js";
-import { MONGSIL, MONGSIL_POSTS } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
-
-type LikeMap = Record<string, { count: number; liked: boolean }>;
 
 interface PostScreenProps {
   postId: string;
   th: ThemeTokens;
-  likes: LikeMap;
-  onToggleLike: (id: string) => void;
   onBack: () => void;
   onOpenProfile: () => void;
 }
 
-export function PostScreen({
-  postId,
-  th,
-  likes,
-  onToggleLike,
-  onBack,
-  onOpenProfile,
-}: PostScreenProps) {
-  const post = MONGSIL_POSTS.find((p) => p.id === postId);
-  if (!post) return null;
+export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProps) {
+  const [post, setPost] = useState<ApiPost | null>(null);
+  const [liked, setLiked] = useState(false);
+  const [commentText, setCommentText] = useState("");
 
-  const like = likes[post.id] ?? { count: post.hearts, liked: false };
+  useEffect(() => {
+    let cancelled = false;
+    fetchPostDetail(postId)
+      .then((p) => {
+        if (cancelled) return;
+        setPost(p);
+        setLiked(p.is_liked);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [postId]);
+
+  if (!post) {
+    return (
+      <div className="pd-screen" style={{ background: th.modalBg }}>
+        <div style={{ padding: 48, textAlign: "center", color: th.inkSoft }}>불러오는 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="pd-screen" style={{ background: th.modalBg }}>
@@ -68,27 +79,23 @@ export function PostScreen({
       </div>
 
       <div className="pd-scroll">
-        {/* post card */}
         <article className="pd-post" style={{ background: th.cardBg, borderColor: th.cardEdge }}>
           <button type="button" className="pd-author" onClick={onOpenProfile}>
-            <div className="pd-avatar">🐑</div>
+            <div className="pd-avatar">{post.character[0]?.toUpperCase() ?? "?"}</div>
             <div className="pd-author-txt">
               <div className="pd-author-name" style={{ color: th.ink }}>
-                {MONGSIL.name}
-                <span className="pd-badge" style={{ background: th.badgeBg, color: th.badgeInk }}>
-                  {MONGSIL.role}
-                </span>
+                {post.character.slice(0, 8)}
               </div>
               <div className="pd-author-meta" style={{ color: th.inkSoft }}>
-                {post.time} · {post.location}
+                {new Date(post.created_at).toLocaleDateString("ko-KR")}
               </div>
             </div>
           </button>
 
           <div className="pd-img">
             <ImageSlot
-              id={`pd-${post.id}`}
-              placeholder={`${post.food} ${post.title}`}
+              id={`pd-${post.post_id}`}
+              placeholder={post.img_url || "이미지"}
               width="100%"
               height={240}
               tint={th.rowBg}
@@ -97,10 +104,7 @@ export function PostScreen({
           </div>
 
           <div className="pd-body" style={{ color: th.ink }}>
-            {post.body.split("\n").map((ln, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: static body lines
-              <p key={i}>{ln || " "}</p>
-            ))}
+            <p>{post.content}</p>
           </div>
 
           <div className="pd-meta" style={{ background: th.rowBg, borderColor: th.rowEdge }}>
@@ -114,55 +118,29 @@ export function PostScreen({
               <span>퀘스트</span>
             </div>
             <div className="pd-meta-val" style={{ color: th.ink }}>
-              {post.quest}
-            </div>
-          </div>
-
-          <div className="pd-meta" style={{ background: th.rowBg, borderColor: th.rowEdge }}>
-            <div
-              className="pd-meta-key"
-              style={{ background: th.cardBg, borderColor: th.rowEdge, color: th.ink }}
-            >
-              <span className="pd-meta-ic" style={{ background: th.tagBg, color: th.tagInk }}>
-                #
-              </span>
-              <span>해시태그</span>
-            </div>
-            <div className="pd-meta-val">
-              <div className="pd-chips">
-                {post.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="pd-chip"
-                    style={{ background: th.tagBg, color: th.tagInk }}
-                  >
-                    #{t}
-                  </span>
-                ))}
-              </div>
+              {post.quest_id}
             </div>
           </div>
 
           <footer className="pd-foot" style={{ borderColor: th.cardEdge }}>
             <button
               type="button"
-              className={`pd-react pd-heart${like.liked ? " on" : ""}`}
-              onClick={() => onToggleLike(post.id)}
+              className={`pd-react pd-heart${liked ? " on" : ""}`}
+              onClick={() => setLiked((v) => !v)}
             >
               <svg
                 aria-hidden="true"
                 width="22"
                 height="22"
                 viewBox="0 0 24 24"
-                fill={like.liked ? th.like : "none"}
-                stroke={like.liked ? th.like : th.ink}
+                fill={liked ? th.like : "none"}
+                stroke={liked ? th.like : th.ink}
                 strokeWidth="1.9"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
                 <path d="M12 20.5C12 20.5 3.5 15 3.5 8.8 3.5 6.1 5.6 4 8.2 4c1.7 0 3.1.9 3.8 2.2C12.7 4.9 14.1 4 15.8 4 18.4 4 20.5 6.1 20.5 8.8 20.5 15 12 20.5 12 20.5Z" />
               </svg>
-              <span style={{ color: like.liked ? th.like : th.ink }}>{like.count}</span>
             </button>
 
             <button type="button" className="pd-react" style={{ color: th.ink }}>
@@ -179,7 +157,7 @@ export function PostScreen({
               >
                 <path d="M21 11.5c0 4-3.9 7-8.5 7-1 0-2-.1-2.9-.4L4 19.5l1.3-3.4C4.2 14.9 3.5 13.3 3.5 11.5c0-4 3.9-7 8.5-7s9 3 9 7Z" />
               </svg>
-              <span>{post.commentList.length}</span>
+              <span>{post.comments.length}</span>
             </button>
 
             <div style={{ flex: 1 }} />
@@ -204,42 +182,41 @@ export function PostScreen({
           </footer>
         </article>
 
-        {/* comments */}
         <div className="pd-comments">
           <div className="pd-comments-h" style={{ color: th.ink }}>
-            댓글 {post.commentList.length}
+            댓글 {post.comments.length}
           </div>
-          {post.commentList.length === 0 && (
+          {post.comments.length === 0 && (
             <div className="pd-comments-empty" style={{ color: th.inkSoft }}>
               아직 댓글이 없어요. 첫 따뜻한 한마디를 남겨보세요 🌷
             </div>
           )}
-          {post.commentList.map((c, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: static comment list
-            <div key={i} className="pd-comment">
+          {post.comments.map((c) => (
+            <div key={c.comment_id} className="pd-comment">
               <div className="pd-comment-av" style={{ color: th.tagInk }}>
-                {c.who[0]}
+                {c.user[0]?.toUpperCase() ?? "?"}
               </div>
               <div
                 className="pd-comment-bubble"
                 style={{ background: th.rowBg, borderColor: th.rowEdge }}
               >
-                <b style={{ color: th.ink }}>{c.who}</b>
-                <span style={{ color: th.inkSoft }}>{c.text}</span>
+                <b style={{ color: th.ink }}>{c.user}</b>
+                <span style={{ color: th.inkSoft }}>{c.content}</span>
               </div>
             </div>
           ))}
         </div>
 
-        {/* comment input */}
+        {/* TODO: wire createComment API — 유저가 댓글 입력 시 10분 뒤 캐릭터 답글 예약 */}
         <div className="pd-ci">
-          <div className="pd-ci-av">🐑</div>
-          <div
+          <div className="pd-ci-av">?</div>
+          <input
             className="pd-ci-field"
-            style={{ background: th.rowBg, borderColor: th.rowEdge, color: th.inkSoft }}
-          >
-            따뜻한 댓글 남기기…
-          </div>
+            style={{ background: th.rowBg, borderColor: th.rowEdge, color: th.ink }}
+            placeholder="따뜻한 댓글 남기기…"
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+          />
           <button type="button" className="pd-ci-send" style={{ color: th.accent }}>
             게시
           </button>
