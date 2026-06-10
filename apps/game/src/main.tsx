@@ -290,6 +290,9 @@ function App() {
 
   function handleSourceImageUpload(file: File | undefined) {
     if (!file) {
+      setSourceImageName("");
+      setSourceImagePreview("");
+      setGeneratedCharacterPreview("");
       return;
     }
     if (!file.type.startsWith("image/")) {

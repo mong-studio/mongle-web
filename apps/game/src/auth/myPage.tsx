@@ -279,6 +279,7 @@ export function MyPageModal({
                     />
                     <span className="mpCount">{nickname.length}/8</span>
                   </div>
+                  {!nickname.trim() && <p className="mpPwError">닉네임을 입력해 주세요.</p>}
                 </div>
 
                 <div className="mpFormRow">
