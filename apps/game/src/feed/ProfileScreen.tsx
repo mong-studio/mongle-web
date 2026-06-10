@@ -1,20 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { type ApiCharacterDetail, type ApiPost, fetchCharacterDetail } from "./api.js";
 import type { ThemeTokens } from "./feedData.js";
-import { MONGSIL, MONGSIL_POSTS } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
-
-type LikeMap = Record<string, { count: number; liked: boolean }>;
 
 interface ProfileScreenProps {
   th: ThemeTokens;
   onBack: () => void;
   onOpenPost: (id: string) => void;
-  likes: LikeMap;
+  posts: ApiPost[];
+  characterId: string;
 }
 
-export function ProfileScreen({ th, onBack, onOpenPost, likes }: ProfileScreenProps) {
+export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: ProfileScreenProps) {
   const [following, setFollowing] = useState(false);
-  const totalHearts = MONGSIL_POSTS.reduce((s, p) => s + (likes[p.id]?.count ?? p.hearts), 0);
+  const [character, setCharacter] = useState<ApiCharacterDetail | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchCharacterDetail(characterId)
+      .then((c) => {
+        if (!cancelled) setCharacter(c);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [characterId]);
+
+  const characterPosts = posts.filter((p) => p.character === characterId);
 
   return (
     <div className="pf-screen" style={{ background: th.modalBg }}>
@@ -42,10 +55,10 @@ export function ProfileScreen({ th, onBack, onOpenPost, likes }: ProfileScreenPr
         </button>
         <div className="pf-topbar-center">
           <div className="pf-topbar-name" style={{ color: th.ink }}>
-            {MONGSIL.name}
+            {character?.name ?? "..."}
           </div>
           <div className="pf-topbar-sub" style={{ color: th.inkSoft }}>
-            @mongsil
+            @{characterId.slice(0, 8)}
           </div>
         </div>
         <button
@@ -63,20 +76,18 @@ export function ProfileScreen({ th, onBack, onOpenPost, likes }: ProfileScreenPr
       </div>
 
       <div className="pf-scroll">
-        {/* avatar + stats */}
         <div className="pf-head">
           <div
             className="pf-avatar"
             style={{ boxShadow: `0 0 0 2.5px ${th.modalBg}, 0 0 0 4.5px ${th.accent}` }}
           >
-            {MONGSIL.emoji}
+            {character?.name?.[0] ?? "?"}
           </div>
           <div className="pf-stats">
             {(
               [
-                ["게시물", MONGSIL.stats.posts],
-                ["하트", totalHearts],
-                ["이웃", MONGSIL.stats.followers],
+                ["게시물", characterPosts.length],
+                ["이웃", 0],
               ] as const
             ).map(([label, val]) => (
               <div key={label} className="pf-stat">
@@ -91,46 +102,17 @@ export function ProfileScreen({ th, onBack, onOpenPost, likes }: ProfileScreenPr
           </div>
         </div>
 
-        {/* name + badge */}
         <div className="pf-id">
           <span className="pf-name" style={{ color: th.ink }}>
-            {MONGSIL.name}
+            {character?.name ?? "..."}
           </span>
-          <span className="pf-badge" style={{ background: th.badgeBg, color: th.badgeInk }}>
-            {MONGSIL.role}
-          </span>
+          {character?.persona && (
+            <span className="pf-badge" style={{ background: th.badgeBg, color: th.badgeInk }}>
+              {character.persona}
+            </span>
+          )}
         </div>
 
-        {/* bio */}
-        <div className="pf-bio">
-          {MONGSIL.bio.split("\n").map((ln, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: static bio lines
-            <p key={i} style={{ color: th.ink }}>
-              {ln}
-            </p>
-          ))}
-        </div>
-
-        {/* location */}
-        <div className="pf-loc" style={{ color: th.inkSoft }}>
-          <svg
-            aria-hidden="true"
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={th.accent}
-            strokeWidth="2.1"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 21s6.5-5.6 6.5-10.5A6.5 6.5 0 0 0 5.5 10.5C5.5 15.4 12 21 12 21Z" />
-            <circle cx="12" cy="10.3" r="2.2" />
-          </svg>
-          <span>{MONGSIL.location}</span>
-        </div>
-
-        {/* follow button */}
         <div className="pf-actions">
           <button
             type="button"
@@ -150,28 +132,31 @@ export function ProfileScreen({ th, onBack, onOpenPost, likes }: ProfileScreenPr
           </button>
         </div>
 
-        {/* post grid */}
         <div className="pf-grid-wrap" style={{ borderColor: th.modalEdge }}>
+          {characterPosts.length === 0 && (
+            <div style={{ padding: 24, textAlign: "center", color: th.inkSoft }}>
+              아직 게시글이 없어요 🌱
+            </div>
+          )}
           <div className="pf-grid">
-            {MONGSIL_POSTS.map((p) => (
+            {characterPosts.map((p) => (
               <button
-                key={p.id}
+                key={p.post_id}
                 type="button"
                 className="pf-grid-item"
                 style={{ background: th.rowBg }}
-                onClick={() => onOpenPost(p.id)}
+                onClick={() => onOpenPost(p.post_id)}
               >
                 <div className="pf-grid-img">
                   <ImageSlot
-                    id={`pf-${p.id}`}
-                    placeholder={`${p.food} ${p.title}`}
+                    id={`pf-${p.post_id}`}
+                    placeholder={p.img_url || "이미지"}
                     width="100%"
                     height={130}
                     tint={th.rowBg}
                     radius={5}
                   />
                 </div>
-                <span className="pf-grid-heart">♥ {likes[p.id]?.count ?? p.hearts}</span>
               </button>
             ))}
           </div>
