@@ -244,7 +244,7 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
   const H = 874;
   const scale = useScale(W, H);
 
-  const insetTop = 54;
+  const insetTop = 0;
   const tabBottomPad = 22;
   const tabBarH = tabBottomPad + 60;
   const modalBottom = tabBarH;
