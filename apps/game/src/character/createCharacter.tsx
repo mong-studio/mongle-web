@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./createCharacter.css";
 
 const PERSONALITY_CATEGORIES = [
@@ -61,6 +61,8 @@ export function CharacterModal({
   onClose,
 }: Props) {
   const bookRef = useRef<HTMLDivElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dragCounter = useRef(0);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
   useEffect(() => {
@@ -110,21 +112,52 @@ export function CharacterModal({
           <span className="imageCaption">애착인형의 사진</span>
         </div>
 
-        <label className="bookUploadZone">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => onImageUpload(e.target.files?.[0])}
-          />
-          <span className="bookUploadTitle">
-            애착인형 사진 올리기 <em className="bookUploadOptional">선택</em>
-          </span>
-          <small>{sourceImageName || "PNG · JPG · JPEG · 드래그도 괜찮아요"}</small>
-          <span className="bookUploadHint">
-            인형이 혼자 담긴 사진이 좋아요 🌿<br />
-            하얀 배경이면 더 예쁜 친구가 태어난답니다
-          </span>
-        </label>
+        {sourceImageName ? (
+          <div className="bookUploadZone bookUploadZoneFilled">
+            <span className="bookUploadFileName">📎 {sourceImageName}</span>
+            <button
+              type="button"
+              className="bookUploadCancel"
+              onClick={() => onImageUpload(undefined)}
+            >
+              취소
+            </button>
+          </div>
+        ) : (
+          <label
+            className={`bookUploadZone${isDragOver ? " isDragOver" : ""}`}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              dragCounter.current += 1;
+              setIsDragOver(true);
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDragLeave={() => {
+              dragCounter.current -= 1;
+              if (dragCounter.current === 0) setIsDragOver(false);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              dragCounter.current = 0;
+              setIsDragOver(false);
+              onImageUpload(e.dataTransfer.files?.[0]);
+            }}
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => onImageUpload(e.target.files?.[0])}
+            />
+            <span className="bookUploadTitle">
+              애착인형 사진 올리기 <em className="bookUploadOptional">선택</em>
+            </span>
+            <small>PNG · JPG · JPEG · 드래그도 괜찮아요</small>
+            <span className="bookUploadHint">
+              인형이 혼자 담긴 사진이 좋아요 🌿<br />
+              하얀 배경이면 더 예쁜 친구가 태어난답니다
+            </span>
+          </label>
+        )}
 
         {/* ── 왼쪽 하단: 각주 ── */}
         <p className="bookLeftFootnote">
@@ -170,14 +203,15 @@ export function CharacterModal({
               </span>
               <span>이름</span>
             </div>
-            <span className="bookFieldCount">{characterName.length} / 50</span>
+            <span className="bookFieldCount">{characterName.length} / 10</span>
           </div>
           <input
             value={characterName}
-            maxLength={50}
+            maxLength={10}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="예: 몽글아"
           />
+          {!characterName.trim() && <p className="bookFieldError">이름을 입력해 주세요.</p>}
         </div>
 
         <div className="bookField">
@@ -196,6 +230,7 @@ export function CharacterModal({
             onChange={(e) => onPersonaChange(e.target.value)}
             placeholder="어떤 성격과 이야기를 가진 친구인지 들려주세요."
           />
+          {!characterPersona.trim() && <p className="bookFieldError">페르소나를 입력해 주세요.</p>}
         </div>
 
         <div className="bookField">
@@ -260,7 +295,9 @@ export function CharacterModal({
             type="button"
             className="stampButton"
             onClick={onSubmit}
-            disabled={isBusy || residents.length >= 10}
+            disabled={
+              isBusy || residents.length >= 10 || !characterName.trim() || !characterPersona.trim()
+            }
             aria-label="입주 도장"
           >
             {isBusy ? "생성 중" : "입주\n도장"}

@@ -9,12 +9,12 @@ import {
 } from "./auth/api.js";
 import { apiClient } from "./auth/client.js";
 import { LoginModal } from "./auth/LoginModal.js";
+import { MyPageWrapper } from "./auth/MyPageWrapper.js";
 import { type AuthState, useAuthStore } from "./auth/store.js";
 import { CalendarBulletinBoard } from "./calendar/CalendarBulletinBoard.js";
 import { CalendarModal } from "./calendar/CalendarModal.js";
-import { CharacterModal } from "./components/createCharacter/createCharacter.js";
+import { CharacterModal } from "./character/createCharacter.js";
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
-import { MyPageWrapper } from "./components/myPage/MyPageWrapper.js";
 import { PlannerChat } from "./components/plannerChat/plannerChat.js";
 
 const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
@@ -81,30 +81,6 @@ const FEATURES: Record<FeatureId, Feature> = {
   },
 };
 
-const INITIAL_RESIDENTS: Resident[] = [
-  {
-    id: "resident-tofu",
-    name: "두부",
-    personality: "차분한 기록 담당",
-    speechStyle: "짧고 다정한 조언체",
-    avatarUrl: "/assets/mongle_chief.png",
-  },
-  {
-    id: "resident-kong",
-    name: "콩이",
-    personality: "활기찬 실행 담당",
-    speechStyle: "밝게 응원하는 말투",
-    avatarUrl: "/assets/mongle_chief.png",
-  },
-  {
-    id: "resident-bambi",
-    name: "밤비",
-    personality: "느긋한 회고 담당",
-    speechStyle: "부드럽게 묻는 말투",
-    avatarUrl: "/assets/mongle_chief.png",
-  },
-];
-
 const INITIAL_TODOS: TodoItem[] = [
   {
     id: "todo-1",
@@ -122,35 +98,15 @@ const INITIAL_TODOS: TodoItem[] = [
   },
 ];
 
-function createId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function buildQuest(todo: TodoItem, resident: Resident): Quest {
-  return {
-    id: createId("quest"),
-    ownerId: resident.id,
-    ownerName: resident.name,
-    todoId: todo.id,
-    todoTitle: todo.title,
-    questText: `${resident.name}의 ${resident.personality.replace(" 담당", "")} 미션`,
-    done: false,
-  };
-}
-
 function buildApiUrl(path: string) {
   return `${API_BASE}${path}`;
 }
 function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
-  const [residents, setResidents] = useState<Resident[]>(INITIAL_RESIDENTS);
+  const [residents, setResidents] = useState<Resident[]>([]);
   const [todos, setTodos] = useState<TodoItem[]>(INITIAL_TODOS);
-  const [quests, setQuests] = useState<Quest[]>(() =>
-    INITIAL_TODOS.map((todo, index) =>
-      buildQuest(todo, INITIAL_RESIDENTS[index % INITIAL_RESIDENTS.length]),
-    ),
-  );
+  const [quests, setQuests] = useState<Quest[]>([]);
   const [apples, setApples] = useState(12);
   const [cycles, setCycles] = useState(2);
   const [isFocusing, setIsFocusing] = useState(false);
@@ -257,7 +213,8 @@ function App() {
       return;
     }
 
-    const fallbackResident = residents[quests.length % residents.length] ?? INITIAL_RESIDENTS[0];
+    const fallbackResident = residents[quests.length % residents.length] ?? residents[0];
+    if (!fallbackResident) return;
     const nextQuests = result.questPreviews.map((preview) => {
       const linkedResident =
         residents.find((resident) => resident.id === preview.characterId) ?? fallbackResident;
@@ -284,6 +241,7 @@ function App() {
     setIsBusy(true);
     try {
       const keywords = selectedKeywordCategories.slice(0, 3);
+
       const { data: result } = await apiClient.post<{
         character_id: string;
         name: string;
@@ -297,7 +255,7 @@ function App() {
         personality_keywords: keywords,
       });
       if (!result.image_url) {
-        throw new Error("AI 이미지 URL이 비어 있어 캐릭터를 생성하지 못했어요.");
+        throw new Error("친구 그림을 그리는 데 실패했어요. 잠시 후 다시 시도해 주세요.");
       }
       const resident: Resident = {
         id: result.character_id,
@@ -312,11 +270,20 @@ function App() {
       setGeneratedCharacterPreview(resident.avatarUrl || "");
       setNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
+      setCharacterName("");
+      setCharacterPersona("");
+      setCharacterKeywords("");
+      setSelectedKeywordCategories([]);
+      setSourceImagePreview("");
+      setSourceImageName("");
+      useAuthStore.setState((state) => ({
+        user: state.user ? { ...state.user, hasCharacter: true } : null,
+      }));
       setCharacterSetupOpen(false);
       setActiveFeature(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
-      setNotice(`캐릭터 생성 실패: ${message}`);
+      setNotice(`새 친구를 마을에 데려오지 못했어요. ${message}`);
     } finally {
       setIsBusy(false);
     }
@@ -324,6 +291,9 @@ function App() {
 
   function handleSourceImageUpload(file: File | undefined) {
     if (!file) {
+      setSourceImageName("");
+      setSourceImagePreview("");
+      setGeneratedCharacterPreview("");
       return;
     }
     if (!file.type.startsWith("image/")) {

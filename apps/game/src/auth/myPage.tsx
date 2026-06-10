@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./myPage.css";
 
 export type Resident = {
@@ -71,12 +71,40 @@ export function MyPageModal({
   const [selectedResident, setSelectedResident] = useState<{ r: Resident; idx: number } | null>(
     null,
   );
+  const [showPwConfirm, setShowPwConfirm] = useState(false);
+
+  useEffect(() => {
+    setNickname(userName);
+  }, [userName]);
+  useEffect(() => {
+    setBirth(userBirth);
+  }, [userBirth]);
+  useEffect(() => {
+    setJob((JOB_OPTIONS as readonly string[]).includes(userJob) ? userJob : "무직/기타");
+  }, [userJob]);
+
+  const initialJob = (JOB_OPTIONS as readonly string[]).includes(userJob) ? userJob : "무직/기타";
+  const pwMismatch = !!(newPw && confirmPw && newPw !== confirmPw);
+  const pwCurrentMissing = !!((newPw || confirmPw) && !currentPw);
+  const isDirty =
+    !pwMismatch &&
+    !pwCurrentMissing &&
+    !!nickname.trim() &&
+    (nickname !== userName ||
+      job !== initialJob ||
+      birth !== userBirth ||
+      !!(currentPw || newPw || confirmPw));
 
   async function handleSave() {
     await onUpdateProfile(nickname, job, birth);
     if (currentPw || newPw || confirmPw) {
-      await onUpdatePassword(currentPw, newPw, confirmPw);
+      setShowPwConfirm(true);
     }
+  }
+
+  async function handlePwConfirm() {
+    setShowPwConfirm(false);
+    await onUpdatePassword(currentPw, newPw, confirmPw);
   }
 
   const joinDateFmt = joinDate ? joinDate.slice(0, 10).replace(/-/g, ".") : "";
@@ -251,6 +279,7 @@ export function MyPageModal({
                     />
                     <span className="mpCount">{nickname.length}/8</span>
                   </div>
+                  {!nickname.trim() && <p className="mpPwError">닉네임을 입력해 주세요.</p>}
                 </div>
 
                 <div className="mpFormRow">
@@ -292,6 +321,7 @@ export function MyPageModal({
                     onChange={(e) => setCurrentPw(e.target.value)}
                     placeholder="현재 비밀번호"
                   />
+                  {pwCurrentMissing && <p className="mpPwError">현재 비밀번호를 입력해 주세요.</p>}
                   <input
                     type="password"
                     value={newPw}
@@ -308,9 +338,15 @@ export function MyPageModal({
                     aria-label="새 비밀번호 확인"
                     className="mpInputGap"
                   />
+                  {pwMismatch && <p className="mpPwError">새 비밀번호가 일치하지 않아요.</p>}
                 </div>
 
-                <button type="button" className="mpSaveBtn" onClick={handleSave}>
+                <button
+                  type="button"
+                  className="mpSaveBtn"
+                  onClick={handleSave}
+                  disabled={!isDirty}
+                >
                   저장하기
                 </button>
               </div>
@@ -373,6 +409,26 @@ export function MyPageModal({
             <div className="mpResDetailRow">
               <span className="mpResDetailKey">말투</span>
               <span className="mpResDetailVal">{selectedResident.r.speechStyle}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPwConfirm && (
+        <div className="mpConfirmOverlay">
+          <div className="mpConfirmBox">
+            <p className="mpConfirmMsg">비밀번호를 변경하시겠습니까?</p>
+            <div className="mpConfirmActions">
+              <button
+                type="button"
+                className="mpConfirmCancel"
+                onClick={() => setShowPwConfirm(false)}
+              >
+                취소
+              </button>
+              <button type="button" className="mpConfirmOk" onClick={() => void handlePwConfirm()}>
+                확인
+              </button>
             </div>
           </div>
         </div>
