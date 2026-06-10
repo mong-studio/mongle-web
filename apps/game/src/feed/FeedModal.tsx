@@ -1,8 +1,10 @@
 import type React from "react";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { FeedPost } from "./FeedPost.js";
-import { POSTS, THEMES, type ThemeTokens } from "./feedData.js";
+import { MONGSIL_POSTS, POSTS, THEMES, type ThemeTokens } from "./feedData.js";
 import { APPLE_PAL, PixelSprite, SPARK_PAL, SPRITES } from "./PixelSprite.js";
+import { PostScreen } from "./PostScreen.js";
+import { ProfileScreen } from "./ProfileScreen.js";
 import "./feed.css";
 
 function useScale(W: number, H: number) {
@@ -132,6 +134,7 @@ const TABS = [
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
+type NavScreen = "feed" | "profile" | "post";
 
 function TabBar({
   active,
@@ -212,6 +215,28 @@ interface FeedModalProps {
 export function FeedModal({ onClose: _onClose }: FeedModalProps) {
   const [tab, setTab] = useState<TabId>("피드");
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [navScreen, setNavScreen] = useState<NavScreen>("feed");
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [mongsilLikes, setMongsilLikes] = useState<
+    Record<string, { count: number; liked: boolean }>
+  >(() => Object.fromEntries(MONGSIL_POSTS.map((p) => [p.id, { count: p.hearts, liked: false }])));
+
+  useEffect(() => {
+    if (tab !== "피드") {
+      setNavScreen("feed");
+      setSelectedPostId(null);
+    }
+  }, [tab]);
+
+  function toggleMongsilLike(id: string) {
+    setMongsilLikes((prev) => {
+      const cur = prev[id] ?? { count: 0, liked: false };
+      return {
+        ...prev,
+        [id]: { count: cur.liked ? cur.count - 1 : cur.count + 1, liked: !cur.liked },
+      };
+    });
+  }
 
   const th = THEMES["크림 당근"];
   const onFeed = tab === "피드";
@@ -274,7 +299,14 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
 
         <div className="feed">
           {POSTS.map((p) => (
-            <FeedPost key={p.id} post={p} th={th} pixelMode={false} notify={notify} />
+            <FeedPost
+              key={p.id}
+              post={p}
+              th={th}
+              pixelMode={false}
+              notify={notify}
+              onAuthorClick={p.id === "mongsil" ? () => setNavScreen("profile") : undefined}
+            />
           ))}
         </div>
       </div>
@@ -310,6 +342,32 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
           </div>
         ))}
       </div>
+
+      {navScreen !== "feed" && onFeed && (
+        <>
+          {navScreen === "profile" && (
+            <ProfileScreen
+              th={th}
+              onBack={() => setNavScreen("feed")}
+              onOpenPost={(id) => {
+                setSelectedPostId(id);
+                setNavScreen("post");
+              }}
+              likes={mongsilLikes}
+            />
+          )}
+          {navScreen === "post" && selectedPostId && (
+            <PostScreen
+              postId={selectedPostId}
+              th={th}
+              likes={mongsilLikes}
+              onToggleLike={toggleMongsilLike}
+              onBack={() => setNavScreen("profile")}
+              onOpenProfile={() => setNavScreen("profile")}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 
