@@ -1,7 +1,8 @@
 import type React from "react";
 import { useEffect, useLayoutEffect, useState } from "react";
+import { type ApiCharacter, type ApiPost, fetchCharacters, fetchPosts, toFeedPost } from "./api.js";
 import { FeedPost } from "./FeedPost.js";
-import { MONGSIL_POSTS, POSTS, THEMES, type ThemeTokens } from "./feedData.js";
+import { THEMES, type ThemeTokens } from "./feedData.js";
 import { APPLE_PAL, PixelSprite, SPARK_PAL, SPRITES } from "./PixelSprite.js";
 import { PostScreen } from "./PostScreen.js";
 import { ProfileScreen } from "./ProfileScreen.js";
@@ -217,9 +218,11 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [navScreen, setNavScreen] = useState<NavScreen>("feed");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [mongsilLikes, setMongsilLikes] = useState<
-    Record<string, { count: number; liked: boolean }>
-  >(() => Object.fromEntries(MONGSIL_POSTS.map((p) => [p.id, { count: p.hearts, liked: false }])));
+  const [apiPosts, setApiPosts] = useState<ApiPost[]>([]);
+  const [charMap, setCharMap] = useState<Map<string, ApiCharacter>>(new Map());
+  const [feedLoading, setFeedLoading] = useState(true);
+  const [feedError, setFeedError] = useState<string | null>(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
 
   useEffect(() => {
     if (tab !== "피드") {
@@ -228,15 +231,26 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
     }
   }, [tab]);
 
-  function toggleMongsilLike(id: string) {
-    setMongsilLikes((prev) => {
-      const cur = prev[id] ?? { count: 0, liked: false };
-      return {
-        ...prev,
-        [id]: { count: cur.liked ? cur.count - 1 : cur.count + 1, liked: !cur.liked },
-      };
-    });
-  }
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const [posts, chars] = await Promise.all([fetchPosts(), fetchCharacters()]);
+        if (cancelled) return;
+        const map = new Map(chars.map((c) => [c.character_id, c]));
+        setApiPosts(posts);
+        setCharMap(map);
+      } catch {
+        if (!cancelled) setFeedError("피드를 불러오지 못했어요.");
+      } finally {
+        if (!cancelled) setFeedLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const th = THEMES["크림 당근"];
   const onFeed = tab === "피드";
@@ -292,22 +306,40 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
               몽글마을 피드
             </div>
             <div className="msub" style={{ color: th.inkSoft }}>
-              친구들의 따뜻한 소식 {POSTS.length}개
+              친구들의 따뜻한 소식 {apiPosts.length}개
             </div>
           </div>
         </div>
 
         <div className="feed">
-          {POSTS.map((p) => (
-            <FeedPost
-              key={p.id}
-              post={p}
-              th={th}
-              pixelMode={false}
-              notify={notify}
-              onAuthorClick={p.id === "mongsil" ? () => setNavScreen("profile") : undefined}
-            />
-          ))}
+          {feedLoading && (
+            <div style={{ padding: 32, textAlign: "center", color: th.inkSoft }}>
+              불러오는 중...
+            </div>
+          )}
+          {feedError && (
+            <div style={{ padding: 32, textAlign: "center", color: th.like }}>{feedError}</div>
+          )}
+          {!feedLoading &&
+            !feedError &&
+            apiPosts.map((p) => (
+              <FeedPost
+                key={p.post_id}
+                post={toFeedPost(p, charMap)}
+                th={th}
+                pixelMode={false}
+                notify={notify}
+                onAuthorClick={() => {
+                  setSelectedCharacterId(p.character);
+                  setNavScreen("profile");
+                }}
+              />
+            ))}
+          {!feedLoading && !feedError && apiPosts.length === 0 && (
+            <div style={{ padding: 32, textAlign: "center", color: th.inkSoft }}>
+              아직 게시글이 없어요 🌱
+            </div>
+          )}
         </div>
       </div>
 
@@ -345,7 +377,7 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
 
       {navScreen !== "feed" && onFeed && (
         <>
-          {navScreen === "profile" && (
+          {navScreen === "profile" && selectedCharacterId && (
             <ProfileScreen
               th={th}
               onBack={() => setNavScreen("feed")}
@@ -353,15 +385,14 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
                 setSelectedPostId(id);
                 setNavScreen("post");
               }}
-              likes={mongsilLikes}
+              posts={apiPosts}
+              characterId={selectedCharacterId}
             />
           )}
           {navScreen === "post" && selectedPostId && (
             <PostScreen
               postId={selectedPostId}
               th={th}
-              likes={mongsilLikes}
-              onToggleLike={toggleMongsilLike}
               onBack={() => setNavScreen("profile")}
               onOpenProfile={() => setNavScreen("profile")}
             />
