@@ -117,6 +117,7 @@ export interface FeedPostData {
   quest: { label: string; value: string };
   tags: string[];
   likes: number;
+  isLiked: boolean;
   comments: number;
   heroPlaceholder: string;
   commentList: FeedComment[];
@@ -289,6 +290,7 @@ export const POSTS: FeedPostData[] = [
     quest: { label: "몽실이의 퀘스트", value: "새로운 요리 레시피 연구 중이야! 🥕" },
     tags: ["요리연구", "당근수프", "오늘의실험", "몽실이의하루"],
     likes: 24,
+    isLiked: false,
     comments: 7,
     heroPlaceholder: "몽실이의 요리 사진을 드롭하세요 🥕",
     commentList: [
@@ -312,6 +314,7 @@ export const POSTS: FeedPostData[] = [
     quest: { label: "콩이의 퀘스트", value: "가을 축제용 왕호박 키우기 🎃" },
     tags: ["텃밭일기", "왕호박", "가을축제", "콩이네밭"],
     likes: 41,
+    isLiked: false,
     comments: 12,
     heroPlaceholder: "콩이의 왕호박 사진을 드롭하세요 🎃",
     commentList: [
@@ -335,6 +338,7 @@ export const POSTS: FeedPostData[] = [
     quest: { label: "토토의 퀘스트", value: "전설의 무지개 물고기 찾기 🎣" },
     tags: ["낚시일지", "무지개물고기", "반짝강가", "토토의모험"],
     likes: 58,
+    isLiked: false,
     comments: 19,
     heroPlaceholder: "토토의 낚시 사진을 드롭하세요 🎣",
     commentList: [
@@ -358,6 +362,7 @@ export const POSTS: FeedPostData[] = [
     quest: { label: "별이의 퀘스트", value: "마을 꽃길 가꾸기 🌷" },
     tags: ["꽃집일기", "봄꽃축제", "꽃길산책", "별이의정원"],
     likes: 33,
+    isLiked: false,
     comments: 9,
     heroPlaceholder: "별이의 꽃길 사진을 드롭하세요 🌷",
     commentList: [
@@ -381,6 +386,7 @@ export const POSTS: FeedPostData[] = [
     quest: { label: "마루의 퀘스트", value: "마을 편지 모두 배달하기 ✉️" },
     tags: ["우체부일기", "편지배달", "마을한바퀴", "마루의하루"],
     likes: 27,
+    isLiked: false,
     comments: 6,
     heroPlaceholder: "마루의 배달 사진을 드롭하세요 ✉️",
     commentList: [

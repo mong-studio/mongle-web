@@ -60,7 +60,7 @@ const MENU_ITEMS = [
 ] as const;
 
 export function FeedPost({ post, th, pixelMode, notify, onAuthorClick }: FeedPostProps) {
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(post.isLiked);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

@@ -235,7 +235,10 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
     let cancelled = false;
     async function load() {
       try {
-        const [posts, chars] = await Promise.all([fetchPosts(), fetchCharacters()]);
+        const [posts, chars] = await Promise.all([
+          fetchPosts(),
+          fetchCharacters().catch(() => [] as ApiCharacter[]),
+        ]);
         if (cancelled) return;
         const map = new Map(chars.map((c) => [c.character_id, c]));
         setApiPosts(posts);

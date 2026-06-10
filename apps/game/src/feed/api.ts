@@ -78,6 +78,7 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     quest: { label: "퀘스트", value: post.quest_id },
     tags: [],
     likes: 0,
+    isLiked: post.is_liked,
     comments: post.comments.length,
     heroPlaceholder: post.img_url || "이미지",
     commentList,
