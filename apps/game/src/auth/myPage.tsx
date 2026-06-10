@@ -338,7 +338,7 @@ export function MyPageModal({
                     aria-label="새 비밀번호 확인"
                     className="mpInputGap"
                   />
-                  {pwMismatch && <p className="mpPwError">새 비밀번호가 일치하지 않습니다.</p>}
+                  {pwMismatch && <p className="mpPwError">새 비밀번호가 일치하지 않아요.</p>}
                 </div>
 
                 <button

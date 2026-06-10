@@ -241,6 +241,7 @@ function App() {
     setIsBusy(true);
     try {
       const keywords = selectedKeywordCategories.slice(0, 3);
+
       const { data: result } = await apiClient.post<{
         character_id: string;
         name: string;
@@ -254,7 +255,7 @@ function App() {
         personality_keywords: keywords,
       });
       if (!result.image_url) {
-        throw new Error("AI 이미지 URL이 비어 있어 캐릭터를 생성하지 못했어요.");
+        throw new Error("친구 그림을 그리는 데 실패했어요. 잠시 후 다시 시도해 주세요.");
       }
       const resident: Resident = {
         id: result.character_id,
@@ -282,7 +283,7 @@ function App() {
       setActiveFeature(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
-      setNotice(`캐릭터 생성 실패: ${message}`);
+      setNotice(`새 친구를 마을에 데려오지 못했어요. ${message}`);
     } finally {
       setIsBusy(false);
     }
