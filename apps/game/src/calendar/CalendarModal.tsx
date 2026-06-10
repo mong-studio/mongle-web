@@ -186,20 +186,6 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
               로그인하기
             </button>
           </div>
-        ) : isLoading && !hasLoaded ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              fontFamily: "var(--font-display)",
-              fontSize: 22,
-              color: "var(--ink-3)",
-            }}
-          >
-            🌸 불러오는 중...
-          </div>
         ) : (
           <CalendarWindow
             cal={cal}
@@ -208,7 +194,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
             onAddEvent={handleAddEvent}
             onDeleteTag={deleteTag}
             onEditTag={editTag}
-            isRefreshing={isLoading && hasLoaded}
+            isRefreshing={isLoading}
             tags={tagItems}
           />
         )}

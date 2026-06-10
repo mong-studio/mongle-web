@@ -58,7 +58,7 @@ export function MonthCard({ cal, dir }: MonthCardProps) {
           minHeight: 0,
         }}
       >
-        <AnimatePresence custom={dir}>
+        <AnimatePresence custom={dir} initial={false}>
           <motion.div
             key={`${cal.view.y}-${cal.view.m}`}
             custom={dir}
