@@ -14,6 +14,7 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
   const [post, setPost] = useState<ApiPost | null>(null);
   const [liked, setLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [postError, setPostError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,7 +24,10 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
         setPost(p);
         setLiked(p.is_liked);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (cancelled) return;
+        setPostError(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -32,7 +36,9 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
   if (!post) {
     return (
       <div className="pd-screen" style={{ background: th.modalBg }}>
-        <div style={{ padding: 48, textAlign: "center", color: th.inkSoft }}>불러오는 중...</div>
+        <div style={{ padding: 48, textAlign: "center", color: th.inkSoft }}>
+          {postError ? "게시물을 불러오지 못했어요." : "불러오는 중..."}
+        </div>
       </div>
     );
   }
