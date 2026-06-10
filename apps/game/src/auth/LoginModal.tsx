@@ -63,21 +63,20 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
   }
 
   return (
-    <div className="modalBackdrop" role="presentation">
-      <button
-        type="button"
-        className="modalBackdropClose"
-        onClick={onClose}
-        aria-label="모달 닫기"
-      />
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
+    <div className="modalBackdrop" role="presentation" onClick={onClose}>
       <section
         className="featureModal signupModal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="login-title"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <button type="button" className="closeButton" onClick={onClose} aria-label="닫기">
-          ×
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
         </button>
         <p className="modalKicker">MONGLE ACCOUNT</p>
         <h2 id="login-title">로그인</h2>

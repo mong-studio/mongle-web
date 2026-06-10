@@ -7,8 +7,11 @@ import {
   signup as signupRequest,
   toUserMessage,
 } from "./auth/api.js";
+import { apiClient } from "./auth/client.js";
 import { LoginModal } from "./auth/LoginModal.js";
 import { type AuthState, useAuthStore } from "./auth/store.js";
+import { CalendarBulletinBoard } from "./calendar/CalendarBulletinBoard.js";
+import { CalendarModal } from "./calendar/CalendarModal.js";
 import { CharacterModal } from "./components/createCharacter/createCharacter.js";
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
 import { MyPageWrapper } from "./components/myPage/MyPageWrapper.js";
@@ -18,7 +21,6 @@ const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/inde
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
-const DEMO_USER_ID = "00000000-0000-0000-0000-000000000001";
 
 type FeatureId = "character" | "todo" | "planner";
 type TodoStatus = "candidate" | "saved" | "done";
@@ -139,30 +141,6 @@ function buildQuest(todo: TodoItem, resident: Resident): Quest {
 function buildApiUrl(path: string) {
   return `${API_BASE}${path}`;
 }
-
-async function postApiJson<T>(path: string, payload: unknown): Promise<T> {
-  const response = await fetch(buildApiUrl(path), {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const record = body as { error?: string | { message?: string } };
-    throw new Error(
-      typeof record.error === "string"
-        ? record.error
-        : record.error?.message || "API 요청에 실패했어요.",
-    );
-  }
-
-  if (body && typeof body === "object" && "status" in body && "result" in body) {
-    return (body as { result: T }).result;
-  }
-  return body as T;
-}
 function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
@@ -209,11 +187,19 @@ function App() {
   const authUser = useAuthStore((state: AuthState) => state.user);
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
 
   useEffect(() => {
     void useAuthStore.getState().restoreSession();
   }, []);
+
+  useEffect(() => {
+    if (authStatus === "authenticated" && authUser?.hasCharacter === false) {
+      setCharacterSetupOpen(true);
+    }
+  }, [authStatus, authUser]);
 
   const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
@@ -298,14 +284,13 @@ function App() {
     setIsBusy(true);
     try {
       const keywords = selectedKeywordCategories.slice(0, 3);
-      const result = await postApiJson<{
+      const { data: result } = await apiClient.post<{
         character_id: string;
         name: string;
         personality: string;
         speech_style: string;
         image_url?: string;
-      }>("/api/v1/character", {
-        user_id: "demo-user",
+      }>("/characters/generate/", {
         name,
         persona,
         source_image_url: sourceImagePreview || null,
@@ -327,6 +312,7 @@ function App() {
       setGeneratedCharacterPreview(resident.avatarUrl || "");
       setNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
+      setCharacterSetupOpen(false);
       setActiveFeature(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
@@ -593,6 +579,8 @@ function App() {
         </button>
       </aside>
 
+      <CalendarBulletinBoard todos={todos} onOpen={() => setCalendarOpen(true)} />
+
       {dialogueOpen ? (
         <section className="dialogueBox" aria-label="마을 이장님 대화">
           <img className="chiefPortrait" src="/assets/mongle_chief.png" alt="몽글마을 이장님" />
@@ -633,7 +621,15 @@ function App() {
                 onClick={() => setActiveFeature(null)}
                 aria-label="닫기"
               >
-                ×
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
               </button>
             ) : null}
             {activeFeature !== "character" &&
@@ -646,7 +642,15 @@ function App() {
                   onClick={() => setActiveFeature(null)}
                   aria-label="닫기"
                 >
-                  ×
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
                 </button>
                 <p className="modalKicker">MONGLE VILLAGE</p>
                 <h2 id="feature-title">{active.title}</h2>
@@ -678,7 +682,6 @@ function App() {
             {activeFeature === "todo" ? (
               <TodoCreation
                 apiBase={API_BASE}
-                userId={DEMO_USER_ID}
                 savedTodos={savedTodos}
                 onNotice={setNotice}
                 onTodosSaved={handleCommittedTodos}
@@ -688,7 +691,6 @@ function App() {
             {activeFeature === "planner" ? (
               <PlannerChat
                 apiBase={API_BASE}
-                userId={DEMO_USER_ID}
                 onNotice={setNotice}
                 onTodosSaved={handleCommittedTodos}
               />
@@ -711,7 +713,15 @@ function App() {
               onClick={() => setSignupOpen(false)}
               aria-label="닫기"
             >
-              x
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+              </svg>
             </button>
             <p className="modalKicker">MONGLE ACCOUNT</p>
             <h2 id="signup-title">회원가입</h2>
@@ -858,6 +868,40 @@ function App() {
         onSwitchToSignup={() => {
           setLoginOpen(false);
           setSignupOpen(true);
+        }}
+      />
+
+      {characterSetupOpen ? (
+        <div className="modalBackdrop" role="presentation">
+          <section className="featureModal characterModal" role="dialog" aria-modal="true">
+            <CharacterModal
+              residents={residents}
+              sourceImagePreview={sourceImagePreview}
+              sourceImageName={sourceImageName}
+              characterName={characterName}
+              characterPersona={characterPersona}
+              characterKeywords={characterKeywords}
+              selectedKeywordCategories={selectedKeywordCategories}
+              isBusy={isBusy}
+              onImageUpload={handleSourceImageUpload}
+              onNameChange={setCharacterName}
+              onPersonaChange={setCharacterPersona}
+              onKeywordsChange={setCharacterKeywords}
+              onToggleKeyword={toggleKeywordCategory}
+              onSubmit={createCharacter}
+              onClose={() => {}}
+            />
+          </section>
+        </div>
+      ) : null}
+
+      <CalendarModal
+        isOpen={calendarOpen}
+        onClose={() => setCalendarOpen(false)}
+        isAuthenticated={authStatus === "authenticated"}
+        onOpenLogin={() => {
+          setCalendarOpen(false);
+          setLoginOpen(true);
         }}
       />
     </main>
