@@ -1,21 +1,33 @@
 /* ============================================================
-   MyPage — 몽글마을 마이페이지 (Full Page)
-   Palette: #fdf4e3 · #fff8ec · #f0ddb0 · #d4a840 · #2e1a04
+   MyPage — 몽글마을 마이페이지
+   Design tokens: #fbf3de · #fffdf6 · #fbefcf · #ead8ac · #6e5c44
    ============================================================ */
 
-@keyframes mpFloat {
+@keyframes mpFloaty {
   0%,
   100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
   }
 }
 
-@keyframes mpPop {
+@keyframes mpTwinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.82);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes mpPopIn {
   from {
-    transform: scale(0.7);
+    transform: scale(0.96);
     opacity: 0;
   }
   to {
@@ -24,794 +36,782 @@
   }
 }
 
-/* ── 전체 페이지 ── */
+@keyframes mpOverlayIn {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes mpToastIn {
+  0% {
+    transform: translateX(-50%) translateY(20px) scale(0.96);
+  }
+  60% {
+    transform: translateX(-50%) translateY(-4px) scale(1.02);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* ── 페이지 루트 ── */
 .mpPage {
+  --mp-bg: #fbf3de;
+  --mp-panel: #fffdf6;
+  --mp-card: #fbefcf;
+  --mp-soft: #faf0d6;
+  --mp-border: #ead8ac;
+  --mp-border-strong: #d9be84;
+  --mp-border-active: #e8a24e;
+  --mp-ink: #6e5c44;
+  --mp-ink-soft: #9a876a;
+  --mp-ink-faint: #bcaa88;
+  --mp-accent: #e89a6c;
+  --mp-accent-soft: #efb48e;
+  --mp-divider: #ecddb8;
+  --mp-plate: #c99a5e;
+  --mp-plate-dk: #a87b43;
+
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: #fdf4e3;
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
+  overflow-y: auto;
   font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  display: flex;
-  flex-direction: column;
+  background: linear-gradient(180deg, #bfe3f2 0%, #d8ebb0 50%, #a9d18a 100%);
+  background-attachment: fixed;
+  color: var(--mp-ink);
   scrollbar-width: thin;
-  scrollbar-color: #d4a840 #fdf4e3;
+  scrollbar-color: #dcc79c transparent;
 }
 
-/* ── 상단 바 ── */
-.mpTopbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  height: 52px;
-  background: rgba(255, 248, 236, 0.94);
-  backdrop-filter: blur(8px);
-  border-bottom: 1.5px solid #f0ddb0;
-  flex-shrink: 0;
-  gap: 12px;
+.mpPage::-webkit-scrollbar {
+  width: 11px;
 }
 
-.mpTopbarBrand {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #2e1a04;
-  flex-shrink: 0;
-}
-
-.mpTopbarRight {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.mpAppleChip {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: linear-gradient(135deg, #ffe8a0, #f5d060);
-  border: 1.5px solid #c8a030;
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #7a5018;
-  white-space: nowrap;
-}
-
-.mpTopbarAv {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e8c060, #c09840);
-  border: 2px solid #d4a840;
-  display: grid;
-  place-items: center;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #3a2408;
-  flex-shrink: 0;
-}
-
-.mpBackBtn {
-  background: none;
-  border: 1.5px solid #d4a840;
-  border-radius: 20px;
-  padding: 5px 14px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  font-family: "Gowun Dodum", sans-serif;
-  color: #7a5018;
-  cursor: pointer;
-  transition: background 0.13s;
-  box-shadow: none;
-}
-
-.mpBackBtn:hover {
-  background: #fef0c8;
-}
-
-/* ── 커버 ── */
-.mpCover {
-  flex-shrink: 0;
-  height: 130px;
-  background: linear-gradient(155deg, #9ecde0 0%, #c4e2f2 50%, #d8ecc8 100%);
-  position: relative;
-}
-
-.mpCover::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 22px;
-  background: #fdf4e3;
-  -webkit-mask-image: radial-gradient(circle at 10px 0, transparent 9px, black 10px);
-  -webkit-mask-size: 20px 22px;
-  -webkit-mask-repeat: repeat-x;
-  mask-image: radial-gradient(circle at 10px 0, transparent 9px, black 10px);
-  mask-size: 20px 22px;
-  mask-repeat: repeat-x;
-}
-
-.mpCloud {
-  position: absolute;
-  font-size: 1.8rem;
-  opacity: 0.7;
-  user-select: none;
-  pointer-events: none;
-  line-height: 1;
-}
-
-.mpCloudA {
-  top: 20px;
-  left: 8%;
-  animation: mpFloat 4.5s ease-in-out infinite;
-}
-
-.mpCloudB {
-  top: 14px;
-  left: 24%;
-  font-size: 1.2rem;
-  opacity: 0.5;
-  animation: mpFloat 6s ease-in-out 1.6s infinite;
-}
-
-.mpCloudC {
-  top: 22px;
-  right: 16%;
-  font-size: 1.4rem;
-  opacity: 0.55;
-  animation: mpFloat 5.2s ease-in-out 0.9s infinite;
-}
-
-/* ── 본문 컨텐츠 ── */
-.mpContent {
-  width: min(720px, calc(100% - 32px));
-  margin: 0 auto;
-  flex: 1;
-  padding-bottom: 48px;
-}
-
-/* ── 프로필 밴드 ── */
-.mpProfileBand {
-  display: flex;
-  align-items: flex-start;
-  gap: 18px;
-  padding: 16px 0 24px;
-}
-
-.mpAvatarWrap {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  margin-top: -44px;
-  animation: mpPop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) 0.06s both;
-}
-
-.mpCrown {
-  font-size: 1.1rem;
-  line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(120, 80, 10, 0.28));
-}
-
-.mpAv {
-  width: 82px;
-  height: 82px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #e8c060, #c09840);
-  border: 3px solid #d4a840;
-  display: grid;
-  place-items: center;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #3a2408;
-  box-shadow:
-    0 6px 20px rgba(80, 55, 10, 0.28),
-    0 0 0 4px rgba(255, 248, 200, 0.6);
-  overflow: hidden;
-}
-
-.mpAv img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mpPInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 6px;
-  min-width: 0;
-}
-
-.mpNameRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.mpName {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #2e1a04;
-}
-
-.mpJoinBadge {
-  margin-left: auto;
-  font-size: 0.62rem;
-  color: #9a7030;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.mpVillageBadge {
-  display: inline-flex;
-  align-items: center;
-  background: linear-gradient(135deg, #f0d870, #d4a830);
-  color: #3a2408;
+.mpPage::-webkit-scrollbar-thumb {
+  background: #dcc79c;
   border-radius: 10px;
-  padding: 2px 10px;
-  font-size: 0.63rem;
-  font-weight: 700;
-  flex-shrink: 0;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
-.mpChipRow {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.mpInfoChip {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(212, 168, 64, 0.12);
-  border: 1px solid rgba(212, 168, 64, 0.38);
-  border-radius: 10px;
-  padding: 2px 10px;
-  font-size: 0.65rem;
-  color: #7a5018;
-}
-
-.mpTokenDisplay {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.mpTokenEmoji {
-  font-size: 0.9rem;
-}
-
-.mpTokenNum {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #c08018;
-}
-
-.mpTokenUnit {
-  font-size: 0.66rem;
-  color: #9a7030;
-}
-
-/* ── 통계 카드 ── */
-.mpStatGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.mpStatCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 14px 8px;
-  border-radius: 14px;
-  border: 1.5px solid transparent;
-}
-
-.mpStatApple {
-  background: #fef7e0;
-  border-color: rgba(212, 168, 64, 0.3);
-}
-
-.mpStatVillage {
-  background: #fef0e4;
-  border-color: rgba(220, 140, 60, 0.3);
-}
-
-.mpStatJob {
-  background: #e8f5f0;
-  border-color: rgba(40, 160, 100, 0.3);
-}
-
-.mpStatJoin {
-  background: #eef2fe;
-  border-color: rgba(80, 100, 200, 0.3);
-}
-
-.mpStatEm {
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-.mpStatNum {
-  font-size: 0.96rem;
-  font-weight: 700;
-  color: #2e1a04;
-  line-height: 1.2;
-}
-
-.mpStatNum small {
-  font-size: 0.7rem;
-}
-
-.mpStatNumSm {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #2e1a04;
-  line-height: 1.2;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
-}
-
-.mpStatLb {
-  font-size: 0.57rem;
-  color: #9a7030;
-  text-align: center;
-}
-
-/* ── 탭 바 ── */
-.mpTabBar {
-  display: flex;
-  border-bottom: 2px solid #f0ddb0;
-  background: #fff8ec;
-  border-radius: 12px 12px 0 0;
-}
-
-.mpTab {
-  flex: 1;
-  padding: 12px 0;
-  background: transparent;
-  border: none;
-  border-bottom: 2.5px solid transparent;
-  margin-bottom: -2px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #b09050;
-  cursor: pointer;
-  transition:
-    color 0.13s,
-    border-color 0.13s;
-  font-family: "Gowun Dodum", sans-serif;
-  box-shadow: none;
-}
-
-.mpTab.on {
-  color: #2e1a04;
-  border-bottom-color: #d4a840;
-}
-
-.mpTab:hover:not(.on) {
-  color: #7a5018;
-}
-
-.mpTabBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #d4a840;
-  color: #fff8ec;
-  border-radius: 10px;
-  padding: 1px 6px;
-  font-size: 0.6rem;
-  margin-left: 3px;
-  vertical-align: middle;
-}
-
-/* ── 탭 본문 ── */
-.mpTabBody {
-  background: #fff8ec;
-  border: 1.5px solid #f0ddb0;
-  border-top: none;
-  border-radius: 0 0 16px 16px;
-  min-height: 180px;
-}
-
-.mpSection {
-  padding: 20px;
-}
-
-.mpSecHead {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: #5a3a10;
-  margin-bottom: 14px;
-}
-
-/* ── 주민 그리드 ── */
-.mpResGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
-}
-
-.mpResCard {
-  appearance: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  padding: 14px 8px;
-  background: #fdf4e3;
-  border: 1.5px solid #f0ddb0;
-  border-radius: 14px;
-  cursor: pointer;
-  font: inherit;
-  text-align: center;
-  transition:
-    background 0.13s,
-    transform 0.12s,
-    box-shadow 0.12s;
-}
-
-.mpResCard:hover {
-  background: #faf0c8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(80, 55, 10, 0.14);
-}
-
-.mpResAv {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #3a2408;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.mpResAv img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mpResName {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #2e1a04;
-  text-align: center;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mpResKind {
-  font-size: 0.6rem;
-  color: #9a7030;
-  text-align: center;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mpResEmpty {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 36px 20px;
-  font-size: 0.82rem;
-  color: #9a7030;
-  line-height: 1.9;
-  margin: 0;
-}
-
-.mpResEmpty em {
-  font-style: normal;
-  display: block;
-  font-size: 0.7rem;
-  opacity: 0.75;
-}
-
-/* ── 내 정보 폼 ── */
-.mpInfoForm {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.mpFormGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.mpFormRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.mpLabel {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #5a3a10;
-}
-
-.mpLabel::before {
-  content: "";
-  display: inline-block;
-  width: 3px;
-  height: 13px;
-  background: #d4a840;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.mpInputRow {
-  position: relative;
-}
-
-.mpInputRow input {
-  width: 100%;
-  padding-right: 40px;
-}
-
-.mpCount {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.6rem;
-  color: #b09050;
-  pointer-events: none;
-}
-
-.mpInfoForm input,
-.mpInfoForm select {
-  width: 100%;
-  padding: 10px 13px;
-  border: 1.5px solid #e8d0a0;
-  border-radius: 10px;
-  background: #fffcf5;
-  color: #2e1a04;
-  font-size: 0.83rem;
-  font-family: "Gowun Dodum", sans-serif;
-  outline: none;
-  box-sizing: border-box;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-
-.mpInfoForm input::placeholder {
-  color: #c0a868;
-  opacity: 0.75;
-}
-
-.mpInfoForm input:focus,
-.mpInfoForm select:focus {
-  border-color: #d4a840;
-  box-shadow: 0 0 0 3px rgba(212, 168, 64, 0.15);
-}
-
-.mpInfoForm select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6018' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 30px;
-}
-
-.mpInputGap {
-  margin-top: 6px;
-}
-
-.mpDivider {
-  border: none;
-  border-top: 1px dashed #e0c880;
-  margin: 2px 0;
-}
-
-.mpSaveBtn {
-  width: 100%;
-  padding: 12px 0;
-  border-radius: 12px;
-  border: 2px solid #b88a1a;
-  background: linear-gradient(160deg, #f0d060, #d4a820);
-  color: #2e1a04;
-  font-size: 0.9rem;
-  font-weight: 700;
-  font-family: "Gowun Dodum", sans-serif;
-  cursor: pointer;
-  transition:
-    background 0.13s,
-    transform 0.1s,
-    box-shadow 0.13s;
-  box-shadow: 0 3px 10px rgba(80, 55, 10, 0.22);
-  margin-top: 2px;
-}
-
-.mpSaveBtn:hover {
-  background: linear-gradient(160deg, #e0c050, #c49810);
-  transform: translateY(-1px);
-  box-shadow: 0 5px 14px rgba(80, 55, 10, 0.28);
-}
-
-.mpSaveBtn:active {
-  transform: translateY(1px);
-}
-
-.mpSaveBtn:disabled {
-  background: #e8dcc8;
-  border-color: #c8b898;
-  color: #a08060;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.mpPwError {
-  margin: 6px 0 0;
-  font-size: 0.78rem;
-  color: #d63030;
-  font-weight: 600;
-}
-
-.mpConfirmOverlay {
+/* ── 배경 블롭 ── */
+.mpBlobs {
   position: fixed;
   inset: 0;
-  z-index: 300;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mpConfirmBox {
-  background: #fff8ec;
-  border: 2px solid #f0ddb0;
-  border-radius: 16px;
-  padding: 28px 32px 22px;
-  min-width: 280px;
-  box-shadow: 0 8px 32px rgba(80, 55, 10, 0.22);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.mpConfirmMsg {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #2e1a04;
-  text-align: center;
-}
-
-.mpConfirmActions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-.mpConfirmCancel {
-  flex: 1;
-  padding: 10px 0;
-  border-radius: 10px;
-  border: 1.5px solid #d4a840;
-  background: #fff8ec;
-  color: #7a5018;
-  font-size: 0.88rem;
-  font-weight: 700;
-  font-family: "Gowun Dodum", sans-serif;
-  cursor: pointer;
-}
-
-.mpConfirmOk {
-  flex: 1;
-  padding: 10px 0;
-  border-radius: 10px;
-  border: 2px solid #b88a1a;
-  background: linear-gradient(160deg, #f0d060, #d4a820);
-  color: #2e1a04;
-  font-size: 0.88rem;
-  font-weight: 700;
-  font-family: "Gowun Dodum", sans-serif;
-  cursor: pointer;
-}
-
-/* ── 설정 탭 ── */
-.mpSettings {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.mpPolicySection {
-  display: flex;
-  flex-direction: column;
-  border: 1.5px solid #f0ddb0;
-  border-radius: 14px;
+  pointer-events: none;
   overflow: hidden;
-  background: #fdf4e3;
+  z-index: 0;
 }
 
-.mpPolicyLabel {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #9a7030;
-  padding: 10px 16px 6px;
+.mpBlob {
+  position: absolute;
+  border-radius: 50%;
 }
 
-.mpLinkBtn {
+.mpBlob1 {
+  top: 8%;
+  left: 9%;
+  width: 140px;
+  height: 140px;
+  background: #fff;
+  opacity: 0.42;
+  filter: blur(8px);
+}
+
+.mpBlob2 {
+  top: 18%;
+  right: 13%;
+  width: 96px;
+  height: 96px;
+  background: #fff;
+  opacity: 0.4;
+  filter: blur(7px);
+}
+
+.mpBlob3 {
+  bottom: 7%;
+  left: 6%;
+  width: 170px;
+  height: 170px;
+  background: #8fc47a;
+  opacity: 0.45;
+  filter: blur(11px);
+}
+
+.mpBlob4 {
+  bottom: 5%;
+  right: 8%;
+  width: 150px;
+  height: 150px;
+  background: #9ecb86;
+  opacity: 0.45;
+  filter: blur(11px);
+}
+
+.mpBlob5 {
+  top: 46%;
+  left: 2%;
+  width: 80px;
+  height: 80px;
+  background: #f4c0cf;
+  opacity: 0.34;
+  filter: blur(9px);
+}
+
+/* ── 컨테이너 ── */
+.mpContainer {
+  position: relative;
+  z-index: 1;
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 26px 26px 44px;
+}
+
+/* ── 메인 카드 ── */
+.mpCard {
+  background: var(--mp-bg);
+  border: 3px solid var(--mp-border-strong);
+  border-radius: 30px;
+  box-shadow: 0 28px 64px -24px rgba(80, 58, 26, 0.55);
+  overflow: hidden;
+}
+
+/* ── 헤더 바 ── */
+.mpHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  font-size: 0.83rem;
+  gap: 18px;
+  padding: 16px 26px;
+  border-bottom: 2px solid var(--mp-divider);
+}
+
+.mpHeaderBrand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mpBrandLogo {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.mpBrandName {
+  font-family: "Jua", sans-serif;
+  font-size: 25px;
+  color: var(--mp-ink);
+  white-space: nowrap;
+}
+
+.mpBrandStar {
+  color: #f6c84c;
+  font-size: 13px;
+  animation: mpTwinkle 1.7s infinite;
+}
+
+.mpGoVillage {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 20px;
+  border-radius: 14px;
+  border: 2px solid var(--mp-border);
+  background: var(--mp-panel);
+  color: var(--mp-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.13s,
+    border-color 0.13s;
+  flex-shrink: 0;
+}
+
+.mpGoVillage img {
+  width: 24px;
+  height: 24px;
+}
+
+.mpGoVillage:hover {
+  background: var(--mp-card);
+  border-color: var(--mp-border-strong);
+}
+
+.mpHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.mpTokenChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 2px solid var(--mp-border-strong);
+  background: var(--mp-panel);
+}
+
+.mpTokenChip img {
+  width: 24px;
+  height: 24px;
+}
+
+.mpTokenChip span {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--mp-ink);
+}
+
+.mpBellBtn {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 2px solid var(--mp-border);
+  background: var(--mp-panel);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.13s;
+  flex-shrink: 0;
+}
+
+.mpBellBtn img {
+  width: 26px;
+  height: 26px;
+}
+
+.mpBellBtn:hover {
+  background: var(--mp-card);
+}
+
+.mpNameBtn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  border: 2px solid var(--mp-border-strong);
+  background: var(--mp-panel);
+  cursor: pointer;
+  transition: background 0.13s;
+  flex-shrink: 0;
+}
+
+.mpNameBtn:hover {
+  background: var(--mp-card);
+}
+
+.mpNameAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mpNameBtn span:not(.mpCaret) {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--mp-ink);
+  white-space: nowrap;
+}
+
+.mpCaret {
+  color: var(--mp-ink-soft);
+  font-size: 12px;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+/* ── 타이틀 ── */
+.mpTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  padding: 26px 30px 8px;
+}
+
+.mpTitleFlower {
+  height: 50px;
+  flex-shrink: 0;
+}
+
+.mpFlowerL {
+  animation: mpFloaty 3.6s ease-in-out infinite;
+}
+
+.mpFlowerR {
+  animation: mpFloaty 3.9s ease-in-out 0.2s infinite;
+}
+
+.mpTitleCenter {
+  flex: 1;
+  max-width: 560px;
+  text-align: center;
+}
+
+.mpTitleLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.mpTitleStar {
+  font-size: 16px;
+}
+
+.mpStarY {
+  color: #f6c84c;
+  animation: mpTwinkle 1.6s infinite;
+}
+
+.mpStarG {
+  color: #a7ce7e;
+  animation: mpTwinkle 1.9s 0.3s infinite;
+}
+
+.mpTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 40px;
+  color: var(--mp-accent);
+  margin: 0;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.mpSubtitle {
+  font-size: 15px;
+  color: var(--mp-ink-soft);
+  margin: 6px 0 0;
+  white-space: nowrap;
+}
+
+/* ── 본문 ── */
+.mpBody {
+  padding: 18px 30px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ── 상단 2열 그리드 ── */
+.mpTopRow {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 22px;
+}
+
+/* ── 섹션 제목 공통 ── */
+.mpSecHead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-bottom: 16px;
+  font-family: "Jua", sans-serif;
+  font-size: 19px;
+  color: var(--mp-ink);
+  white-space: nowrap;
+}
+
+.mpSecFleur {
+  color: var(--mp-accent-soft);
+}
+
+/* ── 프로필 + 기본정보 카드 ── */
+.mpProfileCard {
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border);
+  border-radius: 22px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 26px;
+  align-items: center;
+}
+
+.mpAvatarCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mpAvatarRing {
+  position: relative;
+  width: 188px;
+  height: 188px;
+  flex-shrink: 0;
+}
+
+.mpAvatarImg {
+  width: 188px;
+  height: 188px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  border: 4px solid var(--mp-border-strong);
+  box-shadow: 0 10px 22px -12px rgba(120, 90, 40, 0.55);
+  display: block;
+}
+
+.mpNamePlate {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 26px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, #d7ac72, var(--mp-plate));
+  border: 2px solid var(--mp-plate-dk);
+  box-shadow: 0 5px 0 var(--mp-plate-dk);
+  white-space: nowrap;
+}
+
+.mpPlateFleur {
+  color: #fff;
+  font-size: 11px;
+}
+
+.mpNamePlateText {
+  font-family: "Jua", sans-serif;
+  font-size: 21px;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(120, 80, 30, 0.5);
+}
+
+/* ── 기본정보 열 ── */
+.mpInfoCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.mpInfoRows {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.mpInfoRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: var(--mp-card);
+  border: 1.5px solid var(--mp-border);
+  border-radius: 15px;
+  padding: 14px 18px;
+}
+
+.mpInfoIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.mpInfoLabel {
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  color: var(--mp-ink);
+  white-space: nowrap;
+}
+
+.mpInfoVal {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "Jua", sans-serif;
+  font-size: 19px;
+  color: var(--mp-ink);
+  white-space: nowrap;
+}
+
+.mpInfoValIcon {
+  width: 22px;
+  height: 22px;
+}
+
+.mpInfoEditBtn {
+  margin-left: auto;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--mp-border-strong);
+  background: var(--mp-panel);
+  color: var(--mp-ink-soft);
+  font-size: 13px;
   font-family: "Gowun Dodum", sans-serif;
-  color: #3a2408;
-  text-decoration: none;
-  border-top: 1px solid #f0ddb0;
-  transition: background 0.12s;
+  cursor: pointer;
+  transition: background 0.13s;
+  white-space: nowrap;
 }
 
-.mpLinkBtn:hover {
-  background: #faf0c8;
+.mpInfoEditBtn:hover {
+  background: var(--mp-card);
 }
 
-.mpLinkBtn::after {
-  content: "›";
-  font-size: 1.1rem;
-  color: #b09050;
+.mpInfoEditActions {
+  margin-left: auto;
+  display: flex;
+  gap: 7px;
+}
+
+.mpInfoSaveBtn {
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--mp-accent);
+  color: #fff;
+  font-size: 13px;
+  font-family: "Jua", sans-serif;
+  cursor: pointer;
+  transition: opacity 0.13s;
+}
+
+.mpInfoSaveBtn:hover {
+  opacity: 0.85;
+}
+
+.mpInfoCancelBtn {
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--mp-border);
+  background: var(--mp-panel);
+  color: var(--mp-ink-soft);
+  font-size: 13px;
+  font-family: "Gowun Dodum", sans-serif;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.mpInfoCancelBtn:hover {
+  background: var(--mp-card);
+}
+
+.mpInfoSelect {
+  margin-left: auto;
+  padding: 6px 28px 6px 10px;
+  border-radius: 10px;
+  border: 2px solid var(--mp-border-active);
+  background: var(--mp-panel);
+  color: var(--mp-ink);
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6018' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-color: var(--mp-panel);
+  max-width: 160px;
+}
+
+.mpInfoDateInput {
+  margin-left: auto;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 2px solid var(--mp-border-active);
+  background: var(--mp-panel);
+  color: var(--mp-ink);
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 14px;
+  outline: none;
+}
+
+/* ── 계정 설정 카드 ── */
+.mpSettingsCard {
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border);
+  border-radius: 22px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mpPwBlock {
+  background: var(--mp-card);
+  border: 1.5px solid var(--mp-border);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 0;
+}
+
+.mpPwInfo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mpLockIcon {
+  width: 62px;
+  height: 62px;
+  flex-shrink: 0;
+}
+
+.mpPwTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--mp-ink);
+  white-space: nowrap;
+}
+
+.mpPwDesc {
+  font-size: 13px;
+  color: var(--mp-ink-soft);
+  line-height: 1.55;
+  margin-top: 4px;
+}
+
+.mpPwToggleBtn {
+  width: 100%;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border-strong);
+  background: var(--mp-panel);
+  color: var(--mp-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.13s;
+}
+
+.mpPwToggleBtn:hover {
+  background: var(--mp-soft);
+}
+
+.mpChevron {
+  position: absolute;
+  right: 16px;
+  color: var(--mp-ink-soft);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.mpPwForm {
+  margin-top: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  animation: mpPopIn 0.25s ease both;
+}
+
+.mpPwInput {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 11px;
+  border: 2px solid #e8d8b0;
+  background: var(--mp-panel);
+  font-size: 14px;
+  font-family: "Gowun Dodum", sans-serif;
+  color: var(--mp-ink);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.mpPwInput:focus {
+  border-color: var(--mp-border-active);
+}
+
+.mpPwInput::placeholder {
+  color: var(--mp-ink-faint);
+}
+
+.mpPwSaveBtn {
+  padding: 11px;
+  border-radius: 11px;
+  border: none;
+  background: var(--mp-accent);
+  color: #fff;
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  transition: opacity 0.13s;
+}
+
+.mpPwSaveBtn:hover {
+  opacity: 0.88;
+}
+
+.mpPwError {
+  margin: 0;
+  font-size: 13px;
+  color: #d63030;
+}
+
+.mpSettingsRow {
+  width: 100%;
+  margin-top: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 18px;
+  border-radius: 15px;
+  border: 1.5px solid var(--mp-border);
+  background: var(--mp-panel);
+  color: var(--mp-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.13s;
+}
+
+.mpSettingsRow img {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.mpSettingsRow:hover {
+  background: var(--mp-card);
+}
+
+.mpSettingsRow .mpChevron {
+  right: 18px;
 }
 
 .mpWithdrawBtn {
   width: 100%;
+  margin-top: 13px;
   padding: 11px 0;
   background: transparent;
   border: 1.5px solid rgba(180, 50, 30, 0.28);
-  border-radius: 12px;
+  border-radius: 13px;
   color: #b03020;
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 14px;
   font-family: "Gowun Dodum", sans-serif;
   cursor: pointer;
   opacity: 0.75;
   transition:
     opacity 0.13s,
     background 0.13s;
-  box-shadow: none;
 }
 
 .mpWithdrawBtn:hover {
@@ -819,107 +819,435 @@
   background: rgba(180, 50, 30, 0.05);
 }
 
-/* ── 주민 상세 오버레이 ── */
-.mpResDetail {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  background: #fdf4e3;
+/* ── 내 주민들 ── */
+.mpResSection {
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border);
+  border-radius: 22px;
+  padding: 22px 24px;
+}
+
+.mpResSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.mpResHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Jua", sans-serif;
+  font-size: 20px;
+  color: var(--mp-ink);
+  white-space: nowrap;
+}
+
+.mpResHeadStar {
+  color: #6e9a47;
+}
+
+.mpTipWrap {
+  position: relative;
+}
+
+.mpTipBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--mp-border);
+  background: var(--mp-panel);
+  color: var(--mp-ink-soft);
+  font-size: 14px;
+  font-family: "Gowun Dodum", sans-serif;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.mpTipBtn:hover {
+  background: var(--mp-card);
+}
+
+.mpTipQ {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  border: 1.5px solid var(--mp-border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--mp-ink-soft);
+}
+
+.mpTipBox {
+  position: absolute;
+  right: 0;
+  top: 46px;
+  z-index: 20;
+  width: 280px;
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border-strong);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 16px 36px -14px rgba(80, 58, 26, 0.5);
+  animation: mpPopIn 0.22s ease both;
+}
+
+.mpTipTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--mp-ink);
+  margin-bottom: 8px;
+}
+
+.mpTipBox p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--mp-ink-soft);
+  line-height: 1.7;
+}
+
+.mpResGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.mpResCard {
+  background: var(--mp-card);
+  border: 2px solid var(--mp-border);
+  border-radius: 18px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 28px 24px;
-  gap: 16px;
-  overflow-y: auto;
+  gap: 11px;
 }
 
-.mpResDetailBack {
-  align-self: flex-start;
-  background: none;
-  border: none;
-  font-size: 0.82rem;
-  font-family: "Gowun Dodum", sans-serif;
-  color: #9a7030;
-  cursor: pointer;
-  padding: 0;
-  box-shadow: none;
-}
-
-.mpResDetailBack:hover {
-  color: #3a2408;
-}
-
-.mpResDetailAv {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: #3a2408;
-  border: 3px solid rgba(212, 168, 64, 0.5);
-  box-shadow: 0 4px 16px rgba(80, 55, 10, 0.2);
+.mpResImgWrap {
+  border-radius: 13px;
   overflow: hidden;
-  flex-shrink: 0;
+  border: 2px solid var(--mp-border-strong);
+  aspect-ratio: 2 / 1;
+  background: var(--mp-soft);
 }
 
-.mpResDetailAv img {
+.mpResImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.mpResDetailName {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #2e1a04;
-}
-
-.mpResDetailRows {
+.mpResAv {
   width: 100%;
-  max-width: 420px;
-  display: flex;
-  flex-direction: column;
-  border: 1.5px solid #f0ddb0;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #fff8ec;
-}
-
-.mpResDetailRow {
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border-bottom: 1px solid #f0ddb0;
+  justify-content: center;
+  font-family: "Jua", sans-serif;
+  font-size: 2rem;
+  color: #3a2408;
 }
 
-.mpResDetailRow:last-child {
-  border-bottom: none;
-}
-
-.mpResDetailKey {
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #9a7030;
-  width: 36px;
-  flex-shrink: 0;
-}
-
-.mpResDetailVal {
-  font-size: 0.86rem;
-  color: #2e1a04;
-  line-height: 1.5;
-}
-
-/* ── 푸터 ── */
-.mpFoot {
+.mpResName {
+  font-family: "Jua", sans-serif;
+  font-size: 20px;
+  color: var(--mp-ink);
   text-align: center;
-  padding: 32px 0 16px;
-  color: #9a7030;
-  font-size: 0.76rem;
+}
+
+.mpResChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  min-height: 30px;
+}
+
+.mpResChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.mpResProfileBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1.5px solid var(--mp-border-strong);
+  background: var(--mp-panel);
+  color: var(--mp-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.mpResProfileBtn:hover {
+  background: var(--mp-soft);
+}
+
+.mpResEmpty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.mpResEmpty p {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--mp-ink-soft);
+  margin: 0 0 8px;
+}
+
+.mpResEmpty em {
+  font-style: normal;
+  font-size: 14px;
+  color: var(--mp-ink-faint);
+}
+
+/* ── 드롭다운/팝오버 공통 dismiss ── */
+.mpDismiss {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+/* ── 이름 드롭다운 ── */
+.mpNameMenu {
+  position: fixed;
+  right: 42px;
+  top: 78px;
+  z-index: 41;
+  width: 188px;
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border-strong);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 18px 40px -14px rgba(80, 58, 26, 0.5);
+  animation: mpPopIn 0.2s ease both;
+}
+
+.mpNameMenuItem {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 11px;
+  border: none;
+  background: transparent;
+  color: var(--mp-ink);
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.mpNameMenuItem:hover {
+  background: var(--mp-card);
+}
+
+/* ── 알림 팝오버 ── */
+.mpBellPopover {
+  position: fixed;
+  right: 120px;
+  top: 78px;
+  z-index: 41;
+  width: 300px;
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border-strong);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 18px 40px -14px rgba(80, 58, 26, 0.5);
+  animation: mpPopIn 0.2s ease both;
+}
+
+.mpBellPopTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  color: var(--mp-ink);
+  padding: 4px 6px 10px;
+}
+
+.mpBellItem {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 11px;
+  border-radius: 12px;
+  background: var(--mp-soft);
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--mp-ink);
+}
+
+.mpBellItem:last-child {
+  margin-bottom: 0;
+}
+
+.mpBellTime {
+  font-size: 12px;
+  color: var(--mp-ink-faint);
+  margin-top: 2px;
+}
+
+/* ── 주민 프로필 오버레이 ── */
+.mpResOverlayBg {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(70, 52, 28, 0.4);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.mpResOverlay {
+  width: 440px;
+  max-width: 94vw;
+  background: var(--mp-bg);
+  border: 3px solid var(--mp-border-strong);
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 28px 60px -20px rgba(80, 58, 26, 0.6);
+  animation: mpOverlayIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  position: relative;
+}
+
+.mpResOverlayClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 2px solid var(--mp-border-strong);
+  background: var(--mp-panel);
+  color: var(--mp-ink-soft);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.13s;
+}
+
+.mpResOverlayClose:hover {
+  background: var(--mp-card);
+}
+
+.mpResOverlayImgWrap {
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  border-bottom: 2px solid var(--mp-border);
+  background: var(--mp-soft);
+}
+
+.mpResOverlayImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mpResOverlayAv {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Jua", sans-serif;
+  font-size: 4rem;
+  color: #3a2408;
+}
+
+.mpResOverlayBody {
+  padding: 22px 26px 26px;
+}
+
+.mpResOverlayName {
+  font-family: "Jua", sans-serif;
+  font-size: 28px;
+  color: var(--mp-ink);
+  margin-bottom: 14px;
+}
+
+.mpResOverlayChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.mpResOverlayRows {
+  border-top: 2px dashed var(--mp-divider);
+  padding-top: 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
+}
+
+.mpResOverlayRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.mpResOverlayKey {
+  font-size: 13px;
+  color: var(--mp-ink-faint);
+  width: 36px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.mpResOverlayVal {
+  font-size: 15px;
+  color: var(--mp-ink);
+  line-height: 1.6;
+}
+
+/* ── 토스트 ── */
+.mpToast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--mp-panel);
+  border: 2.5px solid var(--mp-border-strong);
+  border-radius: 16px;
+  padding: 14px 22px;
+  box-shadow: 0 18px 42px -14px rgba(60, 42, 18, 0.55);
+  animation: mpToastIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  white-space: nowrap;
+}
+
+.mpToast span:first-child {
+  color: var(--mp-accent);
+}
+
+.mpToast span:last-child {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--mp-ink);
 }
