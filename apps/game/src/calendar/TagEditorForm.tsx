@@ -42,23 +42,40 @@ export function TagEditorForm({
         gap: 9,
       }}
     >
-      <input
-        value={name}
-        onChange={(e) => onNameChange(e.target.value)}
-        placeholder="태그 이름"
-        style={{
-          width: "100%",
-          boxSizing: "border-box",
-          padding: "8px 11px",
-          borderRadius: "var(--r-md)",
-          border: "2px solid var(--line-soft)",
-          background: "var(--cream-0)",
-          color: "var(--ink-1)",
-          fontFamily: "var(--font-display)",
-          fontSize: 15,
-          outline: "none",
-        }}
-      />
+      <div style={{ position: "relative" }}>
+        <input
+          value={name}
+          onChange={(e) => onNameChange(e.target.value.slice(0, 10))}
+          maxLength={10}
+          placeholder="태그 이름"
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            padding: "8px 40px 8px 11px",
+            borderRadius: "var(--r-md)",
+            border: "2px solid var(--line-soft)",
+            background: "var(--cream-0)",
+            color: "var(--ink-1)",
+            fontFamily: "var(--font-display)",
+            fontSize: 15,
+            outline: "none",
+          }}
+        />
+        <span
+          style={{
+            position: "absolute",
+            right: 10,
+            top: "50%",
+            transform: "translateY(-50%)",
+            fontFamily: "var(--font-body)",
+            fontSize: 11,
+            color: name.length >= 10 ? "var(--sun)" : "var(--ink-3)",
+            pointerEvents: "none",
+          }}
+        >
+          {name.length}/10
+        </span>
+      </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         {TAG_COLORS.map((c) => (
           <button
@@ -113,7 +130,7 @@ export function TagEditorForm({
           style={{ width: 10, height: 10, borderRadius: "50%", background: color, flexShrink: 0 }}
         />
         <span style={{ fontFamily: "var(--font-display)", fontSize: 13, color: "var(--ink-2)" }}>
-          #{name.trim() || "새태그"} 미리보기
+          #{name.trim() || "새태그"}
         </span>
       </div>
       {onConfirm && (
