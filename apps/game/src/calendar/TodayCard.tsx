@@ -77,7 +77,9 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
         <button
           type="button"
           className="calBtn-accent"
-          onClick={() => !isRefreshing && cal.openAdd({ y: ty, m: tm, d: td })}
+          aria-label={isRefreshing ? "새로고침 중" : "일정 추가"}
+          disabled={isRefreshing}
+          onClick={() => cal.openAdd({ y: ty, m: tm, d: td })}
           style={{
             width: 34,
             height: 34,
@@ -185,6 +187,19 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
           );
         })}
       </motion.div>
+      {evs.length === 0 && (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "20px 0",
+            color: "var(--ink-3)",
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+          }}
+        >
+          오늘의 할일이 없어요
+        </div>
+      )}
     </div>
   );
 }
