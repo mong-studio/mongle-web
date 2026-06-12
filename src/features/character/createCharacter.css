@@ -4,7 +4,7 @@
    ============================================================ */
 
 /* Reset featureModal wrapper */
-.characterModal {
+.featureModal.characterModal {
   padding: 0;
   background: transparent;
   border: none;
