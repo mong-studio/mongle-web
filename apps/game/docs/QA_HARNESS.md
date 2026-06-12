@@ -5,16 +5,15 @@ This project does not yet have automated Playwright tests. Until those are added
 ## Build Harness
 
 ```bash
-npm run godot:export --prefix apps/game
+npm run web:typecheck
 npm run web:build
 ```
 
 Pass condition:
 
-- Godot loads the project under `apps/game/godot`.
-- Web export completes when export templates are installed.
-- React/Vite build completes.
-- No runtime assets are missing from `godot/assets/`.
+- TypeScript passes.
+- Vite build completes.
+- No required map assets are missing from `public/assets/map/`.
 
 ## Browser Harness
 
@@ -26,12 +25,11 @@ npm run web:dev
 
 Check:
 
-- The iframe renders a nonblank Godot pixel village.
+- Phaser renders a nonblank pixel village.
 - Timer starts, changes to pause, and reset works.
-- Todo input adds an item with `+` or Enter.
-- Todo complete toggle works.
-- Todo remains after restarting the Godot run.
-- NPC/building click changes dialogue and card text.
+- Todo and quest controls still work.
+- Village marker opens dialogue.
+- Login/signup modals still open.
 
 ## Visual Harness
 
@@ -45,16 +43,11 @@ Check:
 
 - Pixel art is crisp, not blurry.
 - HUD panels remain readable.
-- Bottom dialogue does not hide all important map content.
-- Top-left and top-right panels do not collide.
+- Panels do not collide on narrow widths.
 - No obvious empty or placeholder-looking areas.
-- Houses, trees, props, and UI feel like one palette.
 
 ## Future Automation
-
-Recommended future tests:
 
 - Playwright screenshot smoke test at desktop and mobile widths.
 - Canvas nonblank pixel sample.
 - UI checks for timer, todos, and dialogue.
-- `user://` persistence test.

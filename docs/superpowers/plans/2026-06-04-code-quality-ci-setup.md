@@ -60,8 +60,6 @@
     "web:typecheck": "npm run typecheck --prefix apps/game",
     "web:build": "npm run build --prefix apps/game",
     "web:preview": "npm run preview --prefix apps/game",
-    "web:godot": "npm run godot:edit --prefix apps/game",
-    "web:godot:export": "npm run godot:export --prefix apps/game",
     "ai:api": "cd packages/ai && uv run python -m api.server",
     "ai:test": "cd packages/ai && uv run pytest",
     "ai:demo": "cd packages/ai && uv run streamlit run streamlit_app/app.py",

@@ -25,7 +25,7 @@ description: 몽글마을 UI 규칙 — 타이포그래피, z-index, 반응형, 
 ## Z-index 레이어
 
 ```
-0  — godotLayer (Godot iframe)
+0  — phaserLayer (Phaser canvas)
 1  — shadeLayer
 6  — leftRail, questPanel
 7  — dialogueBox, talkButton

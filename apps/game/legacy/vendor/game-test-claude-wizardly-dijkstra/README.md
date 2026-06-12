@@ -129,13 +129,9 @@ no UI overlays, no text, 1920x1280
 │   ├── MCP_AND_SKILLS.md        ← MCP·스킬 가이드
 │   ├── WEB_APP_ALTERNATIVE.md   ← 왜 웹앱인가
 │   └── KNOWN_ISSUES.md          ← 미해결 + 알면 좋은 것들
-├── legacy/godot/              ← 초기 Godot 버전 (참고용)
-│   ├── project.godot
-│   ├── scenes/
-│   ├── scripts/
+├── legacy/map-build/          ← 초기 맵 합성 참고 자료
 │   ├── assets/sparklin/       ← CC0 픽셀아트 (Pixel-boy)
-│   ├── tools/build_village.py ← 배경 PNG 합성 스크립트
-│   └── HOW_TO_RUN.md
+│   └── tools/build_village.py ← 배경 PNG 합성 스크립트
 └── .claude/skills/            ← Claude Code용 커스텀 스킬
     ├── tile-check.md          ← 타일 좌표 시각확인
     ├── village-rebuild.md     ← 빌드 풀 루프 자동화
@@ -154,7 +150,7 @@ no UI overlays, no text, 1920x1280
 - **순수 SVG** — 캐릭터·닭 (스케일 자유로움)
 
 배경 PNG는 [Sparklin Labs "Ninja Adventure"](https://github.com/sparklinlabs/superpowers-asset-packs) 타일셋(CC0)을
-파이썬으로 합성한 것 (`legacy/godot/tools/build_village.py`). 원하면
+파이썬으로 합성한 것 (`legacy/map-build/tools/build_village.py`). 원하면
 규칙 바꿔서 마을 모양 재합성 가능.
 
 ---
@@ -174,7 +170,7 @@ no UI overlays, no text, 1920x1280
 ## 📜 라이선스
 
 - **코드**: MIT
-- **픽셀아트** (`legacy/godot/assets/sparklin/`): CC0 by Pixel-boy ([원본](https://github.com/sparklinlabs/superpowers-asset-packs))
+- **픽셀아트** (`legacy/map-build/assets/sparklin/`): CC0 by Pixel-boy ([원본](https://github.com/sparklinlabs/superpowers-asset-packs))
 - **폰트**: Google Fonts (Press Start 2P, VT323, Noto Sans KR) — SIL Open Font License
 
 ---

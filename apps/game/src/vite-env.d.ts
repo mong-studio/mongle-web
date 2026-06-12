@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_GODOT_EXPORT_PATH?: string;
   readonly VITE_API_BASE?: string;
 }
 

@@ -1,131 +1,68 @@
 # Mongle Village Web MVP
 
-A React/Vite web shell that embeds a Godot Web export in an iframe. The Godot scene is a cozy top-down farming RPG style village with a focus timer, todo panel, clickable NPCs/buildings, and dialogue text.
+React/Vite 기반의 몽글마을 웹 화면입니다. 메인 마을 배경은 Phaser가 Tiled JSON 맵(`public/assets/map/mongle.tmj`)을 렌더링하고, React는 HUD, 퀘스트, 주민, 로그인, 캘린더, 모달 UI를 담당합니다.
 
-This is an original prototype. The reference screenshot is stored under `legacy/reference/` for visual direction only; the code does not extract or copy assets from it.
+## 문서 안내
 
-## 문서 안내 (처음이라면 여기부터)
-
-개발이 처음인 팀원은 아래 순서로 읽으면 가장 빠르게 시작할 수 있습니다.
-
-| 순서 | 문서 | 무엇을 설명하나요? |
+| 순서 | 문서 | 내용 |
 | --- | --- | --- |
-| 1 | [docs/setup-guide.md](docs/setup-guide.md) | 설치 → 실행 → 빌드 따라 하기 |
-| 2 | [docs/project-guide.md](docs/project-guide.md) | 프로젝트 구조와 코드를 둘 위치 |
-| 3 | [../../docs/code-quality-guide.md](../../docs/code-quality-guide.md) | Biome·Git 훅·CI 등 코드 품질 |
-| 4 | [docs/git-strategy.md](docs/git-strategy.md) | 브랜치·커밋·PR 올리는 방법 |
-
-참고 문서: [docs/HANDOFF.md](docs/HANDOFF.md) (평가/인수인계),
-[docs/QA_HARNESS.md](docs/QA_HARNESS.md) (수동 점검),
-[docs/RISKS_AND_NOTES.md](docs/RISKS_AND_NOTES.md) (위험·메모),
-[docs/REFERENCES.md](docs/REFERENCES.md) (에셋·비주얼 방향),
-[../../docs/PROJECT_STRUCTURE.md](../../docs/PROJECT_STRUCTURE.md) (작업 공간 전체 구조).
+| 1 | [docs/setup-guide.md](docs/setup-guide.md) | 설치, 실행, 빌드 |
+| 2 | [docs/project-guide.md](docs/project-guide.md) | 프로젝트 구조와 작업 위치 |
+| 3 | [../../docs/code-quality-guide.md](../../docs/code-quality-guide.md) | Biome, Git 훅, CI |
+| 4 | [docs/git-strategy.md](docs/git-strategy.md) | 브랜치, 커밋, PR |
 
 ## Quick Start
-
-Requirements:
-
-- Node.js 20+ recommended
-- npm 10+ recommended
-- Godot 4.x for editing/exporting the iframe content
-
-Install and run the React web shell:
 
 ```bash
 npm install
 npm run dev
 ```
 
-From the workspace root:
+워크스페이스 루트에서는 아래 명령을 사용합니다.
 
 ```bash
 npm run web:install
 npm run web:dev
 ```
 
-AI TODO integration:
+## Environment
 
-AI features are provided through the Django backend, which calls the separate `mongle-ai` service. The TODO UI calls `VITE_API_BASE` (default same-origin), e.g. `/api/v1/todos/generate/`, `/api/v1/todos/chat/`, and `/api/v1/todos/commit/`.
-If that service is not running, the React app keeps working and uses the local fallback splitter.
-
-Environment values for the web shell can be copied from `.env.example`:
-
-```bash
-cp .env.example .env.local
-```
-
-- `VITE_GODOT_EXPORT_PATH` controls the iframe URL for the Godot Web export.
-- `VITE_API_BASE` controls the Django API base URL.
-
-Export the Godot screen for the iframe:
-
-```bash
-npm run godot:export
-```
-
-The export writes to `public/godot/index.html`, which the React app embeds at `/godot/index.html`.
+- `VITE_API_BASE`: Django API base URL. 비어 있으면 same-origin을 사용합니다.
 
 ## What Is Implemented
 
-- React/Vite shell with a full-viewport iframe.
-- Godot project with a single main village scene under `godot/`.
-- Configurable Vite environment values for the Godot iframe path and the AI API base URL.
-- Pixel village map with grass, paths, houses, trees, water, fences, flowers, props, NPCs, and clickable buildings.
-- Focus timer with start, pause, and reset.
-- Todo list with add, complete toggle, and Godot `user://` persistence.
-- AI TODO splitting through the external `mongle-ai` API.
-- NPC/building selection card and bottom dialogue panel.
-- Pixel-style HUD with nearest-neighbor rendering.
+- React/Vite 앱 셸
+- Phaser 기반 Tiled 맵 렌더링
+- 픽셀 스타일 HUD와 모달
+- 포커스 타이머
+- TODO/퀘스트 UI
+- 주민 생성 UI
+- 외부 AI TODO API 연동과 로컬 fallback
 
 ## Project Structure
 
 ```text
 .
-├── project.godot
-├── export_presets.cfg
-├── scenes/
-│   └── main.tscn
-├── scripts/
-│   └── village.gd
-├── godot/
-│   ├── project.godot
-│   ├── scenes/
-│   ├── scripts/
+├── public/
 │   └── assets/
-├── public/godot/
+│       ├── map/
+│       │   ├── mongle.tmj
+│       │   ├── *.tsx
+│       │   └── *.png
+│       └── mongle_chief.png
 ├── src/
+│   ├── PhaserVillage.tsx
+│   ├── main.tsx
+│   ├── calendar/
+│   ├── auth/
+│   └── components/
 ├── docs/
 ├── legacy/
 └── ASSET_CREDITS.md
 ```
 
-## Assets And References
-
-Runtime assets:
-
-- `godot/assets/grass_tileset/`
-- `godot/assets/lpc-flowers-plants-fungi-wood/`
-- `godot/assets/lpc-terrains/`
-- `godot/assets/submission_daneeklu/`
-- See `ASSET_CREDITS.md` and `docs/REFERENCES.md`
-
-Archived reference material:
-
-- `legacy/reference/reference-screenshot.png`
-- `legacy/vendor/kenney/`
-- `legacy/plans/original-plan.md`
-
 ## Known Limitations
 
-- The visual style is still prototype-level and mixes atlas sprites with simple Godot-drawn houses/NPCs.
-- There is no player movement yet; this MVP is a clickable focus/todo village screen.
-- No server sync, account system, audio, mobile app packaging, or multiplayer.
-- `user://` is used for todos inside the Godot iframe, so data stays local to that runtime/profile.
-
-## Recommended Next Steps
-
-- Replace generated sprites with a cohesive dedicated tile pack or custom pixel art.
-- Add a player character and path/collision movement.
-- Move map composition into a Godot TileMap/TileSet for easier level design.
-- Add ambient animation: water shimmer, chimney smoke, NPC idle frames, flower sway.
-- Add visual regression screenshots for desktop and mobile sizes.
+- 맵의 일부 타일셋 파일이 없으면 해당 타일은 렌더링되지 않습니다.
+- 현재 마을 캐릭터 클릭 지점은 임시 마커입니다.
+- 플레이어 이동, 충돌, 오디오, 멀티플레이는 아직 없습니다.
