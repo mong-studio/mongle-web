@@ -5,18 +5,10 @@ Build and maintain a cozy pixel village focus/todo game MVP. The web app is a Re
 ## Commands
 
 ```bash
-npm run dev --prefix apps/game
-npm run typecheck --prefix apps/game
-npm run build --prefix apps/game
-npm run test --prefix apps/game
-```
-
-From the workspace root:
-
-```bash
-npm run web:dev
-npm run web:typecheck
-npm run web:build
+npm run dev
+npm run typecheck
+npm run build
+npm run test
 ```
 
 ## Main Files

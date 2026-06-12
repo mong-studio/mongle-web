@@ -37,7 +37,7 @@ ls .husky
 | `npm run check:fix` | 검사하고 고칠 수 있는 것은 자동으로 고칩니다. | 커밋 전 코드 정리 |
 | `npm run format` | 코드 모양(들여쓰기·따옴표)만 맞춥니다. | 모양만 빠르게 정리할 때 |
 | `npm run lint` | 코드 품질 규칙만 검사합니다. | 잠재적 버그를 찾을 때 |
-| `npm run web:typecheck` | TypeScript 타입 오류를 검사합니다. | 타입 실수를 찾을 때 |
+| `npm run typecheck` | TypeScript 타입 오류를 검사합니다. | 타입 실수를 찾을 때 |
 | `npm run ci-check` | 검사 + 타입검사 + 빌드를 한 번에 합니다. | 푸시 전, CI와 똑같이 확인할 때 |
 
 가장 자주 쓰는 흐름: 작업 → `npm run check:fix` → 커밋.

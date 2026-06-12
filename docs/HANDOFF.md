@@ -15,13 +15,13 @@ Implemented systems:
 
 ## How To Evaluate It
 
-1. Run `npm run web:install`.
-2. Run `npm run web:dev`.
+1. Run `npm install`.
+2. Run `npm run dev`.
 3. Open `http://127.0.0.1:5173/`.
 4. Confirm the Phaser canvas renders a nonblank village map.
 5. Confirm HUD panels remain readable.
 6. Click the village marker and confirm the dialogue opens.
-7. Run `npm run web:build`.
+7. Run `npm run build`.
 
 ## Files To Edit First
 

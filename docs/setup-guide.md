@@ -8,7 +8,7 @@
 
 ## 이 프로젝트는 무엇인가요?
 
-`apps/game`은 React + Vite 앱입니다. 마을 배경은 Phaser가 Tiled 맵을 렌더링하고, React는 HUD와 기능 UI를 담당합니다.
+이 저장소는 React + Vite 앱입니다. 마을 배경은 Phaser가 Tiled 맵을 렌더링하고, React는 HUD와 기능 UI를 담당합니다.
 
 ## 미리 준비할 것
 
@@ -23,13 +23,13 @@
 
 ```bash
 npm install
-npm run web:install
+npm install
 ```
 
 ## 화면 실행
 
 ```bash
-npm run web:dev
+npm run dev
 ```
 
 브라우저에서 아래 주소를 엽니다.
@@ -50,7 +50,7 @@ http://127.0.0.1:5173/
 ## 환경 변수
 
 ```bash
-cp apps/game/.env.example apps/game/.env.local
+cp .env.example .env.local
 ```
 
 | 변수 | 필수 | 기본값 | 설명 |
@@ -62,9 +62,9 @@ cp apps/game/.env.example apps/game/.env.local
 Phaser는 아래 파일들을 사용합니다.
 
 ```text
-apps/game/public/assets/map/mongle.tmj
-apps/game/public/assets/map/*.tsx
-apps/game/public/assets/map/*.png
+public/assets/map/mongle.tmj
+public/assets/map/*.tsx
+public/assets/map/*.png
 ```
 
 맵이 비어 보이거나 일부 타일이 빠지면 `mongle.tmj`가 참조하는 `.tsx` 파일과 `.tsx` 내부 이미지 파일이 실제로 있는지 확인합니다.
@@ -72,25 +72,25 @@ apps/game/public/assets/map/*.png
 ## 빌드
 
 ```bash
-npm run web:build
+npm run build
 ```
 
-빌드 결과는 `apps/game/dist/`에 생깁니다.
+빌드 결과는 `dist/`에 생깁니다.
 
 ## 명령어 치트시트
 
 | 명령어 | 무엇을 하나요? |
 | --- | --- |
-| `npm run web:install` | 화면 앱 의존성 설치 |
-| `npm run web:dev` | 개발 서버 실행 |
-| `npm run web:typecheck` | TypeScript 타입 검사 |
-| `npm run web:build` | 타입 검사 + 배포용 빌드 |
-| `npm run web:preview` | 빌드 결과 미리보기 |
+| `npm install` | 화면 앱 의존성 설치 |
+| `npm run dev` | 개발 서버 실행 |
+| `npm run typecheck` | TypeScript 타입 검사 |
+| `npm run build` | 타입 검사 + 배포용 빌드 |
+| `npm run preview` | 빌드 결과 미리보기 |
 | `npm run check:fix` | 코드 검사 + 자동 수정 |
 | `npm run ci-check` | CI와 같은 검증 |
 
 ## 잘 안 될 때
 
-- `npm run web:dev`가 안 켜지면 `npm install`과 `npm run web:install`을 다시 실행합니다.
+- `npm run dev`가 안 켜지면 `npm install`과 `npm install`을 다시 실행합니다.
 - 마을 배경이 비어 있으면 `public/assets/map/`의 맵/타일셋/이미지 파일을 확인합니다.
 - API 기능이 동작하지 않으면 API 서버 주소와 `VITE_API_BASE`를 확인합니다.

@@ -12,7 +12,7 @@ mongle-web/
 ## Web App
 
 ```text
-apps/game/
+
 ├── public/
 │   └── assets/
 │       ├── map/                   # Tiled map, tilesets, tile images
@@ -31,7 +31,7 @@ apps/game/
 ## Runtime Flow
 
 ```text
-apps/game/src/main.tsx
+src/main.tsx
   -> React HUD, panels, modals
   -> PhaserVillage
     -> public/assets/map/mongle.tmj
@@ -42,8 +42,8 @@ apps/game/src/main.tsx
 ## Common Commands
 
 ```bash
-npm run web:install
-npm run web:dev
-npm run web:typecheck
-npm run web:build
+npm install
+npm run dev
+npm run typecheck
+npm run build
 ```

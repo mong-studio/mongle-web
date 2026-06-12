@@ -1,34 +1,26 @@
 # Mongle Web
 
-Mongle Web 워크스페이스는 React/Vite 게임 화면, Phaser 타일맵 렌더링, Python AI API로 구성되어 있습니다.
+React/Vite 기반의 몽글마을 웹 화면입니다. 메인 마을 배경은 Phaser가 Tiled JSON 맵(`public/assets/map/mongle.tmj`)을 렌더링하고, React는 HUD, 퀘스트, 주민, 로그인, 캘린더, 모달 UI를 담당합니다.
+
+## 문서 안내
+
+| 순서 | 문서 | 내용 |
+| --- | --- | --- |
+| 1 | [docs/setup-guide.md](docs/setup-guide.md) | 설치, 실행, 빌드 |
+| 2 | [docs/project-guide.md](docs/project-guide.md) | 프로젝트 구조와 작업 위치 |
+| 3 | [docs/code-quality-guide.md](docs/code-quality-guide.md) | Biome, Git 훅, CI |
+| 4 | [docs/git-strategy.md](docs/git-strategy.md) | 브랜치, 커밋, PR |
 
 ## 필요 환경
 
-- Python 3.12
-- uv
 - Node.js 20+
 - npm 10+
 
-## 설치
-
-Python 3.12 기준으로 AI 패키지 환경을 설치합니다.
+## Quick Start
 
 ```bash
-uv sync --project packages/ai --python 3.12 --all-extras --dev
-```
-
-React/Vite 프론트엔드 패키지를 설치합니다.
-
-```bash
-npm run web:install
-```
-
-## 실행
-
-프론트엔드를 실행합니다.
-
-```bash
-npm run web:dev
+npm install
+npm run dev
 ```
 
 브라우저에서 아래 주소를 엽니다.
@@ -37,43 +29,55 @@ npm run web:dev
 http://127.0.0.1:5173/
 ```
 
-프론트엔드는 기본적으로 같은 origin의 API를 호출합니다. 별도 API 서버를 사용할 때는 `VITE_API_BASE`를 설정합니다.
+## 자주 쓰는 명령
+
+```bash
+npm run typecheck
+npm run build
+npm run test
+npm run check
+```
+
+## Environment
+
+- `VITE_API_BASE`: AI API base URL. 비어 있으면 same-origin을 사용합니다. 개발 서버는 `/api` 요청을 `http://127.0.0.1:8000`으로 프록시합니다.
 
 ## Phaser Map
 
 마을 배경은 Phaser가 Tiled 맵을 렌더링합니다.
 
 ```text
-apps/game/public/assets/map/mongle.tmj
-apps/game/public/assets/map/*.tsx
-apps/game/public/assets/map/*.png
+public/assets/map/mongle.tmj
+public/assets/map/*.tsx
+public/assets/map/*.png
 ```
 
 맵을 수정할 때는 `mongle.tmj`의 `tilesets[].source`와 각 `.tsx`의 `<image source="...">`가 실제 파일명과 맞는지 확인합니다.
 
-## Lock 파일
+## What Is Implemented
 
-AI 패키지의 Python 의존성은 아래 파일에 고정되어 있습니다.
+- React/Vite 앱 셸
+- Phaser 기반 Tiled 맵 렌더링
+- 픽셀 스타일 HUD와 모달
+- 포커스 타이머
+- TODO/퀘스트 UI
+- 주민 생성 UI
+- 외부 AI TODO API 연동과 로컬 fallback
+
+## Project Structure
 
 ```text
-packages/ai/uv.lock
+.
+├── public/
+│   └── assets/
+├── src/
+├── docs/
+├── legacy/
+└── ASSET_CREDITS.md
 ```
 
-프론트엔드 의존성은 아래 파일에 고정되어 있습니다.
+## Known Limitations
 
-```text
-apps/game/package-lock.json
-```
-
-프론트엔드 의존성을 변경한 뒤에는 아래 명령을 실행합니다.
-
-```bash
-npm install --prefix apps/game
-```
-
-## 자주 쓰는 명령
-
-```bash
-npm run web:typecheck
-npm run web:build
-```
+- 맵의 일부 타일셋 파일이 없으면 해당 타일은 렌더링되지 않습니다.
+- 현재 마을 캐릭터 클릭 지점은 임시 마커입니다.
+- 플레이어 이동, 충돌, 오디오, 멀티플레이는 아직 없습니다.
