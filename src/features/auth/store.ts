@@ -107,7 +107,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
           const me = await authApi.fetchMe();
           set({ user: { userId: me.user_id, email: me.email, userName: me.user_name } });
         } catch {
-          // access token이 만료된 경우 interceptor가 refresh를 시도하므로 여기선 무시.
+          // 401: interceptor가 refresh를 시도하고 실패 시 onSessionExpired로 clearSession을 호출한다.
+          // 네트워크 에러 등 그 외 실패: 직접 세션을 초기화해 로그인 버튼을 표시한다.
+          clearSession();
         }
         return;
       }
@@ -121,7 +123,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         const me = await authApi.fetchMe();
         set({ user: { userId: me.user_id, email: me.email, userName: me.user_name } });
       } catch {
-        // user 정보 조회 실패해도 토큰 세션은 유효하므로 유지한다.
+        clearSession();
       }
     },
   };
