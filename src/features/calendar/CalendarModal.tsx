@@ -133,6 +133,55 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
     [createTag],
   );
 
+  const handleDeleteEvent = useCallback(async (id: string) => {
+    if (id.startsWith("todo-")) {
+      const todoId = id.slice(5);
+      await apiClient.delete(`/todos/${todoId}/`);
+      setTodos((prev) => prev.filter((t) => t.todo_id !== todoId));
+    } else if (id.startsWith("sched-")) {
+      const schedId = id.slice(6);
+      await apiClient.delete(`/todos/schedules/${schedId}/`);
+      setSchedules((prev) => prev.filter((s) => s.schedule_id !== schedId));
+    }
+  }, []);
+
+  const handleEditEvent = useCallback(
+    async (
+      id: string,
+      title: string,
+      tagId: number | null,
+      startStr: string,
+      endStr: string,
+      description: string,
+    ) => {
+      const tagParam = tagId !== null ? { tag_id: tagId } : {};
+      if (id.startsWith("todo-")) {
+        const todoId = id.slice(5);
+        const res = await apiClient.patch(`/todos/${todoId}/`, {
+          content: title,
+          todo_date: startStr,
+          ...tagParam,
+        });
+        setTodos((prev) =>
+          prev.map((t) => (t.todo_id === todoId ? { ...t, ...(res.data as CalTodo) } : t)),
+        );
+      } else if (id.startsWith("sched-")) {
+        const schedId = id.slice(6);
+        const res = await apiClient.patch(`/todos/schedules/${schedId}/`, {
+          title,
+          description,
+          start_date: startStr,
+          end_date: endStr,
+          ...tagParam,
+        });
+        setSchedules((prev) =>
+          prev.map((s) => (s.schedule_id === schedId ? { ...s, ...(res.data as CalSchedule) } : s)),
+        );
+      }
+    },
+    [],
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -192,6 +241,8 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
             onClose={onClose}
             onToggle={handleToggle}
             onAddEvent={handleAddEvent}
+            onDeleteEvent={handleDeleteEvent}
+            onEditEvent={handleEditEvent}
             onDeleteTag={deleteTag}
             onEditTag={editTag}
             isRefreshing={isLoading}

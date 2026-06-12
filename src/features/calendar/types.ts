@@ -8,6 +8,7 @@ export type CalTodo = {
   todo_date: string;
   tag_color: string;
   tag_content: string;
+  tag_id?: number;
 };
 
 export type CalSchedule = {
@@ -18,6 +19,7 @@ export type CalSchedule = {
   end_date: string | null;
   tag_color: string;
   tag_content: string;
+  tag_id?: number;
 };
 
 export type CalTag = {
@@ -42,6 +44,8 @@ export function todoToEvent(t: CalTodo): CalEvent {
     color: t.tag_color || c.color,
     bg: t.tag_color ? `${t.tag_color}22` : c.bg,
     tagLabel: t.tag_content ? `#${t.tag_content}` : `#${c.label}`,
+    description: "",
+    tagId: t.tag_id ?? null,
     todoId: t.todo_id,
   };
 }
@@ -61,6 +65,8 @@ export function scheduleToEvent(s: CalSchedule): CalEvent {
     color: s.tag_color || c.color,
     bg: s.tag_color ? `${s.tag_color}22` : c.bg,
     tagLabel: s.tag_content ? `#${s.tag_content}` : `#${c.label}`,
+    description: s.description,
+    tagId: s.tag_id ?? null,
     scheduleId: s.schedule_id,
   };
 }

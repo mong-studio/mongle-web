@@ -5,6 +5,7 @@ import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import { CalendarBulletinBoard } from "../features/calendar/CalendarBulletinBoard.js";
 import { CalendarModal } from "../features/calendar/CalendarModal.js";
 import { CharacterModal } from "../features/character/createCharacter.js";
+import { FeedModal } from "../features/feed/FeedModal.js";
 import { MyPageWrapper } from "../features/my-page/MyPageWrapper.js";
 import { PlannerChat } from "../features/planner-chat/plannerChat.js";
 import { type TodoCommitResult, TodoCreation } from "../features/todo/todoCreation.js";
@@ -95,6 +96,7 @@ export function App() {
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [feedOpen, setFeedOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
 
   useEffect(() => {
@@ -319,6 +321,26 @@ export function App() {
         </nav>
         <h1>몽글마을</h1>
         <div className="navUserArea">
+          <button
+            type="button"
+            className="feedIconButton"
+            aria-label="몽글마을 피드 열기"
+            onClick={() => setFeedOpen(true)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="6"
+                y="2.5"
+                width="12"
+                height="19"
+                rx="2.5"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path d="M10 5.5h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M10.5 18.5h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
           {authStatus === "authenticated" && authUser ? (
             <>
               <button type="button" className="loginButton" onClick={() => setShowMyPage(true)}>
@@ -585,6 +607,18 @@ export function App() {
           setLoginOpen(true);
         }}
       />
+      {feedOpen ? (
+        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
+        <div
+          className="modalBackdrop"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setFeedOpen(false);
+          }}
+        >
+          <FeedModal onClose={() => setFeedOpen(false)} />
+        </div>
+      ) : null}
     </main>
   );
 }
