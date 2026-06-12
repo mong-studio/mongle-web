@@ -463,10 +463,15 @@ export function TodoCreation({
       {/* ── PAGE 1: QUEST PREVIEW ── */}
       {page === 1 && (
         <div className="tdPanel tdSingle tdPageIn">
+          <button
+            type="button"
+            className="tdBackBtn"
+            onClick={() => setPage(0)}
+            aria-label="돌아가기"
+          >
+            ←
+          </button>
           <div className="tdRightHeader">
-            <button type="button" className="tdBackBtn" onClick={() => setPage(0)}>
-              ← 돌아가기
-            </button>
             <div className="tdRightTitle">
               <img src="/assets/character/deco-flowers-l.png" alt="" className="tdFlowerSm" />
               <h2 className="tdRightTitleText">오늘의 할 일 목록</h2>

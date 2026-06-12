@@ -585,23 +585,21 @@
 
 /* ── Back button ── */
 .tdBackBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border-radius: 10px;
-  border: 2px solid var(--td-border-strong);
-  background: var(--td-panel);
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  border: none;
+  background: transparent;
   color: var(--td-ink-soft);
-  font-family: "Jua", sans-serif;
-  font-size: 14px;
+  font-size: 22px;
+  line-height: 1;
   cursor: pointer;
-  margin-bottom: 12px;
-  transition: background 0.12s;
+  padding: 4px;
+  transition: color 0.12s;
 }
 
 .tdBackBtn:hover {
-  background: var(--td-field);
+  color: var(--td-ink);
 }
 
 /* ── Right panel header ── */
