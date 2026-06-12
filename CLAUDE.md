@@ -13,9 +13,13 @@ npm run test
 
 ## Main Files
 
-- `src/main.tsx`: React app shell, HUD, feature modals, auth state, and API calls.
-- `src/PhaserVillage.tsx`: Phaser scene that loads and renders `public/assets/map/mongle.tmj`.
-- `src/style.css`: full-viewport layout and pixel UI styling.
+- `src/main.tsx`: entry point (createRoot only).
+- `src/app/App.tsx`: React app shell, HUD, feature modals, auth state, and API calls.
+- `src/app/featureRegistry.ts`: feature modal definitions.
+- `src/features/village/PhaserVillage.tsx`: Phaser scene that loads and renders `public/assets/map/mongle.tmj`.
+- `src/app/global.css`: full-viewport layout and pixel UI styling.
+- `src/features/`: domain features (auth, calendar, character, my-page, planner-chat, todo, village).
+- `src/shared/`: cross-domain code (`api/` HTTP client, `ui/` reusable components).
 - `public/assets/map/`: Tiled map, tileset definitions, and image assets.
 
 ## Notes
