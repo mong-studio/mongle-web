@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import {
@@ -16,8 +16,8 @@ import { CalendarModal } from "./calendar/CalendarModal.js";
 import { CharacterModal } from "./character/createCharacter.js";
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
 import { PlannerChat } from "./components/plannerChat/plannerChat.js";
+import { PhaserVillage } from "./PhaserVillage.js";
 
-const GODOT_EXPORT_PATH = import.meta.env.VITE_GODOT_EXPORT_PATH ?? "/godot/index.html";
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const TODAY_LABEL = "2026.05.26 TUE";
 const MAX_DAILY_APPLES = 20;
@@ -160,9 +160,9 @@ function App() {
   const active = useMemo(() => (activeFeature ? FEATURES[activeFeature] : null), [activeFeature]);
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
-  const residentNames = residents.map((resident) => resident.name).join("|");
-  const residentAvatars = JSON.stringify(residents.map((resident) => resident.avatarUrl || ""));
-  const godotSrc = `${GODOT_EXPORT_PATH}?residents=${residents.length}&names=${encodeURIComponent(residentNames)}&avatars=${encodeURIComponent(residentAvatars)}&v=${villageVersion}`;
+  const openVillageDialogue = useCallback(() => {
+    setDialogueOpen(true);
+  }, []);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -442,11 +442,10 @@ function App() {
 
   return (
     <main className="appShell">
-      <iframe
-        className="godotLayer"
-        title="몽글마을 Godot 배경 레이어"
-        src={godotSrc}
-        allow="fullscreen; gamepad; autoplay"
+      <PhaserVillage
+        residents={residents}
+        reloadKey={villageVersion}
+        onOpenDialogue={openVillageDialogue}
       />
       <div className="shadeLayer" aria-hidden="true" />
 

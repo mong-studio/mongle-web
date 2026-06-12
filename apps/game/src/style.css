@@ -39,7 +39,7 @@ button {
   background: #2d5b36;
 }
 
-.godotLayer,
+.phaserLayer,
 .shadeLayer {
   position: absolute;
   inset: 0;
@@ -47,10 +47,17 @@ button {
   height: 100%;
 }
 
-.godotLayer {
+.phaserLayer {
   z-index: 0;
-  border: 0;
-  background: #6fbf63;
+  overflow: hidden;
+  background: #47783d;
+}
+
+.phaserLayer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
 }
 
 .shadeLayer {
@@ -96,6 +103,7 @@ button {
 }
 
 .townNav button,
+.mapControls button,
 .focusActions button,
 .questPanel > button,
 .primaryButton,
@@ -117,6 +125,29 @@ button {
   padding: 0 12px;
   font-size: 0.78rem;
   white-space: nowrap;
+}
+
+.mapControls {
+  position: absolute;
+  z-index: 7;
+  right: 22px;
+  bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 34px);
+  gap: 6px;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mapControls button {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .navUserArea {

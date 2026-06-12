@@ -2,42 +2,31 @@
 
 ## Current State
 
-The app is now a React/Vite shell that embeds the Godot screen in an iframe. The Godot scene is kept under `godot/` and exported to `public/godot/`.
+The app is a React/Vite web app with a Phaser-rendered Tiled map background.
 
 Implemented systems:
 
-- Godot-rendered top-down village map using runtime assets from `godot/assets/`.
-- Clickable NPCs and buildings.
+- Phaser-rendered top-down village map from `public/assets/map/mongle.tmj`.
+- Pixel-style React HUD panels.
 - Focus timer.
-- Todo list with Godot `user://` persistence.
-- Pixel-style UI panels.
-- TODO generation/chat/commit requests to Django `api/v1/todos/*`, which forwards to `mongle-ai` api/v1 endpoints.
+- Todo and quest UI.
+- Character creation UI.
+- TODO generation/chat/commit requests to API endpoints with local fallback behavior where available.
 
 ## How To Evaluate It
 
-1. Run `npm install --prefix apps/game`.
-2. Export the Godot screen with `npm run godot:export --prefix apps/game`.
-3. Run `npm run web:dev`.
-4. Open `http://127.0.0.1:5173/`.
-5. Check that the iframe shows the Godot map and stays pixel-sharp.
-6. Click NPCs/buildings and confirm the card and dialogue update.
-7. Add a todo, reload, and confirm it persists.
-8. Start and pause the timer.
+1. Run `npm run web:install`.
+2. Run `npm run web:dev`.
+3. Open `http://127.0.0.1:5173/`.
+4. Confirm the Phaser canvas renders a nonblank village map.
+5. Confirm HUD panels remain readable.
+6. Click the village marker and confirm the dialogue opens.
+7. Run `npm run web:build`.
 
 ## Files To Edit First
 
-- React iframe shell: `src/main.tsx`, `src/style.css`
-- Visual/map work: `godot/scripts/village.gd`
-- Scene shell: `godot/scenes/main.tscn`
-- External asset documentation: `ASSET_CREDITS.md`
+- React app shell: `src/main.tsx`
+- Phaser map renderer: `src/PhaserVillage.tsx`
+- Visual styles: `src/style.css`
+- Map assets: `public/assets/map/`
 - Project docs: `README.md`, `docs/*.md`
-
-## Packaging For A Friend
-
-Send the project folder without `node_modules` and `dist`. The recipient should run:
-
-```bash
-npm install --prefix apps/game
-npm run godot:export --prefix apps/game
-npm run web:dev
-```

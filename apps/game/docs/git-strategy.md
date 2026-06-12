@@ -153,7 +153,7 @@ git diff apps/game/src/main.tsx
 - `.env`, `.env.local` (개인 환경 설정)
 - `node_modules/` (설치된 패키지)
 - `apps/game/dist/` (빌드 결과물)
-- 이번 작업과 상관없는 화면/Godot 파일
+- 이번 작업과 상관없는 화면/맵 파일
 - IDE나 포맷터가 자동으로 바꾼 관련 없는 파일
 
 의도하지 않은 파일이 보이면 아래를 생각합니다.

@@ -9,8 +9,6 @@
     "web:typecheck": "npm run typecheck --prefix apps/game",
     "web:build": "npm run build --prefix apps/game",
     "web:preview": "npm run preview --prefix apps/game",
-    "web:godot": "npm run godot:edit --prefix apps/game",
-    "web:godot:export": "npm run godot:export --prefix apps/game",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check .",

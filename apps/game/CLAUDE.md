@@ -1,67 +1,34 @@
-# CLAUDE.md
+# Mongle Game Notes
 
-This file is for AI coding agents working on this project.
-
-## Project Intent
-
-Build and maintain a cozy pixel village focus/todo game MVP. The web app is a React/Vite shell that embeds a Godot Web export in an iframe.
-
-Do not copy the reference screenshot's exact assets, characters, or layout. Treat `legacy/reference/reference-screenshot.png` as visual direction only.
+Build and maintain a cozy pixel village focus/todo game MVP. The web app is a React/Vite application with a Phaser-rendered Tiled map background.
 
 ## Commands
 
-Use these before handing off changes:
-
 ```bash
-npm run godot:export --prefix apps/game
-npm run web:build
+npm run dev --prefix apps/game
+npm run typecheck --prefix apps/game
+npm run build --prefix apps/game
+npm run test --prefix apps/game
 ```
 
-For local development:
+From the workspace root:
 
 ```bash
 npm run web:dev
+npm run web:typecheck
+npm run web:build
 ```
 
-## Important Files
+## Main Files
 
-- `src/main.tsx`: React iframe shell.
-- `src/style.css`: full-viewport iframe styling.
-- `godot/project.godot`: Godot project settings and main scene pointer.
-- `godot/scenes/main.tscn`: main scene shell.
-- `godot/scripts/village.gd`: map composition, game state, timer/todo interactions, and HUD.
-- `godot/assets/`: runtime third-party asset files.
-- `legacy/`: reference-only material. Do not import from here in app code.
-- `docs/`: handoff, risks, QA, and reference notes.
+- `src/main.tsx`: React app shell, HUD, feature modals, auth state, and API calls.
+- `src/PhaserVillage.tsx`: Phaser scene that loads and renders `public/assets/map/mongle.tmj`.
+- `src/style.css`: full-viewport layout and pixel UI styling.
+- `public/assets/map/`: Tiled map, tileset definitions, and image assets.
 
-## Engineering Rules
+## Notes
 
-- Keep runtime code independent from `legacy/`.
-- Preserve pixel crispness with nearest-neighbor texture filtering, pixel snapping, and whole-number sprite scaling.
-- Keep the MVP small and shippable. Prefer visual polish over adding large new systems.
-- Do not add copied Stardew Valley or screenshot-derived assets.
-- If adding external assets, document license and source in `ASSET_CREDITS.md` and `docs/REFERENCES.md`.
-
-## Design System
-
-For color values, read `src/style.css` — do not introduce hex values not already present there.
-
-When building a new component read `docs/design/components.md`. When reviewing UI read `docs/design/rules.md`.
-
-## Visual Quality Bar
-
-Before finalizing visual work, inspect:
-
-- The map does not feel empty.
-- Houses and trees share palette, scale, outline thickness, and shadow direction.
-- HUD text is readable over the map.
-- UI panels do not overlap awkwardly at laptop width.
-- Pixel art is not blurry.
-- New art does not clash with the selected runtime asset folders.
-
-## Current Risks
-
-- Procedural sprites are useful for prototyping but can look homemade.
-- More free asset packs may clash unless normalized to the same tile size, palette, and outline style.
-- Godot Web export needs export templates and browser QA before sharing a web build.
-- Todo persistence is local to Godot `user://` storage only.
+- Keep map assets in `public/assets/map/`.
+- Keep `mongle.tmj` tileset `source` values aligned with actual `.tsx` filenames.
+- Keep `.tsx` image `source` basenames aligned with actual `.png` filenames.
+- React UI should remain layered above the Phaser canvas.
