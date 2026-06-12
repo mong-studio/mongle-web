@@ -27,6 +27,7 @@ describe("useAuthStore", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    sessionStorage.clear();
     useAuthStore.setState({ user: null, accessToken: null, status: "loading" });
   });
 

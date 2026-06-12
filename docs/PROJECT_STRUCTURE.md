@@ -16,6 +16,7 @@ mongle-web/
 │   │   ├── auth/                  # 로그인, 세션 스토어
 │   │   ├── calendar/
 │   │   ├── character/
+│   │   ├── feed/                  # 마을 피드 (게시글, 댓글)
 │   │   ├── my-page/
 │   │   ├── planner-chat/
 │   │   ├── todo/

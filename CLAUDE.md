@@ -18,7 +18,7 @@ npm run test
 - `src/app/featureRegistry.ts`: feature modal definitions.
 - `src/features/village/PhaserVillage.tsx`: Phaser scene that loads and renders `public/assets/map/mongle.tmj`.
 - `src/app/global.css`: full-viewport layout and pixel UI styling.
-- `src/features/`: domain features (auth, calendar, character, my-page, planner-chat, todo, village).
+- `src/features/`: domain features (auth, calendar, character, feed, my-page, planner-chat, todo, village).
 - `src/shared/`: cross-domain code (`api/` HTTP client, `ui/` reusable components).
 - `public/assets/map/`: Tiled map, tileset definitions, and image assets.
 
@@ -31,8 +31,8 @@ src/
 ├── main.tsx          # 엔트리 (createRoot만) — 여기에 로직 추가 금지
 ├── app/              # 앱 셸: App.tsx, featureRegistry.ts, global.css
 ├── features/<도메인>/  # 도메인별 기능 (kebab-case 폴더)
-│   ├── auth/  calendar/  character/  my-page/
-│   ├── planner-chat/  todo/  village/
+│   ├── auth/  calendar/  character/  feed/
+│   ├── my-page/  planner-chat/  todo/  village/
 └── shared/           # 두 개 이상의 feature가 쓰는 코드만
     ├── api/          # HTTP 클라이언트 (apiClient)
     └── ui/           # 재사용 UI 컴포넌트 (Tag 등)
