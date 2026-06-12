@@ -481,7 +481,7 @@ export function TodoCreation({
 
           <div className="tdQuestList">
             {quests.length === 0 ? (
-              <div className="tdQuestEmpty">왼쪽에서 생성하기를 눌러보세요 🌸</div>
+              <div className="tdQuestEmpty">돌아가서 TODO를 추가해주세요!!</div>
             ) : (
               quests.map((q) => {
                 const isEditing = editingId === q.id;
@@ -552,12 +552,6 @@ export function TodoCreation({
                               +
                             </button>
                           ))}
-                      </div>
-                      <div className="tdQuestDesc">
-                        <span>
-                          {q.who}의 퀘스트: {q.desc}
-                        </span>
-                        <span className="tdAccentStar">✦</span>
                       </div>
                     </div>
                     <div className="tdQuestBtns">
