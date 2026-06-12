@@ -82,6 +82,7 @@ type TodoCreationProps = {
   savedTodos: TodoItem[];
   onNotice: (message: string) => void;
   onTodosSaved: (result: TodoCommitResult) => void;
+  onClose?: () => void;
 };
 
 export function TodoCreation({
@@ -89,6 +90,7 @@ export function TodoCreation({
   savedTodos: _savedTodos,
   onNotice,
   onTodosSaved,
+  onClose,
 }: TodoCreationProps) {
   const [sentence, setSentence] = useState("");
   const [confirmed, setConfirmed] = useState(false);
@@ -104,19 +106,19 @@ export function TodoCreation({
 
   const [page, setPage] = useState<0 | 1>(0);
   const [quests, setQuests] = useState<Quest[]>([]);
-  const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [spinning, setSpinning] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [addingTagFor, setAddingTagFor] = useState<string | null>(null);
+  const [questTagText, setQuestTagText] = useState("");
   const [isBusy, setIsBusy] = useState(false);
   const [toast, setToast] = useState("");
 
   const tagInputRef = useRef<HTMLInputElement>(null);
+  const questTagInputRef = useRef<HTMLInputElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
-  const spinTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(
     () => () => {
       clearTimeout(toastTimer.current);
-      clearTimeout(spinTimer.current);
     },
     [],
   );
@@ -209,25 +211,34 @@ export function TodoCreation({
       desc: DESCS[i % DESCS.length],
     }));
     setQuests(newQuests);
-    setChecked({});
     setPage(1);
     showToast("퀘스트를 생성했어요!");
   }
 
-  function handleRegenerate() {
-    setSpinning(true);
-    setQuests((prev) =>
-      prev.map((q, i) => ({
-        ...q,
-        desc: DESCS[(i + 1 + Math.floor(Math.random() * 4)) % DESCS.length],
-      })),
-    );
-    clearTimeout(spinTimer.current);
-    spinTimer.current = setTimeout(() => setSpinning(false), 600);
+  function deleteQuest(id: string) {
+    setQuests((prev) => prev.filter((q) => q.id !== id));
+    if (editingId === id) setEditingId(null);
   }
 
-  function toggleCheck(id: string) {
-    setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
+  function updateQuestTitle(id: string, title: string) {
+    setQuests((prev) => prev.map((q) => (q.id === id ? { ...q, title } : q)));
+  }
+
+  function removeQuestTag(id: string, tag: string) {
+    setQuests((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, tags: q.tags.filter((t) => t !== tag) } : q)),
+    );
+  }
+
+  function commitQuestTag(id: string) {
+    const t = questTagText.trim();
+    if (t) {
+      setQuests((prev) =>
+        prev.map((q) => (q.id === id && !q.tags.includes(t) ? { ...q, tags: [...q.tags, t] } : q)),
+      );
+    }
+    setAddingTagFor(null);
+    setQuestTagText("");
   }
 
   async function handleAddToToday() {
@@ -283,6 +294,11 @@ export function TodoCreation({
       {/* ── PAGE 0: INPUT ── */}
       {page === 0 && (
         <div className="tdPanel tdSingle">
+          {onClose && (
+            <button type="button" className="tdCloseBtn" onClick={onClose} aria-label="닫기">
+              ✕
+            </button>
+          )}
           <div className="tdHeader">
             <img src="/assets/character/deco-flowers-l.png" alt="" className="tdFlower" />
             <h1 className="tdTitle">TODO 만들기</h1>
@@ -330,7 +346,7 @@ export function TodoCreation({
           <div className="tdDivider" />
 
           {/* Section 2 */}
-          <div className="tdSection">
+          <div className="tdSection tdSection--grow">
             <div className="tdSectionHead">
               <span className="tdNumBadge">2</span>
               <span className="tdSectionTitle">직접 TODO 추가</span>
@@ -430,13 +446,8 @@ export function TodoCreation({
                       );
                     })}
                   </div>
-                  <button
-                    type="button"
-                    className="tdDeleteBtn"
-                    onClick={() => deleteTodo(todo.id)}
-                    title="삭제"
-                  >
-                    🗑
+                  <button type="button" className="tdDeleteBtn" onClick={() => deleteTodo(todo.id)}>
+                    삭제
                   </button>
                 </div>
               ))}
@@ -473,33 +484,21 @@ export function TodoCreation({
               <div className="tdQuestEmpty">왼쪽에서 생성하기를 눌러보세요 🌸</div>
             ) : (
               quests.map((q) => {
-                const ck = !!checked[q.id];
+                const isEditing = editingId === q.id;
                 return (
                   <div key={q.id} className="tdQuestRow">
-                    <button
-                      type="button"
-                      className="tdCheckbox"
-                      style={{
-                        borderColor: ck ? "#93C56A" : "#D9BE84",
-                        background: ck ? "#93C56A" : "#FFFDF6",
-                      }}
-                      onClick={() => toggleCheck(q.id)}
-                    >
-                      {ck && <span className="tdCheckMark">✓</span>}
-                    </button>
                     <img src="/assets/character/avatar.png" alt="" className="tdAnimalAvatar" />
                     <div className="tdQuestContent">
-                      <div className="tdQuestTitleRow">
-                        <span
-                          className="tdQuestTitle"
-                          style={{
-                            color: ck ? "#B6A78C" : "#6E5C44",
-                            textDecoration: ck ? "line-through" : "none",
-                            opacity: ck ? 0.6 : 1,
-                          }}
-                        >
-                          {q.title}
-                        </span>
+                      {isEditing ? (
+                        <input
+                          className="tdQuestTitleInput"
+                          value={q.title}
+                          onChange={(e) => updateQuestTitle(q.id, e.target.value)}
+                        />
+                      ) : (
+                        <span className="tdQuestTitleText">{q.title}</span>
+                      )}
+                      <div className="tdQuestTagRow">
                         {q.tags.map((tag, i) => {
                           const c = getTagColor(tag, i);
                           return (
@@ -509,9 +508,50 @@ export function TodoCreation({
                               style={{ background: c.bg, color: c.fg }}
                             >
                               {tag}
+                              {isEditing && (
+                                <button
+                                  type="button"
+                                  className="tdTagRemove"
+                                  onClick={() => removeQuestTag(q.id, tag)}
+                                >
+                                  ×
+                                </button>
+                              )}
                             </span>
                           );
                         })}
+                        {isEditing &&
+                          (addingTagFor === q.id ? (
+                            <input
+                              ref={questTagInputRef}
+                              className="tdQuestTagInput"
+                              value={questTagText}
+                              onChange={(e) => setQuestTagText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  commitQuestTag(q.id);
+                                } else if (e.key === "Escape") {
+                                  setAddingTagFor(null);
+                                  setQuestTagText("");
+                                }
+                              }}
+                              onBlur={() => commitQuestTag(q.id)}
+                              placeholder="태그"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              className="tdQuestTagAdd"
+                              onClick={() => {
+                                setAddingTagFor(q.id);
+                                setQuestTagText("");
+                                setTimeout(() => questTagInputRef.current?.focus(), 0);
+                              }}
+                            >
+                              +
+                            </button>
+                          ))}
                       </div>
                       <div className="tdQuestDesc">
                         <span>
@@ -520,6 +560,26 @@ export function TodoCreation({
                         <span className="tdAccentStar">✦</span>
                       </div>
                     </div>
+                    <div className="tdQuestBtns">
+                      <button
+                        type="button"
+                        className={`tdEditBtn${isEditing ? " tdEditBtn--active" : ""}`}
+                        onClick={() => {
+                          setEditingId(isEditing ? null : q.id);
+                          setAddingTagFor(null);
+                          setQuestTagText("");
+                        }}
+                      >
+                        {isEditing ? "완료" : "수정"}
+                      </button>
+                      <button
+                        type="button"
+                        className="tdQuestDeleteBtn"
+                        onClick={() => deleteQuest(q.id)}
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </div>
                 );
               })
@@ -527,16 +587,6 @@ export function TodoCreation({
           </div>
 
           <div className="tdRightFooter">
-            <button type="button" className="tdRegenBtn" onClick={handleRegenerate}>
-              <span
-                style={
-                  spinning ? { display: "inline-block", animation: "tdSpin .6s linear" } : undefined
-                }
-              >
-                ↻
-              </span>
-              다시 생성
-            </button>
             <button
               type="button"
               className="tdAddTodayBtn"
