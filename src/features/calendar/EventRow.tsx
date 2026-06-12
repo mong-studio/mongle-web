@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { Tag } from "../components/Tag/index.js";
+import { Tag } from "../../shared/ui/Tag/index.js";
 import { Check } from "./CalendarCore.js";
 import type { CalEvent } from "./calEngine.js";
 import { serialToMD, serialToYMDStr } from "./calEngine.js";

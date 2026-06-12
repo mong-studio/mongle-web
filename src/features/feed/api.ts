@@ -1,4 +1,4 @@
-import { apiClient } from "../auth/client.js";
+import { apiClient } from "../../shared/api/client.js";
 import type { FeedComment, FeedPostData } from "./feedData.js";
 
 export interface ApiComment {

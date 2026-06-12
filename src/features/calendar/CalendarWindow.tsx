@@ -18,6 +18,15 @@ type CalendarWindowProps = {
     startStr: string,
     endStr: string,
   ) => Promise<void>;
+  onDeleteEvent: (id: string) => Promise<void>;
+  onEditEvent: (
+    id: string,
+    title: string,
+    tagId: number | null,
+    startStr: string,
+    endStr: string,
+    description: string,
+  ) => Promise<void>;
   onDeleteTag: (id: number) => Promise<void>;
   onEditTag: (id: number, content: string, color: string) => Promise<void>;
   isRefreshing: boolean;
@@ -29,6 +38,8 @@ export function CalendarWindow({
   onClose,
   onToggle,
   onAddEvent,
+  onDeleteEvent,
+  onEditEvent,
   onDeleteTag,
   onEditTag,
   isRefreshing,
@@ -240,6 +251,8 @@ export function CalendarWindow({
           onToggle={onToggle}
           tags={tags}
           onAddEvent={onAddEvent}
+          onDeleteEvent={onDeleteEvent}
+          onEditEvent={onEditEvent}
           onDeleteTag={onDeleteTag}
           onEditTag={onEditTag}
         />
