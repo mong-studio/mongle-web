@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import type { CalHook } from "./CalendarCore.js";
 import { WD, weekSegments } from "./calEngine.js";
 
@@ -96,10 +96,12 @@ export function MonthCard({ cal, dir }: MonthCardProps) {
                   >
                     {week.map((c, ci) => (
                       // biome-ignore lint/a11y/noStaticElementInteractions: conditional role for in-month cells
+                      // biome-ignore lint/a11y/useAriaPropsSupportedByRole: aria-label is only set when role="button" (c.inMonth)
                       <div
                         key={`${c.y}-${c.m}-${c.d}-bg`}
                         className={c.inMonth ? "calDay" : undefined}
                         role={c.inMonth ? "button" : undefined}
+                        aria-label={c.inMonth ? `${c.m + 1}월 ${c.d}일` : undefined}
                         tabIndex={c.inMonth ? 0 : undefined}
                         onClick={() => c.inMonth && cal.setSel({ y: c.y, m: c.m, d: c.d })}
                         onKeyDown={(e) =>

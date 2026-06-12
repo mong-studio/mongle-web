@@ -26,6 +26,7 @@
   --accent-deep: #ce7c1e;
   --accent-soft: #fbe6c7;
   --accent-tint: #fdf1dc;
+  --c-danger: #e06060;
 
   --sun: #dd8a7e;
   --sat: #6f9bc9;
@@ -323,4 +324,90 @@
 .calBtn-submit:disabled {
   opacity: 0.55;
   cursor: default;
+}
+
+.calMiniDay {
+  transition:
+    background 0.1s,
+    transform 0.1s,
+    filter 0.1s;
+}
+.calMiniDay:hover {
+  filter: brightness(0.9);
+  transform: scale(1.1);
+}
+.calMiniDay:active {
+  transform: scale(0.92);
+}
+
+/* EventRow icon buttons base styles + hover */
+.calIconBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--cream-1);
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.calBtn-icon {
+  transition:
+    border-color 0.12s,
+    color 0.12s,
+    transform 0.12s,
+    background 0.12s;
+}
+.calBtn-icon:hover {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+  transform: scale(1.12);
+  background: var(--accent-tint);
+}
+.calBtn-icon:active {
+  transform: scale(0.9);
+}
+
+/* Loading spinner */
+@keyframes calSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.calSpinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: calSpin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Reduced motion: disable all transforms/transitions except functional spinner */
+@media (prefers-reduced-motion: reduce) {
+  .calBtn-nav,
+  .calBtn-ghost,
+  .calBtn-accent,
+  .calDay,
+  .calEventBar,
+  .calBtn-dashed,
+  .calBtn-tag,
+  .calTagGroup,
+  .calBtn-swatch,
+  .calBtn-cancel,
+  .calBtn-submit,
+  .calMiniDay,
+  .calBtn-icon,
+  .bulletinBoard {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
 }

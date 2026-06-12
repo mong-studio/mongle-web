@@ -3,7 +3,6 @@ import { apiClient } from "../auth/client.js";
 import { useCalendar } from "./CalendarCore.js";
 import { CalendarWindow } from "./CalendarWindow.js";
 import type { CalEvent } from "./calEngine.js";
-import { ymdStrToSerial } from "./calEngine.js";
 import type { CalSchedule, CalTodo } from "./types.js";
 import { scheduleToEvent, todoToEvent } from "./types.js";
 import { useTagManager } from "./useTagManager.js";
@@ -41,6 +40,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
         });
         const newTodos = res.data.todos as CalTodo[];
         const newSchedules = res.data.schedules as CalSchedule[];
+        // 기존 todos를 Map으로 변환한 뒤 새로운 데이터로 덮어쓴다. 단순 교체 대신 병합을 쓰는 이유는 달을 넘겨도 다른 달 데이터가 날아가지 않게 하기 위해서다.
         setTodos((prev) => {
           const map = new Map(prev.map((t) => [t.todo_id, t]));
           for (const t of newTodos) map.set(t.todo_id, t);
@@ -104,15 +104,15 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
       newTag: { name: string; color: string } | null,
       startStr: string,
       endStr: string,
+      type: "todo" | "schedule",
+      description: string,
     ) => {
       let resolvedTagId = tagId;
       if (newTag) {
         resolvedTagId = await createTag(newTag.name, newTag.color);
       }
       const tagParam = resolvedTagId !== null ? { tag_id: resolvedTagId } : {};
-      const sSerial = ymdStrToSerial(startStr);
-      const eSerial = ymdStrToSerial(endStr);
-      if (sSerial === eSerial) {
+      if (type === "todo") {
         const res = await apiClient.post("/todos/", {
           content: title,
           todo_date: startStr,
@@ -122,7 +122,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
       } else {
         const res = await apiClient.post("/todos/schedules/", {
           title,
-          description: "",
+          description,
           start_date: startStr,
           end_date: endStr,
           ...tagParam,
@@ -131,6 +131,55 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
       }
     },
     [createTag],
+  );
+
+  const handleDeleteEvent = useCallback(async (id: string) => {
+    if (id.startsWith("todo-")) {
+      const todoId = id.slice(5);
+      await apiClient.delete(`/todos/${todoId}/`);
+      setTodos((prev) => prev.filter((t) => t.todo_id !== todoId));
+    } else if (id.startsWith("sched-")) {
+      const schedId = id.slice(6);
+      await apiClient.delete(`/todos/schedules/${schedId}/`);
+      setSchedules((prev) => prev.filter((s) => s.schedule_id !== schedId));
+    }
+  }, []);
+
+  const handleEditEvent = useCallback(
+    async (
+      id: string,
+      title: string,
+      tagId: number | null,
+      startStr: string,
+      endStr: string,
+      description: string,
+    ) => {
+      const tagParam = tagId !== null ? { tag_id: tagId } : {};
+      if (id.startsWith("todo-")) {
+        const todoId = id.slice(5);
+        const res = await apiClient.patch(`/todos/${todoId}/`, {
+          content: title,
+          todo_date: startStr,
+          ...tagParam,
+        });
+        setTodos((prev) =>
+          prev.map((t) => (t.todo_id === todoId ? { ...t, ...(res.data as CalTodo) } : t)),
+        );
+      } else if (id.startsWith("sched-")) {
+        const schedId = id.slice(6);
+        const res = await apiClient.patch(`/todos/schedules/${schedId}/`, {
+          title,
+          description,
+          start_date: startStr,
+          end_date: endStr,
+          ...tagParam,
+        });
+        setSchedules((prev) =>
+          prev.map((s) => (s.schedule_id === schedId ? { ...s, ...(res.data as CalSchedule) } : s)),
+        );
+      }
+    },
+    [],
   );
 
   if (!isOpen) return null;
@@ -192,6 +241,8 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
             onClose={onClose}
             onToggle={handleToggle}
             onAddEvent={handleAddEvent}
+            onDeleteEvent={handleDeleteEvent}
+            onEditEvent={handleEditEvent}
             onDeleteTag={deleteTag}
             onEditTag={editTag}
             isRefreshing={isLoading}

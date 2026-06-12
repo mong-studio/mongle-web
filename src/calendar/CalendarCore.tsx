@@ -112,6 +112,7 @@ export function Check({ on, onClick }: { on: boolean; onClick?: () => void }) {
   return (
     <button
       type="button"
+      aria-label={on ? "완료 해제" : "완료로 표시"}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();
