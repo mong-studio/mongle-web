@@ -6,7 +6,7 @@ vi.mock("./api", () => ({
   refreshToken: vi.fn(),
   fetchMe: vi.fn(),
 }));
-vi.mock("./client", () => ({ configureAuthClient: vi.fn() }));
+vi.mock("../../shared/api/client.js", () => ({ configureAuthClient: vi.fn() }));
 
 import * as authApi from "./api.js";
 import { useAuthStore } from "./store.js";
@@ -27,6 +27,7 @@ describe("useAuthStore", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    sessionStorage.clear();
     useAuthStore.setState({ user: null, accessToken: null, status: "loading" });
   });
 
