@@ -96,7 +96,7 @@ export function TodoCreation({
   const [aiTodos, setAiTodos] = useState<LocalTodo[]>([]);
 
   const [manualText, setManualText] = useState("");
-  const [selectedTags, setSelectedTags] = useState<string[]>(["건강", "운동"]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [addingTag, setAddingTag] = useState(false);
   const [tagText, setTagText] = useState("");
   const [customTags, setCustomTags] = useState<string[]>([]);
