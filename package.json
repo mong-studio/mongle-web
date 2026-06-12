@@ -1,28 +1,43 @@
 {
-  "name": "mongle-web-workspace",
+  "name": "mongle-web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "npm run web:dev",
-    "web:install": "npm install --prefix apps/game",
-    "web:dev": "npm run dev --prefix apps/game",
-    "web:typecheck": "npm run typecheck --prefix apps/game",
-    "web:build": "npm run build --prefix apps/game",
-    "web:preview": "npm run preview --prefix apps/game",
+    "dev": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "ci-check": "biome ci . && npm run web:typecheck && npm run web:build",
+    "ci-check": "biome ci . && npm run typecheck && npm run build",
     "prepare": "husky"
+  },
+  "dependencies": {
+    "@radix-ui/react-alert-dialog": "^1.1.16",
+    "@vitejs/plugin-react": "^4.3.4",
+    "axios": "^1.17.0",
+    "motion": "^12.40.0",
+    "phaser": "^3.90.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",
     "@commitlint/cli": "21.0.2",
     "@commitlint/config-conventional": "21.0.0",
     "@types/node": "^25.9.2",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
     "husky": "9.1.7",
-    "lint-staged": "17.0.7"
+    "lint-staged": "17.0.7",
+    "vitest": "^4.1.8"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,css}": "biome check --write --no-errors-on-unmatched"
