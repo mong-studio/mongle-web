@@ -1,0 +1,1012 @@
+/* ============================================================
+   CharacterModal — Design v2 (cc prefix, scoped to .ccModal)
+   Fonts: Jua (headings), Gowun Dodum (body)
+   ============================================================ */
+
+/* Reset featureModal wrapper */
+.characterModal {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  width: auto;
+  max-height: none;
+  overflow: visible;
+  image-rendering: auto;
+}
+
+/* Animations */
+@keyframes ccFloaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes ccShimmer {
+  0% {
+    background-position: -150% 0;
+  }
+  100% {
+    background-position: 250% 0;
+  }
+}
+@keyframes ccTwinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+@keyframes ccModalIn {
+  0% {
+    transform: scale(0.96) translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ccToastIn {
+  0% {
+    transform: translateY(22px) scale(0.96);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-4px) scale(1.015);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes ccPopIn {
+  0% {
+    transform: scale(0.985);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes ccShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* ── Root modal card ── */
+.ccModal {
+  --cc-bg: #fbf3de;
+  --cc-panel: #fffdf6;
+  --cc-card: #fbefcf;
+  --cc-card-active: #fbe3ae;
+  --cc-border: #ead8ac;
+  --cc-border-strong: #d9be84;
+  --cc-border-active: #e8a24e;
+  --cc-ink: #6e5c44;
+  --cc-ink-soft: #9a876a;
+  --cc-ink-faint: #bcaa88;
+  --cc-field-bg: #fffdf7;
+  --cc-field-border: #e8d8b0;
+  --cc-num-bg: #e9b65a;
+  --cc-num-ink: #fffdf4;
+  --cc-divider: #ecddb8;
+  --cc-primary: #f6c84c;
+  --cc-primary-dk: #e0a52a;
+  --cc-primary-ink: #7a5a18;
+  --cc-go: #93cd6e;
+  --cc-go-dk: #6fa84e;
+
+  width: min(1180px, 95vw);
+  max-height: 94vh;
+  overflow: auto;
+  background: var(--cc-bg);
+  border: 3px solid var(--cc-border-strong);
+  border-radius: 30px;
+  box-shadow: 0 30px 70px -22px rgba(80, 58, 26, 0.62);
+  animation: ccModalIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  position: relative;
+  font-family: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif;
+  color: var(--cc-ink);
+  box-sizing: border-box;
+}
+
+/* ── Header ── */
+.ccHeader {
+  position: relative;
+  padding: 14px 30px 4px;
+}
+
+.ccHeaderTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.ccTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 26px;
+  color: var(--cc-ink);
+  margin: 0;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.ccFlower {
+  height: 34px;
+  width: auto;
+  image-rendering: pixelated;
+}
+
+.ccFlower--l {
+  animation: ccFloaty 3.4s ease-in-out infinite;
+}
+.ccFlower--r {
+  animation: ccFloaty 3.8s ease-in-out infinite 0.2s;
+}
+
+.ccCloseBtn {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 13px;
+  border: 2px solid var(--cc-border-strong);
+  background: var(--cc-panel);
+  color: var(--cc-ink-soft);
+  font-size: 19px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.ccCloseBtn:hover {
+  background: var(--cc-card);
+  color: var(--cc-ink);
+}
+
+/* ── Body: two-column grid ── */
+.ccBody {
+  display: grid;
+  grid-template-columns: 1.04fr 0.96fr;
+  gap: 20px;
+  padding: 8px 24px 18px;
+}
+
+/* ── Section labels ── */
+.ccSectionLabel {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+
+.ccNumBadge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--cc-num-bg);
+  color: var(--cc-num-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ccSectionTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--cc-ink);
+  white-space: nowrap;
+}
+
+/* ── Left column ── */
+.ccLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ccSection {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Image cards ── */
+.ccCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ccCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  text-align: center;
+  background: var(--cc-card);
+  border: 2.5px solid var(--cc-border);
+}
+
+.ccCard--active {
+  background: var(--cc-card-active);
+  border-color: var(--cc-border-active);
+  box-shadow: 0 7px 16px -9px rgba(200, 150, 60, 0.6);
+}
+
+.ccCardIcon {
+  width: 58px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.ccCardHead {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--cc-ink);
+}
+
+.ccCardSub {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 12px;
+  color: var(--cc-ink-soft);
+  margin-top: 2px;
+}
+
+.ccCardThumbWrap {
+  position: relative;
+}
+
+.ccCardThumb {
+  width: 96px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid var(--cc-border-strong);
+  display: block;
+  box-shadow: 0 4px 10px -5px rgba(120, 90, 40, 0.5);
+}
+
+.ccCardClearBtn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  border: 2px solid var(--cc-border-strong);
+  background: var(--cc-panel);
+  color: var(--cc-ink-soft);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.1s;
+}
+
+.ccCardClearBtn:hover {
+  background: var(--cc-card);
+}
+
+.ccCardFileName {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 13px;
+  color: var(--cc-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
+
+/* ── Name row ── */
+.ccNameRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ccNameRow--shake {
+  animation: ccShake 0.4s;
+}
+
+.ccFieldLabel {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--cc-ink);
+  flex-shrink: 0;
+  display: block;
+}
+
+.ccNameRow .ccFieldLabel {
+  width: 54px;
+}
+
+.ccInput {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--cc-field-border);
+  background: var(--cc-field-bg);
+  color: var(--cc-ink);
+  font-size: 15px;
+  font-family: "Gowun Dodum", sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.ccInput:focus {
+  border-color: var(--cc-border-active);
+}
+
+.ccInput::placeholder {
+  color: #c4b493;
+  opacity: 1;
+}
+
+.ccNameError {
+  color: #d9785a;
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  margin: 8px 0 0 66px;
+}
+
+/* ── Chips ── */
+.ccChipSection {
+  margin-top: 12px;
+}
+
+.ccChipLabel {
+  margin-bottom: 11px;
+}
+
+.ccChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ccChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  white-space: nowrap;
+  border: 2px solid transparent;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.ccChipCheck {
+  font-size: 12px;
+}
+
+.ccChipInput {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 2px dashed var(--cc-border-active);
+  background: var(--cc-field-bg);
+  color: var(--cc-ink);
+  font-size: 14px;
+  width: 118px;
+  outline: none;
+  font-family: "Gowun Dodum", sans-serif;
+}
+
+.ccChipInput::placeholder {
+  color: #c4b493;
+  opacity: 1;
+}
+
+.ccAddChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  background: transparent;
+  color: var(--cc-ink-faint);
+  border: 2px dashed var(--cc-border-strong);
+  transition:
+    color 0.14s,
+    border-color 0.14s;
+}
+
+.ccAddChip:hover {
+  color: var(--cc-ink-soft);
+  border-color: var(--cc-border-active);
+}
+
+/* ── Description ── */
+.ccDescSection {
+  margin-top: 12px;
+}
+
+.ccDescSection .ccFieldLabel {
+  margin-bottom: 11px;
+}
+
+.ccTextarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 2px solid var(--cc-field-border);
+  background: var(--cc-field-bg);
+  color: var(--cc-ink);
+  font-size: 14px;
+  font-family: "Gowun Dodum", sans-serif;
+  line-height: 1.5;
+  outline: none;
+  min-height: 76px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.ccTextarea:focus {
+  border-color: var(--cc-border-active);
+}
+
+.ccTextarea::placeholder {
+  color: #c4b493;
+  opacity: 1;
+}
+
+/* ── Divider ── */
+.ccDivider {
+  border: none;
+  border-top: 2px dashed var(--cc-divider);
+}
+
+/* ── Generate section ── */
+.ccGenSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ccGenSection .ccFieldLabel {
+  margin-bottom: 0;
+}
+
+.ccGenRow {
+  display: flex;
+  gap: 18px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.ccGenBtn {
+  flex: 1 1 200px;
+  min-width: 170px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--cc-primary);
+  color: var(--cc-primary-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 var(--cc-primary-dk),
+    0 12px 18px -8px rgba(190, 140, 40, 0.5);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease,
+    filter 0.08s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.ccGenBtn:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+.ccGenBtn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--cc-primary-dk),
+    0 6px 10px -6px rgba(190, 140, 40, 0.5);
+}
+
+.ccGenBtn:disabled {
+  background: #e7decb;
+  box-shadow: 0 3px 0 #d3c7ad;
+  cursor: not-allowed;
+  color: #b8a888;
+}
+
+.ccBearIcon {
+  width: 22px;
+  height: 22px;
+  image-rendering: pixelated;
+}
+
+.ccGenStatus {
+  flex: 1 1 220px;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+}
+
+.ccStatusMsg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cc-ink-soft);
+  font-size: 13px;
+}
+
+.ccStatusStar {
+  color: var(--cc-border-active);
+  font-size: 14px;
+}
+
+.ccProgressHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ccProgressStar {
+  font-size: 13px;
+  animation: ccTwinkle 1.2s infinite;
+  color: var(--cc-go-dk);
+}
+
+.ccProgressLabel {
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--cc-ink);
+}
+
+.ccProgressPct {
+  margin-left: auto;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--cc-go-dk);
+}
+
+.ccProgressBar {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--cc-card);
+  border: 1.5px solid var(--cc-border);
+  overflow: hidden;
+}
+
+.ccProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cc-go), #b8e68a);
+  border-radius: 999px;
+  transition: width 0.22s ease;
+}
+
+.ccProgressMsg {
+  font-size: 12.5px;
+  color: var(--cc-ink-soft);
+}
+
+.ccStatusDone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cc-go-dk);
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+}
+
+/* ── Right column ── */
+.ccRight {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Preview panel ── */
+.ccPreviewPanel {
+  background: var(--cc-panel);
+  border: 2px solid var(--cc-border);
+  border-radius: 22px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.ccPreviewImgBox {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid var(--cc-border);
+  aspect-ratio: 16 / 11;
+  background: var(--cc-card);
+}
+
+.ccPreviewImgBox--checker {
+  background: repeating-linear-gradient(135deg, #f0e3c2 0 13px, #f8efd6 13px 26px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ccPreviewBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ccUploadedImg {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.ccShimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 28%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 72%
+  );
+  background-size: 240% 100%;
+  animation: ccShimmer 1.9s linear infinite;
+}
+
+/* Loading state */
+.ccLoadingInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.ccRabbit {
+  width: 78px;
+  height: auto;
+  image-rendering: pixelated;
+  animation: ccFloaty 2.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.ccLoadingTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--cc-ink);
+  line-height: 1.4;
+}
+
+.ccLoadingSub {
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--cc-ink-soft);
+  margin-top: 5px;
+}
+
+.ccDots {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+}
+
+.ccDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cc-border-strong);
+  animation: ccTwinkle 1.1s infinite;
+  display: inline-block;
+}
+
+.ccPreviewProgress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+}
+
+.ccProgressDot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.ccProgressDot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(120, 90, 40, 0.3);
+}
+
+.ccProgressDot::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cc-primary);
+}
+
+.ccPreviewProgress .ccProgressBar {
+  flex: 1;
+  height: 16px;
+}
+
+.ccPreviewPct {
+  text-align: center;
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--cc-go-dk);
+}
+
+/* Uploaded state */
+.ccUploadedName {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 13.5px;
+  color: var(--cc-ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ccUploadedHint {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--cc-ink);
+}
+
+/* Action buttons */
+.ccActionRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.ccDeleteBtn {
+  flex: 0 0 auto;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 2px solid #e7ae9e;
+  background: var(--cc-panel);
+  color: #c56f58;
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.12s;
+}
+
+.ccDeleteBtn:hover {
+  background: #fbede8;
+}
+
+.ccChangeBtn {
+  flex: 1;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 2px solid var(--cc-border-strong);
+  background: var(--cc-card);
+  color: var(--cc-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.12s;
+}
+
+.ccChangeBtn:hover:not(:disabled) {
+  background: var(--cc-card-active);
+}
+
+.ccChangeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ccCompleteBtn {
+  flex: 1;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 14px;
+  background: var(--cc-go);
+  color: #fff;
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 var(--cc-go-dk),
+    0 12px 18px -8px rgba(90, 150, 60, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+
+.ccCompleteBtn:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--cc-go-dk),
+    0 6px 10px -6px rgba(90, 150, 60, 0.45);
+}
+
+/* Result state */
+.ccResultInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  animation: ccPopIn 0.35s ease both;
+}
+
+.ccResultHeader {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.ccAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  flex-shrink: 0;
+  border: 2px solid var(--cc-border-strong);
+  object-fit: cover;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.ccResultNameText {
+  font-family: "Jua", sans-serif;
+  font-size: 26px;
+  color: var(--cc-ink);
+  white-space: nowrap;
+}
+
+.ccResultChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ccResultDesc {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 15px;
+  color: var(--cc-ink-soft);
+  line-height: 1.75;
+}
+
+/* ── Toast ── */
+.ccToast {
+  position: fixed;
+  right: 26px;
+  bottom: 26px;
+  z-index: 60;
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  background: var(--cc-panel);
+  border: 2.5px solid var(--cc-border-strong);
+  border-radius: 20px;
+  padding: 16px 42px 16px 18px;
+  box-shadow: 0 18px 42px -14px rgba(60, 42, 18, 0.55);
+  animation: ccToastIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  max-width: 330px;
+}
+
+.ccToastIcon {
+  width: 50px;
+  height: auto;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+.ccToastTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--cc-ink);
+  margin-bottom: 3px;
+}
+
+.ccToastBody {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 13.5px;
+  color: var(--cc-ink-soft);
+  line-height: 1.6;
+}
+
+.ccToastClose {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  color: var(--cc-ink-faint);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.ccToastStar {
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  color: var(--cc-primary);
+  font-size: 15px;
+  animation: ccTwinkle 1.4s infinite;
+}

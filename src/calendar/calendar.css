@@ -1,0 +1,413 @@
+/* ───────────────────────────────────── */
+/* CALENDAR WINDOW  (new design)          */
+/* ───────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap");
+
+:root {
+  --font-display: "Jua", "Noto Sans KR", sans-serif;
+  --font-body: "Gowun Dodum", "Noto Sans KR", sans-serif;
+
+  --cream-0: #fffdf7;
+  --cream-1: #fcf4e2;
+  --cream-2: #f8ebd0;
+  --cream-3: #f2e0be;
+
+  --line-soft: #ebd8b0;
+  --line: #e2c690;
+  --line-deep: #d1a763;
+
+  --ink-1: #5a4632;
+  --ink-2: #7c6a52;
+  --ink-3: #a89478;
+  --ink-inv: #fffdf7;
+
+  --accent: #ee9b36;
+  --accent-deep: #ce7c1e;
+  --accent-soft: #fbe6c7;
+  --accent-tint: #fdf1dc;
+  --c-danger: #e06060;
+
+  --sun: #dd8a7e;
+  --sat: #6f9bc9;
+
+  --c-work: #8478c0;
+  --c-work-bg: #ece7f8;
+  --c-work-pin: #9b8bd6;
+  --c-health: #62a256;
+  --c-health-bg: #e3f0dc;
+  --c-health-pin: #7fc070;
+  --c-grow: #5790c4;
+  --c-grow-bg: #dcebf8;
+  --c-grow-pin: #6ca7dc;
+  --c-rest: #cf7e97;
+  --c-rest-bg: #f8e3ea;
+  --c-rest-pin: #e394ae;
+  --c-meet: #d9943c;
+  --c-meet-bg: #fbebd2;
+  --c-meet-pin: #edaa55;
+
+  --r-xl: 30px;
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 11px;
+  --r-pill: 999px;
+
+  --sh-panel: 0 18px 40px -18px rgba(120, 84, 38, 0.45), 0 3px 10px rgba(120, 84, 38, 0.1);
+  --sh-card: 0 4px 10px -4px rgba(120, 84, 38, 0.22);
+  --sh-pop: 0 30px 70px -20px rgba(80, 52, 20, 0.55);
+}
+
+.calWindow {
+  width: min(1460px, calc(100vw - 52px));
+  height: min(1140px, calc(100vh - 52px));
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Bulletin board widget ───────────────────────────────────── */
+
+.bulletinBoard {
+  position: absolute;
+  z-index: 6;
+  bottom: 22px;
+  left: 22px;
+  width: min(230px, calc(100vw - 44px));
+  display: grid;
+  gap: 0;
+  padding: 0;
+  border: 3px solid #5a3820;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 243, 195, 0.4),
+    0 5px 0 rgba(38, 22, 12, 0.46),
+    0 12px 24px rgba(23, 22, 16, 0.2);
+  background: #f2dfa0;
+  image-rendering: pixelated;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.bulletinBoard:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  transition:
+    transform 0.12s,
+    filter 0.12s;
+}
+
+.boardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 11px 6px;
+  background: linear-gradient(135deg, #8a5a32, #7a4e2c);
+  border-bottom: 2px solid #5a3820;
+}
+
+.boardTitle {
+  font-size: 0.78rem;
+  font-weight: 950;
+  color: #fff8e0;
+  letter-spacing: 0.04em;
+}
+.boardBell {
+  font-size: 0.88rem;
+}
+
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 7px 6px 9px;
+  gap: 2px;
+}
+
+.boardDayLabel {
+  text-align: center;
+  font-size: 0.58rem;
+  font-weight: 950;
+  color: #8a6038;
+  padding-bottom: 4px;
+}
+
+.boardCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  background: rgba(255, 252, 235, 0.8);
+  border: 1px solid rgba(160, 110, 55, 0.12);
+  border-radius: 3px;
+}
+
+.boardCell.isToday {
+  background: #fff3a8;
+  border-color: rgba(210, 150, 50, 0.5);
+}
+
+.boardIcon {
+  font-size: 0.65rem;
+  font-weight: 950;
+  line-height: 1;
+}
+.iconDone {
+  color: #3a8a30;
+}
+.iconPending {
+  color: #c06820;
+}
+.iconPartial {
+  color: #8a7020;
+}
+
+@media (max-width: 760px) {
+  .bulletinBoard {
+    position: static;
+    width: auto;
+    margin: 10px;
+  }
+}
+
+/* ── Interactive button effects ───────────────────────────────── */
+
+.calBtn-nav {
+  border-radius: 8px;
+  transition:
+    background 0.12s,
+    transform 0.12s;
+}
+.calBtn-nav:hover {
+  background: var(--accent-soft);
+  transform: scale(1.15);
+}
+.calBtn-nav:active {
+  transform: scale(0.88);
+}
+
+.calBtn-ghost {
+  transition:
+    filter 0.12s,
+    transform 0.12s;
+}
+.calBtn-ghost:hover {
+  filter: brightness(0.93);
+  transform: translateY(-1px);
+}
+.calBtn-ghost:active {
+  filter: brightness(0.87);
+  transform: translateY(0) scale(0.95);
+}
+
+.calBtn-accent {
+  transition:
+    filter 0.13s,
+    transform 0.13s;
+}
+.calBtn-accent:hover:not([disabled]) {
+  filter: brightness(1.09) saturate(1.1);
+  transform: scale(1.1) translateY(-1px);
+}
+.calBtn-accent:active:not([disabled]) {
+  transform: scale(0.92);
+  filter: brightness(0.97);
+}
+
+.calDay {
+  transition: box-shadow 0.12s;
+}
+.calDay:hover {
+  box-shadow: inset 0 0 0 2000px rgba(238, 155, 54, 0.07);
+}
+.calDay:active {
+  box-shadow: inset 0 0 0 2000px rgba(238, 155, 54, 0.15);
+}
+
+.calEventBar {
+  transition:
+    filter 0.11s,
+    transform 0.11s;
+}
+.calEventBar:hover {
+  filter: brightness(1.09) saturate(1.08);
+  transform: scaleY(1.12);
+  position: relative;
+  z-index: 2;
+}
+.calEventBar:active {
+  filter: brightness(0.95);
+  transform: scaleY(0.95);
+}
+
+.calBtn-dashed {
+  transition:
+    filter 0.13s,
+    transform 0.13s,
+    border-color 0.13s;
+}
+.calBtn-dashed:hover {
+  filter: brightness(0.96);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.calBtn-dashed:active {
+  transform: translateY(1px);
+  filter: brightness(0.91);
+}
+
+.calBtn-tag {
+  transition:
+    transform 0.11s,
+    filter 0.11s;
+}
+.calBtn-tag:hover {
+  transform: scale(1.07);
+  filter: brightness(1.06);
+}
+.calBtn-tag:active {
+  transform: scale(0.95);
+}
+
+/* Split tag group (tag-name | edit | delete) — scale the whole group, not parts */
+.calTagGroup {
+  transition:
+    transform 0.11s,
+    filter 0.11s;
+  border-radius: 999px;
+}
+.calTagGroup:hover {
+  transform: scale(1.05);
+  filter: brightness(1.05);
+}
+.calTagGroup:active {
+  transform: scale(0.96);
+}
+
+.calBtn-swatch {
+  transition: transform 0.11s;
+}
+.calBtn-swatch:hover {
+  transform: scale(1.28);
+}
+.calBtn-swatch:active {
+  transform: scale(0.85);
+}
+
+.calBtn-cancel {
+  transition:
+    filter 0.12s,
+    transform 0.12s;
+}
+.calBtn-cancel:hover {
+  filter: brightness(0.93);
+  transform: translateY(-1px);
+}
+.calBtn-cancel:active {
+  filter: brightness(0.87);
+  transform: translateY(0) scale(0.97);
+}
+
+.calBtn-submit {
+  transition:
+    filter 0.12s,
+    transform 0.12s;
+}
+.calBtn-submit:hover:not(:disabled) {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
+.calBtn-submit:active:not(:disabled) {
+  filter: brightness(0.95);
+  transform: translateY(1px);
+}
+.calBtn-submit:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.calMiniDay {
+  transition:
+    background 0.1s,
+    transform 0.1s,
+    filter 0.1s;
+}
+.calMiniDay:hover {
+  filter: brightness(0.9);
+  transform: scale(1.1);
+}
+.calMiniDay:active {
+  transform: scale(0.92);
+}
+
+/* EventRow icon buttons base styles + hover */
+.calIconBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--cream-1);
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.calBtn-icon {
+  transition:
+    border-color 0.12s,
+    color 0.12s,
+    transform 0.12s,
+    background 0.12s;
+}
+.calBtn-icon:hover {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+  transform: scale(1.12);
+  background: var(--accent-tint);
+}
+.calBtn-icon:active {
+  transform: scale(0.9);
+}
+
+/* Loading spinner */
+@keyframes calSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.calSpinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: calSpin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Reduced motion: disable all transforms/transitions except functional spinner */
+@media (prefers-reduced-motion: reduce) {
+  .calBtn-nav,
+  .calBtn-ghost,
+  .calBtn-accent,
+  .calDay,
+  .calEventBar,
+  .calBtn-dashed,
+  .calBtn-tag,
+  .calTagGroup,
+  .calBtn-swatch,
+  .calBtn-cancel,
+  .calBtn-submit,
+  .calMiniDay,
+  .calBtn-icon,
+  .bulletinBoard {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
