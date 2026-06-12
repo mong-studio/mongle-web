@@ -1,6 +1,6 @@
 import { create } from "zustand";
+import { configureAuthClient } from "../shared/api/client.js";
 import * as authApi from "./api.js";
-import { configureAuthClient } from "./client.js";
 
 export type SessionUser = {
   userId: string;

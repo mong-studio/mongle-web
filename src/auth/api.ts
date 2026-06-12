@@ -1,5 +1,5 @@
 import { isAxiosError } from "axios";
-import { apiClient } from "./client.js";
+import { apiClient } from "../shared/api/client.js";
 
 export type AuthUser = {
   user_id: string;

@@ -7,7 +7,6 @@ import {
   signup as signupRequest,
   toUserMessage,
 } from "./auth/api.js";
-import { apiClient } from "./auth/client.js";
 import { LoginModal } from "./auth/LoginModal.js";
 import { MyPageWrapper } from "./auth/MyPageWrapper.js";
 import { type AuthState, useAuthStore } from "./auth/store.js";
@@ -17,6 +16,7 @@ import { CharacterModal } from "./character/createCharacter.js";
 import { type TodoCommitResult, TodoCreation } from "./components/createTodo/todoCreation.js";
 import { PlannerChat } from "./components/plannerChat/plannerChat.js";
 import { PhaserVillage } from "./PhaserVillage.js";
+import { apiClient } from "./shared/api/client.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const TODAY_LABEL = "2026.05.26 TUE";
