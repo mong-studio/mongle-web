@@ -1,441 +1,769 @@
-.todoReplica {
-  width: min(1460px, calc(100vw - 64px));
-  margin: 0 auto;
-  color: #5a371f;
-  font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+@import url("https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap");
+
+/* ============================================================
+   TODO 만들기 — Design v1
+   ============================================================ */
+
+.tdRoot {
+  --td-modal: #fcf4df;
+  --td-panel: #fffdf6;
+  --td-field: #fbf4e0;
+  --td-field-br: #e7d7ac;
+  --td-border: #ead8ac;
+  --td-border-strong: #d9be84;
+  --td-ink: #6e5c44;
+  --td-ink-soft: #9a876a;
+  --td-ink-faint: #bcaa88;
+  --td-num: #7a5a38;
+  --td-divider: #ecddb8;
+  --td-accent: #e89a6c;
+  --td-green: #93c56a;
+  --td-green-dk: #6fa347;
+
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 20px;
+  min-height: 100%;
+  box-sizing: border-box;
+  font-family: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif;
+  color: var(--td-ink);
 }
 
-.todoOuterFrame {
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-  border: 7px solid #8a6018;
-  outline: 3px solid #d4a840;
-  outline-offset: -11px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #edd8ab 0%, #e3c07b 100%);
-  box-shadow:
-    0 24px 64px rgba(50, 30, 5, 0.32),
-    0 6px 16px rgba(50, 30, 5, 0.18),
-    inset 0 0 0 2px rgba(255, 235, 150, 0.2);
+/* ── Animations ── */
+@keyframes tdFloaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
-.todoHeroCard,
-.todoPanel,
-.todoFooterNote {
-  position: relative;
-  border: 2px solid #e0ba74;
-  border-radius: 14px;
-  background:
-    radial-gradient(
-      circle at top,
-      rgba(255, 255, 255, 0.94),
-      rgba(255, 248, 228, 0.92) 54%,
-      rgba(252, 241, 210, 0.98)
-    ),
-    #fff8ea;
-  box-shadow:
-    inset 0 0 18px rgba(219, 171, 84, 0.1),
-    0 4px 12px rgba(114, 76, 32, 0.05);
+@keyframes tdTwinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 
-.todoHeroCard {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+@keyframes tdModalIn {
+  0% {
+    transform: scale(0.96) translateY(12px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes tdRowIn {
+  0% {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes tdToastIn {
+  0% {
+    transform: translate(-50%, 18px) scale(0.96);
+    opacity: 0;
+  }
+  60% {
+    transform: translate(-50%, -3px) scale(1.02);
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tdSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Panels ── */
+.tdPanel {
+  background: var(--td-modal);
+  border: 3px solid var(--td-border-strong);
+  border-radius: 28px;
+  box-shadow: 0 28px 64px -24px rgba(80, 58, 26, 0.6);
+  animation: tdModalIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  padding: 24px 26px 26px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.tdLeft {
+  width: 540px;
+  max-width: 46vw;
+  max-height: calc(100vh - 72px);
+  overflow: auto;
+}
+
+.tdRight {
+  width: 560px;
+  max-width: 46vw;
+  max-height: calc(100vh - 72px);
+  animation-delay: 0.05s;
+}
+
+/* ── Left header ── */
+.tdHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 16px;
-  padding: 18px 20px;
-  align-items: start;
 }
 
-.todoHeroCopy {
-  max-width: 560px;
-}
-
-.todoHeroKicker {
-  margin: 0 0 10px;
-  color: #a77733;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.todoHeroCard h3 {
+.tdTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 30px;
+  color: var(--td-ink);
   margin: 0;
-  color: #52311c;
-  font-size: clamp(1.4rem, 2vw, 1.95rem);
-  line-height: 1.26;
-  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
 }
 
-.todoHeroLead {
-  margin: 12px 0 0;
-  color: #6a472d;
-  font-size: 0.76rem;
-  line-height: 1.6;
+.tdFlower {
+  height: 38px;
+  animation: tdFloaty 3.5s ease-in-out infinite;
 }
 
-.todoUsageChip,
-.todoDateChip {
+.tdFlower--r {
+  animation-duration: 3.8s;
+  animation-delay: 0.2s;
+}
+
+/* ── Sections ── */
+.tdSection {
+  margin-top: 20px;
+}
+
+.tdSectionHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tdNumBadge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--td-num);
+  color: #fff6e6;
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 0 16px;
-  border: 1.5px solid #dcb66b;
-  border-radius: 999px;
-  background: rgba(255, 248, 230, 0.98);
-  color: #8d622c;
-  font-size: 0.72rem;
-  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.todoUsageChip {
-  margin-top: 16px;
-  width: fit-content;
+.tdSectionTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: var(--td-ink);
 }
 
-.todoDateChip {
-  min-width: 118px;
-}
-
-.todoSplitLayout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
-}
-
-.todoPanel {
-  padding: 16px;
-}
-
-.todoPanelTitle {
-  color: #5a371f;
-  font-size: 0.84rem;
-  font-weight: 700;
-}
-
-.todoMemoCard,
-.todoCandidateCard,
-.todoSavedCard {
-  display: grid;
-  gap: 12px;
-}
-
-.todoMemoField textarea {
-  width: 100%;
-  min-height: 148px;
-  resize: none;
-  padding: 14px 16px;
-  border: 1.5px solid #d8c088;
-  border-radius: 14px;
-  background: rgba(255, 255, 253, 0.95);
-  color: #5e3b22;
-  font-size: 0.82rem;
-  line-height: 1.65;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 244, 220, 0.42),
-    0 3px 10px rgba(148, 102, 43, 0.05);
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-.todoMemoField textarea::placeholder {
-  color: #b3956d;
-}
-
-.todoMemoFooter {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.todoMemoFooter p {
-  margin: 0;
-  color: #856238;
-  font-size: 0.72rem;
-  line-height: 1.55;
-}
-
-.todoSplitButton {
-  min-width: 124px;
-  min-height: 46px;
-  padding: 0 18px;
-  border: 2px solid #7d4c1f;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #ae7741, #88541f);
-  color: #fff6df;
-  font-size: 0.82rem;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(127, 78, 32, 0.12);
-}
-
-.todoSplitButton:disabled,
-.todoAddButton:disabled {
+.tdLockIcon {
+  width: 20px;
+  height: 20px;
+  margin-left: auto;
   opacity: 0.5;
-  cursor: not-allowed;
 }
 
-.todoCandidateHeader,
-.todoSavedHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
+/* ── Textarea ── */
+.tdTextareaWrap {
+  position: relative;
+  margin-top: 11px;
 }
 
-.todoCandidateHeader span,
-.todoSavedHeader span {
-  color: #9b7748;
-  font-size: 0.7rem;
-  font-weight: 700;
+.tdTextarea {
+  width: 100%;
+  padding: 14px 15px 36px;
+  border-radius: 16px;
+  border: 2px solid var(--td-field-br);
+  background: var(--td-field);
+  color: var(--td-ink);
+  font-size: 15px;
+  line-height: 1.7;
+  outline: none;
+  min-height: 108px;
+  resize: none;
+  box-sizing: border-box;
+  font-family: "Gowun Dodum", sans-serif;
+  transition: border-color 0.15s;
 }
 
-.todoCandidateList,
-.todoSavedList {
-  display: grid;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border: 1.5px solid rgba(216, 192, 136, 0.9);
-  border-radius: 14px;
-  overflow: hidden;
-  background: rgba(255, 252, 244, 0.92);
+.tdTextarea:focus {
+  border-color: var(--td-accent);
 }
 
-.todoCandidateRow,
-.todoSavedList li {
-  display: grid;
-  align-items: center;
-  gap: 12px;
-  min-height: 58px;
-  padding: 0 14px;
-  border-bottom: 1px solid rgba(222, 194, 142, 0.72);
+.tdTextarea::placeholder {
+  color: #c4b493;
+  opacity: 1;
 }
 
-.todoCandidateRow:last-child,
-.todoSavedList li:last-child {
-  border-bottom: 0;
-}
-
-.todoCandidateRow {
-  grid-template-columns: 38px minmax(0, 1fr) auto;
-}
-
-.todoSavedList li {
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.todoCandidateEmpty {
-  padding: 26px 16px;
-  color: #9d7c52;
-  font-size: 0.76rem;
-  text-align: center;
-}
-
-.todoMiniIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  background: #f3e2bf;
-  box-shadow: inset 0 0 0 1.5px rgba(213, 177, 104, 0.45);
-}
-
-.todoMiniIcon.is-work {
-  background: linear-gradient(180deg, #f8ddc0, #f5c89c);
-}
-
-.todoMiniIcon.is-life {
-  background: linear-gradient(180deg, #e1e8be, #d0db9b);
-}
-
-.todoMiniIcon.is-health {
-  background: linear-gradient(180deg, #d9e8fb, #b7cef5);
-}
-
-.todoCandidateText,
-.todoSavedLead {
+.tdConfirmedBadge {
+  position: absolute;
+  right: 13px;
+  bottom: 11px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  color: var(--td-green-dk);
+}
+
+.tdConfirmedCheck {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--td-green);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+/* ── Confirm row ── */
+.tdConfirmRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.tdHintIcon {
+  font-size: 15px;
+}
+
+.tdHintText {
+  font-size: 13px;
+  color: var(--td-ink-soft);
+  flex: 1;
   min-width: 0;
 }
 
-.todoCandidateText b,
-.todoSavedLead b {
-  color: #462b18;
-  font-size: 0.82rem;
-  font-weight: 700;
+.tdConfirmBtn {
+  margin-left: auto;
+  padding: 9px 22px;
+  border-radius: 12px;
+  border: 2px solid var(--td-border-strong);
+  background: var(--td-panel);
+  color: var(--td-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+
+.tdConfirmBtn:hover {
+  background: var(--td-field);
+}
+
+.tdSpinner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid var(--td-border);
+  border-top-color: var(--td-accent);
+  animation: tdSpin 0.7s linear infinite;
+  display: inline-block;
+}
+
+/* ── Divider ── */
+.tdDivider {
+  border: none;
+  border-top: 2px dashed var(--td-divider);
+  margin: 20px 0 0;
+}
+
+/* ── Input row ── */
+.tdInputRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.tdInput {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 15px;
+  border-radius: 13px;
+  border: 2px solid var(--td-field-br);
+  background: var(--td-panel);
+  color: var(--td-ink);
+  font-size: 15px;
+  outline: none;
+  font-family: "Gowun Dodum", sans-serif;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.tdInput:focus {
+  border-color: var(--td-accent);
+}
+
+.tdInput::placeholder {
+  color: #c4b493;
+  opacity: 1;
+}
+
+.tdAddBtn {
+  padding: 0 22px;
+  border-radius: 13px;
+  border: 2px solid var(--td-green-dk);
+  background: var(--td-panel);
+  color: var(--td-green-dk);
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+
+.tdAddBtn:hover {
+  background: #f1f7e8;
+}
+
+/* ── Tag chips ── */
+.tdChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tdChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 15px;
+  border-radius: 999px;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tdChipCheck {
+  font-size: 11px;
+}
+
+.tdTagInput {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 2px dashed var(--td-accent);
+  background: var(--td-panel);
+  color: var(--td-ink);
+  font-size: 14px;
+  width: 100px;
+  outline: none;
+  font-family: "Gowun Dodum", sans-serif;
+}
+
+.tdTagInput::placeholder {
+  color: #c4b493;
+  opacity: 1;
+}
+
+.tdAddTag {
+  padding: 8px 15px;
+  border-radius: 999px;
+  border: 2px dashed var(--td-border-strong);
+  background: transparent;
+  color: var(--td-ink-faint);
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+
+.tdAddTag:hover {
+  background: var(--td-field);
+}
+
+/* ── Todo list ── */
+.tdTodoList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.tdTodoRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: var(--td-panel);
+  border: 2px solid var(--td-border);
+  border-radius: 14px;
+  padding: 11px 14px;
+  animation: tdRowIn 0.28s ease both;
+}
+
+.tdDragDots {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.tdDotRow {
+  display: flex;
+  gap: 3px;
+}
+
+.tdDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--td-ink-faint);
+  display: block;
+}
+
+.tdTodoName {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--td-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 }
 
-.todoTag {
+.tdTodoChips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.tdHashChip {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
-  padding: 0 10px;
+  padding: 3px 9px;
   border-radius: 999px;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 12px;
   white-space: nowrap;
 }
 
-.todoTag.tone-work {
-  background: #f7e6c8;
-  color: #9f6c2d;
-}
-
-.todoTag.tone-life {
-  background: #edf0d4;
-  color: #84924f;
-}
-
-.todoTag.tone-health {
-  background: #dfe9fb;
-  color: #5077b9;
-}
-
-.todoTag.tone-default {
-  background: #f1eadc;
-  color: #8a7258;
-}
-
-.todoAddButton {
-  min-width: 82px;
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1.5px solid #d7ae63;
-  border-radius: 999px;
-  background: #fff8eb;
-  color: #9b6322;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.todoCheckBadge {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  flex: 0 0 22px;
-  border: 1.5px solid #bf8832;
-  background: linear-gradient(180deg, #ddb15c, #c99037);
-  position: relative;
-}
-
-.todoCheckBadge::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 4px;
-  width: 6px;
-  height: 10px;
-  border-right: 2px solid #fff8eb;
-  border-bottom: 2px solid #fff8eb;
-  transform: rotate(40deg);
-}
-
-.todoSavedLead {
-  overflow: hidden;
-}
-
-.todoSavedList li.isDone {
-  opacity: 0.72;
-}
-
-.todoMenuButton {
-  border: 0;
+.tdDeleteBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
   background: transparent;
-  color: #9f6e30;
-  font-size: 1.1rem;
-  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: background 0.12s;
+  flex-shrink: 0;
   padding: 0;
 }
 
-.todoFooterNote {
-  padding: 14px 18px;
+.tdDeleteBtn:hover {
+  background: var(--td-field);
 }
 
-.todoFooterNote p {
+/* ── Generate button ── */
+.tdGenerateBtn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #a6d279, var(--td-green));
+  color: #fff;
+  font-family: "Jua", sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 var(--td-green-dk),
+    0 12px 18px -8px rgba(90, 150, 60, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+
+.tdGenerateBtn:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--td-green-dk),
+    0 6px 10px -6px rgba(90, 150, 60, 0.5);
+}
+
+.tdGenStar {
+  display: inline-block;
+  animation: tdTwinkle 1.5s infinite;
+}
+
+/* ── Right panel header ── */
+.tdRightHeader {
+  text-align: center;
+}
+
+.tdRightTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.tdRightTitleText {
+  font-family: "Jua", sans-serif;
+  font-size: 24px;
+  color: var(--td-ink);
   margin: 0;
-  color: #856238;
-  font-size: 0.76rem;
-  line-height: 1.55;
+  white-space: nowrap;
 }
 
-@media (max-width: 760px) {
-  .todoReplica {
-    width: min(100%, calc(100vw - 14px));
-  }
+.tdFlowerSm {
+  height: 28px;
+}
 
-  .todoOuterFrame {
-    padding: 8px;
-    gap: 10px;
-    border-radius: 14px;
-    outline: 2px solid #d4a840;
-    outline-offset: -8px;
-  }
+.tdRightSub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 6px;
+  color: var(--td-ink-soft);
+  font-size: 13px;
+}
 
-  .todoHeroCard,
-  .todoPanel,
-  .todoFooterNote {
-    border-radius: 12px;
-  }
+.tdStar {
+  color: var(--td-accent);
+  font-size: 11px;
+  display: inline-block;
+  animation: tdTwinkle 1.6s infinite;
+}
 
-  .todoHeroCard,
-  .todoSplitLayout,
-  .todoCandidateHeader,
-  .todoSavedHeader,
-  .todoMemoFooter,
-  .todoSavedList li,
-  .todoCandidateRow {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-    align-items: stretch;
-  }
+.tdStar--delay {
+  animation-delay: 0.4s;
+}
 
-  .todoHeroCard {
-    gap: 12px;
-    padding: 16px;
-  }
+/* ── Quest list ── */
+.tdQuestList {
+  flex: 1;
+  overflow: auto;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-right: 2px;
+}
 
-  .todoDateChip {
-    width: fit-content;
-  }
+.tdQuestRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--td-panel);
+  border: 2px solid var(--td-border);
+  border-radius: 18px;
+  padding: 13px 15px;
+  animation: tdRowIn 0.3s ease both;
+}
 
-  .todoUsageChip {
-    margin-top: 12px;
-  }
+.tdCheckbox {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 2px solid;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.14s ease;
+  padding: 0;
+}
 
-  .todoHeroCard h3 {
-    font-size: 1.34rem;
-  }
+.tdCheckMark {
+  color: #fff;
+  font-size: 12px;
+}
 
-  .todoHeroLead,
-  .todoFooterNote p,
-  .todoMemoFooter p {
-    font-size: 0.74rem;
-  }
+.tdAnimalAvatar {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
-  .todoMemoField textarea {
-    min-height: 122px;
-  }
+.tdQuestContent {
+  flex: 1;
+  min-width: 0;
+}
 
-  .todoCandidateRow,
-  .todoSavedList li {
-    min-height: auto;
-    padding: 12px;
-  }
+.tdQuestTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-  .todoAddButton,
-  .todoSplitButton {
-    width: 100%;
-  }
+.tdQuestTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  transition: all 0.14s;
+  min-width: 0;
+}
 
-  .todoCandidateText,
-  .todoSavedLead {
-    flex-wrap: wrap;
-  }
+.tdQuestChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.tdQuestDesc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--td-ink-soft);
+  font-size: 13px;
+}
+
+.tdAccentStar {
+  color: var(--td-accent);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.tdQuestEmpty {
+  text-align: center;
+  color: var(--td-ink-soft);
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  padding: 48px 0;
+}
+
+/* ── Right footer ── */
+.tdRightFooter {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.tdRegenBtn {
+  flex-shrink: 0;
+  padding: 13px 20px;
+  border-radius: 14px;
+  border: 2px solid var(--td-border-strong);
+  background: var(--td-panel);
+  color: var(--td-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+
+.tdRegenBtn:hover {
+  background: var(--td-field);
+}
+
+.tdAddTodayBtn {
+  flex: 1;
+  padding: 13px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #a6d279, var(--td-green));
+  color: #fff;
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 var(--td-green-dk),
+    0 12px 18px -8px rgba(90, 150, 60, 0.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease,
+    opacity 0.12s;
+}
+
+.tdAddTodayBtn:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--td-green-dk),
+    0 6px 10px -6px rgba(90, 150, 60, 0.5);
+}
+
+.tdAddTodayBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Toast ── */
+.tdToast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--td-panel);
+  border: 2.5px solid var(--td-border-strong);
+  border-radius: 16px;
+  padding: 13px 22px;
+  box-shadow: 0 18px 42px -14px rgba(60, 42, 18, 0.55);
+  animation: tdToastIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  transform: translateX(-50%);
+}
+
+.tdToastText {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: var(--td-ink);
+  white-space: nowrap;
 }

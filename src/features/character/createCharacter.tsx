@@ -498,7 +498,10 @@ export function CharacterModal({
                   {selectedKeywordCategories.length > 0 && (
                     <div className="ccResultChips">
                       {selectedKeywordCategories.slice(0, 3).map((kw, i) => {
-                        const c = getChipColor(i);
+                        const catIdx = PERSONALITY_CATEGORIES.indexOf(
+                          kw as (typeof PERSONALITY_CATEGORIES)[number],
+                        );
+                        const c = getChipColor(catIdx >= 0 ? catIdx : i);
                         return (
                           <span
                             key={kw}
