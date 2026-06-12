@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { apiClient } from "../shared/api/client.js";
+import { apiClient } from "../../shared/api/client.js";
 import { useCalendar } from "./CalendarCore.js";
 import { CalendarWindow } from "./CalendarWindow.js";
 import type { CalEvent } from "./calEngine.js";

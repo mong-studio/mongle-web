@@ -2,7 +2,7 @@ import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Tag } from "../components/Tag/index.js";
+import { Tag } from "../../shared/ui/Tag/index.js";
 import type { CalHook } from "./CalendarCore.js";
 import { Check } from "./CalendarCore.js";
 import { serial, serialToMD, toYMDStr, WD, ymdStrToSerial } from "./calEngine.js";

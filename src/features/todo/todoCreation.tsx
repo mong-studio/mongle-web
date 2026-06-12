@@ -6,7 +6,7 @@ import {
   postWebJson,
   type TodoCommitResponse,
   type TodoGenerateResult,
-} from "../todoApi.js";
+} from "./todoApi.js";
 
 export type TodoItem = {
   id: string;

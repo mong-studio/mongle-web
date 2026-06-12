@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { apiClient } from "../shared/api/client.js";
+import { apiClient } from "../../shared/api/client.js";
 import type { CalTag, TagItem } from "./types.js";
 
 export function useTagManager(isAuthenticated: boolean) {

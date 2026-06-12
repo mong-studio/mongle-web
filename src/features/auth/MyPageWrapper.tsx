@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { apiClient } from "../shared/api/client.js";
+import { apiClient } from "../../shared/api/client.js";
 import { MyPageModal, type Resident } from "./myPage.js";
 import { useAuthStore } from "./store.js";
 

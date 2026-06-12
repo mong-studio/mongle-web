@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { configureAuthClient } from "../shared/api/client.js";
+import { configureAuthClient } from "../../shared/api/client.js";
 import * as authApi from "./api.js";
 
 export type SessionUser = {

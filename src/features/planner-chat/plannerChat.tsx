@@ -1,6 +1,5 @@
 import { useState } from "react";
 import "./plannerChat.css";
-import type { TodoCommitResult } from "../createTodo/todoCreation.js";
 import {
   buildCommitPayload,
   groupPlannerDays,
@@ -9,7 +8,8 @@ import {
   type TodoChatFollowUpResult,
   type TodoCommitResponse,
   type TodoGenerateResult,
-} from "../todoApi.js";
+} from "../todo/todoApi.js";
+import type { TodoCommitResult } from "../todo/todoCreation.js";
 
 type PlannerMessage = {
   id: string;
