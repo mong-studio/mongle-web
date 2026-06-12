@@ -135,6 +135,51 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
 
   if (!isOpen) return null;
 
+  if (!isAuthenticated) {
+    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
+      <div
+        className="modalBackdrop"
+        role="presentation"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        <section
+          className="calLoginGate"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cal-login-title"
+        >
+          <button type="button" className="calLoginClose" onClick={onClose} aria-label="닫기">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+          <div className="calLoginIcon" aria-hidden="true">
+            <img src="/favicon.png" alt="" className="calLoginIconImg" />
+          </div>
+          <h2 id="cal-login-title" className="calLoginTitle">
+            로그인이 필요해요
+          </h2>
+          <p className="calLoginText">마을 게시판의 일정과 투두는 로그인한 뒤에 볼 수 있어요.</p>
+          <button type="button" className="calLoginButton" onClick={onOpenLogin}>
+            로그인하기
+          </button>
+        </section>
+      </div>
+    );
+  }
+
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
     <div
@@ -145,59 +190,16 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
       }}
     >
       <div className="calWindow" role="dialog" aria-modal="true" aria-label="마을 게시판 캘린더">
-        {!isAuthenticated ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 18,
-              height: "100%",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            <div style={{ fontSize: 52 }}>🏡</div>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 22,
-                color: "var(--ink-1)",
-                margin: 0,
-              }}
-            >
-              일정과 투두를 보려면 로그인이 필요해요
-            </p>
-            <button
-              type="button"
-              onClick={onOpenLogin}
-              style={{
-                padding: "14px 32px",
-                borderRadius: 999,
-                cursor: "pointer",
-                border: "none",
-                background: "var(--accent)",
-                color: "#fff",
-                fontFamily: "var(--font-display)",
-                fontSize: 18,
-                boxShadow: "inset 0 -3px 0 rgba(0,0,0,.13)",
-              }}
-            >
-              로그인하기
-            </button>
-          </div>
-        ) : (
-          <CalendarWindow
-            cal={cal}
-            onClose={onClose}
-            onToggle={handleToggle}
-            onAddEvent={handleAddEvent}
-            onDeleteTag={deleteTag}
-            onEditTag={editTag}
-            isRefreshing={isLoading}
-            tags={tagItems}
-          />
-        )}
+        <CalendarWindow
+          cal={cal}
+          onClose={onClose}
+          onToggle={handleToggle}
+          onAddEvent={handleAddEvent}
+          onDeleteTag={deleteTag}
+          onEditTag={editTag}
+          isRefreshing={isLoading}
+          tags={tagItems}
+        />
       </div>
     </div>
   );

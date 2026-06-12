@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Modal } from "../../shared/ui/Modal/index.js";
 import {
   confirmEmailVerification,
   requestEmailVerification,
@@ -122,144 +123,128 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
     }
   }
 
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="modalBackdrop" role="presentation">
-      <section
-        className="featureModal signupModal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="signup-title"
-      >
-        <button type="button" className="closeButton" onClick={onClose} aria-label="닫기">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-          </svg>
-        </button>
-        <p className="modalKicker">MONGLE ACCOUNT</p>
-        <h2 id="signup-title">회원가입</h2>
-        <p className="modalLine">이메일 인증 후 모든 입력값을 확인해 몽글마을 계정을 만들어요.</p>
+    <Modal open={open} onClose={onClose} className="signupModal" labelledBy="signup-title">
+      <p className="modalKicker">MONGLE ACCOUNT</p>
+      <h2 id="signup-title">회원가입</h2>
+      <p className="modalLine">이메일 인증 후 모든 입력값을 확인해 몽글마을 계정을 만들어요.</p>
 
-        <div className="signupSheet">
-          <label>
-            이메일
-            <span className="inlineAction">
-              <input
-                type="email"
-                value={signupEmail}
-                onChange={(event) => {
-                  setSignupEmail(event.target.value);
-                  setSignupStep("form");
-                }}
-                placeholder="user@example.com"
-              />
-              <button type="button" onClick={requestSignupEmailVerification} disabled={isBusy}>
-                코드 발송
-              </button>
-            </span>
-          </label>
-          <label>
-            인증 코드
-            <span className="inlineAction">
-              <input
-                value={signupCode}
-                maxLength={6}
-                onChange={(event) => setSignupCode(event.target.value.toUpperCase())}
-                placeholder="ABCDEF"
-              />
-              <button
-                type="button"
-                onClick={confirmSignupEmailVerification}
-                disabled={isBusy || signupStep === "form"}
-              >
-                인증 확인
-              </button>
-            </span>
-          </label>
-          <div className="signupGrid">
-            <label>
-              비밀번호
-              <input
-                type="password"
-                value={signupPassword}
-                onChange={(event) => setSignupPassword(event.target.value)}
-                placeholder="8~16자, 2종 이상 조합"
-              />
-            </label>
-            <label>
-              비밀번호 확인
-              <input
-                type="password"
-                value={signupPasswordConfirm}
-                onChange={(event) => setSignupPasswordConfirm(event.target.value)}
-              />
-            </label>
-          </div>
-          <label>
-            닉네임
+      <div className="signupSheet">
+        <label>
+          이메일
+          <span className="inlineAction">
             <input
-              value={signupUserName}
-              maxLength={8}
-              onChange={(event) => setSignupUserName(event.target.value)}
-              placeholder="한글/영문/숫자 2~8자"
+              type="email"
+              value={signupEmail}
+              onChange={(event) => {
+                setSignupEmail(event.target.value);
+                setSignupStep("form");
+              }}
+              placeholder="user@example.com"
+            />
+            <button type="button" onClick={requestSignupEmailVerification} disabled={isBusy}>
+              코드 발송
+            </button>
+          </span>
+        </label>
+        <label>
+          인증 코드
+          <span className="inlineAction">
+            <input
+              value={signupCode}
+              maxLength={6}
+              onChange={(event) => setSignupCode(event.target.value.toUpperCase())}
+              placeholder="ABCDEF"
+            />
+            <button
+              type="button"
+              onClick={confirmSignupEmailVerification}
+              disabled={isBusy || signupStep === "form"}
+            >
+              인증 확인
+            </button>
+          </span>
+        </label>
+        <div className="signupGrid">
+          <label>
+            비밀번호
+            <input
+              type="password"
+              value={signupPassword}
+              onChange={(event) => setSignupPassword(event.target.value)}
+              placeholder="8~16자, 2종 이상 조합"
             />
           </label>
-          <div className="signupGrid">
-            <label>
-              직업
-              <input
-                value={signupJob}
-                onChange={(event) => setSignupJob(event.target.value)}
-                placeholder="선택"
-              />
-            </label>
-            <label>
-              생년월일
-              <input
-                type="date"
-                value={signupBirth}
-                onChange={(event) => setSignupBirth(event.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="termsBox">
-            <label>
-              <input
-                type="checkbox"
-                checked={signupServiceTermsAgreed}
-                onChange={(event) => setSignupServiceTermsAgreed(event.target.checked)}
-              />
-              이용약관에 동의합니다. (필수)
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={signupPrivacyAgreed}
-                onChange={(event) => setSignupPrivacyAgreed(event.target.checked)}
-              />
-              개인정보 수집·이용에 동의합니다. (필수)
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={signupAiConsent}
-                onChange={(event) => setSignupAiConsent(event.target.checked)}
-              />
-              AI 학습 및 통계 활용에 동의합니다. (선택)
-            </label>
-          </div>
-
-          {signupMessage ? <p className="signupMessage">{signupMessage}</p> : null}
-
-          <button type="button" className="primaryButton" onClick={submitSignup} disabled={isBusy}>
-            {isBusy ? "처리 중..." : "확인"}
-          </button>
+          <label>
+            비밀번호 확인
+            <input
+              type="password"
+              value={signupPasswordConfirm}
+              onChange={(event) => setSignupPasswordConfirm(event.target.value)}
+            />
+          </label>
         </div>
-      </section>
-    </div>
+        <label>
+          닉네임
+          <input
+            value={signupUserName}
+            maxLength={8}
+            onChange={(event) => setSignupUserName(event.target.value)}
+            placeholder="한글/영문/숫자 2~8자"
+          />
+        </label>
+        <div className="signupGrid">
+          <label>
+            직업
+            <input
+              value={signupJob}
+              onChange={(event) => setSignupJob(event.target.value)}
+              placeholder="선택"
+            />
+          </label>
+          <label>
+            생년월일
+            <input
+              type="date"
+              value={signupBirth}
+              onChange={(event) => setSignupBirth(event.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="termsBox">
+          <label>
+            <input
+              type="checkbox"
+              checked={signupServiceTermsAgreed}
+              onChange={(event) => setSignupServiceTermsAgreed(event.target.checked)}
+            />
+            이용약관에 동의합니다. (필수)
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={signupPrivacyAgreed}
+              onChange={(event) => setSignupPrivacyAgreed(event.target.checked)}
+            />
+            개인정보 수집·이용에 동의합니다. (필수)
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={signupAiConsent}
+              onChange={(event) => setSignupAiConsent(event.target.checked)}
+            />
+            AI 학습 및 통계 활용에 동의합니다. (선택)
+          </label>
+        </div>
+
+        {signupMessage ? <p className="signupMessage">{signupMessage}</p> : null}
+
+        <button type="button" className="primaryButton" onClick={submitSignup} disabled={isBusy}>
+          {isBusy ? "처리 중..." : "확인"}
+        </button>
+      </div>
+    </Modal>
   );
 }

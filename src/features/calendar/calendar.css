@@ -324,3 +324,99 @@
   opacity: 0.55;
   cursor: default;
 }
+
+/* ── Login gate (calendar cozy tone) ─────────────────────────── */
+
+.calLoginGate {
+  position: relative;
+  width: min(420px, 100%);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 48px 36px 40px;
+  border-radius: var(--r-xl);
+  background: var(--cream-0);
+  box-shadow: var(--sh-pop);
+  font-family: var(--font-body);
+}
+
+.calLoginClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--cream-2);
+  color: var(--ink-2);
+  transition:
+    background 0.13s,
+    color 0.13s;
+}
+.calLoginClose:hover {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.calLoginIcon {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--r-pill);
+  background: var(--accent-tint);
+  box-shadow:
+    inset 0 0 0 6px var(--cream-0),
+    0 6px 16px -8px rgba(120, 84, 38, 0.4);
+}
+
+.calLoginIconImg {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.calLoginTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--ink-1);
+}
+
+.calLoginText {
+  margin: 0;
+  max-width: 26ch;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.calLoginButton {
+  margin-top: 8px;
+  padding: 14px 36px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--ink-inv);
+  font-family: var(--font-display);
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px -8px var(--accent-deep);
+  transition:
+    filter 0.13s,
+    transform 0.13s;
+}
+.calLoginButton:hover {
+  filter: brightness(1.06) saturate(1.05);
+  transform: translateY(-1px);
+}
+.calLoginButton:active {
+  transform: translateY(1px) scale(0.98);
+  filter: brightness(0.98);
+}
