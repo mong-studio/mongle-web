@@ -1,0 +1,876 @@
+:root {
+  color-scheme: light;
+  font-family: "DotGothic16", "Apple SD Gothic Neo", "Malgun Gothic", monospace;
+  color: #382719;
+  background: #1d2a20;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+
+.appShell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #2d5b36;
+}
+
+.phaserLayer,
+.shadeLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.phaserLayer {
+  z-index: 0;
+  overflow: hidden;
+  background: #47783d;
+}
+
+.phaserLayer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.shadeLayer {
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(34, 52, 35, 0.2), transparent 30%),
+    linear-gradient(0deg, rgba(27, 35, 22, 0.4), transparent 45%);
+}
+
+.townNav {
+  position: absolute;
+  z-index: 8;
+  top: 14px;
+  left: 18px;
+  right: 18px;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  color: #fff6d7;
+  text-shadow: 0 2px 0 rgba(43, 27, 18, 0.65);
+}
+
+.townNav nav {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.townNav h1 {
+  margin: 0;
+  padding: 8px 24px;
+  border: 3px solid #553827;
+  box-shadow:
+    inset 0 0 0 3px #f5d48c,
+    0 4px 0 rgba(50, 33, 22, 0.5);
+  background: #98643f;
+  color: #fff5ce;
+  font-size: clamp(1.2rem, 2.2vw, 2rem);
+  white-space: nowrap;
+}
+
+.townNav button,
+.mapControls button,
+.focusActions button,
+.questPanel > button,
+.primaryButton,
+.talkButton,
+.plannerComposer button,
+.planResult button,
+.candidateBlock li button {
+  min-height: 34px;
+  border: 3px solid #453023;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 244, 196, 0.55),
+    0 3px 0 rgba(50, 33, 22, 0.55);
+  background: #8a5b38;
+  color: #fff5d1;
+  font-weight: 900;
+}
+
+.townNav button {
+  padding: 0 12px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.mapControls {
+  position: absolute;
+  z-index: 7;
+  right: 22px;
+  bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 34px);
+  gap: 6px;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mapControls button {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.navUserArea {
+  justify-self: end;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.loginButton {
+  min-width: 84px;
+}
+
+.myPageButton {
+  min-width: 84px;
+}
+
+.focusPanel,
+.questPanel,
+.dialogueBox,
+.noticeBubble,
+.appleCounter,
+.residentPanel,
+.featureModal {
+  border: 4px solid #4b2f1f;
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 246, 202, 0.45),
+    0 6px 0 rgba(44, 28, 20, 0.55),
+    0 18px 34px rgba(23, 22, 16, 0.28);
+  image-rendering: pixelated;
+}
+
+.leftRail {
+  position: absolute;
+  z-index: 6;
+  top: 90px;
+  left: 22px;
+  width: 210px;
+  display: grid;
+  gap: 12px;
+}
+
+.focusPanel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 16px 14px;
+  background: #f1d18c;
+}
+
+.sunBadge {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 3px solid #7d4b28;
+  background: #ffe279;
+  color: #8f4c24;
+  font-size: 1.5rem;
+}
+
+.focusPanel strong {
+  font-size: 2rem;
+  color: #3d2a1d;
+}
+.focusPanel span,
+.focusPanel small {
+  color: #7a4b2d;
+  font-weight: 900;
+}
+
+.focusActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  width: 100%;
+}
+
+.residentPanel {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: #f7df9e;
+}
+
+.residentPanel b {
+  color: #4b3021;
+  font-size: 0.78rem;
+}
+
+.residentPanel div,
+.residentList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.residentPanel span,
+.residentList span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 2px solid #8e6038;
+  background: #fff4c5;
+  color: #5b3925;
+  font-size: 0.7rem;
+  font-weight: 950;
+}
+
+.residentPanel img,
+.residentList img {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #7b4d2b;
+  image-rendering: pixelated;
+  object-fit: cover;
+}
+
+.noticeBubble {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  background: #fff1bd;
+  color: #4b3021;
+}
+
+.noticeBubble b {
+  color: #7b3d29;
+}
+.noticeBubble span {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.appleCounter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 12px;
+  background: #f7df9e;
+}
+
+.appleCounter span {
+  font-size: 1.3rem;
+}
+.appleCounter b {
+  font-size: 1.15rem;
+}
+
+.questPanel {
+  position: absolute;
+  z-index: 6;
+  top: 92px;
+  right: 22px;
+  width: min(320px, calc(100vw - 44px));
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  background: #f7df9e;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 3px solid #8f5c34;
+}
+
+.panelHeader span {
+  color: #3d2a1d;
+  font-size: 1rem;
+  font-weight: 950;
+}
+.panelHeader b {
+  color: #7c4d2c;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.questPanel ul,
+.todoSheet ul,
+.planResult ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.questPanel li,
+.todoSheet li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 9px;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+}
+
+.checkButton,
+.todoSheet li > span {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #5c3722;
+  font-weight: 950;
+}
+
+.questPanel b,
+.questPanel p,
+.questPanel small {
+  margin: 0;
+}
+.questPanel li p {
+  margin-top: 2px;
+  color: #5c4635;
+  font-size: 0.82rem;
+}
+.questPanel li small {
+  display: block;
+  margin-top: 3px;
+  color: #8a6040;
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+.questPanel li.isDone,
+.todoSheet li.isDone {
+  opacity: 0.72;
+}
+.questPanel li.isDone p,
+.todoSheet li.isDone b {
+  text-decoration: line-through;
+}
+
+.dialogueBox {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 22px;
+  width: min(920px, calc(100vw - 280px));
+  min-height: 180px;
+  display: grid;
+  grid-template-columns: 112px minmax(160px, 1fr) minmax(320px, 1.2fr);
+  gap: 14px;
+  align-items: stretch;
+  padding: 14px;
+  transform: translateX(-50%);
+  background: #f8dea1;
+}
+
+.dialogueBox img,
+.pixelPreview img {
+  image-rendering: pixelated;
+}
+
+.dialogueBox img {
+  width: 112px;
+  height: 132px;
+  object-fit: cover;
+  object-position: center 18%;
+  align-self: end;
+  border: 3px solid #7b4d2b;
+  background: #fff3c0;
+}
+
+.dialogueText {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+}
+
+.dialogueText span {
+  color: #8d3f28;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+.dialogueText p {
+  margin: 0;
+  color: #3f2d21;
+  font-size: 1.02rem;
+  font-weight: 900;
+  line-height: 1.5;
+}
+.dialogueText small {
+  color: #7b5a3e;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.dialogueOptions {
+  display: grid;
+  gap: 8px;
+}
+
+.dialogueOptions button {
+  display: grid;
+  gap: 3px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 3px solid #6e4329;
+  background: #fff4c5;
+  color: #3f2d21;
+  text-align: left;
+}
+
+.dialogueOptions b {
+  font-size: 0.92rem;
+}
+.dialogueOptions span {
+  color: #765338;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.talkButton {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 30px;
+  min-width: 160px;
+  transform: translateX(-50%);
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 26px;
+  background: rgba(21, 18, 16, 0.58);
+}
+
+.featureModal {
+  position: relative;
+  width: min(700px, 100%);
+  max-height: min(760px, calc(100vh - 52px));
+  overflow: auto;
+  padding: 24px;
+  background: #f8dea1;
+}
+
+.plannerModalShell {
+  width: min(1120px, 100%);
+  max-height: min(860px, calc(100vh - 40px));
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.todoModalShell {
+  width: min(1520px, 100%);
+  max-height: calc(100vh - 28px);
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: auto;
+}
+
+.plannerCloseButton {
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+}
+
+.todoCloseButton {
+  top: 18px;
+  right: 18px;
+  z-index: 5;
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 3px solid #4b2f1f;
+  background: #8a5b38;
+  color: #fff5d1;
+  font-weight: 950;
+}
+
+.modalKicker,
+.featureMeta {
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+.modalKicker {
+  margin: 0 0 8px;
+  color: #8d3f28;
+}
+.featureModal h2 {
+  margin: 0;
+  color: #3e2a1d;
+  font-size: clamp(1.45rem, 3vw, 2.25rem);
+}
+.modalLine {
+  margin: 12px 0 0;
+  color: #5f442d;
+  font-weight: 850;
+  line-height: 1.5;
+}
+.featureMeta {
+  display: inline-flex;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+  color: #633921;
+}
+
+.characterSheet,
+.todoSheet,
+.plannerSheet,
+.signupSheet {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.uploadDropzone {
+  padding: 12px;
+  border: 3px dashed #8e6038;
+  background: #fff4c5;
+}
+.uploadPreview {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  border: 3px solid #8e6038;
+  background: #f1d18c;
+  overflow: hidden;
+}
+.uploadPreview img {
+  width: 100%;
+  height: 170px;
+  object-fit: contain;
+  image-rendering: auto;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #4a2e1f;
+  font-weight: 950;
+}
+input,
+textarea {
+  width: 100%;
+  border: 3px solid #8e6038;
+  background: #fff6ca;
+  color: #382719;
+  padding: 11px 12px;
+}
+textarea {
+  min-height: 128px;
+  resize: vertical;
+}
+.primaryButton {
+  min-height: 42px;
+}
+
+.signupModal {
+  width: min(620px, 100%);
+}
+.inlineAction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 8px;
+}
+.inlineAction button,
+.termsBox {
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+}
+.inlineAction button {
+  color: #fff5d1;
+  background: #8a5b38;
+  font-weight: 950;
+}
+.signupGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.termsBox {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+.termsBox label {
+  display: flex;
+  grid-template-columns: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+.termsBox input {
+  width: auto;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  border: 0.1875rem solid #8e6038;
+  background: #fff6ca;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  padding: 0;
+}
+input[type="checkbox"]:checked {
+  background: #8a5b38;
+  border-color: #453023;
+}
+input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff5d1;
+  font-size: 0.8125rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.signupMessage {
+  margin: 0;
+  padding: 10px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+  color: #7b3d29;
+  font-size: 0.82rem;
+  font-weight: 950;
+  line-height: 1.4;
+}
+.keywordCategoryBlock {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+}
+.keywordCategoryBlock b {
+  color: #7b3d29;
+}
+.keywordChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.keywordChips button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 2px solid #6e4329;
+  background: #ffe9b4;
+  color: #4d2f1f;
+  font-weight: 900;
+  box-shadow: none;
+}
+.keywordChips button.isSelected {
+  background: #8a5b38;
+  color: #fff5d1;
+}
+
+.pixelPreview {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+}
+.pixelPreview img {
+  width: 96px;
+  height: 112px;
+  object-fit: cover;
+}
+.pixelPreview p {
+  margin: 0;
+  color: #5f442d;
+  text-align: center;
+}
+
+.candidateBlock,
+.planResult,
+.chatStack {
+  display: grid;
+  gap: 10px;
+}
+.candidateBlock li {
+  grid-template-columns: 24px 1fr auto;
+}
+
+.chatStack {
+  min-height: 320px;
+  max-height: 360px;
+  overflow: auto;
+  align-content: start;
+  padding: 14px;
+  border: 3px solid #8e6038;
+  background: #fffdf5;
+}
+.chatBubble {
+  width: fit-content;
+  max-width: min(78%, 420px);
+  padding: 11px 14px;
+  border: 3px solid rgba(67, 48, 35, 0.2);
+  line-height: 1.45;
+}
+.chatBubble p {
+  margin: 0;
+}
+.chatBubble.fromChief {
+  justify-self: start;
+  background: #b6dc32;
+  color: #2d2e15;
+}
+.chatBubble.fromUser {
+  justify-self: end;
+  background: #24b5c6;
+  color: #fffdf4;
+}
+
+.plannerComposer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 10px;
+}
+.planResult {
+  padding: 14px;
+  border: 3px solid #8e6038;
+  background: #fff4c5;
+}
+.planResult li {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 2px solid rgba(142, 96, 56, 0.65);
+  background: #fff9d7;
+}
+.planResult li span {
+  color: #6c4d36;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 1060px) {
+  .leftRail {
+    top: 80px;
+    width: 184px;
+  }
+  .questPanel {
+    width: 280px;
+  }
+  .dialogueBox {
+    width: min(760px, calc(100vw - 28px));
+    grid-template-columns: 88px 1fr;
+    grid-template-areas: "portrait text" "options options";
+  }
+  .dialogueBox img {
+    grid-area: portrait;
+    width: 88px;
+    height: 104px;
+  }
+  .dialogueText {
+    grid-area: text;
+  }
+  .dialogueOptions {
+    grid-area: options;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  body {
+    overflow: auto;
+  }
+  .appShell {
+    min-height: 960px;
+    height: auto;
+  }
+  .townNav {
+    grid-template-columns: 1fr auto;
+  }
+  .townNav nav {
+    display: none;
+  }
+  .leftRail,
+  .questPanel,
+  .dialogueBox,
+  .talkButton {
+    position: static;
+    transform: none;
+    width: auto;
+    margin: 10px;
+  }
+  .dialogueBox {
+    grid-template-columns: 1fr;
+  }
+  .signupGrid,
+  .inlineAction {
+    grid-template-columns: 1fr;
+  }
+}

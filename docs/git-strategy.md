@@ -145,14 +145,14 @@ git diff
 특정 파일만 보고 싶을 때는 아래처럼 확인합니다.
 
 ```bash
-git diff apps/game/src/main.tsx
+git diff src/main.tsx
 ```
 
 특히 아래 파일·폴더는 실수로 커밋하지 않도록 주의합니다.
 
 - `.env`, `.env.local` (개인 환경 설정)
 - `node_modules/` (설치된 패키지)
-- `apps/game/dist/` (빌드 결과물)
+- `dist/` (빌드 결과물)
 - 이번 작업과 상관없는 화면/맵 파일
 - IDE나 포맷터가 자동으로 바꾼 관련 없는 파일
 
@@ -199,8 +199,8 @@ npm run check:fix
 필요한 파일만 staging합니다.
 
 ```bash
-git add apps/game/src/main.tsx
-git add apps/game/src/style.css
+git add src/main.tsx
+git add src/style.css
 ```
 
 `git add .`는 편하지만 관련 없는 파일까지 들어갈 수 있습니다. 사용했다면
@@ -539,7 +539,7 @@ git log --oneline -5
 
 ```text
 feat/todo-ai-button 브랜치에서 git merge main을 했더니
-apps/game/src/main.tsx 파일에 충돌이 났습니다.
+src/main.tsx 파일에 충돌이 났습니다.
 git status 결과는 아래와 같습니다.
 ...
 제가 수정한 부분은 AI 버튼 핸들러이고, main에서는 같은 컴포넌트 구조가

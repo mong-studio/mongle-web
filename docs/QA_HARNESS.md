@@ -5,8 +5,8 @@ This project does not yet have automated Playwright tests. Until those are added
 ## Build Harness
 
 ```bash
-npm run web:typecheck
-npm run web:build
+npm run typecheck
+npm run build
 ```
 
 Pass condition:
@@ -20,7 +20,7 @@ Pass condition:
 Run:
 
 ```bash
-npm run web:dev
+npm run dev
 ```
 
 Check:

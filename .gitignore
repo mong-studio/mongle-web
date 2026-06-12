@@ -1,6 +1,10 @@
 # Node
 node_modules/
 
+# Build output
+dist/
+.vite/
+
 # Python
 __pycache__/
 *.py[cod]

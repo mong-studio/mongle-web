@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["apps/game/src/**", "*.json", "*.js", "!**/package-lock.json"]
+    "includes": ["src/**", "*.json", "*.js", "!**/package-lock.json"]
   },
   "formatter": {
     "enabled": true,

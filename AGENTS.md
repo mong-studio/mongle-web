@@ -1,26 +1,17 @@
-# Mongle Game Notes
+# Mongle Web — Agent Guide
 
-Build and maintain a cozy pixel village focus/todo game MVP. The web app is a React/Vite application with a Phaser-rendered Tiled map background.
+React/Vite + Phaser 기반 몽글마을 웹 앱. React가 HUD/모달 UI를, Phaser가 Tiled 맵 배경을 담당한다.
 
 ## Commands
 
 ```bash
-npm run dev
-npm run typecheck
-npm run build
-npm run test
+npm install        # 의존성 설치
+npm run dev        # 개발 서버 (http://127.0.0.1:5173)
+npm run typecheck  # tsc --noEmit
+npm run build      # typecheck + vite build
+npm run test       # vitest
+npm run check      # biome lint + format 검사
 ```
-
-## Main Files
-
-- `src/main.tsx`: entry point (createRoot only).
-- `src/app/App.tsx`: React app shell, HUD, feature modals, auth state, and API calls.
-- `src/app/featureRegistry.ts`: feature modal definitions.
-- `src/features/village/PhaserVillage.tsx`: Phaser scene that loads and renders `public/assets/map/mongle.tmj`.
-- `src/app/global.css`: full-viewport layout and pixel UI styling.
-- `src/features/`: domain features (auth, calendar, character, feed, my-page, planner-chat, todo, village).
-- `src/shared/`: cross-domain code (`api/` HTTP client, `ui/` reusable components).
-- `public/assets/map/`: Tiled map, tileset definitions, and image assets.
 
 ## Folder Structure Rules
 
@@ -44,12 +35,11 @@ src/
 - **HTTP 호출**은 `src/shared/api/client.js`의 `apiClient`를 사용한다. feature별 API 함수는 해당 feature 폴더 안에 둔다 (예: `features/todo/todoApi.ts`).
 - **네이밍**: React 컴포넌트 파일은 PascalCase(`MyPage.tsx`), 훅은 `useX.ts`, 그 외 모듈은 camelCase. CSS는 컴포넌트 옆에 colocate(`MyPage.css`).
 - **import 경로**는 상대 경로 + `.js` 확장자를 쓴다 (`moduleResolution: nodenext`). 예: `import { apiClient } from "../../shared/api/client.js"`.
-- **정적 자산**은 `public/assets/`에 둔다.
+- **정적 자산**은 `public/assets/`에 둔다. 맵 에셋은 `public/assets/map/`.
 - 전역 스타일은 `src/app/global.css` 하나만 유지하고, 새 스타일은 feature CSS에 추가한다.
 
-## Notes
+## Conventions
 
-- Keep map assets in `public/assets/map/`.
-- Keep `mongle.tmj` tileset `source` values aligned with actual `.tsx` filenames.
-- Keep `.tsx` image `source` basenames aligned with actual `.png` filenames.
-- React UI should remain layered above the Phaser canvas.
+- 커밋 메시지는 conventional commits (`feat:`, `fix:`, `refactor:`, ...) — commitlint가 강제한다.
+- 커밋 전 husky가 biome check를 실행한다. CI는 biome + typecheck + build를 검사한다.
+- React UI는 Phaser 캔버스 위에 레이어로 올린다.

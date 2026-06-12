@@ -6,7 +6,7 @@ vi.mock("./api", () => ({
   refreshToken: vi.fn(),
   fetchMe: vi.fn(),
 }));
-vi.mock("./client", () => ({ configureAuthClient: vi.fn() }));
+vi.mock("../../shared/api/client.js", () => ({ configureAuthClient: vi.fn() }));
 
 import * as authApi from "./api.js";
 import { useAuthStore } from "./store.js";
