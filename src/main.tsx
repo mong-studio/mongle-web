@@ -8,11 +8,11 @@ import {
   toUserMessage,
 } from "./features/auth/api.js";
 import { LoginModal } from "./features/auth/LoginModal.js";
-import { MyPageWrapper } from "./features/auth/MyPageWrapper.js";
 import { type AuthState, useAuthStore } from "./features/auth/store.js";
 import { CalendarBulletinBoard } from "./features/calendar/CalendarBulletinBoard.js";
 import { CalendarModal } from "./features/calendar/CalendarModal.js";
 import { CharacterModal } from "./features/character/createCharacter.js";
+import { MyPageWrapper } from "./features/my-page/MyPageWrapper.js";
 import { PlannerChat } from "./features/planner-chat/plannerChat.js";
 import { type TodoCommitResult, TodoCreation } from "./features/todo/todoCreation.js";
 import { PhaserVillage } from "./PhaserVillage.js";

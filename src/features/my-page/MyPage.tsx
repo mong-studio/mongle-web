@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import "./myPage.css";
+import "./MyPage.css";
 
 export type Resident = {
   id: string;

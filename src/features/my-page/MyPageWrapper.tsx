@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "../../shared/api/client.js";
-import { MyPageModal, type Resident } from "./myPage.js";
-import { useAuthStore } from "./store.js";
+import { useAuthStore } from "../auth/store.js";
+import { MyPageModal, type Resident } from "./MyPage.js";
 
 type UserProfile = {
   user_name: string;
