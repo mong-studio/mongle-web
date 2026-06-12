@@ -439,10 +439,10 @@ export function App() {
             aria-modal="true"
             aria-labelledby="feature-title"
           >
-            {activeFeature === "planner" || activeFeature === "todo" ? (
+            {activeFeature === "planner" ? (
               <button
                 type="button"
-                className={`closeButton ${activeFeature === "planner" ? "plannerCloseButton" : "todoCloseButton"}`}
+                className="closeButton plannerCloseButton"
                 onClick={() => setActiveFeature(null)}
                 aria-label="닫기"
               >
@@ -510,6 +510,7 @@ export function App() {
                 savedTodos={savedTodos}
                 onNotice={setNotice}
                 onTodosSaved={handleCommittedTodos}
+                onClose={() => setActiveFeature(null)}
               />
             ) : null}
 

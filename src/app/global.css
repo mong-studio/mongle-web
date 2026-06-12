@@ -522,7 +522,7 @@ button {
   border: 0;
   box-shadow: none;
   background: transparent;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .plannerCloseButton {
