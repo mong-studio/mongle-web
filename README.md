@@ -1,6 +1,6 @@
 # Mongle Web
 
-Mongle Web 워크스페이스는 React/Vite 게임 화면, Godot Web 빌드, Python AI API로 구성되어 있습니다.
+Mongle Web 워크스페이스는 React/Vite 게임 화면, Phaser 타일맵 렌더링, Python AI API로 구성되어 있습니다.
 
 ## 필요 환경
 
@@ -8,15 +8,6 @@ Mongle Web 워크스페이스는 React/Vite 게임 화면, Godot Web 빌드, Pyt
 - uv
 - Node.js 20+
 - npm 10+
-- Godot 프로젝트를 수정하거나 export해야 한다면 Godot 4.3
-
-현재 Godot 관련 스크립트는 Godot 앱이 아래 경로에 있다고 가정합니다.
-
-```bash
-$HOME/Downloads/Godot.app/Contents/MacOS/Godot
-```
-
-Godot 앱이 다른 위치에 설치되어 있다면 `apps/game/package.json`의 `godot:edit`, `godot:export` 스크립트 경로를 수정해야 합니다.
 
 ## 설치
 
@@ -32,14 +23,12 @@ React/Vite 프론트엔드 패키지를 설치합니다.
 npm run web:install
 ```
 
-두 명령 모두 필요합니다. `uv sync`는 Python 패키지만 설치하고, `npm run web:install`은 프론트엔드 패키지를 설치합니다.
-
 ## 실행
 
-프론트엔드와 Python AI API를 함께 실행합니다.
+프론트엔드를 실행합니다.
 
 ```bash
-npm run dev
+npm run web:dev
 ```
 
 브라우저에서 아래 주소를 엽니다.
@@ -48,44 +37,19 @@ npm run dev
 http://127.0.0.1:5173/
 ```
 
-프론트엔드는 아래 로컬 AI API를 호출합니다.
+프론트엔드는 기본적으로 같은 origin의 API를 호출합니다. 별도 API 서버를 사용할 때는 `VITE_API_BASE`를 설정합니다.
+
+## Phaser Map
+
+마을 배경은 Phaser가 Tiled 맵을 렌더링합니다.
 
 ```text
-http://127.0.0.1:8010
+apps/game/public/assets/map/mongle.tmj
+apps/game/public/assets/map/*.tsx
+apps/game/public/assets/map/*.png
 ```
 
-프론트엔드와 API를 따로 실행할 수도 있습니다.
-
-```bash
-npm run web:dev
-```
-
-```bash
-cd packages/ai
-uv run python -m api.server
-```
-
-## Godot
-
-React 앱은 export된 Godot Web 빌드를 iframe으로 불러옵니다.
-
-```text
-apps/game/public/godot/index.html
-```
-
-Godot Web 빌드를 다시 export하려면 아래 명령을 실행합니다.
-
-```bash
-npm run web:godot:export
-```
-
-Godot 에디터를 열려면 아래 명령을 실행합니다.
-
-```bash
-npm run web:godot
-```
-
-Godot은 `uv sync`나 `npm install`로 설치되지 않습니다. Godot 에디터나 export 기능이 필요한 팀원은 각자 로컬에 Godot을 설치해야 합니다.
+맵을 수정할 때는 `mongle.tmj`의 `tilesets[].source`와 각 `.tsx`의 `<image source="...">`가 실제 파일명과 맞는지 확인합니다.
 
 ## Lock 파일
 
@@ -93,12 +57,6 @@ AI 패키지의 Python 의존성은 아래 파일에 고정되어 있습니다.
 
 ```text
 packages/ai/uv.lock
-```
-
-Python 의존성을 변경한 뒤에는 lock 파일을 갱신합니다.
-
-```bash
-uv lock --project packages/ai
 ```
 
 프론트엔드 의존성은 아래 파일에 고정되어 있습니다.
@@ -116,19 +74,6 @@ npm install --prefix apps/game
 ## 자주 쓰는 명령
 
 ```bash
+npm run web:typecheck
 npm run web:build
 ```
-
-React/Vite 프론트엔드를 빌드합니다.
-
-```bash
-npm run ai:test
-```
-
-Python AI 테스트를 실행합니다.
-
-```bash
-npm run ai:demo
-```
-
-Streamlit 데모를 실행합니다.

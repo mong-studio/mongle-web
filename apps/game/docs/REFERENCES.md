@@ -2,7 +2,7 @@
 
 ## Runtime Dependencies
 
-- Godot Engine: https://godotengine.org/
+- Phaser: https://phaser.io/
 - React: https://react.dev/
 - Vite: https://vite.dev/
 
@@ -10,25 +10,21 @@
 
 ## Runtime Art
 
-본 프로젝트의 Godot 마을 화면 및 타일맵 구성에는 `godot/assets` 폴더에 포함된 에셋을 우선 사용한다.
+본 프로젝트의 Phaser 마을 화면 및 타일맵 구성에는 `public/assets/map` 폴더에 포함된 에셋을 우선 사용한다.
 
 ### Primary Asset Folders
 
 아래 폴더의 에셋을 우선적으로 사용한다.
 
-- `godot/assets/grass_tileset/`
-- `godot/assets/lpc-flowers-plants-fungi-wood/`
-- `godot/assets/lpc-terrains/`
-- `godot/assets/submission_daneeklu/`
+- `public/assets/map/`
 
 위 폴더들은 몽글마을의 지형, 풀밭, 식물, 나무, 장식 오브젝트, 자연물 배치에 사용할 수 있는 주요 에셋 저장소이다.
 
 ### Usage Priority
 
-1. 마을 바닥, 잔디, 길, 자연 지형은 `grass_tileset/` 및 `lpc-terrains/`를 우선 사용한다.
-2. 꽃, 풀, 식물, 버섯, 나무, 목재 장식 등 자연 오브젝트는 `lpc-flowers-plants-fungi-wood/`를 우선 사용한다.
-3. 추가 장식, 건물 주변 소품, 마을 분위기 보강용 에셋은 `submission_daneeklu/`에서 활용한다.
-4. 기존 Kenney 또는 legacy reference 에셋은 필요한 경우 보조 참고용으로만 사용한다.
+1. 마을 바닥, 잔디, 길, 자연 지형은 `public/assets/map/`의 Tiled 맵과 타일셋을 우선 사용한다.
+2. 추가 장식과 오브젝트는 같은 맵 에셋 세트에 맞춰 추가한다.
+3. 기존 Kenney 또는 legacy reference 에셋은 필요한 경우 보조 참고용으로만 사용한다.
 
 ---
 
@@ -185,7 +181,7 @@ Guidelines:
 
 Use:
 - `submission_daneeklu/`
-- 필요 시 다른 `godot/assets` 하위 폴더
+- 필요 시 `public/assets/map`에 추가한 새 타일셋
 
 For:
 - 마을 소품
@@ -203,12 +199,8 @@ Guidelines:
 
 When implementing or modifying the tilemap, follow these rules.
 
-1. Load runtime assets primarily from `godot/assets`.
-2. Prefer the following folders:
-   - `godot/assets/grass_tileset/`
-   - `godot/assets/lpc-flowers-plants-fungi-wood/`
-   - `godot/assets/lpc-terrains/`
-   - `godot/assets/submission_daneeklu/`
+1. Load runtime assets primarily from `public/assets/map`.
+2. Keep `mongle.tmj`, tileset `.tsx` files, and tile images in sync.
 3. Use `legacy/reference/village1.png` only as a visual reference for natural composition.
 4. Do not copy the reference image directly.
 5. Avoid placing the same decorative asset repeatedly in a grid-like pattern.

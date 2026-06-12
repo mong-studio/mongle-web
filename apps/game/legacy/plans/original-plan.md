@@ -3,7 +3,7 @@
 ## Summary
 
 - Build a browser-based pixel village focus/todo game MVP.
-- Use godot, TypeScript, and Vite.
+- Use Phaser, TypeScript, and Vite.
 - Prioritize graphics quality while using free assets where licensing is clear.
 
 ## Graphics Direction
