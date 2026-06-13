@@ -8,6 +8,7 @@ import { CharacterModal } from "../features/character/createCharacter.js";
 import { FeedModal } from "../features/feed/FeedModal.js";
 import { MyPageWrapper } from "../features/my-page/MyPageWrapper.js";
 import { PlannerChat } from "../features/planner-chat/plannerChat.js";
+import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { type TodoCommitResult, TodoCreation } from "../features/todo/todoCreation.js";
 import { PhaserVillage } from "../features/village/PhaserVillage.js";
 import { apiClient } from "../shared/api/client.js";
@@ -72,8 +73,6 @@ export function App() {
   const [todos, setTodos] = useState<TodoItem[]>(INITIAL_TODOS);
   const [quests, setQuests] = useState<Quest[]>([]);
   const [apples, setApples] = useState(12);
-  const [cycles, setCycles] = useState(2);
-  const [isFocusing, setIsFocusing] = useState(false);
   const [characterName, setCharacterName] = useState("몽글러");
   const [characterPersona, setCharacterPersona] = useState(
     "계획을 세우고 작은 실천을 응원하는 마을 주민",
@@ -287,17 +286,6 @@ export function App() {
     }
   }
 
-  function toggleFocus() {
-    setIsFocusing((current) => !current);
-    setNotice(isFocusing ? "집중 타이머를 잠시 멈췄어요." : "25분 집중을 시작했어요.");
-  }
-
-  function resetFocus() {
-    setIsFocusing(false);
-    setCycles(0);
-    setNotice("오늘의 집중 사이클을 초기화했어요.");
-  }
-
   return (
     <main className="appShell">
       <PhaserVillage
@@ -359,21 +347,6 @@ export function App() {
       </header>
 
       <div className="leftRail">
-        <section className="focusPanel" aria-label="집중 시간">
-          <div className="sunBadge">☀</div>
-          <strong>{isFocusing ? "24:59" : "25:00"}</strong>
-          <span>{isFocusing ? "FOCUSING" : "FOCUS TIME"}</span>
-          <div className="focusActions">
-            <button type="button" onClick={toggleFocus}>
-              {isFocusing ? "PAUSE" : "START"}
-            </button>
-            <button type="button" onClick={resetFocus}>
-              RESET
-            </button>
-          </div>
-          <small>{cycles} / 4 cycles</small>
-        </section>
-
         <aside className="residentPanel" aria-label="마을 주민">
           <b>RESIDENTS {residents.length}/10</b>
           <div>
@@ -607,6 +580,9 @@ export function App() {
           setLoginOpen(true);
         }}
       />
+
+      <PomodoroHud />
+
       {feedOpen ? (
         // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
         <div

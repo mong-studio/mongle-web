@@ -1,0 +1,488 @@
+@import url("https://fonts.googleapis.com/css2?family=Jua&display=swap");
+
+.pmHud {
+  position: fixed;
+  top: 80px;
+  left: 26px;
+  z-index: 7;
+  font-family: "Jua", sans-serif;
+  user-select: none;
+}
+
+/* ── Animations ── */
+@keyframes pmFloaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes pmTwinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+@keyframes pmCardIn {
+  0% {
+    transform: scale(0.96) translateY(-8px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes pmToastIn {
+  0% {
+    transform: translateX(-50%) translateY(-14px) scale(0.96);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pmSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Card ── */
+.pmCard {
+  width: 300px;
+  max-width: calc(100vw - 52px);
+  border-radius: 20px;
+  padding: 10px 16px 14px;
+  position: relative;
+  overflow: hidden;
+  animation: pmCardIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  box-sizing: border-box;
+}
+
+.pmCard--focus {
+  background: linear-gradient(165deg, #fcf4da 0%, #fbe9bc 100%);
+  border: 3px solid #e1b54c;
+  box-shadow:
+    0 16px 34px -16px rgba(120, 90, 30, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.65);
+}
+
+.pmCard--break {
+  background: linear-gradient(165deg, #d4cef1 0%, #c2bae6 100%);
+  border: 3px solid #a096da;
+  box-shadow:
+    0 16px 34px -16px rgba(70, 60, 130, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ── Break left glow ── */
+.pmBreakGlow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 150px;
+  background: radial-gradient(circle at 40% 45%, #6e66ab 0%, rgba(110, 102, 171, 0) 72%);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ── Twinkle stars ── */
+.pmTwinkle {
+  position: absolute;
+  animation: pmTwinkle 1.8s infinite;
+  pointer-events: none;
+}
+.pmTwinkle--tr1 {
+  top: 14px;
+  right: 18px;
+  color: #f0c95a;
+  font-size: 13px;
+  animation-duration: 1.7s;
+}
+.pmTwinkle--tr2 {
+  top: 34px;
+  right: 34px;
+  color: #ebc04a;
+  font-size: 9px;
+  animation-duration: 2.1s;
+  animation-delay: 0.4s;
+}
+.pmTwinkle--bl1 {
+  top: 18px;
+  left: 30px;
+  color: #fff;
+  font-size: 9px;
+  animation-duration: 1.8s;
+}
+.pmTwinkle--bl2 {
+  top: 56px;
+  left: 120px;
+  color: #fff;
+  font-size: 11px;
+  animation-duration: 2.2s;
+  animation-delay: 0.5s;
+}
+.pmTwinkle--bl3 {
+  top: 96px;
+  left: 18px;
+  color: #fce7b0;
+  font-size: 8px;
+  animation-duration: 1.5s;
+  animation-delay: 0.2s;
+}
+.pmTwinkle--tr1b {
+  top: 14px;
+  right: 18px;
+  color: #cfc6f2;
+  font-size: 12px;
+  animation-duration: 1.9s;
+}
+
+/* ── Title ── */
+.pmTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  position: relative;
+}
+
+.pmTitleText {
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.pmTitleText--focus {
+  color: #8a6b38;
+}
+.pmTitleText--break {
+  color: #6b61a8;
+}
+
+.pmFlower {
+  color: #d9b255;
+  font-size: 13px;
+}
+.pmStar {
+  color: #9088cc;
+  font-size: 12px;
+}
+
+/* ── Main row ── */
+.pmMain {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* ── Image area ── */
+.pmImageWrap {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pmImageGlow {
+  position: absolute;
+  border-radius: 50%;
+}
+.pmImageGlow--sun {
+  width: 62px;
+  height: 62px;
+  background: radial-gradient(circle, #fce9a8 0%, rgba(252, 233, 168, 0) 70%);
+}
+.pmImageGlow--moon {
+  width: 64px;
+  height: 64px;
+  background: radial-gradient(circle, rgba(255, 247, 210, 0.5) 0%, rgba(255, 247, 210, 0) 68%);
+}
+
+.pmEmoji {
+  position: relative;
+  font-size: 42px;
+  line-height: 1;
+  animation: pmFloaty 4s ease-in-out infinite;
+}
+.pmEmoji--moon {
+  animation-duration: 4.2s;
+}
+
+.pmPetal {
+  position: absolute;
+  left: 2px;
+  bottom: 8px;
+  color: #fff;
+  font-size: 11px;
+  text-shadow: 0 0 3px #e9b94e;
+}
+
+.pmMoonShadow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(3px);
+}
+.pmMoonShadow--l {
+  left: -2px;
+  bottom: 6px;
+  width: 40px;
+  height: 18px;
+  background: rgba(232, 228, 250, 0.7);
+}
+.pmMoonShadow--r {
+  right: 6px;
+  bottom: 2px;
+  width: 30px;
+  height: 14px;
+  background: rgba(232, 228, 250, 0.6);
+}
+
+/* ── Timer ── */
+.pmTime {
+  flex: 1;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-align: center;
+  user-select: none;
+}
+.pmTime--focus {
+  color: #5a4528;
+}
+.pmTime--break {
+  color: #5b53a0;
+  position: relative;
+}
+
+/* ── Play/pause button ── */
+.pmPlayBtn {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+
+.pmPlayBtn--focus {
+  border-color: #d89a2a;
+  background: radial-gradient(circle at 38% 32%, #f6d058, #e8b238);
+  box-shadow:
+    0 5px 0 #c5871f,
+    0 10px 14px -6px rgba(180, 130, 30, 0.5);
+}
+.pmPlayBtn--break {
+  border-color: #8b81c8;
+  background: radial-gradient(circle at 38% 32%, #c3baec, #9e94dc);
+  box-shadow:
+    0 5px 0 #7b71bd,
+    0 10px 14px -6px rgba(80, 70, 150, 0.5);
+}
+.pmPlayBtn--focus:not(:disabled):active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 #c5871f,
+    0 5px 8px -5px rgba(180, 130, 30, 0.5);
+}
+.pmPlayBtn--break:not(:disabled):active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 #7b71bd,
+    0 5px 8px -5px rgba(80, 70, 150, 0.5);
+}
+
+/* Pause icon (two bars) */
+.pmPause {
+  display: flex;
+  gap: 4px;
+}
+.pmPause span {
+  width: 5px;
+  height: 16px;
+  border-radius: 2px;
+  background: #7a5a1e;
+}
+.pmPause--break span {
+  background: #f2efff;
+}
+
+/* Play icon (triangle) */
+.pmPlay {
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 15px solid #7a5a1e;
+  margin-left: 4px;
+}
+.pmPlay--break {
+  border-left-color: #f2efff;
+}
+
+/* ── Divider ── */
+.pmDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 2px 10px;
+  position: relative;
+}
+.pmDivider div {
+  flex: 1;
+  border-top: 2px dashed;
+}
+.pmDivider--focus div {
+  border-color: #e7cf8e;
+}
+.pmDivider--focus span {
+  color: #e0b658;
+  font-size: 12px;
+}
+.pmDivider--break div {
+  border-color: #b3aade;
+}
+.pmDivider--break span {
+  color: #8e84ce;
+  font-size: 12px;
+}
+
+/* ── Actions ── */
+.pmActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
+  position: relative;
+}
+
+.pmModeBtn,
+.pmResetBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+
+.pmModeBtn {
+  padding: 7px 16px;
+  font-size: 14px;
+}
+
+.pmModeBtn--focus {
+  border-color: #d6982f;
+  background: linear-gradient(180deg, #f1c75e, #e8b038);
+  color: #6e4e1a;
+  box-shadow: 0 3px 0 #c5871f;
+}
+.pmResetBtn--focus {
+  border-color: #d6982f;
+  background: #fcefcd;
+  color: #a9781f;
+  box-shadow: 0 3px 0 #e0be72;
+}
+.pmModeBtn--break {
+  border-color: #b0a8de;
+  background: #f5f3fc;
+  color: #5b53a0;
+  box-shadow: 0 3px 0 #c7c0ec;
+  padding: 7px 18px;
+}
+.pmResetBtn--break {
+  border-color: #b0a8de;
+  background: #eeebfa;
+  color: #7a70be;
+  box-shadow: 0 3px 0 #c7c0ec;
+}
+
+.pmModeBtn--focus:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #c5871f;
+}
+.pmResetBtn--focus:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #e0be72;
+}
+.pmModeBtn--break:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #c7c0ec;
+}
+.pmResetBtn--break:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #c7c0ec;
+}
+
+.pmModeBtn:disabled,
+.pmResetBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: saturate(0.55);
+}
+
+.pmActionIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.pmSpinIcon {
+  display: inline-block;
+  font-size: 17px;
+  animation: pmSpin 0.5s ease;
+}
+.pmSpinIconIdle {
+  display: inline-block;
+  font-size: 17px;
+}
+
+/* ── Toast ── */
+.pmToast {
+  position: fixed;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fffdf6;
+  border: 2.5px solid #d9be84;
+  border-radius: 16px;
+  padding: 12px 22px;
+  box-shadow: 0 14px 30px -12px rgba(60, 42, 18, 0.5);
+  animation: pmToastIn 0.4s ease both;
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  color: #6e5c44;
+  white-space: nowrap;
+}
+.pmToast span:first-child {
+  color: #e0a52a;
+}
