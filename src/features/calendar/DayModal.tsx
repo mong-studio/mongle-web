@@ -2,18 +2,13 @@ import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Tag } from "../../shared/ui/Tag/index.js";
 import type { CalHook } from "./CalendarCore.js";
-import { Check } from "./CalendarCore.js";
-import { serial, serialToMD, toYMDStr, WD, ymdStrToSerial } from "./calEngine.js";
+import { serial, toYMDStr, WD, ymdStrToSerial } from "./calEngine.js";
+import { EventRow } from "./EventRow.js";
 import { TagEditorForm } from "./TagEditorForm.js";
 import type { TagItem } from "./types.js";
 
 const staggerContainer = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const staggerItem = {
-  hidden: { opacity: 0, y: 6 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.16 } },
-};
 
 type DayModalProps = {
   ymd: { y: number; m: number; d: number } | null;
@@ -28,6 +23,15 @@ type DayModalProps = {
     startStr: string,
     endStr: string,
   ) => Promise<void>;
+  onDeleteEvent: (id: string) => Promise<void>;
+  onEditEvent: (
+    id: string,
+    title: string,
+    tagId: number | null,
+    startStr: string,
+    endStr: string,
+    description: string,
+  ) => Promise<void>;
   onDeleteTag: (id: number) => Promise<void>;
   onEditTag: (id: number, content: string, color: string) => Promise<void>;
 };
@@ -39,6 +43,8 @@ export function DayModal({
   onToggle,
   tags,
   onAddEvent,
+  onDeleteEvent,
+  onEditEvent,
   onDeleteTag,
   onEditTag,
 }: DayModalProps) {
@@ -131,18 +137,6 @@ export function DayModal({
     boxShadow: "var(--sh-pop)",
     overflow: "hidden",
   };
-  const itemRow: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "12px 14px",
-    background: "var(--cream-0)",
-    borderRadius: "var(--r-md)",
-    border: "1.5px solid var(--line-soft)",
-    cursor: "pointer",
-    boxShadow: "var(--sh-card)",
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -275,85 +269,19 @@ export function DayModal({
               animate="show"
               variants={staggerContainer}
             >
-              {evs.map((e) => {
-                const on = cal.done.has(e.id);
-                const { m: sm, d: sd } = serialToMD(e.s);
-                const { m: em, d: ed } = serialToMD(e.e);
-                return (
-                  <motion.div
-                    key={e.id}
-                    variants={staggerItem}
-                    whileHover={{ x: 1 }}
-                    whileTap={{ scale: 0.99 }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => onToggle(e.id)}
-                    onKeyDown={(ev) => ev.key === "Enter" && onToggle(e.id)}
-                    style={itemRow}
-                  >
-                    <Check on={on} onClick={() => onToggle(e.id)} />
-                    <span
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        flex: "0 0 auto",
-                        background: e.color,
-                      }}
-                    />
-                    <div
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          flex: "1 1 auto",
-                          minWidth: 0,
-                          fontFamily: "var(--font-display)",
-                          fontSize: 17,
-                          color: on ? "var(--ink-3)" : "var(--ink-1)",
-                          textDecoration: on ? "line-through" : "none",
-                          lineHeight: 1.2,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {e.title}
-                      </div>
-                      <div
-                        style={{ display: "flex", alignItems: "center", gap: 7, flex: "0 0 auto" }}
-                      >
-                        {e.s !== e.e && (
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 3,
-                              padding: "2px 9px",
-                              borderRadius: 999,
-                              background: "var(--cream-2)",
-                              color: "var(--ink-2)",
-                              fontFamily: "var(--font-display)",
-                              fontSize: 12,
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            📅 {sm + 1}/{sd}–{em + 1}/{ed}
-                          </span>
-                        )}
-                        <Tag color={e.color} bg={e.bg} label={e.tagLabel} />
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {evs.map((e) => (
+                <EventRow
+                  key={e.id}
+                  ev={e}
+                  isDone={cal.done.has(e.id)}
+                  onToggle={() => onToggle(e.id)}
+                  onDelete={() => onDeleteEvent(e.id)}
+                  onEdit={(title, tagId, startStr, endStr, description) =>
+                    onEditEvent(e.id, title, tagId, startStr, endStr, description)
+                  }
+                  tags={tags}
+                />
+              ))}
             </motion.div>
           )}
         </div>

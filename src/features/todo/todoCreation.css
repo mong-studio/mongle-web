@@ -109,18 +109,62 @@
   box-sizing: border-box;
 }
 
-.tdLeft {
-  width: 540px;
-  max-width: 46vw;
+.tdSingle {
+  position: relative;
+  width: 600px;
+  max-width: min(600px, 90vw);
   max-height: calc(100vh - 72px);
-  overflow: auto;
+  overflow: hidden;
 }
 
-.tdRight {
-  width: 560px;
-  max-width: 46vw;
-  max-height: calc(100vh - 72px);
-  animation-delay: 0.05s;
+.tdCloseBtn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--td-ink-faint);
+  font-size: 17px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition:
+    color 0.12s,
+    background 0.12s;
+  padding: 0;
+  z-index: 1;
+}
+
+.tdCloseBtn:hover {
+  color: var(--td-ink);
+  background: var(--td-field);
+}
+
+.tdSection--grow {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes tdPageIn {
+  0% {
+    transform: translateX(40px) scale(0.98);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.tdPageIn {
+  animation: tdPageIn 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 }
 
 /* ── Left header ── */
@@ -413,10 +457,14 @@
 
 /* ── Todo list ── */
 .tdTodoList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 14px;
+  padding-right: 2px;
 }
 
 .tdTodoRow {
@@ -479,23 +527,24 @@
 }
 
 .tdDeleteBtn {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  transition: background 0.12s;
   flex-shrink: 0;
-  padding: 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--td-border-strong);
+  background: transparent;
+  color: var(--td-ink-soft);
+  cursor: pointer;
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .tdDeleteBtn:hover {
-  background: var(--td-field);
+  background: #fde8e8;
+  border-color: #d9836a;
+  color: #c04a3a;
 }
 
 /* ── Generate button ── */
@@ -532,6 +581,25 @@
 .tdGenStar {
   display: inline-block;
   animation: tdTwinkle 1.5s infinite;
+}
+
+/* ── Back button ── */
+.tdBackBtn {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  border: none;
+  background: transparent;
+  color: var(--td-ink-soft);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.12s;
+}
+
+.tdBackBtn:hover {
+  color: var(--td-ink);
 }
 
 /* ── Right panel header ── */
@@ -601,25 +669,6 @@
   animation: tdRowIn 0.3s ease both;
 }
 
-.tdCheckbox {
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  border: 2px solid;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.14s ease;
-  padding: 0;
-}
-
-.tdCheckMark {
-  color: #fff;
-  font-size: 12px;
-}
-
 .tdAnimalAvatar {
   width: 50px;
   height: 50px;
@@ -633,28 +682,157 @@
   min-width: 0;
 }
 
-.tdQuestTitleRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.tdQuestTitle {
+.tdQuestTitleText {
   font-family: "Jua", sans-serif;
   font-size: 17px;
-  transition: all 0.14s;
-  min-width: 0;
+  color: var(--td-ink);
+  display: block;
+  padding: 2px 0;
+}
+
+.tdQuestTitleInput {
+  width: 100%;
+  border: none;
+  border-bottom: 1.5px solid var(--td-accent);
+  background: transparent;
+  color: var(--td-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  outline: none;
+  padding: 2px 0;
+  box-sizing: border-box;
+}
+
+.tdQuestBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.tdQuestDeleteBtn {
+  padding: 5px 13px;
+  border-radius: 8px;
+  border: 1.5px solid var(--td-border-strong);
+  background: transparent;
+  color: var(--td-ink-soft);
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+}
+
+.tdQuestDeleteBtn:hover {
+  background: #fde8e8;
+  border-color: #d9836a;
+  color: #c04a3a;
+}
+
+.tdEditBtn {
+  flex-shrink: 0;
+  padding: 5px 13px;
+  border-radius: 8px;
+  border: 1.5px solid var(--td-border-strong);
+  background: transparent;
+  color: var(--td-ink-soft);
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.tdEditBtn:hover {
+  background: var(--td-field);
+  color: var(--td-ink);
+}
+
+.tdEditBtn--active {
+  border-color: var(--td-green-dk);
+  color: var(--td-green-dk);
+}
+
+.tdEditBtn--active:hover {
+  background: #f1f7e8;
+}
+
+.tdQuestTagRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .tdQuestChip {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  gap: 4px;
+  padding: 3px 8px 3px 10px;
   border-radius: 999px;
   font-family: "Gowun Dodum", sans-serif;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.tdTagRemove {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.12s;
+  color: inherit;
+}
+
+.tdTagRemove:hover {
+  opacity: 1;
+}
+
+.tdQuestTagInput {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1.5px dashed var(--td-accent);
+  background: var(--td-panel);
+  color: var(--td-ink);
+  font-size: 12px;
+  width: 70px;
+  outline: none;
+  font-family: "Gowun Dodum", sans-serif;
+}
+
+.tdQuestTagAdd {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--td-border-strong);
+  background: transparent;
+  color: var(--td-ink-faint);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.12s,
+    color 0.12s;
+  padding: 0;
+}
+
+.tdQuestTagAdd:hover {
+  background: var(--td-field);
+  color: var(--td-ink);
 }
 
 .tdQuestDesc {
@@ -685,27 +863,6 @@
   display: flex;
   gap: 12px;
   margin-top: 14px;
-}
-
-.tdRegenBtn {
-  flex-shrink: 0;
-  padding: 13px 20px;
-  border-radius: 14px;
-  border: 2px solid var(--td-border-strong);
-  background: var(--td-panel);
-  color: var(--td-ink);
-  font-family: "Jua", sans-serif;
-  font-size: 15px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: background 0.12s;
-  white-space: nowrap;
-}
-
-.tdRegenBtn:hover {
-  background: var(--td-field);
 }
 
 .tdAddTodayBtn {

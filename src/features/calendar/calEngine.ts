@@ -23,6 +23,8 @@ export type CalEvent = {
   color: string; // text / border color
   bg: string; // background color
   tagLabel: string; // e.g. '#작업'
+  description?: string;
+  tagId?: number | null;
   todoId?: string;
   scheduleId?: string;
 };
@@ -59,9 +61,31 @@ export function dateToSerial(d: Date): number {
   return serial(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
+// 날짜 문자열(YYYY-MM-DD)을 파싱하거나 한국어로 포맷하는 함수들. DateRangePicker, SingleDatePicker 양쪽에서 공용으로 쓴다.
+export function parseYMD(s: string): [number, number, number] | null {
+  if (!s) return null;
+  const parts = s.split("-").map(Number);
+  return parts.length === 3 && !parts.some(Number.isNaN)
+    ? [parts[0], parts[1] - 1, parts[2]]
+    : null;
+}
+
+export function formatYMDKo(s: string): string {
+  const p = parseYMD(s);
+  if (!p) return "날짜 선택";
+  const wd = new Date(p[0], p[1], p[2]).getDay();
+  return `${p[1] + 1}월 ${p[2]}일 (${WD[wd]})`;
+}
+
 export function ymdStrToSerial(s: string): number {
-  const [y, m, d] = s.split("-").map(Number);
-  return serial(y, m - 1, d);
+  const p = parseYMD(s);
+  if (!p) return 0; // 잘못된 날짜 문자열이 들어오면 0(epoch serial)을 반환. 정상 흐름에서 API는 항상 YYYY-MM-DD 형식을 보낸다.
+  return serial(p[0], p[1], p[2]);
+}
+
+export function serialToYMDStr(sr: number): string {
+  const dt = new Date(sr * 86400000);
+  return toYMDStr(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
 }
 
 export function toYMDStr(y: number, m: number, d: number): string {

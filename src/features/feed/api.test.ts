@@ -1,6 +1,6 @@
 import type { InternalAxiosRequestConfig } from "axios";
 import { beforeEach, describe, expect, it } from "vitest";
-import { apiClient, configureAuthClient } from "../auth/client.js";
+import { apiClient, configureAuthClient } from "../../shared/api/client.js";
 import { createComment, fetchPostDetail, fetchPosts } from "./api.js";
 
 type AdapterHandler = (config: InternalAxiosRequestConfig) => {
