@@ -183,7 +183,7 @@ button {
 .leftRail {
   position: absolute;
   z-index: 6;
-  top: 90px;
+  top: 295px;
   left: 22px;
   width: 210px;
   display: grid;
