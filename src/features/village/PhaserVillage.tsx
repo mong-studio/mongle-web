@@ -7,7 +7,6 @@ const MAP_PATH = `${MAP_BASE_PATH}/mongle.tmj`;
 const CHIEF_HOUSE_KEY = "chief-house";
 const CHIEF_HOUSE_PATH = "/assets/objects/chief_house.png";
 const MAX_ZOOM_MULTIPLIER = 1.5;
-const KEYBOARD_PAN_SPEED = 210;
 const BUTTON_PAN_DISTANCE = 86;
 const WHEEL_ZOOM_STEP = 0.12;
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
@@ -137,7 +136,6 @@ class VillageScene extends Phaser.Scene {
   private cleanupCameraControls: Array<() => void> = [];
   private dragStart: { pointerX: number; pointerY: number } | null = null;
   private hasDragged = false;
-  private pressedPanKeys = new Set<"down" | "left" | "right" | "up">();
   private mapBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
   private missingAssets: string[] = [];
 
@@ -150,10 +148,6 @@ class VillageScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor("#47783d");
     void this.buildVillage();
-  }
-
-  update(_time: number, delta: number) {
-    this.panWithKeyboard(delta);
   }
 
   private async buildVillage() {
@@ -312,29 +306,6 @@ class VillageScene extends Phaser.Scene {
     this.cleanupCameraControls.push(() =>
       window.removeEventListener("mongle-map-control", handleMapControl),
     );
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const direction = this.getPanDirectionForKey(event.key);
-      if (!direction) {
-        return;
-      }
-      event.preventDefault();
-      this.pressedPanKeys.add(direction);
-      this.handleMapControl(direction);
-    };
-    const handleKeyUp = (event: KeyboardEvent) => {
-      const direction = this.getPanDirectionForKey(event.key);
-      if (!direction) {
-        return;
-      }
-      event.preventDefault();
-      this.pressedPanKeys.delete(direction);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    this.cleanupCameraControls.push(
-      () => window.removeEventListener("keydown", handleKeyDown),
-      () => window.removeEventListener("keyup", handleKeyUp),
-    );
 
     this.updateCameraCursor();
 
@@ -452,7 +423,6 @@ class VillageScene extends Phaser.Scene {
       cleanup();
     }
     this.cleanupCameraControls = [];
-    this.pressedPanKeys.clear();
   }
 
   private zoomAtPoint(deltaY: number, screenX: number, screenY: number) {
@@ -485,52 +455,6 @@ class VillageScene extends Phaser.Scene {
     this.cameraCenter.y -= deltaY / camera.zoom;
     this.applyCameraView();
     this.updateCameraCursor();
-  }
-
-  private panWithKeyboard(delta: number) {
-    if (this.cameras.main.zoom <= this.baseZoom) {
-      return;
-    }
-
-    const camera = this.cameras.main;
-    const distance = (KEYBOARD_PAN_SPEED * delta) / 1000 / camera.zoom;
-    const left = this.pressedPanKeys.has("left");
-    const right = this.pressedPanKeys.has("right");
-    const up = this.pressedPanKeys.has("up");
-    const down = this.pressedPanKeys.has("down");
-
-    if (left) {
-      this.cameraCenter.x -= distance;
-    }
-    if (right) {
-      this.cameraCenter.x += distance;
-    }
-    if (up) {
-      this.cameraCenter.y -= distance;
-    }
-    if (down) {
-      this.cameraCenter.y += distance;
-    }
-    if (left || right || up || down) {
-      this.applyCameraView();
-    }
-  }
-
-  private getPanDirectionForKey(key: string) {
-    const normalized = key.toLowerCase();
-    if (normalized === "arrowleft" || normalized === "a") {
-      return "left";
-    }
-    if (normalized === "arrowright" || normalized === "d") {
-      return "right";
-    }
-    if (normalized === "arrowup" || normalized === "w") {
-      return "up";
-    }
-    if (normalized === "arrowdown" || normalized === "s") {
-      return "down";
-    }
-    return null;
   }
 }
 
