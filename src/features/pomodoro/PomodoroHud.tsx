@@ -35,12 +35,6 @@ export function PomodoroHud() {
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
   const spinTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  function showToast(msg: string) {
-    setToast(msg);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 2800);
-  }
-
   useEffect(() => {
     try {
       const raw = localStorage.getItem("pomodoro_hud");
@@ -109,7 +103,6 @@ export function PomodoroHud() {
     saveLocal(modeRef.current, r, false);
     clearTimeout(spinTimer.current);
     spinTimer.current = setTimeout(() => setSpinning(false), 520);
-    showToast("타이머를 초기화했어요");
   }
 
   const isFocus = mode === "focus";
