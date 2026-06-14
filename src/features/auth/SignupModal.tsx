@@ -214,6 +214,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             className="suInput"
             type="email"
             value={email}
+            autoComplete="off"
             onChange={(e) => {
               setEmail(e.target.value);
               setVerified(false);
@@ -286,6 +287,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
               className="suInput"
               type="password"
               value={pw}
+              autoComplete="new-password"
               onChange={(e) => setPw(e.target.value)}
               placeholder="8~16자, 2종 이상 조합"
             />
@@ -303,6 +305,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
               className={`suInput${pwMismatch ? " suInput--warn" : ""}`}
               type="password"
               value={pw2}
+              autoComplete="new-password"
               onChange={(e) => setPw2(e.target.value)}
             />
           </div>
