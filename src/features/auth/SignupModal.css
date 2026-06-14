@@ -211,6 +211,7 @@
   color: #6e4a1c;
   font-family: "Jua", sans-serif;
   font-size: 14px;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   box-shadow:
@@ -441,6 +442,7 @@
   color: #6e4a1c;
   font-family: "Jua", sans-serif;
   font-size: 19px;
+  line-height: 1;
   letter-spacing: 2px;
   cursor: pointer;
   box-shadow:
