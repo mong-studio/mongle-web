@@ -57,15 +57,15 @@
 /* ── Close button ── */
 .suClose {
   position: absolute;
-  top: 22px;
-  right: 24px;
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
-  border: 2px solid #d3a95f;
-  background: #fffdf7;
-  color: #9a876a;
-  font-size: 19px;
+  top: 16px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #b7a483;
+  font-size: 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -76,7 +76,7 @@
     color 0.12s ease;
 }
 .suClose:hover {
-  background: #f3e7c6;
+  background: #f0e4c4;
   color: #5e4a30;
 }
 
@@ -292,8 +292,9 @@
   border-radius: 13px;
   border: 2px solid #e7d6ac;
   background: #fffdf7;
+  color: #5e4a30;
   font-family: "Gowun Dodum", sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
@@ -303,6 +304,9 @@
 }
 .suSelect:focus {
   border-color: #e29a4c;
+}
+.suSelect--placeholder {
+  color: #bfae8a;
 }
 .suSelectCaret {
   position: absolute;

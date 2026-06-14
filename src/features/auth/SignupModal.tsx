@@ -338,10 +338,9 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             </div>
             <div className="suSelectWrap">
               <select
-                className="suSelect"
+                className={`suSelect${!job ? " suSelect--placeholder" : ""}`}
                 value={job}
                 onChange={(e) => setJob(e.target.value)}
-                style={{ color: job ? "#5e4a30" : "#bfae8a" }}
               >
                 <option value="" disabled>
                   선택
