@@ -51,9 +51,15 @@ export async function createComment(postId: string, content: string): Promise<Ap
   return data;
 }
 
+interface CharacterListResponse {
+  items: ApiCharacter[];
+  page: { limit: number; next_cursor: string | null; has_next: boolean };
+}
+
 export async function fetchCharacters(): Promise<ApiCharacter[]> {
-  const { data } = await apiClient.get<ApiCharacter[]>("/characters/");
-  return data;
+  // /characters/ 는 커서 페이지네이션 응답({items, page})을 반환한다.
+  const { data } = await apiClient.get<CharacterListResponse>("/characters/");
+  return data.items ?? [];
 }
 
 export async function fetchCharacterDetail(characterId: string): Promise<ApiCharacterDetail> {
@@ -80,7 +86,8 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     likes: 0,
     isLiked: post.is_liked,
     comments: post.comments.length,
-    heroPlaceholder: post.img_url || "이미지",
+    heroPlaceholder: "사진",
+    imageUrl: post.img_url,
     commentList,
   };
 }
