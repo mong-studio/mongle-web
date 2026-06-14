@@ -193,7 +193,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={onKey}
-            autoComplete="off"
+            autoComplete="new-password"
           />
           <button
             type="button"
