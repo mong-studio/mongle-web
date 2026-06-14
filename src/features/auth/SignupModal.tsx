@@ -176,7 +176,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <img
             src="/assets/auth/su-sprout.png"
             alt=""
-            style={{ width: 34, height: 34, flex: "none" }}
+            style={{ width: 26, height: 26, flex: "none" }}
           />
           <h1 id="su-title" className="suTitle">
             회원가입
@@ -184,7 +184,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <img
             src="/assets/auth/su-sprout.png"
             alt=""
-            style={{ width: 34, height: 34, flex: "none", transform: "scaleX(-1)" }}
+            style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
           />
         </div>
         <p className="suSubtitle">이메일 인증 후 모든 입력값을 확인해 몽글마을 계정을 만들어요.</p>
@@ -437,14 +437,14 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <img
             src="/assets/auth/su-bigflower.png"
             alt=""
-            style={{ width: 32, height: 32, flex: "none" }}
+            style={{ width: 26, height: 26, flex: "none" }}
           />
           {submitting && <span className="suSpinner suSpinner--lg" />}
           <span className="suSubmitLabel">{submitting ? "가입하는 중…" : "확인"}</span>
           <img
             src="/assets/auth/su-bigflower.png"
             alt=""
-            style={{ width: 32, height: 32, flex: "none", transform: "scaleX(-1)" }}
+            style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
           />
         </button>
       </section>
