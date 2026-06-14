@@ -494,7 +494,10 @@ export function App() {
 
       <SignupModal
         open={signupOpen}
-        onClose={() => setSignupOpen(false)}
+        onClose={() => {
+          setSignupOpen(false);
+          setLoginOpen(true);
+        }}
         onComplete={(notice) => {
           setSignupOpen(false);
           setNotice(notice);
@@ -525,7 +528,10 @@ export function App() {
 
       <ResetPasswordModal
         open={resetPwOpen}
-        onClose={() => setResetPwOpen(false)}
+        onClose={() => {
+          setResetPwOpen(false);
+          setLoginOpen(true);
+        }}
         onComplete={(notice) => {
           setResetPwOpen(false);
           setNotice(notice);
