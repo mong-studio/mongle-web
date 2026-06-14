@@ -393,8 +393,8 @@
 @media (prefers-reduced-motion: reduce) {
   .calMiniDay,
   .calBtn-icon {
-    transition: none !important;
-    transform: none !important;
-    animation: none !important;
+    transition: none;
+    transform: none;
+    animation: none;
   }
 }
