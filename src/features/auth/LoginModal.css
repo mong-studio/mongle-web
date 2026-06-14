@@ -104,6 +104,7 @@
   border-radius: 9px;
   border: none;
   background: transparent;
+  z-index: 1;
   color: #b7a483;
   font-size: 15px;
   cursor: pointer;
