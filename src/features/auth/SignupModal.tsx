@@ -246,6 +246,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             className={`suInput suInput--code${verified ? " suInput--verified" : ""}`}
             value={code}
             maxLength={6}
+            autoComplete="one-time-code"
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="ABCDEF"
           />
