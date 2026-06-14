@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LoginModal } from "../features/auth/LoginModal.js";
 import { ResetPasswordModal } from "../features/auth/ResetPasswordModal.js";
 import { SignupModal } from "../features/auth/SignupModal.js";
@@ -76,6 +76,18 @@ export function App() {
   const [feedOpen, setFeedOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
 
+  const overlayOpenRef = useRef(false);
+  useEffect(() => {
+    overlayOpenRef.current =
+      loginOpen ||
+      signupOpen ||
+      resetPwOpen ||
+      showMyPage ||
+      characterSetupOpen ||
+      calendarOpen ||
+      feedOpen;
+  }, [loginOpen, signupOpen, resetPwOpen, showMyPage, characterSetupOpen, calendarOpen, feedOpen]);
+
   useEffect(() => {
     void useAuthStore.getState().restoreSession();
   }, []);
@@ -98,6 +110,8 @@ export function App() {
       if (event.origin !== window.location.origin) {
         return;
       }
+
+      if (overlayOpenRef.current) return;
 
       if (
         event.data?.type === "MONGLE_CHIEF_CLICKED" ||
