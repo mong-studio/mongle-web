@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./LoginModal.css";
 import { toUserMessage } from "./api.js";
 import { type AuthState, useAuthStore } from "./store.js";
@@ -13,125 +13,263 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
   const login = useAuthStore((state: AuthState) => state.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [serverError, setServerError] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [keep, setKeep] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [toast, setToast] = useState("");
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (open) {
       setEmailError("");
-      setPasswordError("");
-      setServerError("");
+      setToast("");
     }
   }, [open]);
 
-  if (!open) {
-    return null;
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  if (!open) return null;
+
+  function showToast(msg: string) {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(""), 2600);
   }
 
   async function submit() {
     setEmailError("");
-    setPasswordError("");
-    setServerError("");
-
-    let valid = true;
-    if (!email.trim()) {
-      setEmailError("이메일을 입력해 주세요.");
-      valid = false;
+    if (!email.trim() || !password.trim()) {
+      showToast("이메일과 비밀번호를 입력해주세요");
+      return;
     }
-    if (!password) {
-      setPasswordError("비밀번호를 입력해 주세요.");
-      valid = false;
-    }
-    if (!valid) return;
-
     setBusy(true);
     try {
-      await login(email.trim(), password, rememberMe);
+      await login(email.trim(), password, keep);
       setEmail("");
       setPassword("");
-      setRememberMe(false);
       onClose();
     } catch (error) {
       setPassword("");
-      setServerError(toUserMessage(error));
+      showToast(toUserMessage(error));
     } finally {
       setBusy(false);
     }
   }
 
+  function onKey(e: React.KeyboardEvent) {
+    if (e.key === "Enter") submit();
+  }
+
+  const eyeOpen = (
+    <svg
+      aria-hidden="true"
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#b79a6e"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx={12} cy={12} r={3} />
+    </svg>
+  );
+  const eyeOff = (
+    <svg
+      aria-hidden="true"
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#b79a6e"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9.9 5.1A9.6 9.6 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-3.2 4M6.1 6.1C3.3 7.8 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 3.9-.8" />
+      <path d="M3 3l18 18" />
+    </svg>
+  );
+
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-    <div className="modalBackdrop" role="presentation" onClick={onClose}>
-      <section
-        className="featureModal signupModal"
+    <div className="lgBackdrop" role="presentation" onClick={onClose}>
+      <div
+        className="lgCard"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="login-title"
+        aria-labelledby="lg-title"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
       >
-        <button type="button" className="closeButton" onClick={onClose} aria-label="닫기">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-          </svg>
-        </button>
-        <p className="modalKicker">MONGLE ACCOUNT</p>
-        <h2 id="login-title">로그인</h2>
+        {/* HEADER */}
+        <div className="lgHeader">
+          <span className="lgTwinkle lgTwinkle--tl1">✦</span>
+          <span className="lgTwinkle lgTwinkle--tl2">✦</span>
+          <span className="lgTwinkle lgTwinkle--tr1">✦</span>
+          <span className="lgTwinkle lgTwinkle--tr2">✦</span>
+          <img src="/assets/character/mp-logo-rabbit.png" alt="" className="lgLogo" />
+          <h1 id="lg-title" className="lgTitle">
+            몽글마을
+          </h1>
+        </div>
+        <div className="lgSubtitle">
+          <span>✿</span>
+          <span className="lgSubtitleText">AI 애착인형들과 함께 만드는 말랑한 루틴 마을</span>
+          <span>✿</span>
+        </div>
 
-        <div className="signupSheet">
-          <label>
-            이메일
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                setEmailError("");
-              }}
-              placeholder="user@example.com"
-            />
-            {emailError ? <span className="fieldError">{emailError}</span> : null}
-          </label>
-          <label>
-            비밀번호
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                setPasswordError("");
-              }}
-              placeholder="비밀번호"
-            />
-            {passwordError ? <span className="fieldError">{passwordError}</span> : null}
-          </label>
+        {/* HERO */}
+        <div className="lgHero">
+          <img src="/assets/character/preview-scene.png" alt="몽글마을 친구들" />
+        </div>
 
-          <label className="checkboxLabel">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(event) => setRememberMe(event.target.checked)}
-            />
-            자동 로그인
-          </label>
+        {/* GREETING */}
+        <div className="lgGreeting">
+          <span>✿</span>
+          <span className="lgGreetingText">오늘도 천천히, 함께 시작해볼까요?</span>
+          <span>✿</span>
+        </div>
 
-          {serverError ? <p className="signupMessage">{serverError}</p> : null}
+        {/* EMAIL */}
+        <div className="lgField">
+          <span className="lgFieldIcon">
+            <svg
+              aria-hidden="true"
+              width={22}
+              height={22}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#c49a5e"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x={3} y={5} width={18} height={14} rx={3} />
+              <path d="M4 7l8 6 8-6" />
+            </svg>
+          </span>
+          <input
+            className="lgInput"
+            type="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setEmailError("");
+            }}
+            onKeyDown={onKey}
+            autoComplete="email"
+          />
+          {emailError && <span className="lgFieldError">{emailError}</span>}
+        </div>
 
-          <button type="button" className="primaryButton" onClick={submit} disabled={busy}>
-            {busy ? "로그인 중..." : "로그인"}
+        {/* PASSWORD */}
+        <div className="lgField">
+          <span className="lgFieldIcon">
+            <svg
+              aria-hidden="true"
+              width={22}
+              height={22}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#c49a5e"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x={4} y={10} width={16} height={11} rx={2.5} />
+              <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+            </svg>
+          </span>
+          <input
+            className="lgInput lgInput--pw"
+            type={showPw ? "text" : "password"}
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={onKey}
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            className="lgEyeBtn"
+            onClick={() => setShowPw((p) => !p)}
+            aria-label="비밀번호 표시"
+          >
+            {showPw ? eyeOpen : eyeOff}
           </button>
+        </div>
 
-          <p className="signupCta">
-            우리 처음보는건가?{" "}
-            <button type="button" className="textLink" onClick={onSwitchToSignup}>
+        {/* ROW */}
+        <div className="lgRow">
+          <button type="button" className="lgKeepBtn" onClick={() => setKeep((k) => !k)}>
+            <span className={`lgCheckbox ${keep ? "lgCheckbox--on" : "lgCheckbox--off"}`}>
+              {keep && <span className="lgCheckmark">✓</span>}
+            </span>
+            <span className="lgKeepLabel">로그인 상태 유지</span>
+          </button>
+          <div className="lgLinks">
+            <button type="button" className="lgLinkBtn" onClick={onSwitchToSignup}>
               회원가입
             </button>
-          </p>
+            <span className="lgLinkSep">|</span>
+            <button
+              type="button"
+              className="lgLinkBtn"
+              onClick={() => showToast("비밀번호 찾기로 이동해요")}
+            >
+              비밀번호 찾기
+            </button>
+          </div>
         </div>
-      </section>
+
+        {/* LOGIN BUTTON */}
+        <button type="button" className="lgLoginBtn" onClick={submit} disabled={busy}>
+          <span className="lgBtnFlower">✿</span>
+          {busy && <span className="lgSpinner" />}
+          <span className="lgBtnLabel">{busy ? "들어가는 중…" : "로그인"}</span>
+          <span className="lgBtnFlower">✿</span>
+        </button>
+
+        {/* DIVIDER */}
+        <div className="lgDivider">
+          <div className="lgDividerLine" />
+          <span className="lgDividerText">✼ 간편 로그인 ✼</span>
+          <div className="lgDividerLine" />
+        </div>
+
+        {/* SOCIAL */}
+        <div className="lgSocials">
+          <button
+            type="button"
+            className="lgSocialBtn"
+            onClick={() => showToast("Kakao(으)로 시작하기")}
+          >
+            <span className="lgSocialBadge--k">
+              <span />
+            </span>
+            Kakao로 시작하기
+          </button>
+        </div>
+
+        {/* FOOTER */}
+        <div className="lgFooter">
+          <span>✿</span>
+          <span className="lgFooterText">작은 습관이 몽글한 하루를 만들어요</span>
+          <span>✿</span>
+        </div>
+      </div>
+
+      {toast && (
+        <div className="lgToast">
+          <span className="lgToastFlower">✿</span>
+          <span>{toast}</span>
+        </div>
+      )}
     </div>
   );
 }

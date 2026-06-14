@@ -1,42 +1,544 @@
-.modalBackdropClose {
-  position: absolute;
+/* ── CSS variables ── */
+.lgBackdrop {
+  --card: #faf1d8;
+  --card-br: #e2c58a;
+  --card-br2: #d3a95f;
+  --ink: #5e4a30;
+  --ink-soft: #9a876a;
+  --ink-faint: #b7a483;
+  --field: #fffdf7;
+  --field-br: #e7d6ac;
+  --accent: #e29a4c;
+  --accent-dk: #cc8334;
+  --green: #7fb36a;
+  --link: #8a6b40;
+}
+
+/* ── Animations ── */
+@keyframes lgFloaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes lgTwinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+@keyframes lgCardIn {
+  0% {
+    transform: scale(0.97) translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes lgToastIn {
+  0% {
+    transform: translate(-50%, 14px);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+@keyframes lgSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Backdrop ── */
+.lgBackdrop {
+  position: fixed;
   inset: 0;
-  background: transparent;
-  border: none;
-  cursor: default;
+  overflow: auto;
+  background: rgba(54, 42, 22, 0.34);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px 16px;
+  z-index: 30;
+  box-sizing: border-box;
 }
 
-.fieldError {
-  color: #7b3d29;
-  font-size: 0.78rem;
-  font-weight: 900;
+/* ── Card ── */
+.lgCard {
+  position: relative;
+  width: 480px;
+  max-width: 96vw;
+  margin: auto;
+  background: var(--card);
+  border: 3px solid var(--card-br2);
+  border-radius: 22px;
+  box-shadow:
+    0 20px 48px -18px rgba(60, 42, 18, 0.6),
+    inset 0 0 0 3px var(--card),
+    inset 0 0 0 5px #e8d3a2;
+  padding: 22px 28px 20px;
+  animation: lgCardIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  box-sizing: border-box;
+  font-family: "Gowun Dodum", sans-serif;
 }
 
-.checkboxLabel {
+/* ── Header ── */
+.lgHeader {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  color: #4a2e1f;
-  font-weight: 950;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
 }
 
-.signupCta {
+.lgTwinkle {
+  position: absolute;
+  animation: lgTwinkle 1.8s infinite;
+  pointer-events: none;
+}
+.lgTwinkle--tl1 {
+  left: 30px;
+  top: 4px;
+  color: #eac25a;
+  font-size: 11px;
+  animation-duration: 1.7s;
+}
+.lgTwinkle--tl2 {
+  left: 50px;
+  top: 24px;
+  color: #e3b647;
+  font-size: 7px;
+  animation-duration: 2.1s;
+  animation-delay: 0.4s;
+}
+.lgTwinkle--tr1 {
+  right: 36px;
+  top: 5px;
+  color: #eac25a;
+  font-size: 10px;
+  animation-duration: 1.9s;
+  animation-delay: 0.2s;
+}
+.lgTwinkle--tr2 {
+  right: 56px;
+  top: 26px;
+  color: #e3b647;
+  font-size: 7px;
+  animation-duration: 2.3s;
+  animation-delay: 0.5s;
+}
+
+.lgLogo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  animation: lgFloaty 3.6s ease-in-out infinite;
+}
+
+.lgTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 36px;
+  color: var(--ink);
   margin: 0;
-  text-align: center;
-  color: #5f442d;
-  font-weight: 850;
-  line-height: 1.5;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
-.textLink {
+.lgSubtitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 6px;
+}
+.lgSubtitle span:nth-child(1),
+.lgSubtitle span:nth-child(3) {
+  color: var(--green);
+  font-size: 11px;
+}
+.lgSubtitleText {
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ── Hero ── */
+.lgHero {
+  margin-top: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--card-br);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+.lgHero img {
+  width: 100%;
+  display: block;
+}
+
+/* ── Greeting ── */
+.lgGreeting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 12px;
+}
+.lgGreeting span:nth-child(1) {
+  color: #eba9c0;
+  font-size: 12px;
+}
+.lgGreeting span:nth-child(3) {
+  color: var(--green);
+  font-size: 12px;
+}
+.lgGreetingText {
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ── Fields ── */
+.lgField {
+  position: relative;
+  margin-bottom: 10px;
+}
+.lgField:last-of-type {
+  margin-bottom: 0;
+}
+
+.lgFieldIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  pointer-events: none;
+}
+
+.lgInput {
+  width: 100%;
+  padding: 12px 14px 12px 44px;
+  border-radius: 12px;
+  border: 2px solid var(--field-br);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: "Gowun Dodum", sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+.lgInput:focus {
+  border-color: var(--accent);
+}
+.lgInput::placeholder {
+  color: #bfae8a;
+  opacity: 1;
+}
+
+.lgInput--pw {
+  padding-right: 44px;
+}
+
+.lgEyeBtn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
   border: none;
   background: transparent;
-  padding: 0;
-  box-shadow: none;
-  color: #8d3f28;
-  font-weight: 950;
-  text-decoration: underline;
-  text-underline-offset: 0.1875rem;
   cursor: pointer;
-  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* ── Error ── */
+.lgFieldError {
+  display: block;
+  margin-top: 3px;
+  padding-left: 4px;
+  color: #b03a2e;
+  font-size: 12px;
+}
+
+/* ── Row (keep-login + links) ── */
+.lgRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 11px 2px 14px;
+  gap: 10px;
+}
+
+.lgKeepBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.lgCheckbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  transition: all 0.14s ease;
+}
+.lgCheckbox--on {
+  border: 2px solid #cc8334;
+  background: #e8a24e;
+}
+.lgCheckbox--off {
+  border: 2px solid #d3a95f;
+  background: #fffdf7;
+}
+.lgCheckmark {
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+.lgKeepLabel {
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.lgLinks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.lgLinkBtn {
+  border: none;
+  background: transparent;
+  color: var(--link);
+  font-size: 13px;
+  font-family: "Gowun Dodum", sans-serif;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.12s ease;
+}
+.lgLinkBtn:hover {
+  color: var(--accent-dk);
+}
+.lgLinkSep {
+  color: var(--ink-faint);
+}
+
+/* ── Login button ── */
+.lgLoginBtn {
+  width: 100%;
+  padding: 13px;
+  border: 2px solid var(--accent-dk);
+  border-radius: 13px;
+  background: linear-gradient(180deg, #ebae60, #dd9540);
+  color: #fff7e8;
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 var(--accent-dk),
+    0 10px 16px -8px rgba(190, 130, 40, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+.lgLoginBtn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 var(--accent-dk),
+    0 4px 8px -6px rgba(190, 130, 40, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+.lgLoginBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.lgBtnFlower {
+  color: #fbe8c0;
+  font-size: 14px;
+}
+.lgBtnLabel {
+  text-shadow: 0 1px 1px rgba(150, 95, 25, 0.5);
+  white-space: nowrap;
+}
+
+.lgSpinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #fff;
+  animation: lgSpin 0.7s linear infinite;
+  flex: none;
+}
+
+/* ── Divider ── */
+.lgDivider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 12px;
+}
+.lgDividerLine {
+  flex: 1;
+  border-top: 2px dashed #e2cc97;
+}
+.lgDividerText {
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ── Social buttons ── */
+.lgSocials {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.lgSocialBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 6px;
+  border-radius: 11px;
+  border: 2px solid var(--field-br);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-family: "Gowun Dodum", sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+.lgSocialBtn:hover {
+  background: #fffcf2;
+  border-color: var(--card-br);
+}
+
+.lgSocialBadge--g {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid #e7d6ac;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Jua", sans-serif;
+  font-size: 12px;
+  color: #4285f4;
+  flex: none;
+}
+.lgSocialBadge--k {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: #fae100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.lgSocialBadge--k span {
+  width: 11px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3a1d1d;
+  display: block;
+}
+.lgSocialBadge--n {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: #03c75a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Jua", sans-serif;
+  font-size: 11px;
+  color: #fff;
+  flex: none;
+}
+
+/* ── Footer ── */
+.lgFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.lgFooter span:nth-child(1) {
+  color: var(--green);
+  font-size: 12px;
+}
+.lgFooter span:nth-child(3) {
+  color: #eba9c0;
+  font-size: 12px;
+}
+.lgFooterText {
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ── Toast ── */
+.lgToast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fffdf6;
+  border: 2px solid var(--card-br2);
+  border-radius: 14px;
+  padding: 10px 20px;
+  box-shadow: 0 14px 30px -12px rgba(60, 42, 18, 0.55);
+  animation: lgToastIn 0.4s ease both;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.lgToastFlower {
+  color: var(--accent);
 }
