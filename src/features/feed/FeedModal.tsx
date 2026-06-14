@@ -1,12 +1,17 @@
 import type React from "react";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { type ApiCharacter, type ApiPost, fetchCharacters, fetchPosts, toFeedPost } from "./api.js";
 import { FeedPost } from "./FeedPost.js";
 import { THEMES, type ThemeTokens } from "./feedData.js";
-import { APPLE_PAL, PixelSprite, SPARK_PAL, SPRITES } from "./PixelSprite.js";
+import { APPLE_PAL, PixelSprite, SPRITES } from "./PixelSprite.js";
 import { PostScreen } from "./PostScreen.js";
 import { ProfileScreen } from "./ProfileScreen.js";
+import { ShareSheet } from "./ShareSheet.js";
+import { buildPostShare, type SharePayload } from "./share.js";
 import "./feed.css";
+
+const PAGE_SIZE = 5;
+const LOAD_MORE = 3;
 
 function useScale(W: number, H: number) {
   const [s, setS] = useState(0.6);
@@ -20,36 +25,6 @@ function useScale(W: number, H: number) {
     return () => window.removeEventListener("resize", calc);
   }, [W, H]);
   return s;
-}
-
-// ── Village scene background ──────────────────────────────────────────────────
-function VillageScene({ th }: { th: ThemeTokens }) {
-  return (
-    <div
-      className="village"
-      style={{
-        background: `linear-gradient(180deg, ${th.sceneTop} 0%, ${th.sceneTop} 46%, ${th.sceneBottom} 100%)`,
-      }}
-    >
-      <div
-        className="village-sun"
-        style={{ background: th.sceneSun, boxShadow: `0 0 40px ${th.sceneSun}` }}
-      />
-      <div
-        className="village-cloud"
-        style={{ background: th.sceneCloud, width: 96, height: 30, top: 90, left: 40 }}
-      />
-      <div
-        className="village-cloud"
-        style={{ background: th.sceneCloud, width: 70, height: 24, top: 140, left: 150 }}
-      />
-      <div
-        className="village-cloud"
-        style={{ background: th.sceneCloud, width: 60, height: 20, top: 70, left: 250 }}
-      />
-      <div className="village-hill" style={{ background: th.sceneHill }} />
-    </div>
-  );
 }
 
 // ── iPhone frame ──────────────────────────────────────────────────────────────
@@ -111,102 +86,18 @@ function PhoneFrame({
   );
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
-type ToastIconKind = "apple" | "arrow" | "spark";
-interface ToastItem {
-  id: string;
-  msg: string;
-  icon: ToastIconKind;
-}
-
-function ToastIconEl({ kind, th }: { kind: ToastIconKind; th: ThemeTokens }) {
-  if (kind === "apple") return <PixelSprite art={SPRITES.apple} palette={APPLE_PAL} px={2.4} />;
-  if (kind === "arrow")
-    return <PixelSprite art={SPRITES.arrow} palette={{ x: th.accent }} px={2.6} />;
-  return <PixelSprite art={SPRITES.spark} palette={SPARK_PAL} px={2.6} />;
-}
-
-// ── Tab bar ───────────────────────────────────────────────────────────────────
-const TABS = [
-  { id: "마을", icon: "🏡" },
-  { id: "할일", icon: "📅" },
-  { id: "피드", icon: "📱" },
-  { id: "마이", icon: "🙂" },
-] as const;
-
-type TabId = (typeof TABS)[number]["id"];
-type NavScreen = "feed" | "profile" | "post";
-
-function TabBar({
-  active,
-  onSelect,
-  th,
-  bottomPad,
-}: {
-  active: TabId;
-  onSelect: (t: TabId) => void;
-  th: ThemeTokens;
-  bottomPad: number;
-}) {
+// ── 무한스크롤 로딩 인디케이터 ─────────────────────────────────────────────────
+function LoadingDots({ th }: { th: ThemeTokens }) {
   return (
-    <nav
-      className="tabbar"
-      style={{ background: th.headerBg, borderColor: th.modalEdge, paddingBottom: bottomPad }}
-    >
-      {TABS.map((tb) => {
-        const on = tb.id === active;
-        return (
-          <button
-            key={tb.id}
-            type="button"
-            className={`tab${on ? " on" : ""}`}
-            style={{ background: on ? th.badgeBg : "transparent" }}
-            onClick={() => onSelect(tb.id)}
-            aria-current={on ? "page" : undefined}
-          >
-            <span className="tab-ic" aria-hidden="true">
-              {tb.icon}
-            </span>
-            <span className="tab-lbl" style={{ color: on ? th.badgeInk : th.inkSoft }}>
-              {tb.id}
-            </span>
-          </button>
-        );
-      })}
-    </nav>
-  );
-}
-
-// ── Placeholder screen ────────────────────────────────────────────────────────
-function Placeholder({ tab, th, onGoFeed }: { tab: TabId; th: ThemeTokens; onGoFeed: () => void }) {
-  const meta: Partial<Record<TabId, { emoji: string; line: string }>> = {
-    마을: { emoji: "🏡", line: "몽글마을 광장은 곧 만나요!" },
-    할일: { emoji: "📅", line: "오늘의 할일은 곧 만나요!" },
-    마이: { emoji: "🙂", line: "마이페이지는 곧 만나요!" },
-  };
-  const m = meta[tab] ?? { emoji: "✨", line: "곧 만나요!" };
-  return (
-    <div
-      className="ph-card"
-      style={{ background: th.modalBg, borderColor: th.modalEdge, color: th.ink }}
-    >
-      <div className="ph-emoji">{m.emoji}</div>
-      <div className="ph-line">{m.line}</div>
-      <div className="ph-sub" style={{ color: th.inkSoft }}>
-        지금은 친구들의 피드부터 둘러보세요
-      </div>
-      <button
-        type="button"
-        className="ph-btn"
-        style={{ background: th.accent, color: th.accentInk }}
-        onClick={onGoFeed}
-      >
-        <PixelSprite art={SPRITES.heart} palette={{ r: "#FFFFFF" }} px={2.4} />
-        피드 보러가기
-      </button>
+    <div className="feed-loading">
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="feed-dot" style={{ background: th.accent }} />
+      ))}
     </div>
   );
 }
+
+type NavScreen = "feed" | "profile" | "post";
 
 // ── Main FeedModal ────────────────────────────────────────────────────────────
 interface FeedModalProps {
@@ -214,22 +105,18 @@ interface FeedModalProps {
 }
 
 export function FeedModal({ onClose: _onClose }: FeedModalProps) {
-  const [tab, setTab] = useState<TabId>("피드");
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [navScreen, setNavScreen] = useState<NavScreen>("feed");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+  const [postBackTo, setPostBackTo] = useState<NavScreen>("feed");
   const [apiPosts, setApiPosts] = useState<ApiPost[]>([]);
   const [charMap, setCharMap] = useState<Map<string, ApiCharacter>>(new Map());
   const [feedLoading, setFeedLoading] = useState(true);
   const [feedError, setFeedError] = useState<string | null>(null);
-  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (tab !== "피드") {
-      setNavScreen("feed");
-      setSelectedPostId(null);
-    }
-  }, [tab]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [sharePayload, setSharePayload] = useState<SharePayload | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -255,58 +142,61 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
     };
   }, []);
 
+  const hasMore = visibleCount < apiPosts.length;
+
+  // 무한 스크롤 — 센티넬 노출 시 0.9초 뒤 추가 로드
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || navScreen !== "feed") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore && hasMore) {
+          setLoadingMore(true);
+          setTimeout(() => {
+            setVisibleCount((c) => Math.min(c + LOAD_MORE, apiPosts.length));
+            setLoadingMore(false);
+          }, 900);
+        }
+      },
+      { threshold: 0.1, rootMargin: "80px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadingMore, hasMore, apiPosts.length, navScreen]);
+
   const th = THEMES["크림 당근"];
-  const onFeed = tab === "피드";
   const W = 402;
   const H = 874;
   const scale = useScale(W, H);
 
-  const insetTop = 0;
-  const tabBottomPad = 22;
-  const tabBarH = tabBottomPad + 60;
-  const modalBottom = tabBarH;
+  const visiblePosts = apiPosts.slice(0, visibleCount);
 
-  function notify(msg: string, icon: string) {
-    const id = `t-${performance.now().toFixed(0)}-${Math.floor(Math.random() * 9999)}`;
-    setToasts((ts) => [...ts, { id, msg, icon: icon as ToastIconKind }]);
-    setTimeout(() => setToasts((ts) => ts.filter((x) => x.id !== id)), 1700);
+  function openPostFrom(postId: string, characterId: string, from: NavScreen) {
+    setSelectedPostId(postId);
+    setSelectedCharacterId(characterId);
+    setPostBackTo(from);
+    setNavScreen("post");
   }
 
   const screenContent = (
-    <div className="feed-screen">
-      {/* village scene backdrop */}
-      <VillageScene th={th} />
-      {/* blur scrim — fully opaque on feed tab, dimmed on others */}
-      <div className="feed-scrim" style={{ opacity: onFeed ? 1 : 0.5 }} />
-      {/* pixel texture overlay */}
-      <div className="pixfx" />
-
-      {/* floating feed modal card */}
+    <div className="feed-screen" style={{ background: th.modalBg }}>
       <div
-        className={`feed-modal${onFeed ? "" : " closed"}`}
-        style={{
-          top: insetTop,
-          bottom: modalBottom,
-          background: th.modalBg,
-          borderColor: th.modalEdge,
-        }}
+        className="feed-modal"
+        style={{ top: 0, bottom: 0, background: th.modalBg, borderColor: th.modalEdge }}
       >
         <div
           className="mhead"
-          style={{
-            background: th.headerBg,
-            borderBottom: `1.5px solid ${th.modalEdge}`,
-          }}
+          style={{ background: th.headerBg, borderBottom: `1px solid ${th.modalEdge}` }}
         >
           <div
             className="memblem"
-            style={{ background: th.cardBg, boxShadow: `0 2px 0 ${th.modalEdge}` }}
+            style={{ background: "linear-gradient(155deg,#FBE3CC,#F4C7A4)" }}
           >
             <PixelSprite art={SPRITES.apple} palette={APPLE_PAL} px={2.7} />
           </div>
           <div className="mhead-txt">
             <div className="mtitle" style={{ color: th.ink }}>
-              몽글마을 피드
+              우리 마을 소식
             </div>
             <div className="msub" style={{ color: th.inkSoft }}>
               친구들의 따뜻한 소식 {apiPosts.length}개
@@ -325,82 +215,65 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
           )}
           {!feedLoading &&
             !feedError &&
-            apiPosts.map((p) => (
+            visiblePosts.map((p) => (
               <FeedPost
                 key={p.post_id}
                 post={toFeedPost(p, charMap)}
                 th={th}
-                pixelMode={false}
-                notify={notify}
                 onAuthorClick={() => {
                   setSelectedCharacterId(p.character);
                   setNavScreen("profile");
                 }}
+                onOpen={() => openPostFrom(p.post_id, p.character, "feed")}
+                onShare={() =>
+                  setSharePayload(
+                    buildPostShare(
+                      p.post_id,
+                      charMap.get(p.character)?.name ?? "몽글마을 친구",
+                      p.content,
+                    ),
+                  )
+                }
               />
             ))}
+
           {!feedLoading && !feedError && apiPosts.length === 0 && (
             <div style={{ padding: 32, textAlign: "center", color: th.inkSoft }}>
               아직 게시글이 없어요 🌱
             </div>
           )}
+
+          {/* 무한스크롤 센티넬 */}
+          <div ref={sentinelRef} style={{ height: 1 }} />
+          {loadingMore && <LoadingDots th={th} />}
+          {!feedLoading && !feedError && apiPosts.length > 0 && !hasMore && (
+            <div className="feed-end" style={{ color: th.inkFaint }}>
+              — 몽글마을의 하루 끝 —
+            </div>
+          )}
         </div>
       </div>
 
-      {/* placeholder screen for non-feed tabs */}
-      {!onFeed && (
-        <div
-          className="ph-wrap"
-          style={{
-            position: "absolute",
-            top: insetTop,
-            bottom: modalBottom,
-            left: 0,
-            right: 0,
-            zIndex: 12,
-          }}
-        >
-          <Placeholder tab={tab} th={th} onGoFeed={() => setTab("피드")} />
-        </div>
+      {navScreen === "profile" && selectedCharacterId && (
+        <ProfileScreen
+          th={th}
+          onBack={() => setNavScreen("feed")}
+          onOpenPost={(id) => openPostFrom(id, selectedCharacterId, "profile")}
+          posts={apiPosts}
+          characterId={selectedCharacterId}
+        />
+      )}
+      {navScreen === "post" && selectedPostId && (
+        <PostScreen
+          postId={selectedPostId}
+          th={th}
+          onBack={() => setNavScreen(postBackTo)}
+          onOpenProfile={() => setNavScreen("profile")}
+        />
       )}
 
-      <TabBar active={tab} onSelect={setTab} th={th} bottomPad={tabBottomPad} />
-
-      <div className="feed-toasts" style={{ bottom: tabBarH + 14 }}>
-        {toasts.map((to) => (
-          <div
-            key={to.id}
-            className="feed-toast"
-            style={{ background: th.cardBg, borderColor: th.modalEdge, color: th.ink }}
-          >
-            <ToastIconEl kind={to.icon} th={th} />
-            {to.msg}
-          </div>
-        ))}
-      </div>
-
-      {navScreen !== "feed" && onFeed && (
-        <>
-          {navScreen === "profile" && selectedCharacterId && (
-            <ProfileScreen
-              th={th}
-              onBack={() => setNavScreen("feed")}
-              onOpenPost={(id) => {
-                setSelectedPostId(id);
-                setNavScreen("post");
-              }}
-              posts={apiPosts}
-              characterId={selectedCharacterId}
-            />
-          )}
-          {navScreen === "post" && selectedPostId && (
-            <PostScreen
-              postId={selectedPostId}
-              th={th}
-              onBack={() => setNavScreen("profile")}
-              onOpenProfile={() => setNavScreen("profile")}
-            />
-          )}
-        </>
+      {sharePayload && (
+        <ShareSheet th={th} share={sharePayload} onClose={() => setSharePayload(null)} />
       )}
     </div>
   );

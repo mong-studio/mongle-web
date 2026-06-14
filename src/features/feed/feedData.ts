@@ -1,6 +1,7 @@
 export interface ThemeTokens {
   ink: string;
   inkSoft: string;
+  inkFaint: string;
   modalBg: string;
   modalEdge: string;
   headerBg: string;
@@ -25,20 +26,21 @@ export interface ThemeTokens {
 
 export const THEMES: Record<string, ThemeTokens> = {
   "크림 당근": {
-    ink: "#5A4636",
-    inkSoft: "#A89A86",
-    modalBg: "#FAEFD9",
-    modalEdge: "#ECD4B4",
-    headerBg: "#FCEFD6",
+    ink: "#5A4733",
+    inkSoft: "#A48E73",
+    inkFaint: "#C6B59C",
+    modalBg: "#F6EEE1",
+    modalEdge: "#ECE0CD",
+    headerBg: "#F6EEE1",
     cardBg: "#FFFDF8",
-    cardEdge: "#F0E2CC",
-    rowBg: "#FBF5EA",
-    rowEdge: "#EFE3D0",
-    badgeBg: "#F7CDA6",
+    cardEdge: "#ECE0CD",
+    rowBg: "#FBF4E8",
+    rowEdge: "#ECE0CD",
+    badgeBg: "#FBE3CC",
     badgeInk: "#B26A3E",
-    tagBg: "#EAE6F7",
-    tagInk: "#7E76B8",
-    accent: "#E0894C",
+    tagBg: "#EAE6F6",
+    tagInk: "#8E81C0",
+    accent: "#EE9A63",
     accentInk: "#FFFFFF",
     like: "#F2627A",
     sceneTop: "#BFE3F2",
@@ -51,6 +53,7 @@ export const THEMES: Record<string, ThemeTokens> = {
   "민트 들판": {
     ink: "#33514A",
     inkSoft: "#85A79B",
+    inkFaint: "#B3C9BF",
     modalBg: "#EAF6EC",
     modalEdge: "#C7E3CC",
     headerBg: "#E5F4E8",
@@ -75,6 +78,7 @@ export const THEMES: Record<string, ThemeTokens> = {
   "라벤더 노을": {
     ink: "#4F4260",
     inkSoft: "#9D93B0",
+    inkFaint: "#C3B9D2",
     modalBg: "#F6EFF8",
     modalEdge: "#E1D0E9",
     headerBg: "#F3E9F6",
@@ -120,6 +124,7 @@ export interface FeedPostData {
   isLiked: boolean;
   comments: number;
   heroPlaceholder: string;
+  imageUrl?: string;
   commentList: FeedComment[];
 }
 

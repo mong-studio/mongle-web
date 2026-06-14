@@ -58,7 +58,7 @@ export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: Pr
             {character?.name ?? "..."}
           </div>
           <div className="pf-topbar-sub" style={{ color: th.inkSoft }}>
-            @{characterId.slice(0, 8)}
+            @{character?.name ?? "..."}
           </div>
         </div>
         <button
@@ -87,6 +87,7 @@ export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: Pr
             {(
               [
                 ["게시물", characterPosts.length],
+                ["하트", 0],
                 ["이웃", 0],
               ] as const
             ).map(([label, val]) => (
@@ -149,8 +150,8 @@ export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: Pr
               >
                 <div className="pf-grid-img">
                   <ImageSlot
-                    id={`pf-${p.post_id}`}
-                    placeholder={p.img_url || "이미지"}
+                    placeholder="사진"
+                    imageUrl={p.img_url}
                     width="100%"
                     height={130}
                     tint={th.rowBg}
