@@ -435,7 +435,7 @@
 .suSubmitBtn {
   width: 100%;
   margin-top: 16px;
-  padding: 11px;
+  padding: 13px 11px 9px;
   border: 2px solid #b27c3a;
   border-radius: 16px;
   background: linear-gradient(180deg, #dba85f, #c98c3d);
