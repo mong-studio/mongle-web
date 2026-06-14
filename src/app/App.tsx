@@ -46,23 +46,6 @@ type Quest = {
   done: boolean;
 };
 
-const INITIAL_TODOS: TodoItem[] = [
-  {
-    id: "todo-1",
-    title: "기획서 10분 정리",
-    dueDate: "2026-05-26",
-    tags: ["업무"],
-    status: "saved",
-  },
-  {
-    id: "todo-2",
-    title: "운동 15분",
-    dueDate: "2026-05-26",
-    tags: ["건강"],
-    status: "saved",
-  },
-];
-
 function buildApiUrl(path: string) {
   return `${API_BASE}${path}`;
 }
@@ -70,18 +53,14 @@ export function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
-  const [todos, setTodos] = useState<TodoItem[]>(INITIAL_TODOS);
+  const [todos, setTodos] = useState<TodoItem[]>([]);
   const [quests, setQuests] = useState<Quest[]>([]);
   const [apples, setApples] = useState(12);
-  const [characterName, setCharacterName] = useState("몽글러");
-  const [characterPersona, setCharacterPersona] = useState(
-    "계획을 세우고 작은 실천을 응원하는 마을 주민",
-  );
-  const [characterKeywords, setCharacterKeywords] = useState("차분함, 응원, 계획형");
+  const [characterName, setCharacterName] = useState("");
+  const [characterPersona, setCharacterPersona] = useState("");
   const [selectedKeywordCategories, setSelectedKeywordCategories] = useState<string[]>([]);
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
-  const [_generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
   const [notice, setNotice] = useState("오늘의 사과 보상은 20개까지 받을 수 있어요.");
   const [isBusy, setIsBusy] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
@@ -215,12 +194,10 @@ export function App() {
           : buildApiUrl(result.image_url),
       };
       setResidents((current) => [...current, resident].slice(0, 10));
-      setGeneratedCharacterPreview(resident.avatarUrl || "");
       setNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
       setCharacterName("");
       setCharacterPersona("");
-      setCharacterKeywords("");
       setSelectedKeywordCategories([]);
       setSourceImagePreview("");
       setSourceImageName("");
@@ -241,7 +218,6 @@ export function App() {
     if (!file) {
       setSourceImageName("");
       setSourceImagePreview("");
-      setGeneratedCharacterPreview("");
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -253,7 +229,6 @@ export function App() {
     reader.onload = () => {
       setSourceImageName(file.name);
       setSourceImagePreview(String(reader.result || ""));
-      setGeneratedCharacterPreview("");
       setNotice("애착인형 사진을 불러왔어요. 이 이미지를 기반으로 주민을 만들게요.");
     };
     reader.readAsDataURL(file);
@@ -483,13 +458,11 @@ export function App() {
                 sourceImageName={sourceImageName}
                 characterName={characterName}
                 characterPersona={characterPersona}
-                characterKeywords={characterKeywords}
                 selectedKeywordCategories={selectedKeywordCategories}
                 isBusy={isBusy}
                 onImageUpload={handleSourceImageUpload}
                 onNameChange={setCharacterName}
                 onPersonaChange={setCharacterPersona}
-                onKeywordsChange={setCharacterKeywords}
                 onToggleKeyword={toggleKeywordCategory}
                 onSubmit={createCharacter}
                 onClose={() => setActiveFeature(null)}
@@ -553,13 +526,11 @@ export function App() {
               sourceImageName={sourceImageName}
               characterName={characterName}
               characterPersona={characterPersona}
-              characterKeywords={characterKeywords}
               selectedKeywordCategories={selectedKeywordCategories}
               isBusy={isBusy}
               onImageUpload={handleSourceImageUpload}
               onNameChange={setCharacterName}
               onPersonaChange={setCharacterPersona}
-              onKeywordsChange={setCharacterKeywords}
               onToggleKeyword={toggleKeywordCategory}
               onSubmit={createCharacter}
               onClose={() => {}}

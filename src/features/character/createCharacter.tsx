@@ -52,13 +52,11 @@ type Props = {
   sourceImageName: string;
   characterName: string;
   characterPersona: string;
-  characterKeywords: string;
   selectedKeywordCategories: string[];
   isBusy: boolean;
   onImageUpload: (file: File | undefined) => void;
   onNameChange: (value: string) => void;
   onPersonaChange: (value: string) => void;
-  onKeywordsChange: (value: string) => void;
   onToggleKeyword: (keyword: string) => void;
   onSubmit: () => void;
   onClose: () => void;
