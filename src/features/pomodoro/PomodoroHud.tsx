@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./PomodoroHud.css";
 
 const DUR = { focus: 25 * 60, break: 5 * 60 } as const;
@@ -28,25 +28,41 @@ export function PomodoroHud() {
   const runningRef = useRef(false);
   const modeRef = useRef<Mode>("focus");
   const remainingRef = useRef(DUR.focus);
-  runningRef.current = running;
-  modeRef.current = mode;
-  remainingRef.current = remaining;
+
+  // Fix 3: assign refs after commit, not during render, to be safe under concurrent rendering
+  useLayoutEffect(() => {
+    runningRef.current = running;
+    modeRef.current = mode;
+    remainingRef.current = remaining;
+  });
 
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
   const spinTimer = useRef<ReturnType<typeof setTimeout>>();
+  const startedAtRef = useRef(0);
+  const baseRemainingRef = useRef(DUR.focus);
+  const lastSaveRef = useRef(0);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem("pomodoro_hud");
       if (raw) {
-        const s = JSON.parse(raw) as { mode?: string; remaining?: number };
+        const s = JSON.parse(raw) as { mode?: string; remaining?: number; running?: boolean };
         if (s.mode === "focus" || s.mode === "break") {
           setMode(s.mode);
           modeRef.current = s.mode;
         }
-        if (typeof s.remaining === "number") {
+        // Fix 1 & 6: guard remaining > 0 to prevent instant mode-switch on first tick
+        if (typeof s.remaining === "number" && s.remaining > 0) {
           setRemaining(s.remaining);
           remainingRef.current = s.remaining;
+        }
+        if (s.running === true) {
+          setRunning(true);
+          runningRef.current = true;
+          startedAtRef.current = Date.now();
+          baseRemainingRef.current =
+            typeof s.remaining === "number" && s.remaining > 0 ? s.remaining : DUR.focus;
+          lastSaveRef.current = Date.now();
         }
       }
     } catch {
@@ -55,7 +71,8 @@ export function PomodoroHud() {
 
     const iv = setInterval(() => {
       if (!runningRef.current) return;
-      const r = remainingRef.current - 1;
+      const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
+      const r = baseRemainingRef.current - elapsed;
       if (r <= 0) {
         const nm: Mode = modeRef.current === "focus" ? "break" : "focus";
         const next = DUR[nm];
@@ -63,6 +80,7 @@ export function PomodoroHud() {
         setRemaining(next);
         setRunning(false);
         saveLocal(nm, next, false);
+        lastSaveRef.current = Date.now();
         const msg =
           nm === "break" ? "휴식 시간이에요! 잠시 쉬어가요" : "집중 시간이에요! 다시 힘내요";
         setToast(msg);
@@ -70,7 +88,11 @@ export function PomodoroHud() {
         toastTimer.current = setTimeout(() => setToast(""), 2800);
       } else {
         setRemaining(r);
-        saveLocal(modeRef.current, r, true);
+        const now = Date.now();
+        if (now - lastSaveRef.current >= 30000) {
+          saveLocal(modeRef.current, r, true);
+          lastSaveRef.current = now;
+        }
       }
     }, 1000);
 
@@ -83,8 +105,15 @@ export function PomodoroHud() {
 
   function toggleRun() {
     const next = !runningRef.current;
+    if (next) {
+      startedAtRef.current = Date.now();
+      baseRemainingRef.current = remainingRef.current;
+      lastSaveRef.current = Date.now();
+    } else {
+      saveLocal(modeRef.current, remainingRef.current, false);
+      lastSaveRef.current = Date.now();
+    }
     setRunning(next);
-    saveLocal(modeRef.current, remainingRef.current, next);
   }
 
   function switchMode() {
