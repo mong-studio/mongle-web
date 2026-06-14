@@ -163,7 +163,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
               setEmailError("");
             }}
             onKeyDown={onKey}
-            autoComplete="email"
+            autoComplete="off"
           />
           {emailError && <span className="lgFieldError">{emailError}</span>}
         </div>
@@ -193,7 +193,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={onKey}
-            autoComplete="current-password"
+            autoComplete="off"
           />
           <button
             type="button"
