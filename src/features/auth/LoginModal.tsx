@@ -106,10 +106,6 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
       >
-        <button type="button" className="lgClose" onClick={onClose} aria-label="닫기">
-          ✕
-        </button>
-
         {/* HEADER */}
         <div className="lgHeader">
           <span className="lgTwinkle lgTwinkle--tl1">✦</span>
@@ -263,6 +259,10 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
           <span className="lgFooterText">작은 습관이 몽글한 하루를 만들어요</span>
           <span>✿</span>
         </div>
+
+        <button type="button" className="lgClose" onClick={onClose} aria-label="닫기">
+          ✕
+        </button>
       </div>
 
       {toast && (
