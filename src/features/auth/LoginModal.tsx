@@ -106,6 +106,10 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
       >
+        <button type="button" className="lgClose" onClick={onClose} aria-label="닫기">
+          ✕
+        </button>
+
         {/* HEADER */}
         <div className="lgHeader">
           <span className="lgTwinkle lgTwinkle--tl1">✦</span>
@@ -193,7 +197,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={onKey}
-            autoComplete="new-password"
+            autoComplete="off"
           />
           <button
             type="button"

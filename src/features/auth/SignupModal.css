@@ -163,7 +163,7 @@
 /* ── Text inputs ── */
 .suInput {
   width: 100%;
-  padding: 12px 14px;
+  padding: 9px 14px;
   border-radius: 13px;
   border: 2px solid #e7d6ac;
   background: #fffdf7;
@@ -288,7 +288,7 @@
 }
 .suSelect {
   width: 100%;
-  padding: 12px 38px 12px 14px;
+  padding: 9px 38px 9px 14px;
   border-radius: 13px;
   border: 2px solid #e7d6ac;
   background: #fffdf7;
@@ -434,7 +434,7 @@
 .suSubmitBtn {
   width: 100%;
   margin-top: 16px;
-  padding: 14px;
+  padding: 11px;
   border: 2px solid #b27c3a;
   border-radius: 16px;
   background: linear-gradient(180deg, #dba85f, #c98c3d);
