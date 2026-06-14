@@ -704,7 +704,6 @@
   background: linear-gradient(155deg, #fbe7d2, #f4d2b4);
   font-size: 38px;
   line-height: 1;
-  user-select: none;
 }
 .pf-stats {
   flex: 1;
