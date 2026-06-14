@@ -7,9 +7,10 @@ type LoginModalProps = {
   open: boolean;
   onClose: () => void;
   onSwitchToSignup: () => void;
+  onResetPw: () => void;
 };
 
-export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps) {
+export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: LoginModalProps) {
   const login = useAuthStore((state: AuthState) => state.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -217,11 +218,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
               회원가입
             </button>
             <span className="lgLinkSep">|</span>
-            <button
-              type="button"
-              className="lgLinkBtn"
-              onClick={() => showToast("비밀번호 찾기로 이동해요")}
-            >
+            <button type="button" className="lgLinkBtn" onClick={onResetPw}>
               비밀번호 찾기
             </button>
           </div>

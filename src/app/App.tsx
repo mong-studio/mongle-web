@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LoginModal } from "../features/auth/LoginModal.js";
+import { ResetPasswordModal } from "../features/auth/ResetPasswordModal.js";
 import { SignupModal } from "../features/auth/SignupModal.js";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import { CalendarBulletinBoard } from "../features/calendar/CalendarBulletinBoard.js";
@@ -65,6 +66,7 @@ export function App() {
   const [isBusy, setIsBusy] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
   const [signupOpen, setSignupOpen] = useState(false);
+  const [resetPwOpen, setResetPwOpen] = useState(false);
   const [showMyPage, setShowMyPage] = useState(false);
   const authStatus = useAuthStore((state: AuthState) => state.status);
   const authUser = useAuthStore((state: AuthState) => state.user);
@@ -514,6 +516,20 @@ export function App() {
         onSwitchToSignup={() => {
           setLoginOpen(false);
           setSignupOpen(true);
+        }}
+        onResetPw={() => {
+          setLoginOpen(false);
+          setResetPwOpen(true);
+        }}
+      />
+
+      <ResetPasswordModal
+        open={resetPwOpen}
+        onClose={() => setResetPwOpen(false)}
+        onComplete={(notice) => {
+          setResetPwOpen(false);
+          setNotice(notice);
+          setLoginOpen(true);
         }}
       />
 
