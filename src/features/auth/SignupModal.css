@@ -204,7 +204,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 0 16px;
+  padding: 4px 16px 0;
   border-radius: 13px;
   border: 2px solid #b27c3a;
   background: linear-gradient(180deg, #dbaa69, #ca9148);
