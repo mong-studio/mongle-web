@@ -1,16 +1,27 @@
 import { apiClient } from "../../shared/api/client.js";
 import type { FeedComment, FeedPostData } from "./feedData.js";
 
+export interface ApiReply {
+  reply_id: string;
+  character: string;
+  character_name: string;
+  content: string;
+  created_at: string;
+}
+
 export interface ApiComment {
   comment_id: string;
   user: string;
+  user_name: string;
   content: string;
   created_at: string;
+  replies: ApiReply[];
 }
 
 export interface ApiPost {
   post_id: string;
   character: string;
+  character_name: string;
   quest_id: string;
   img_url: string;
   content: string;
@@ -70,12 +81,12 @@ export async function fetchCharacterDetail(characterId: string): Promise<ApiChar
 export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): FeedPostData {
   const char = charMap.get(post.character);
   const commentList: FeedComment[] = post.comments.map((c) => ({
-    who: c.user,
+    who: c.user_name,
     txt: c.content,
   }));
   return {
     id: post.post_id,
-    name: char?.name ?? "캐릭터",
+    name: char?.name ?? post.character_name ?? "캐릭터",
     role: "",
     time: formatRelativeTime(post.created_at),
     place: "",

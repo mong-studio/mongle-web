@@ -51,7 +51,7 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
 
   const heartArt = liked ? SPRITES.heart : SPRITES.heartOutline;
   const heartPal = liked ? { r: th.like, h: "#FFD7DF" } : { r: th.inkFaint };
-  const authorName = post.character.slice(0, 8);
+  const authorName = post.character_name || post.character.slice(0, 8);
 
   return (
     <div className="pd-screen" style={{ background: th.modalBg }}>
@@ -167,28 +167,42 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
               아직 댓글이 없어요. 첫 따뜻한 한마디를 남겨보세요 🌷
             </div>
           )}
-          {post.comments.map((c) => {
-            const mine = c.user === ME;
-            return (
-              <div key={c.comment_id} className={`pd-comment${mine ? " pd-comment-mine" : ""}`}>
-                {!mine && (
-                  <div className="pd-comment-av" style={{ color: th.tagInk, background: th.tagBg }}>
-                    {c.user[0]?.toUpperCase() ?? "?"}
-                  </div>
-                )}
+          {post.comments.map((c) => (
+            <div key={c.comment_id} className="pd-comment-group">
+              {/* 사람이 단 댓글 */}
+              <div className="pd-comment">
+                <div className="pd-comment-av" style={{ color: th.tagInk, background: th.tagBg }}>
+                  {c.user_name[0]?.toUpperCase() ?? "?"}
+                </div>
                 <div
-                  className={`pd-comment-bubble${mine ? " pd-comment-bubble-mine" : ""}`}
-                  style={{
-                    background: mine ? th.badgeBg : th.rowBg,
-                    borderColor: mine ? th.badgeBg : th.rowEdge,
-                  }}
+                  className="pd-comment-bubble"
+                  style={{ background: th.rowBg, borderColor: th.rowEdge }}
                 >
-                  <b style={{ color: th.ink }}>{c.user}</b>
+                  <b style={{ color: th.ink }}>{c.user_name}</b>
                   <span style={{ color: th.inkSoft }}>{c.content}</span>
                 </div>
               </div>
-            );
-          })}
+
+              {/* 캐릭터가 단 답글 (스레드) */}
+              {c.replies.map((r) => (
+                <div key={r.reply_id} className="pd-reply">
+                  <div
+                    className="pd-comment-av"
+                    style={{ color: th.badgeInk, background: th.badgeBg }}
+                  >
+                    {r.character_name[0] ?? "?"}
+                  </div>
+                  <div
+                    className="pd-comment-bubble"
+                    style={{ background: th.badgeBg, borderColor: th.badgeBg }}
+                  >
+                    <b style={{ color: th.ink }}>{r.character_name}</b>
+                    <span style={{ color: th.inkSoft }}>{r.content}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
 
         {/* TODO: wire createComment API — 유저가 댓글 입력 시 캐릭터 답글 예약 */}

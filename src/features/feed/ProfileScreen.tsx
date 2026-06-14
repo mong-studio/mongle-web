@@ -58,7 +58,7 @@ export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: Pr
             {character?.name ?? "..."}
           </div>
           <div className="pf-topbar-sub" style={{ color: th.inkSoft }}>
-            @{characterId.slice(0, 8)}
+            @{character?.name ?? "..."}
           </div>
         </div>
         <button

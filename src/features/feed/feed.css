@@ -720,6 +720,24 @@
   font-weight: 400;
   margin-right: 7px;
 }
+.pd-comment-group {
+  margin-bottom: 12px;
+}
+.pd-comment-group .pd-comment {
+  margin-bottom: 0;
+}
+/* 캐릭터 답글 — 댓글 아래에 들여쓰기된 스레드 */
+.pd-reply {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 8px 0 0 30px;
+}
+.pd-reply .pd-comment-av {
+  width: 26px;
+  height: 26px;
+  font-size: 12px;
+}
 
 /* ── post detail: comment input ──────────────────────────────────────────── */
 .pd-ci {
