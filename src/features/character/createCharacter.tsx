@@ -6,15 +6,14 @@ const PERSONALITY_CATEGORIES = [
   "차분한",
   "호기심많은",
   "다정한",
-  "열정적인",
-  "섬세한",
-  "활발한",
-  "느긋한",
-  "유쾌한",
-  "수줍은",
-  "장난꾸러기",
-  "야무진",
-  "명랑한",
+  "장난스러운",
+  "부지런한",
+  "강력한",
+  "몽환적인",
+  "분노가 많은",
+  "용감한",
+  "온화한",
+  "명량한",
 ] as const;
 
 const CHIP_COLORS = [
@@ -82,34 +81,43 @@ export function CharacterModal({
 }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const customInputRef = useRef<HTMLInputElement>(null);
 
   const [mode, setMode] = useState<"upload" | "text">("upload");
-  const [customTraits, setCustomTraits] = useState<string[]>([]);
-  const [adding, setAdding] = useState(false);
-  const [customText, setCustomText] = useState("");
   const [nameError, setNameError] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loadToastHidden, setLoadToastHidden] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [showResult, setShowResult] = useState(false);
   const dragCounter = useRef(0);
+  const wasBusyRef = useRef(false);
 
-  const phase: "result" | "uploaded" | "generating" = isBusy
+  const phase: "result" | "uploaded" | "generating" | "idle-upload" | "idle-text" = isBusy
     ? "generating"
     : sourceImagePreview
       ? "uploaded"
-      : "result";
+      : showResult
+        ? "result"
+        : mode === "upload"
+          ? "idle-upload"
+          : "idle-text";
 
   useEffect(() => {
-    if (!isBusy) {
+    if (isBusy) {
+      wasBusyRef.current = true;
+      setShowResult(false);
       setProgress(0);
       setLoadToastHidden(false);
-      return;
+      const iv = setInterval(() => {
+        setProgress((p) => Math.min(Math.round(p + 3 + Math.random() * 5), 95));
+      }, 90);
+      return () => clearInterval(iv);
     }
-    const iv = setInterval(() => {
-      setProgress((p) => Math.min(Math.round(p + 3 + Math.random() * 5), 95));
-    }, 90);
-    return () => clearInterval(iv);
+    if (wasBusyRef.current) {
+      wasBusyRef.current = false;
+      setShowResult(true);
+    }
+    setProgress(0);
+    setLoadToastHidden(false);
   }, [isBusy]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
@@ -140,19 +148,6 @@ export function CharacterModal({
     }
     onSubmit();
   }
-
-  function commitCustom() {
-    const t = customText.trim();
-    const allBase = PERSONALITY_CATEGORIES as readonly string[];
-    if (t && !customTraits.includes(t) && !allBase.includes(t)) {
-      setCustomTraits((prev) => [...prev, t]);
-      onToggleKeyword(t);
-    }
-    setAdding(false);
-    setCustomText("");
-  }
-
-  const allChips = [...PERSONALITY_CATEGORIES, ...customTraits];
 
   return (
     <div className="ccModal" ref={modalRef}>
@@ -194,61 +189,26 @@ export function CharacterModal({
               <button
                 type="button"
                 className={`ccCard${mode === "upload" ? " ccCard--active" : ""}`}
-                style={dragOver ? { borderColor: "#E8A24E", background: "#FBE3AE" } : undefined}
-                onDragEnter={(e) => {
-                  e.preventDefault();
-                  dragCounter.current += 1;
-                  setDragOver(true);
-                }}
-                onDragOver={(e) => e.preventDefault()}
-                onDragLeave={() => {
-                  dragCounter.current -= 1;
-                  if (dragCounter.current === 0) setDragOver(false);
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  dragCounter.current = 0;
-                  setDragOver(false);
-                  onImageUpload(e.dataTransfer.files?.[0]);
-                }}
                 onClick={() => {
                   setMode("upload");
-                  if (!sourceImagePreview) fileInputRef.current?.click();
+                  setShowResult(false);
                 }}
               >
-                {sourceImagePreview ? (
-                  <>
-                    <div className="ccCardThumbWrap">
-                      <img src={sourceImagePreview} alt="업로드" className="ccCardThumb" />
-                      <button
-                        type="button"
-                        className="ccCardClearBtn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onImageUpload(undefined);
-                        }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <span className="ccCardFileName">{sourceImageName}</span>
-                    <span className="ccCardSub">눌러서 변경</span>
-                  </>
-                ) : (
-                  <>
-                    <img src="/assets/character/icon-photo.png" alt="" className="ccCardIcon" />
-                    <div>
-                      <div className="ccCardHead">이미지 업로드</div>
-                      <div className="ccCardSub">사진을 업로드해주세요</div>
-                    </div>
-                  </>
-                )}
+                <img src="/assets/character/icon-photo.png" alt="" className="ccCardIcon" />
+                <div>
+                  <div className="ccCardHead">이미지 업로드</div>
+                  <div className="ccCardSub">사진을 업로드해주세요</div>
+                </div>
               </button>
               {/* 텍스트 카드 */}
               <button
                 type="button"
                 className={`ccCard${mode === "text" ? " ccCard--active" : ""}`}
-                onClick={() => setMode("text")}
+                onClick={() => {
+                  setMode("text");
+                  setShowResult(false);
+                  if (sourceImagePreview) onImageUpload(undefined);
+                }}
               >
                 <img src="/assets/character/icon-wand.png" alt="" className="ccCardIcon" />
                 <div>
@@ -287,11 +247,15 @@ export function CharacterModal({
 
             {/* 성격 키워드 */}
             <div className="ccChipSection">
-              <div className="ccFieldLabel ccChipLabel">성격 키워드</div>
+              <div className="ccChipLabelRow">
+                <div className="ccFieldLabel ccChipLabel">성격 키워드</div>
+                <span className="ccChipCount">{selectedKeywordCategories.length}/3</span>
+              </div>
               <div className="ccChips">
-                {allChips.map((kw, i) => {
+                {PERSONALITY_CATEGORIES.map((kw, i) => {
                   const c = getChipColor(i);
                   const selected = selectedKeywordCategories.includes(kw);
+                  const maxReached = !selected && selectedKeywordCategories.length >= 3;
                   return (
                     <button
                       key={kw}
@@ -306,45 +270,20 @@ export function CharacterModal({
                               boxShadow: `0 3px 9px -4px ${c.border}`,
                               transform: "translateY(-1px)",
                             }
-                          : { background: c.bg, color: c.fg }
+                          : maxReached
+                            ? { background: c.bg, color: c.fg, opacity: 0.4, cursor: "not-allowed" }
+                            : { background: c.bg, color: c.fg }
                       }
-                      onClick={() => onToggleKeyword(kw)}
+                      onClick={() => {
+                        if (maxReached) return;
+                        onToggleKeyword(kw);
+                      }}
                     >
                       {selected && <span className="ccChipCheck">✓</span>}
                       {kw}
                     </button>
                   );
                 })}
-                {adding ? (
-                  <input
-                    ref={customInputRef}
-                    value={customText}
-                    onChange={(e) => setCustomText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        commitCustom();
-                      } else if (e.key === "Escape") {
-                        setAdding(false);
-                        setCustomText("");
-                      }
-                    }}
-                    onBlur={commitCustom}
-                    placeholder="키워드 입력"
-                    className="ccChipInput"
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    className="ccAddChip"
-                    onClick={() => {
-                      setAdding(true);
-                      setTimeout(() => customInputRef.current?.focus(), 0);
-                    }}
-                  >
-                    + 직접 입력
-                  </button>
-                )}
               </div>
             </div>
 
@@ -478,7 +417,50 @@ export function CharacterModal({
               </>
             )}
 
-            {/* 기본 / 결과 */}
+            {/* 이미지 업로드 드롭존 */}
+            {phase === "idle-upload" && (
+              // biome-ignore lint/a11y/noStaticElementInteractions: 드롭존은 클릭/드래그로 동작
+              // biome-ignore lint/a11y/useKeyWithClickEvents: 드롭존은 키보드 대신 클릭/드래그로 동작
+              <div
+                className={`ccDropZone${dragOver ? " ccDropZone--active" : ""}`}
+                onClick={() => fileInputRef.current?.click()}
+                onDragEnter={(e) => {
+                  e.preventDefault();
+                  dragCounter.current += 1;
+                  setDragOver(true);
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDragLeave={() => {
+                  dragCounter.current -= 1;
+                  if (dragCounter.current === 0) setDragOver(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  dragCounter.current = 0;
+                  setDragOver(false);
+                  onImageUpload(e.dataTransfer.files?.[0]);
+                }}
+              >
+                <img src="/assets/character/icon-photo.png" alt="" className="ccDropIcon" />
+                <div className="ccDropTitle">여기에 파일을 올려주세요</div>
+                <div className="ccDropSub">드래그 앤 드롭 또는 클릭하여 업로드</div>
+              </div>
+            )}
+
+            {/* 텍스트 자동생성 모드 */}
+            {phase === "idle-text" && (
+              <div className="ccTextIdle">
+                <img src="/assets/character/icon-wand.png" alt="" className="ccDropIcon" />
+                <div className="ccDropTitle">텍스트로 자동 생성 모드</div>
+                <div className="ccDropSub">
+                  이름과 성격 키워드, 설명을 입력하면
+                  <br />
+                  AI가 캐릭터를 만들어드려요!
+                </div>
+              </div>
+            )}
+
+            {/* 생성 완료 결과 */}
             {phase === "result" && (
               <>
                 <div className="ccPreviewImgBox">

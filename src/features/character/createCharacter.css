@@ -399,6 +399,28 @@
   margin-bottom: 11px;
 }
 
+.ccChipLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+
+.ccChipLabelRow .ccChipLabel {
+  margin-bottom: 0;
+}
+
+.ccChipCount {
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  color: var(--cc-ink-soft);
+  background: var(--cc-card);
+  border: 1.5px solid var(--cc-border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  line-height: 1.6;
+}
+
 .ccChips {
   display: flex;
   flex-wrap: wrap;
@@ -947,6 +969,72 @@
   font-size: 15px;
   color: var(--cc-ink-soft);
   line-height: 1.75;
+}
+
+/* ── Drop zone (idle-upload) ── */
+.ccDropZone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 2.5px dashed var(--cc-border-strong);
+  border-radius: 18px;
+  background: var(--cc-card);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  padding: 32px 20px;
+  min-height: 200px;
+}
+
+.ccDropZone:hover,
+.ccDropZone--active {
+  border-color: var(--cc-border-active);
+  background: var(--cc-card-active);
+}
+
+.ccDropIcon {
+  width: 52px;
+  height: auto;
+  image-rendering: pixelated;
+  opacity: 0.65;
+}
+
+.ccDropTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--cc-ink);
+  text-align: center;
+}
+
+.ccDropSub {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 13px;
+  color: var(--cc-ink-soft);
+  text-align: center;
+}
+
+/* ── Text idle (idle-text) ── */
+.ccTextIdle {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  justify-content: center;
+  padding: 8px 4px;
+}
+
+.ccTextIdleHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--cc-ink-faint);
 }
 
 /* ── Toast ── */

@@ -78,10 +78,7 @@ export function App() {
     "계획을 세우고 작은 실천을 응원하는 마을 주민",
   );
   const [characterKeywords, setCharacterKeywords] = useState("차분함, 응원, 계획형");
-  const [selectedKeywordCategories, setSelectedKeywordCategories] = useState<string[]>([
-    "차분한",
-    "명랑한",
-  ]);
+  const [selectedKeywordCategories, setSelectedKeywordCategories] = useState<string[]>([]);
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
   const [_generatedCharacterPreview, setGeneratedCharacterPreview] = useState("");
