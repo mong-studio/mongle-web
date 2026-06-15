@@ -178,13 +178,13 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Eyebrow */}
         <div className="suEyebrow">
           <img
-            src="/assets/icon/flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 19, height: 19, flex: "none" }}
           />
           <span className="suEyebrowText">MONGLE ACCOUNT</span>
           <img
-            src="/assets/icon/flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 19, height: 19, flex: "none" }}
           />
@@ -194,7 +194,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Title */}
         <div className="suTitleRow">
           <img
-            src="/assets/icon/sprout.png"
+            src="/assets/auth/sprout.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none" }}
           />
@@ -202,7 +202,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             회원가입
           </h1>
           <img
-            src="/assets/icon/sprout.png"
+            src="/assets/auth/sprout.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
           />
@@ -213,7 +213,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         <div className="suDivider">
           <div className="suDividerLine" />
           <img
-            src="/assets/icon/flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 20, height: 20, flex: "none" }}
           />
@@ -223,7 +223,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Email */}
         <div className="suLabel">
           <img
-            src="/assets/icon/flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -245,7 +245,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <button type="button" className="suAmberBtn" onClick={handleSendCode} disabled={sending}>
             {sending && <span className="suSpinner" />}
             <img
-              src="/assets/icon/flower.png"
+              src="/assets/auth/flower.png"
               alt=""
               style={{ width: 23, height: 23, flex: "none" }}
             />
@@ -256,7 +256,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Verification code */}
         <div className="suLabel suSection">
           <img
-            src="/assets/icon/flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -278,7 +278,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             disabled={verified}
           >
             <img
-              src="/assets/icon/flower.png"
+              src="/assets/auth/flower.png"
               alt=""
               style={{ width: 23, height: 23, flex: "none" }}
             />
@@ -297,7 +297,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/icon/flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -315,7 +315,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/icon/flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -335,7 +335,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Nickname */}
         <div className="suLabel suSection">
           <img
-            src="/assets/icon/flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -354,7 +354,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/icon/flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -381,7 +381,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/icon/flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 22, flex: "none" }}
               />
@@ -416,10 +416,10 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
 
         {/* Agreements */}
         <div className="suAgreeBox">
-          <img src="/assets/icon/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tl" />
-          <img src="/assets/icon/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tr" />
-          <img src="/assets/icon/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--bl" />
-          <img src="/assets/icon/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--br" />
+          <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tl" />
+          <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tr" />
+          <img src="/assets/auth/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--bl" />
+          <img src="/assets/auth/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--br" />
           <div className="suAgreeList">
             {AGREEMENTS.map(({ k, label, tag, req }) => (
               <button key={k} type="button" className="suAgreeRow" onClick={() => toggleAgree(k)}>

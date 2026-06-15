@@ -124,13 +124,13 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
         {/* Eyebrow */}
         <div className="suEyebrow">
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 19, height: 19, flex: "none" }}
           />
           <span className="suEyebrowText">MONGLE ACCOUNT</span>
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 19, height: 19, flex: "none" }}
           />
@@ -140,7 +140,7 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
         {/* Title */}
         <div className="suTitleRow">
           <img
-            src="/assets/auth/su-sprout.png"
+            src="/assets/auth/sprout.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none" }}
           />
@@ -148,18 +148,18 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
             비밀번호 재설정
           </h1>
           <img
-            src="/assets/auth/su-sprout.png"
+            src="/assets/auth/sprout.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
           />
         </div>
-        <p className="suSubtitle">이메일 인증 후 새 비밀번호를 설정해요.</p>
+        <p className="suSubtitle">이메일 인증 후 새 비밀번호를 설정해요!</p>
 
         {/* Divider */}
         <div className="suDivider">
           <div className="suDividerLine" />
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 20, height: 20, flex: "none" }}
           />
@@ -169,7 +169,7 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
         {/* Email */}
         <div className="suLabel">
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -190,11 +190,6 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
           />
           <button type="button" className="suAmberBtn" onClick={handleSendCode} disabled={sending}>
             {sending && <span className="suSpinner" />}
-            <img
-              src="/assets/auth/su-btnflower.png"
-              alt=""
-              style={{ width: 23, height: 23, flex: "none" }}
-            />
             {sending ? "발송 중…" : "코드 발송"}
           </button>
         </div>
@@ -202,7 +197,7 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
         {/* Verification code */}
         <div className="suLabel suSection">
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -223,11 +218,6 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
             onClick={handleVerifyCode}
             disabled={verified}
           >
-            <img
-              src="/assets/auth/su-btnflower.png"
-              alt=""
-              style={{ width: 23, height: 23, flex: "none" }}
-            />
             인증 확인
           </button>
         </div>
@@ -243,7 +233,7 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
           <div>
             <div className="suLabel">
               <img
-                src="/assets/auth/su-flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -255,13 +245,13 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
               value={pw}
               autoComplete="new-password"
               onChange={(e) => setPw(e.target.value)}
-              placeholder="8자 이상 입력해주세요"
+              placeholder="8~16자, 2종 이상 조합"
             />
           </div>
           <div>
             <div className="suLabel">
               <img
-                src="/assets/auth/su-flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -280,18 +270,8 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
 
         {/* Submit */}
         <button type="button" className="suSubmitBtn" onClick={handleSubmit} disabled={submitting}>
-          <img
-            src="/assets/auth/su-bigflower.png"
-            alt=""
-            style={{ width: 26, height: 26, flex: "none" }}
-          />
           {submitting && <span className="suSpinner suSpinner--lg" />}
           <span className="suSubmitLabel">{submitting ? "변경 중…" : "확인"}</span>
-          <img
-            src="/assets/auth/su-bigflower.png"
-            alt=""
-            style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
-          />
         </button>
       </section>
 
