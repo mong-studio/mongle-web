@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   confirmEmailVerification,
   requestEmailVerification,
@@ -47,6 +47,26 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
   const [agree, setAgree] = useState({ terms: false, privacy: false, ai: false });
   const [toast, setToast] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (!open) {
+      setEmail("");
+      setCode("");
+      setPw("");
+      setPw2("");
+      setNick("");
+      setJob("");
+      setBirth("");
+      setSending(false);
+      setCodeSent(false);
+      setVerified(false);
+      setVerificationToken("");
+      setSubmitting(false);
+      setAgree({ terms: false, privacy: false, ai: false });
+      setToast("");
+      clearTimeout(toastTimer.current);
+    }
+  }, [open]);
 
   const pwMismatch = pw2.length > 0 && pw !== pw2;
 

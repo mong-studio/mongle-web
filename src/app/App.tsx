@@ -77,16 +77,15 @@ export function App() {
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
 
   const overlayOpenRef = useRef(false);
-  useEffect(() => {
-    overlayOpenRef.current =
-      loginOpen ||
-      signupOpen ||
-      resetPwOpen ||
-      showMyPage ||
-      characterSetupOpen ||
-      calendarOpen ||
-      feedOpen;
-  }, [loginOpen, signupOpen, resetPwOpen, showMyPage, characterSetupOpen, calendarOpen, feedOpen]);
+  overlayOpenRef.current =
+    loginOpen ||
+    signupOpen ||
+    resetPwOpen ||
+    showMyPage ||
+    characterSetupOpen ||
+    calendarOpen ||
+    feedOpen ||
+    activeFeature !== null;
 
   useEffect(() => {
     void useAuthStore.getState().restoreSession();
@@ -115,7 +114,7 @@ export function App() {
         event.data?.type === "MONGLE_CHIEF_CLICKED" ||
         event.data?.type === "MONGLE_CHIEF_HOUSE_CLICKED"
       ) {
-        setDialogueOpen(true);
+        if (!overlayOpenRef.current) setDialogueOpen(true);
       }
 
       if (event.data?.type === "MONGLE_FEATURE_SELECTED") {

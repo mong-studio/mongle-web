@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   confirmPasswordResetCode,
   requestPasswordResetCode,
@@ -25,6 +25,22 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (!open) {
+      setEmail("");
+      setCode("");
+      setPw("");
+      setPw2("");
+      setSending(false);
+      setCodeSent(false);
+      setVerified(false);
+      setVerificationToken("");
+      setSubmitting(false);
+      setToast("");
+      clearTimeout(toastTimer.current);
+    }
+  }, [open]);
 
   const pwMismatch = pw2.length > 0 && pw !== pw2;
 

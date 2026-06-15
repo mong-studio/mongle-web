@@ -88,6 +88,10 @@ export function CharacterModal({
   const [showResult, setShowResult] = useState(false);
   const dragCounter = useRef(0);
   const wasBusyRef = useRef(false);
+  const characterNameRef = useRef(characterName);
+  characterNameRef.current = characterName;
+  const characterPersonaRef = useRef(characterPersona);
+  characterPersonaRef.current = characterPersona;
 
   const phase: "result" | "uploaded" | "generating" | "idle-upload" | "idle-text" = isBusy
     ? "generating"
@@ -112,7 +116,7 @@ export function CharacterModal({
     }
     if (wasBusyRef.current) {
       wasBusyRef.current = false;
-      setShowResult(true);
+      if (!characterNameRef.current && !characterPersonaRef.current) setShowResult(true);
     }
     setProgress(0);
     setLoadToastHidden(false);
