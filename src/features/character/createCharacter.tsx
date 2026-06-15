@@ -164,9 +164,9 @@ export function CharacterModal({
       {/* ── 헤더 ── */}
       <div className="ccHeader">
         <div className="ccHeaderTitle">
-          <img src="/assets/character/deco-flowers-l.png" alt="" className="ccFlower ccFlower--l" />
+          <img src="/assets/icon/flower3.png" alt="" className="ccFlower ccFlower--l" />
           <h1 className="ccTitle">주민 캐릭터 만들기</h1>
-          <img src="/assets/character/deco-flowers-r.png" alt="" className="ccFlower ccFlower--r" />
+          <img src="/assets/icon/flower3.png" alt="" className="ccFlower ccFlower--r" />
         </div>
         <button type="button" className="ccCloseBtn" onClick={onClose} aria-label="닫기">
           ✕

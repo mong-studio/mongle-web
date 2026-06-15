@@ -468,7 +468,10 @@ export function App() {
           setResetPwOpen(true);
         }}
         onRewardApples={rewardReflectionApples}
-        onSignupClose={() => setSignupOpen(false)}
+        onSignupClose={() => {
+          setSignupOpen(false);
+          setLoginOpen(true);
+        }}
         onSignupComplete={(notice) => {
           setSignupOpen(false);
           showNotice(notice);

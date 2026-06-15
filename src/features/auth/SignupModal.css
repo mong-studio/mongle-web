@@ -289,7 +289,7 @@
 }
 .suSelect {
   width: 100%;
-  padding: 9px 38px 9px 14px;
+  padding: 10px 38px 10px 14px;
   border-radius: 13px;
   border: 2px solid #e7d6ac;
   background: #fffdf7;
@@ -360,28 +360,25 @@
 }
 .suAgreeCorner--tl {
   left: 12px;
-  top: -12px;
-  width: 26px;
-  height: 26px;
+  top: -22px;
+  width: 50px;
 }
 .suAgreeCorner--tr {
   right: 12px;
-  top: -12px;
-  width: 26px;
-  height: 26px;
+  top: -22px;
+  width: 50px;
   transform: scaleX(-1);
 }
 .suAgreeCorner--bl {
   left: 12px;
-  bottom: -14px;
-  width: 28px;
-  height: 28px;
+  bottom: -12px;
+  width: 40px;
 }
 .suAgreeCorner--br {
   right: 12px;
-  bottom: -14px;
-  width: 28px;
-  height: 28px;
+  bottom: -12px;
+  width: 40px;
+
   transform: scaleX(-1);
 }
 .suAgreeList {

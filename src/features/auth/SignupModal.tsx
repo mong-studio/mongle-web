@@ -20,7 +20,7 @@ const JOBS = [
 ];
 
 const AGREEMENTS = [
-  { k: "terms" as const, label: "이용약관에 동의합니다.", tag: "(필수)", req: true },
+  { k: "terms" as const, label: "만 14세 이상입니다.", tag: "(필수)", req: true },
   { k: "privacy" as const, label: "개인정보 수집·이용에 동의합니다.", tag: "(필수)", req: true },
   { k: "ai" as const, label: "AI 학습 및 통계 활용에 동의합니다.", tag: "(선택)", req: false },
 ];
@@ -178,13 +178,13 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Eyebrow */}
         <div className="suEyebrow">
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 19, height: 19, flex: "none" }}
           />
           <span className="suEyebrowText">MONGLE ACCOUNT</span>
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 19, height: 19, flex: "none" }}
           />
@@ -194,7 +194,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Title */}
         <div className="suTitleRow">
           <img
-            src="/assets/auth/su-sprout.png"
+            src="/assets/auth/sprout.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none" }}
           />
@@ -202,18 +202,18 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             회원가입
           </h1>
           <img
-            src="/assets/auth/su-sprout.png"
+            src="/assets/auth/sprout.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
           />
         </div>
-        <p className="suSubtitle">이메일 인증 후 모든 입력값을 확인해 몽글마을 계정을 만들어요.</p>
+        <p className="suSubtitle">이메일 인증 후 계정을 만들어 몽글마을을 방문해봐요!</p>
 
         {/* Divider */}
         <div className="suDivider">
           <div className="suDividerLine" />
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 20, height: 20, flex: "none" }}
           />
@@ -223,7 +223,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Email */}
         <div className="suLabel">
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -245,7 +245,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <button type="button" className="suAmberBtn" onClick={handleSendCode} disabled={sending}>
             {sending && <span className="suSpinner" />}
             <img
-              src="/assets/auth/su-btnflower.png"
+              src="/assets/auth/flower.png"
               alt=""
               style={{ width: 23, height: 23, flex: "none" }}
             />
@@ -256,7 +256,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Verification code */}
         <div className="suLabel suSection">
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -278,7 +278,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             disabled={verified}
           >
             <img
-              src="/assets/auth/su-btnflower.png"
+              src="/assets/auth/flower.png"
               alt=""
               style={{ width: 23, height: 23, flex: "none" }}
             />
@@ -297,7 +297,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/auth/su-flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -315,7 +315,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/auth/su-flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -335,7 +335,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
         {/* Nickname */}
         <div className="suLabel suSection">
           <img
-            src="/assets/auth/su-flower.png"
+            src="/assets/auth/flower.png"
             alt=""
             style={{ width: 23, height: 23, flex: "none" }}
           />
@@ -354,7 +354,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/auth/su-flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
                 style={{ width: 23, height: 23, flex: "none" }}
               />
@@ -381,9 +381,9 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div>
             <div className="suLabel">
               <img
-                src="/assets/auth/su-flower.png"
+                src="/assets/auth/flower.png"
                 alt=""
-                style={{ width: 23, height: 23, flex: "none" }}
+                style={{ width: 23, height: 22, flex: "none" }}
               />
               생년월일
             </div>
@@ -416,37 +416,16 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
 
         {/* Agreements */}
         <div className="suAgreeBox">
-          <img
-            src="/assets/auth/su-sprout.png"
-            alt=""
-            className="suAgreeCorner suAgreeCorner--tl"
-          />
-          <img
-            src="/assets/auth/su-sprout.png"
-            alt=""
-            className="suAgreeCorner suAgreeCorner--tr"
-          />
-          <img
-            src="/assets/auth/su-bigflower.png"
-            alt=""
-            className="suAgreeCorner suAgreeCorner--bl"
-          />
-          <img
-            src="/assets/auth/su-bigflower.png"
-            alt=""
-            className="suAgreeCorner suAgreeCorner--br"
-          />
+          <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tl" />
+          <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tr" />
+          <img src="/assets/auth/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--bl" />
+          <img src="/assets/auth/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--br" />
           <div className="suAgreeList">
             {AGREEMENTS.map(({ k, label, tag, req }) => (
               <button key={k} type="button" className="suAgreeRow" onClick={() => toggleAgree(k)}>
                 <span className={`suCheckbox${agree[k] ? " suCheckbox--on" : ""}`}>
                   {agree[k] && <span className="suCheckmark">✓</span>}
                 </span>
-                <img
-                  src="/assets/auth/su-flower.png"
-                  alt=""
-                  style={{ width: 19, height: 19, flex: "none" }}
-                />
                 <span className="suAgreeLabel">
                   {label} <span className={req ? "suAgreeTag--req" : "suAgreeTag--opt"}>{tag}</span>
                 </span>
@@ -457,18 +436,18 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
 
         {/* Submit */}
         <button type="button" className="suSubmitBtn" onClick={handleSubmit} disabled={submitting}>
-          <img
+          {/* <img
             src="/assets/auth/su-bigflower.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none" }}
-          />
+          /> */}
           {submitting && <span className="suSpinner suSpinner--lg" />}
-          <span className="suSubmitLabel">{submitting ? "가입하는 중…" : "확인"}</span>
-          <img
+          <span className="suSubmitLabel">{submitting ? "가입하는 중…" : "회원가입"}</span>
+          {/* <img
             src="/assets/auth/su-bigflower.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
-          />
+          /> */}
         </button>
       </section>
 
