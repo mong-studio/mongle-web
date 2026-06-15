@@ -5,14 +5,14 @@
  */
 export const SUPPORT_EMAIL = "team.mongstudio@gmail.com";
 
-/** Opens the user's mail client with a pre-filled 일정 상담 (consultation) request. */
+/** Opens the user's mail client with a pre-filled 문의 (inquiry) message. */
 export function openConsultationMail(): void {
-  const subject = encodeURIComponent("[몽글마을] 일정 상담 문의");
+  const subject = encodeURIComponent("[몽글마을] 문의 사항");
   const body = encodeURIComponent(
     [
-      "안녕하세요, 이장님께 일정 상담을 요청드려요.",
+      "안녕하세요, 몽글마을에 문의드릴 내용이 있어요.",
       "",
-      "무엇이 궁금하신지 아래에 자유롭게 적어주세요:",
+      "궁금하신 점이나 불편하신 점을 아래에 자유롭게 적어주세요:",
       "",
       "",
     ].join("\n"),

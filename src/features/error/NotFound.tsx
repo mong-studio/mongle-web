@@ -11,7 +11,7 @@ export type NotFoundProps = {
   onGoHome?: () => void;
   /** "이장님에게 길 묻기" — defaults to onConsult (reach the mayor). */
   onAskMayor?: () => void;
-  /** Bottom note — "일정 상담으로 돌아가기". Defaults to onGoHome. */
+  /** Bottom note — "이장님께 문의하기". Defaults to onGoHome. */
   onConsult?: () => void;
 };
 
@@ -106,10 +106,10 @@ export function NotFound({ onGoHome, onAskMayor, onConsult }: NotFoundProps) {
 
         <motion.div className="nf-scene-wrap" {...rise(0.4)}>
           <picture>
-            <source srcSet={`${ASSET_BASE}/scene.webp`} type="image/webp" />
+            <source srcSet={`${ASSET_BASE}/not-found-scene.webp`} type="image/webp" />
             <img
               className="nf-scene"
-              src={`${ASSET_BASE}/scene.png`}
+              src={`${ASSET_BASE}/not-found-scene.png`}
               alt="길을 잃은 토끼와 길을 알려주는 이장님"
               width={632}
               height={332}
@@ -144,7 +144,7 @@ export function NotFound({ onGoHome, onAskMayor, onConsult }: NotFoundProps) {
 
         <motion.button type="button" className="nf-note" onClick={handleConsult} {...rise(0.58)}>
           <img src={`${ASSET_BASE}/hamster_t.png`} alt="" aria-hidden="true" />
-          <span className="nf-note-txt">문제가 계속되면 이장님과 일정 상담으로 돌아가 보세요.</span>
+          <span className="nf-note-txt">문제가 계속되면 이장님께 문의 사항을 남겨주세요.</span>
           <span className="nf-chev" aria-hidden="true">
             &rsaquo;
           </span>
