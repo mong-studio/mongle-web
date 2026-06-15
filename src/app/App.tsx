@@ -179,7 +179,7 @@ export function App() {
   }, []);
 
   const openVillageBoard = useCallback(() => {
-    setCalendarOpen(true);
+    if (!overlayOpenRef.current) setCalendarOpen(true);
   }, []);
 
   const openSettings = useCallback(() => {
