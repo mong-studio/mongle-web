@@ -112,28 +112,19 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
           <span className="lgTwinkle lgTwinkle--tl2">✦</span>
           <span className="lgTwinkle lgTwinkle--tr1">✦</span>
           <span className="lgTwinkle lgTwinkle--tr2">✦</span>
-          <img src="/assets/character/mp-logo-rabbit.png" alt="" className="lgLogo" />
-          <h1 id="lg-title" className="lgTitle">
-            몽글마을
-          </h1>
-        </div>
-        <div className="lgSubtitle">
-          <span>✿</span>
-          <span className="lgSubtitleText">AI 애착인형들과 함께 만드는 말랑한 루틴 마을</span>
-          <span>✿</span>
         </div>
 
         {/* HERO */}
         <div className="lgHero">
-          <img src="/assets/character/preview-scene.png" alt="몽글마을 친구들" />
+          <img src="/assets/auth/main.png" alt="몽글마을 친구들" />
         </div>
 
         {/* GREETING */}
-        <div className="lgGreeting">
+        {/* <div className="lgGreeting">
           <span>✿</span>
           <span className="lgGreetingText">오늘도 천천히, 함께 시작해볼까요?</span>
           <span>✿</span>
-        </div>
+        </div> */}
 
         {/* EMAIL */}
         <div className="lgField">
