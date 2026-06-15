@@ -1,13 +1,30 @@
 // @refresh reset
 import Phaser from "phaser";
-import { useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
+import "./PhaserVillage.css";
 
 const MAP_BASE_PATH = "/assets/map";
 const MAP_PATH = `${MAP_BASE_PATH}/mongle.tmj`;
+const BOARD_KEY = "village-board";
+const BOARD_PATH = "/assets/objects/board.png";
 const CHIEF_HOUSE_KEY = "chief-house";
 const CHIEF_HOUSE_PATH = "/assets/objects/chief_house.png";
+const CHIEF_NPC_KEY = "chief-npc";
+const CHIEF_NPC_PATH = "/assets/mongle_chief.png";
+const CHIEF_NPC_SPEED = 10;
+const CHIEF_NPC_DISPLAY_SIZE = 50;
+const CHIEF_NPC_BOB_AMPLITUDE = 2;
+const CHIEF_NPC_BOB_FREQUENCY = 0.01;
+const CHIEF_NPC_TARGET_RADIUS = 5;
+const CHIEF_NPC_TARGET_RETRIES = 60;
+const CHIEF_NPC_STEERING = 0.055;
+const CHIEF_NPC_MIN_WANDER_DISTANCE = 72;
+const CHIEF_NPC_MAX_WANDER_DISTANCE = 180;
+const DECORATION_LAYER_NAME = "타일 레이어 4";
+const BASIC_GRASS_OBJECTS_SOURCE = "Basic Grass Biom things 1.tsx";
+const BLOCKING_OBJECT_FRAMES = new Set([0, 1, 2, 6, 7, 8, 14, 15, 16, 25, 27, 28, 31, 32, 33]);
 const MAX_ZOOM_MULTIPLIER = 1.5;
-const BUTTON_PAN_DISTANCE = 86;
 const WHEEL_ZOOM_STEP = 0.12;
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
 const FLIPPED_VERTICALLY_FLAG = 0x40000000;
@@ -24,10 +41,9 @@ type ResidentPreview = {
 type PhaserVillageProps = {
   residents: ResidentPreview[];
   reloadKey: number;
+  onOpenBoard: () => void;
   onOpenDialogue: () => void;
 };
-
-type MapControlCommand = "down" | "left" | "right" | "up" | "zoom-in" | "zoom-out";
 
 type TiledLayer = {
   data: number[];
@@ -64,6 +80,38 @@ type TilesetMeta = {
   tilecount: number;
   tileHeight: number;
   tileWidth: number;
+};
+
+type MinimapState = {
+  imageUrl?: string;
+  mapHeight: number;
+  mapWidth: number;
+  markers: MinimapMarker[];
+  viewportHeight: number;
+  viewportWidth: number;
+  viewportX: number;
+  viewportY: number;
+};
+
+type MinimapMarker = {
+  id: string;
+  label: string;
+  type: "chief" | "house" | "resident";
+  x: number;
+  y: number;
+};
+
+type ObjectHintState = {
+  label: string;
+  visible: boolean;
+  x: number;
+  y: number;
+};
+
+type ActiveObjectHint = {
+  label: string;
+  worldX: number;
+  worldY: number;
 };
 
 function encodeAssetPath(fileName: string) {
@@ -130,24 +178,51 @@ async function loadTilesetMeta(source: string, firstgid: number): Promise<Tilese
 
 class VillageScene extends Phaser.Scene {
   private readonly isDisposed: () => boolean;
+  private readonly onOpenBoard: () => void;
   private readonly onOpenDialogue: () => void;
+  private readonly residents: ResidentPreview[];
   private baseZoom = 1;
   private cameraCenter = new Phaser.Math.Vector2(0, 0);
   private cleanupCameraControls: Array<() => void> = [];
   private dragStart: { pointerX: number; pointerY: number } | null = null;
   private hasDragged = false;
+  private activeObjectHint: ActiveObjectHint | null = null;
+  private blockedWorldRects: Phaser.Geom.Rectangle[] = [];
+  private chiefNpc: Phaser.GameObjects.Image | null = null;
+  private chiefTarget: Phaser.Math.Vector2 | null = null;
+  private chiefVelocity = new Phaser.Math.Vector2(0, 0);
+  private chiefWorldPosition = new Phaser.Math.Vector2(0, 0);
+  private chiefWaitUntil = 0;
+  private lastObjectHintSignature = "";
+  private lastMinimapSignature = "";
   private mapBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
+  private minimapImageUrl = "";
+  private minimapMarkers: MinimapMarker[] = [];
   private missingAssets: string[] = [];
 
-  constructor(sceneKey: string, onOpenDialogue: () => void, isDisposed: () => boolean) {
+  constructor(
+    sceneKey: string,
+    onOpenDialogue: () => void,
+    onOpenBoard: () => void,
+    isDisposed: () => boolean,
+    residents: ResidentPreview[],
+  ) {
     super(sceneKey);
     this.isDisposed = isDisposed;
+    this.onOpenBoard = onOpenBoard;
     this.onOpenDialogue = onOpenDialogue;
+    this.residents = residents;
   }
 
   create() {
     this.cameras.main.setBackgroundColor("#47783d");
     void this.buildVillage();
+  }
+
+  update(time: number, delta: number) {
+    this.updateChiefNpc(time, delta);
+    this.publishMinimapStateIfChanged();
+    this.publishActiveObjectHint();
   }
 
   private async buildVillage() {
@@ -168,7 +243,14 @@ class VillageScene extends Phaser.Scene {
         return;
       }
       this.renderTileLayers(map, tilesets);
+      this.mapBounds.setTo(0, 0, map.width * map.tilewidth, map.height * map.tileheight);
+      this.blockedWorldRects = [];
+      this.addDecorationCollisionRects(map, tilesets);
       this.addVillageActors(map);
+      await this.createMinimapSnapshot(map, tilesets);
+      if (this.isDisposed()) {
+        return;
+      }
       this.fitCamera(map);
       this.scale.on(Phaser.Scale.Events.RESIZE, () => this.fitCamera(map));
       this.configureCameraControls();
@@ -211,6 +293,12 @@ class VillageScene extends Phaser.Scene {
       }
       if (!this.textures.exists(CHIEF_HOUSE_KEY)) {
         this.load.image(CHIEF_HOUSE_KEY, CHIEF_HOUSE_PATH);
+      }
+      if (!this.textures.exists(CHIEF_NPC_KEY)) {
+        this.load.image(CHIEF_NPC_KEY, CHIEF_NPC_PATH);
+      }
+      if (!this.textures.exists(BOARD_KEY)) {
+        this.load.image(BOARD_KEY, BOARD_PATH);
       }
 
       this.load.once(Phaser.Loader.Events.COMPLETE, resolve);
@@ -257,20 +345,481 @@ class VillageScene extends Phaser.Scene {
       });
   }
 
+  private addDecorationCollisionRects(map: TiledMap, tilesets: TilesetMeta[]) {
+    const decorationLayer = map.layers.find(
+      (layer) =>
+        layer.type === "tilelayer" && layer.visible && layer.name === DECORATION_LAYER_NAME,
+    );
+    if (!decorationLayer) {
+      return;
+    }
+
+    decorationLayer.data.forEach((rawGid, index) => {
+      const gid = decodeGid(rawGid);
+      if (gid === 0) {
+        return;
+      }
+
+      const tileset = findTileset(gid, tilesets);
+      if (!tileset || tileset.source !== BASIC_GRASS_OBJECTS_SOURCE) {
+        return;
+      }
+
+      const frame = gid - tileset.firstgid;
+      if (!BLOCKING_OBJECT_FRAMES.has(frame)) {
+        return;
+      }
+
+      const x = (index % decorationLayer.width) * map.tilewidth;
+      const y = Math.floor(index / decorationLayer.width) * map.tileheight;
+      this.blockedWorldRects.push(
+        new Phaser.Geom.Rectangle(x - 8, y - 8, map.tilewidth + 16, map.tileheight + 18),
+      );
+    });
+  }
+
   private addVillageActors(map: TiledMap) {
     const centerX = (map.width * map.tilewidth) / 2;
     const centerY = (map.height * map.tileheight) / 2;
+    this.blockedWorldRects.push(
+      new Phaser.Geom.Rectangle(centerX - 66, centerY - 72, 132, 112),
+      new Phaser.Geom.Rectangle(centerX - 74, centerY - 2, 70, 60),
+    );
     const chiefHouse = this.add
       .image(centerX, centerY + 4, CHIEF_HOUSE_KEY)
       .setOrigin(0.5, 0.86)
       .setDisplaySize(102, 93)
-      .setDepth(50)
+      .setDepth(centerY + 4)
       .setInteractive({ useHandCursor: true });
+    this.addClickableObjectHover(chiefHouse, {
+      label: "이장님과 대화",
+      worldX: centerX,
+      worldY: centerY - 78,
+    });
 
     chiefHouse.on("pointerup", () => {
       if (!this.hasDragged) {
         this.onOpenDialogue();
       }
+    });
+
+    const boardX = centerX - 40;
+    const boardY = centerY + 33;
+    const board = this.add
+      .image(boardX, boardY, BOARD_KEY)
+      .setOrigin(0.5, 0.86)
+      .setDisplaySize(58, 58)
+      .setDepth(boardY + 6)
+      .setInteractive({ useHandCursor: true });
+    this.addClickableObjectHover(
+      board,
+      {
+        label: "일정 확인",
+        worldX: boardX,
+        worldY: boardY - 52,
+      },
+      1.1,
+    );
+
+    board.on("pointerup", () => {
+      if (!this.hasDragged) {
+        this.onOpenBoard();
+      }
+    });
+
+    this.addWanderingChief(map, centerX, centerY);
+
+    const residentOffsets = [
+      [-220, -126],
+      [190, -108],
+      [-314, 124],
+      [266, 146],
+      [-54, 218],
+      [78, -236],
+      [-390, -14],
+      [358, -36],
+    ];
+    this.minimapMarkers = [
+      {
+        id: "chief-house",
+        label: "이장님 집",
+        type: "house",
+        x: centerX,
+        y: centerY,
+      },
+      {
+        id: "chief-npc",
+        label: "이장님",
+        type: "chief",
+        x: this.chiefNpc?.x ?? centerX + 92,
+        y: this.chiefNpc?.y ?? centerY + 52,
+      },
+      ...this.residents.slice(0, residentOffsets.length).map((resident, index) => {
+        const [offsetX, offsetY] = residentOffsets[index];
+        return {
+          id: resident.id,
+          label: resident.name,
+          type: "resident" as const,
+          x: Phaser.Math.Clamp(centerX + offsetX, 0, map.width * map.tilewidth),
+          y: Phaser.Math.Clamp(centerY + offsetY, 0, map.height * map.tileheight),
+        };
+      }),
+    ];
+  }
+
+  private addWanderingChief(map: TiledMap, centerX: number, centerY: number) {
+    const spawnX = centerX + 92;
+    const spawnY = centerY + 52;
+    this.chiefWorldPosition.set(spawnX, spawnY);
+    this.chiefNpc = this.add
+      .image(spawnX, spawnY, CHIEF_NPC_KEY)
+      .setOrigin(0.5, 0.86)
+      .setDisplaySize(CHIEF_NPC_DISPLAY_SIZE, CHIEF_NPC_DISPLAY_SIZE)
+      .setDepth(spawnY)
+      .setInteractive({ useHandCursor: true });
+
+    this.chiefNpc.on("pointerup", () => {
+      if (!this.hasDragged) {
+        this.onOpenDialogue();
+      }
+    });
+
+    this.chiefNpc.on("pointerover", () => {
+      this.chiefNpc?.setTint(0xfff0b0);
+    });
+    this.chiefNpc.on("pointerout", () => {
+      this.chiefNpc?.clearTint();
+    });
+
+    this.chooseChiefTarget(map.width * map.tilewidth, map.height * map.tileheight, 0);
+  }
+
+  private updateChiefNpc(time: number, delta: number) {
+    if (!this.chiefNpc || this.mapBounds.width <= 0 || this.mapBounds.height <= 0) {
+      return;
+    }
+
+    if (!this.chiefTarget && time < this.chiefWaitUntil) {
+      this.updateChiefMinimapMarker();
+      return;
+    }
+
+    if (
+      !this.chiefTarget ||
+      this.isWorldPointCoveredByHud(this.chiefWorldPosition.x, this.chiefWorldPosition.y)
+    ) {
+      this.chooseChiefTargetFromCurrent(time);
+    }
+
+    if (!this.chiefTarget) {
+      this.updateChiefMinimapMarker();
+      return;
+    }
+
+    const dx = this.chiefTarget.x - this.chiefWorldPosition.x;
+    const dy = this.chiefTarget.y - this.chiefWorldPosition.y;
+    const distance = Math.hypot(dx, dy);
+    if (distance <= CHIEF_NPC_TARGET_RADIUS) {
+      this.chiefTarget = null;
+      this.chiefVelocity.scale(0.72);
+      this.chiefWaitUntil = time + Phaser.Math.Between(900, 2200);
+      this.applyChiefDisplayMotion(time, 0, 0, false);
+      this.updateChiefMinimapMarker();
+      return;
+    }
+
+    const desiredVelocity = new Phaser.Math.Vector2(dx / distance, dy / distance).scale(
+      CHIEF_NPC_SPEED,
+    );
+    this.chiefVelocity.lerp(desiredVelocity, Math.min(1, CHIEF_NPC_STEERING * (delta / 16.67)));
+
+    const nextX = this.chiefWorldPosition.x + (this.chiefVelocity.x * delta) / 1000;
+    const nextY = this.chiefWorldPosition.y + (this.chiefVelocity.y * delta) / 1000;
+    if (this.isChiefPointBlocked(nextX, nextY)) {
+      this.chiefTarget = null;
+      this.chiefVelocity.set(0, 0);
+      this.chiefWaitUntil = time + 500;
+      this.applyChiefDisplayMotion(time, 0, 0, false);
+      this.updateChiefMinimapMarker();
+      return;
+    }
+
+    this.chiefWorldPosition.set(nextX, nextY);
+    this.applyChiefDisplayMotion(time, this.chiefVelocity.x, this.chiefVelocity.y, true);
+    this.updateChiefMinimapMarker();
+  }
+
+  private applyChiefDisplayMotion(time: number, dx: number, dy: number, moving: boolean) {
+    if (!this.chiefNpc) {
+      return;
+    }
+
+    const bobPhase = Math.sin(time * CHIEF_NPC_BOB_FREQUENCY);
+    const bob = moving ? Math.max(0, bobPhase) : 0;
+    const yOffset = -bob * CHIEF_NPC_BOB_AMPLITUDE;
+
+    this.chiefNpc.setPosition(this.chiefWorldPosition.x, this.chiefWorldPosition.y + yOffset);
+    this.chiefNpc.setDepth(this.chiefWorldPosition.y);
+    this.chiefNpc.setDisplaySize(CHIEF_NPC_DISPLAY_SIZE, CHIEF_NPC_DISPLAY_SIZE);
+    this.chiefNpc.setAngle(0);
+
+    if (moving && Math.abs(dx) > Math.abs(dy) * 0.25) {
+      this.chiefNpc.setFlipX(dx < 0);
+    }
+  }
+
+  private chooseChiefTargetFromCurrent(time: number) {
+    this.chooseChiefTarget(this.mapBounds.width, this.mapBounds.height, time);
+  }
+
+  private chooseChiefTarget(mapPixelWidth: number, mapPixelHeight: number, time: number) {
+    if (!this.chiefNpc) {
+      return;
+    }
+
+    const margin = 56;
+    const fromX = this.chiefWorldPosition.x;
+    const fromY = this.chiefWorldPosition.y;
+
+    for (let attempt = 0; attempt < CHIEF_NPC_TARGET_RETRIES; attempt += 1) {
+      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+      const distance = Phaser.Math.Between(
+        CHIEF_NPC_MIN_WANDER_DISTANCE,
+        CHIEF_NPC_MAX_WANDER_DISTANCE,
+      );
+      const target = new Phaser.Math.Vector2(
+        Phaser.Math.Clamp(fromX + Math.cos(angle) * distance, margin, mapPixelWidth - margin),
+        Phaser.Math.Clamp(fromY + Math.sin(angle) * distance, margin, mapPixelHeight - margin),
+      );
+      if (
+        !this.isWorldPointCoveredByHud(target.x, target.y) &&
+        this.isChiefPathAllowed(fromX, fromY, target.x, target.y)
+      ) {
+        this.chiefTarget = target;
+        this.chiefWaitUntil = 0;
+        return;
+      }
+    }
+
+    this.chiefTarget = null;
+    this.chiefWaitUntil = time + Phaser.Math.Between(900, 1800);
+  }
+
+  private isChiefPathAllowed(fromX: number, fromY: number, toX: number, toY: number) {
+    for (let index = 1; index <= 12; index += 1) {
+      const t = index / 12;
+      const x = Phaser.Math.Linear(fromX, toX, t);
+      const y = Phaser.Math.Linear(fromY, toY, t);
+      if (this.isChiefWorldObjectBlocked(x, y)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isChiefPointBlocked(x: number, y: number) {
+    return this.isChiefWorldObjectBlocked(x, y) || this.isWorldPointCoveredByHud(x, y);
+  }
+
+  private isChiefWorldObjectBlocked(x: number, y: number) {
+    const padding = 18;
+    if (
+      x < padding ||
+      y < padding ||
+      x > this.mapBounds.width - padding ||
+      y > this.mapBounds.height - padding
+    ) {
+      return true;
+    }
+    if (this.blockedWorldRects.some((rect) => rect.contains(x, y))) {
+      return true;
+    }
+    return false;
+  }
+
+  private isWorldPointCoveredByHud(worldX: number, worldY: number) {
+    const camera = this.cameras.main;
+    const screenX = (worldX - camera.worldView.x) * camera.zoom;
+    const screenY = (worldY - camera.worldView.y) * camera.zoom;
+    const width = camera.width;
+    const height = camera.height;
+    if (screenX < 0 || screenY < 0 || screenX > width || screenY > height) {
+      return false;
+    }
+
+    return this.getHudAvoidRects(width, height).some((rect) => rect.contains(screenX, screenY));
+  }
+
+  private getHudAvoidRects(width: number, height: number) {
+    return [
+      new Phaser.Geom.Rectangle(0, 0, Math.min(360, width), Math.min(520, height)),
+      new Phaser.Geom.Rectangle(Math.max(0, width - 390), 0, 390, Math.min(650, height)),
+      new Phaser.Geom.Rectangle(Math.max(0, width - 360), Math.max(0, height - 290), 360, 290),
+      new Phaser.Geom.Rectangle(Math.max(0, width / 2 - 500), Math.max(0, height - 240), 1000, 240),
+    ];
+  }
+
+  private updateChiefMinimapMarker() {
+    if (!this.chiefNpc) {
+      return;
+    }
+    const marker = this.minimapMarkers.find((item) => item.id === "chief-npc");
+    if (!marker) {
+      return;
+    }
+    marker.x = this.chiefWorldPosition.x;
+    marker.y = this.chiefWorldPosition.y;
+  }
+
+  private addClickableObjectHover(
+    target: Phaser.GameObjects.Image,
+    hint: ActiveObjectHint,
+    hoverScale = 1.06,
+  ) {
+    const baseScaleX = target.scaleX;
+    const baseScaleY = target.scaleY;
+
+    const reset = () => {
+      this.tweens.killTweensOf(target);
+      target.clearTint();
+      this.activeObjectHint = null;
+      this.lastObjectHintSignature = "";
+      this.publishObjectHint({ ...hint, visible: false });
+      this.tweens.add({
+        targets: target,
+        duration: 120,
+        ease: "Quad.easeOut",
+        scaleX: baseScaleX,
+        scaleY: baseScaleY,
+      });
+    };
+
+    target.on("pointerover", () => {
+      this.tweens.killTweensOf(target);
+      target.setTint(0xfff0b0);
+      this.activeObjectHint = hint;
+      this.publishObjectHint({ ...hint, visible: true });
+      this.tweens.add({
+        targets: target,
+        duration: 120,
+        ease: "Quad.easeOut",
+        scaleX: baseScaleX * hoverScale,
+        scaleY: baseScaleY * hoverScale,
+      });
+    });
+
+    target.on("pointerdown", () => {
+      this.tweens.killTweensOf(target);
+      this.tweens.add({
+        targets: target,
+        duration: 70,
+        ease: "Quad.easeOut",
+        scaleX: baseScaleX * 0.98,
+        scaleY: baseScaleY * 0.98,
+      });
+    });
+
+    target.on("pointerup", () => {
+      if (target.input?.enabled) {
+        this.tweens.killTweensOf(target);
+        this.tweens.add({
+          targets: target,
+          duration: 90,
+          ease: "Quad.easeOut",
+          scaleX: baseScaleX * hoverScale,
+          scaleY: baseScaleY * hoverScale,
+        });
+      }
+    });
+
+    target.on("pointerout", reset);
+  }
+
+  private publishActiveObjectHint() {
+    if (!this.activeObjectHint) {
+      return;
+    }
+    this.publishObjectHint({ ...this.activeObjectHint, visible: true });
+  }
+
+  private publishObjectHint({
+    label,
+    visible,
+    worldX,
+    worldY,
+  }: ActiveObjectHint & { visible: boolean }) {
+    const camera = this.cameras.main;
+    const canvasRect = this.game.canvas.getBoundingClientRect();
+    const parentRect = this.game.canvas.parentElement?.getBoundingClientRect();
+    const cssScaleX = canvasRect.width / camera.width;
+    const cssScaleY = canvasRect.height / camera.height;
+    const x =
+      (parentRect ? canvasRect.left - parentRect.left : 0) +
+      (worldX - camera.worldView.x) * camera.zoom * cssScaleX;
+    const y =
+      (parentRect ? canvasRect.top - parentRect.top : 0) +
+      (worldY - camera.worldView.y) * camera.zoom * cssScaleY;
+    const signature = [label, visible ? "1" : "0", x.toFixed(1), y.toFixed(1)].join(":");
+    if (signature === this.lastObjectHintSignature) {
+      return;
+    }
+    this.lastObjectHintSignature = signature;
+    window.dispatchEvent(
+      new CustomEvent<ObjectHintState>("mongle-object-hint-update", {
+        detail: {
+          label,
+          visible,
+          x,
+          y,
+        },
+      }),
+    );
+  }
+
+  private createMinimapSnapshot(map: TiledMap, tilesets: TilesetMeta[]) {
+    const mapPixelWidth = map.width * map.tilewidth;
+    const mapPixelHeight = map.height * map.tileheight;
+    const minimapTexture = this.make.renderTexture({
+      height: mapPixelHeight,
+      width: mapPixelWidth,
+      x: 0,
+      y: 0,
+    });
+
+    minimapTexture.fill(0x47783d, 1);
+    map.layers
+      .filter((layer) => layer.type === "tilelayer" && layer.visible)
+      .forEach((layer) => {
+        layer.data.forEach((rawGid, index) => {
+          const gid = decodeGid(rawGid);
+          if (gid === 0) {
+            return;
+          }
+
+          const tileset = findTileset(gid, tilesets);
+          if (!tileset || gid >= tileset.firstgid + tileset.tilecount) {
+            return;
+          }
+
+          const x = (index % layer.width) * map.tilewidth;
+          const y = Math.floor(index / layer.width) * map.tileheight;
+          const frame = gid - tileset.firstgid;
+          if (this.textures.getFrame(tileset.name, frame) !== null) {
+            minimapTexture.drawFrame(tileset.name, frame, x, y);
+          }
+        });
+      });
+
+    return new Promise<void>((resolve) => {
+      minimapTexture.snapshot((snapshot) => {
+        if (snapshot instanceof HTMLImageElement) {
+          this.minimapImageUrl = snapshot.src;
+        } else if (snapshot instanceof HTMLCanvasElement) {
+          this.minimapImageUrl = snapshot.toDataURL("image/png");
+        }
+        minimapTexture.destroy();
+        resolve();
+      });
     });
   }
 
@@ -297,32 +846,16 @@ class VillageScene extends Phaser.Scene {
 
   private configureCameraControls() {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.destroyCameraControls());
-
-    const handleMapControl = (event: Event) => {
-      const command = (event as CustomEvent<MapControlCommand>).detail;
-      this.handleMapControl(command);
-    };
-    window.addEventListener("mongle-map-control", handleMapControl);
-    this.cleanupCameraControls.push(() =>
-      window.removeEventListener("mongle-map-control", handleMapControl),
-    );
-
     this.updateCameraCursor();
 
-    this.input.on(
-      Phaser.Input.Events.POINTER_WHEEL,
-      (
-        pointer: Phaser.Input.Pointer,
-        _gameObjects: Phaser.GameObjects.GameObject[],
-        _deltaX: number,
-        deltaY: number,
-        _deltaZ: number,
-        event?: WheelEvent,
-      ) => {
-        event?.preventDefault();
-        this.zoomAtPoint(deltaY, pointer.x, pointer.y);
-      },
-    );
+    const canvas = this.game.canvas;
+    const handleCanvasWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const bounds = canvas.getBoundingClientRect();
+      this.zoomAtPoint(event.deltaY, event.clientX - bounds.left, event.clientY - bounds.top);
+    };
+    canvas.addEventListener("wheel", handleCanvasWheel, { passive: false });
+    this.cleanupCameraControls.push(() => canvas.removeEventListener("wheel", handleCanvasWheel));
 
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
       if (!pointer.leftButtonDown() || this.cameras.main.zoom <= this.baseZoom) {
@@ -366,37 +899,6 @@ class VillageScene extends Phaser.Scene {
     });
   }
 
-  private zoomFromViewportCenter(deltaY: number) {
-    this.zoomAtPoint(deltaY, this.cameras.main.width / 2, this.cameras.main.height / 2);
-  }
-
-  private handleMapControl(command: MapControlCommand) {
-    if (command === "zoom-in") {
-      this.zoomFromViewportCenter(-1);
-      return;
-    }
-    if (command === "zoom-out") {
-      this.zoomFromViewportCenter(1);
-      return;
-    }
-
-    const camera = this.cameras.main;
-    const distance = BUTTON_PAN_DISTANCE / camera.zoom;
-    if (command === "left") {
-      this.cameraCenter.x -= distance;
-    }
-    if (command === "right") {
-      this.cameraCenter.x += distance;
-    }
-    if (command === "up") {
-      this.cameraCenter.y -= distance;
-    }
-    if (command === "down") {
-      this.cameraCenter.y += distance;
-    }
-    this.applyCameraView();
-  }
-
   private applyCameraView() {
     const camera = this.cameras.main;
     const visibleWidth = camera.width / camera.zoom;
@@ -412,6 +914,7 @@ class VillageScene extends Phaser.Scene {
       maxScrollY <= 0 ? maxScrollY / 2 : Phaser.Math.Clamp(requestedScrollY, 0, maxScrollY);
     this.cameraCenter.set(camera.scrollX + visibleWidth / 2, camera.scrollY + visibleHeight / 2);
     camera.centerOn(this.cameraCenter.x, this.cameraCenter.y);
+    this.publishMinimapStateIfChanged();
   }
 
   private updateCameraCursor() {
@@ -423,6 +926,56 @@ class VillageScene extends Phaser.Scene {
       cleanup();
     }
     this.cleanupCameraControls = [];
+  }
+
+  private publishMinimapStateIfChanged() {
+    if (this.mapBounds.width <= 0 || this.mapBounds.height <= 0) {
+      return;
+    }
+
+    const camera = this.cameras.main;
+    const worldView = camera.worldView;
+    const viewportX = Number.isFinite(worldView.x) ? worldView.x : camera.scrollX;
+    const viewportY = Number.isFinite(worldView.y) ? worldView.y : camera.scrollY;
+    const viewportWidth =
+      worldView.width > 0 && Number.isFinite(worldView.width)
+        ? worldView.width
+        : camera.width / camera.zoom;
+    const viewportHeight =
+      worldView.height > 0 && Number.isFinite(worldView.height)
+        ? worldView.height
+        : camera.height / camera.zoom;
+    const signature = [
+      viewportX.toFixed(2),
+      viewportY.toFixed(2),
+      viewportWidth.toFixed(2),
+      viewportHeight.toFixed(2),
+      camera.zoom.toFixed(4),
+      this.minimapImageUrl.length,
+      this.minimapMarkers.length,
+      ...this.minimapMarkers.map(
+        (marker) => `${marker.id}:${marker.x.toFixed(1)},${marker.y.toFixed(1)}`,
+      ),
+    ].join(":");
+    if (signature === this.lastMinimapSignature) {
+      return;
+    }
+    this.lastMinimapSignature = signature;
+
+    window.dispatchEvent(
+      new CustomEvent<MinimapState>("mongle-minimap-update", {
+        detail: {
+          mapHeight: this.mapBounds.height,
+          mapWidth: this.mapBounds.width,
+          imageUrl: this.minimapImageUrl,
+          markers: this.minimapMarkers,
+          viewportHeight,
+          viewportWidth,
+          viewportX,
+          viewportY,
+        },
+      }),
+    );
   }
 
   private zoomAtPoint(deltaY: number, screenX: number, screenY: number) {
@@ -458,14 +1011,15 @@ class VillageScene extends Phaser.Scene {
   }
 }
 
-export function PhaserVillage({ reloadKey, onOpenDialogue }: PhaserVillageProps) {
+export function PhaserVillage({
+  reloadKey,
+  onOpenBoard,
+  onOpenDialogue,
+  residents,
+}: PhaserVillageProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  function dispatchMapControl(command: MapControlCommand) {
-    window.dispatchEvent(
-      new CustomEvent<MapControlCommand>("mongle-map-control", { detail: command }),
-    );
-  }
+  const [minimapState, setMinimapState] = useState<MinimapState | null>(null);
+  const [objectHint, setObjectHint] = useState<ObjectHintState | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -486,7 +1040,13 @@ export function PhaserVillage({ reloadKey, onOpenDialogue }: PhaserVillageProps)
         mode: Phaser.Scale.RESIZE,
         width: containerRef.current.clientWidth,
       },
-      scene: new VillageScene(`VillageScene-${reloadKey}`, onOpenDialogue, () => disposed),
+      scene: new VillageScene(
+        `VillageScene-${reloadKey}`,
+        onOpenDialogue,
+        onOpenBoard,
+        () => disposed,
+        residents,
+      ),
       type: Phaser.AUTO,
     });
 
@@ -494,7 +1054,29 @@ export function PhaserVillage({ reloadKey, onOpenDialogue }: PhaserVillageProps)
       disposed = true;
       game.destroy(true);
     };
-  }, [reloadKey, onOpenDialogue]);
+  }, [reloadKey, onOpenBoard, onOpenDialogue, residents]);
+
+  useEffect(() => {
+    function handleMinimapUpdate(event: Event) {
+      setMinimapState((event as CustomEvent<MinimapState>).detail);
+    }
+
+    window.addEventListener("mongle-minimap-update", handleMinimapUpdate);
+    return () => window.removeEventListener("mongle-minimap-update", handleMinimapUpdate);
+  }, []);
+
+  useEffect(() => {
+    function handleObjectHintUpdate(event: Event) {
+      const detail = (event as CustomEvent<ObjectHintState>).detail;
+      setObjectHint(detail.visible ? detail : null);
+    }
+
+    window.addEventListener("mongle-object-hint-update", handleObjectHintUpdate);
+    return () => window.removeEventListener("mongle-object-hint-update", handleObjectHintUpdate);
+  }, []);
+
+  const viewportStyle = getMinimapViewportStyle(minimapState);
+  const markers = minimapState?.markers ?? [];
 
   return (
     <>
@@ -504,30 +1086,69 @@ export function PhaserVillage({ reloadKey, onOpenDialogue }: PhaserVillageProps)
         role="img"
         aria-label="몽글마을 Phaser 배경"
       />
-      <fieldset className="mapControls" aria-label="지도 조작">
-        <button type="button" onClick={() => dispatchMapControl("zoom-in")} aria-label="지도 확대">
-          +
-        </button>
-        <button type="button" onClick={() => dispatchMapControl("up")} aria-label="위로 이동">
-          ↑
-        </button>
-        <button type="button" onClick={() => dispatchMapControl("zoom-out")} aria-label="지도 축소">
-          −
-        </button>
-        <button type="button" onClick={() => dispatchMapControl("left")} aria-label="왼쪽으로 이동">
-          ←
-        </button>
-        <button type="button" onClick={() => dispatchMapControl("down")} aria-label="아래로 이동">
-          ↓
-        </button>
-        <button
-          type="button"
-          onClick={() => dispatchMapControl("right")}
-          aria-label="오른쪽으로 이동"
+      {objectHint ? (
+        <span
+          className="villageObjectHint"
+          style={{ left: objectHint.x, top: objectHint.y }}
+          aria-hidden="true"
         >
-          →
-        </button>
-      </fieldset>
+          {objectHint.label}
+        </span>
+      ) : null}
+      <aside className="villageMinimap" aria-label="마을 미니맵">
+        <span className="villageMinimapFrame" aria-hidden="true">
+          {minimapState?.imageUrl ? (
+            <img className="villageMinimapImage" src={minimapState.imageUrl} alt="" />
+          ) : (
+            <span className="villageMinimapFallback" />
+          )}
+          {markers.map((marker) => (
+            <span
+              key={marker.id}
+              className={`villageMinimapMarker is${capitalize(marker.type)}`}
+              style={getMinimapMarkerStyle(marker, minimapState)}
+              title={marker.label}
+            />
+          ))}
+          <span className="villageMinimapViewport" style={viewportStyle} />
+        </span>
+      </aside>
     </>
   );
+}
+
+function capitalize(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function toPercent(value: number) {
+  return `${Phaser.Math.Clamp(value, 0, 100)}%`;
+}
+
+function getMinimapViewportStyle(state: MinimapState | null): CSSProperties {
+  if (!state) {
+    return {
+      height: "30%",
+      left: "23%",
+      top: "20%",
+      width: "28%",
+    };
+  }
+
+  return {
+    height: toPercent((state.viewportHeight / state.mapHeight) * 100),
+    left: toPercent((state.viewportX / state.mapWidth) * 100),
+    top: toPercent((state.viewportY / state.mapHeight) * 100),
+    width: toPercent((state.viewportWidth / state.mapWidth) * 100),
+  };
+}
+
+function getMinimapMarkerStyle(marker: MinimapMarker, state: MinimapState | null): CSSProperties {
+  if (!state) {
+    return {};
+  }
+  return {
+    left: toPercent((marker.x / state.mapWidth) * 100),
+    top: toPercent((marker.y / state.mapHeight) * 100),
+  };
 }

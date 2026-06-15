@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  font-family: "DotGothic16", "Apple SD Gothic Neo", "Malgun Gothic", monospace;
+  font-family: "NanumSquareRoundExtraBold", "NanumSquareRound", "Malgun Gothic", monospace;
   color: #382719;
   background: #1d2a20;
 }
@@ -22,6 +22,11 @@ body,
 body {
   overflow: hidden;
 }
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
 button,
 input,
 textarea {
@@ -29,6 +34,15 @@ textarea {
 }
 button {
   cursor: pointer;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .appShell {
@@ -72,12 +86,12 @@ button {
 .townNav {
   position: absolute;
   z-index: 8;
-  top: 14px;
-  left: 18px;
-  right: 18px;
-  min-height: 54px;
+  top: 18px;
+  left: 24px;
+  right: 22px;
+  min-height: 42px;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 18px;
   color: #fff6d7;
@@ -90,97 +104,144 @@ button {
   min-width: 0;
 }
 
-.townNav h1 {
-  margin: 0;
-  padding: 8px 24px;
-  border: 3px solid #553827;
-  box-shadow:
-    inset 0 0 0 3px #f5d48c,
-    0 4px 0 rgba(50, 33, 22, 0.5);
-  background: #98643f;
-  color: #fff5ce;
-  font-size: clamp(1.2rem, 2.2vw, 2rem);
-  white-space: nowrap;
-}
-
 .townNav button,
-.mapControls button,
-.focusActions button,
-.questPanel > button,
 .primaryButton,
 .talkButton,
 .plannerComposer button,
 .planResult button,
 .candidateBlock li button {
   min-height: 34px;
-  border: 3px solid #453023;
+  border: 2px solid #bd7b3d;
+  border-radius: 12px;
+  background-color: rgb(250, 238, 210);
   box-shadow:
-    inset 0 0 0 2px rgba(255, 244, 196, 0.55),
-    0 3px 0 rgba(50, 33, 22, 0.55);
-  background: #8a5b38;
-  color: #fff5d1;
+    inset 0 -3px 1px 0 rgba(178, 104, 31, 0.14),
+    0 4px 0 rgba(57, 36, 22, 0.22),
+    0 8px 8px rgba(23, 22, 16, 0.22);
   font-weight: 900;
 }
 
 .townNav button {
-  padding: 0 12px;
-  font-size: 0.78rem;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 2px solid #bd7b3d;
+  border-radius: 12px;
+  background-color: rgb(250, 238, 210);
+  box-shadow:
+    inset 0 -3px 1px 0 rgba(178, 104, 31, 0.14),
+    0 4px 0 rgba(57, 36, 22, 0.22),
+    0 8px 8px rgba(23, 22, 16, 0.22);
+  color: #633b23;
+  font-size: 0.86rem;
+  text-shadow: none;
   white-space: nowrap;
 }
 
-.mapControls {
-  position: absolute;
-  z-index: 7;
-  right: 22px;
-  bottom: 20px;
-  display: grid;
-  grid-template-columns: repeat(3, 34px);
-  gap: 6px;
-  min-inline-size: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
+.townNav .settingsOnlyButton {
+  min-width: 96px;
+  min-height: 48px;
+  padding: 0 16px 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-width: 2px;
+  border-radius: 12px;
+  color: #633b23;
+  font-size: 1rem;
+  font-weight: 800;
 }
 
-.mapControls button {
-  width: 34px;
-  height: 34px;
-  min-height: 34px;
-  padding: 0;
-  font-size: 1rem;
-  line-height: 1;
+.settingsOnlyButtonIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .navUserArea {
   justify-self: end;
   display: flex;
-  gap: 6px;
+  gap: 10px;
   align-items: center;
 }
 
-.loginButton {
-  min-width: 84px;
+.townNav .loginButton {
+  min-width: 95px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 2px solid #bd7b3d;
+  border-radius: 12px;
+  background-color: rgb(250, 238, 210);
+  box-shadow:
+    inset 0 -3px 1px 0 rgba(178, 104, 31, 0.14),
+    0 4px 0 rgba(57, 36, 22, 0.22),
+    0 8px 8px rgba(23, 22, 16, 0.22);
+  color: #633b23;
+  font-size: 1rem;
+  font-weight: 700;
+  text-shadow: none;
 }
 
-.myPageButton {
-  min-width: 84px;
+.townNav .loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 -5px 8px rgba(178, 104, 31, 0.14),
+    0 5px 0 rgba(57, 36, 22, 0.2),
+    0 10px 16px rgba(23, 22, 16, 0.26);
 }
 
-.feedIconButton {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  padding: 0;
+.townNav .loginButton:active {
+  transform: translateY(2px);
+}
+
+.townNav .tokenBadge {
+  min-height: 48px;
+  min-width: 160px;
+  padding: 0 10px 0 18px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 2px solid #bd7b3d;
+  border-radius: 12px;
+  background-color: rgb(250, 238, 210);
+  box-shadow:
+    inset 0 -3px 1px 0 rgba(178, 104, 31, 0.14),
+    0 4px 0 rgba(57, 36, 22, 0.22),
+    0 8px 8px rgba(23, 22, 16, 0.22);
+  color: #633b23;
+  font-weight: 950;
+  text-shadow: none;
 }
 
-.focusPanel,
-.questPanel,
+.townNav .tokenBadgeIcon {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.townNav .tokenBadgeCount {
+  min-width: 32px;
+  font-size: 1.08rem;
+  text-align: center;
+}
+
+.townNav .tokenBadgePlus {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #e2b56f;
+  border-radius: 8px;
+  background: #fff4d0;
+  box-shadow:
+    inset 0 -4px 0 rgba(221, 177, 92, 0.16),
+    0 2px 0 rgba(167, 104, 45, 0.18);
+  color: #9a5a2d;
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
 .dialogueBox,
-.noticeBubble,
-.appleCounter,
 .residentPanel,
 .featureModal {
   border: 4px solid #4b2f1f;
@@ -194,157 +255,194 @@ button {
 .leftRail {
   position: absolute;
   z-index: 6;
-  top: 295px;
-  left: 22px;
-  width: 210px;
+  top: 286px;
+  left: 26px;
+  width: 300px;
+  max-width: calc(100vw - 52px);
   display: grid;
   gap: 12px;
 }
 
-.focusPanel {
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  padding: 16px 14px;
-  background: #f1d18c;
+@keyframes noticeToastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
-.sunBadge {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 3px solid #7d4b28;
-  background: #ffe279;
-  color: #8f4c24;
-  font-size: 1.5rem;
+@keyframes mongleModalIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.focusPanel strong {
-  font-size: 2rem;
-  color: #3d2a1d;
-}
-.focusPanel span,
-.focusPanel small {
-  color: #7a4b2d;
-  font-weight: 900;
+.noticeToast {
+  position: fixed;
+  z-index: 45;
+  top: 26px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(560px, calc(100vw - 36px));
+  padding: 12px 22px;
+  border: 2.5px solid #d9be84;
+  border-radius: 16px;
+  background: #fffdf6;
+  box-shadow: 0 14px 30px -12px rgba(60, 42, 18, 0.5);
+  color: #6e5c44;
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  line-height: 1.3;
+  transform: translateX(-50%);
+  animation: noticeToastIn 0.4s ease both;
+  pointer-events: none;
 }
 
-.focusActions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
-  width: 100%;
+.noticeToast span {
+  flex: 0 0 auto;
+  color: #e0a52a;
+}
+
+.noticeToast b {
+  overflow: hidden;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .residentPanel {
   display: grid;
-  gap: 8px;
-  padding: 12px;
-  background: #f7df9e;
+  gap: 9px;
+  padding: 14px 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(165deg, #fbf2d5 0%, #fbe9bc 100%);
+  border: 3px solid #e1b54c;
+  box-shadow:
+    0 16px 34px -16px rgba(120, 90, 30, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.65);
+  image-rendering: auto;
 }
 
-.residentPanel b {
-  color: #4b3021;
-  font-size: 0.78rem;
-}
-
-.residentPanel div,
-.residentList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.residentPanel span,
-.residentList span {
-  display: inline-flex;
+.residentPanelHeader {
+  display: grid;
+  grid-template-columns: 25px auto 25px 75px;
   align-items: center;
-  gap: 6px;
-  min-height: 24px;
-  padding: 3px 8px;
-  border: 2px solid #8e6038;
-  background: #fff4c5;
-  color: #5b3925;
-  font-size: 0.7rem;
-  font-weight: 950;
+  justify-content: space-between;
+  gap: 7px;
+  min-height: 30px;
 }
 
-.residentPanel img,
-.residentList img {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #7b4d2b;
-  image-rendering: pixelated;
+.residentPanelHeader img {
+  width: 25px;
+  height: 25px;
   object-fit: cover;
 }
 
-.noticeBubble {
-  display: grid;
-  gap: 5px;
-  padding: 10px;
-  background: #fff1bd;
-  color: #4b3021;
-}
-
-.noticeBubble b {
-  color: #7b3d29;
-}
-.noticeBubble span {
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
-
-.appleCounter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 6px 12px;
-  background: #f7df9e;
-}
-
-.appleCounter span {
-  font-size: 1.3rem;
-}
-.appleCounter b {
-  font-size: 1.15rem;
-}
-
-.questPanel {
-  position: absolute;
-  z-index: 6;
-  top: 92px;
-  right: 22px;
-  width: min(320px, calc(100vw - 44px));
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-  background: #f7df9e;
-}
-
-.panelHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  padding-bottom: 8px;
-  border-bottom: 3px solid #8f5c34;
-}
-
-.panelHeader span {
-  color: #3d2a1d;
-  font-size: 1rem;
-  font-weight: 950;
-}
-.panelHeader b {
-  color: #7c4d2c;
-  font-size: 0.72rem;
+.residentPanelHeader h2 {
+  margin: 0;
+  color: #5c3a24;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
-.questPanel ul,
+.residentPanelHeader span {
+  min-height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #e3be6b;
+  border-radius: 15px;
+  background: #fff1bf;
+  box-shadow: inset 0 -3px 0 rgba(216, 165, 60, 0.12);
+  color: #7a4e30dc;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.residentCards {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.residentCards li,
+.residentAddCard {
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: 40px 1fr 24px;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 12px 7px 9px;
+  border: 2px solid #e6c776;
+  border-radius: 16px;
+  background: rgba(255, 251, 228, 0.82);
+  box-shadow:
+    inset 0 -4px 0 rgba(213, 171, 78, 0.1),
+    0 4px 8px rgba(114, 76, 30, 0.12);
+}
+
+.residentAvatar {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.residentCards b,
+.residentAddCard span {
+  overflow: hidden;
+  color: #6a442b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.residentDecor {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+
+.residentAddCard {
+  width: 100%;
+  min-height: 54px;
+  border-style: dashed;
+  border-color: #e4bf68;
+  background: rgba(255, 249, 219, 0.66);
+  color: #6a442b;
+}
+
+.residentAddCard img:first-child {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.residentAddCard img:last-child {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+
+.residentAddCard:hover {
+  transform: scale(1.02);
+}
+
 .todoSheet ul,
 .planResult ul {
   display: grid;
@@ -354,7 +452,6 @@ button {
   padding: 0;
 }
 
-.questPanel li,
 .todoSheet li {
   display: grid;
   grid-template-columns: 24px 1fr;
@@ -366,7 +463,6 @@ button {
   background: #fff4c5;
 }
 
-.checkButton,
 .todoSheet li > span {
   width: 24px;
   height: 24px;
@@ -378,28 +474,10 @@ button {
   font-weight: 950;
 }
 
-.questPanel b,
-.questPanel p,
-.questPanel small {
-  margin: 0;
-}
-.questPanel li p {
-  margin-top: 2px;
-  color: #5c4635;
-  font-size: 0.82rem;
-}
-.questPanel li small {
-  display: block;
-  margin-top: 3px;
-  color: #8a6040;
-  font-size: 0.68rem;
-  line-height: 1.25;
-}
-.questPanel li.isDone,
 .todoSheet li.isDone {
-  opacity: 0.72;
+  opacity: 0.82;
 }
-.questPanel li.isDone p,
+
 .todoSheet li.isDone b {
   text-decoration: line-through;
 }
@@ -494,7 +572,18 @@ button {
   left: 50%;
   bottom: 30px;
   min-width: 160px;
+  min-height: 48px;
   transform: translateX(-50%);
+  color: #765338;
+}
+
+.dialogueDismissLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  border: 0;
+  background: transparent;
+  cursor: default;
 }
 
 .modalBackdrop {
@@ -514,6 +603,12 @@ button {
   overflow: auto;
   padding: 24px;
   background: #f8dea1;
+  animation: mongleModalIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.modalBackdrop > .calWindow,
+.modalBackdrop > .feed-modal-wrapper {
+  animation: mongleModalIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
 .plannerModalShell {
@@ -536,15 +631,19 @@ button {
   overflow: hidden;
 }
 
+.reflectionModalShell {
+  width: min(1380px, 100%);
+  max-height: calc(100vh - 22px);
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+}
+
 .plannerCloseButton {
   top: 16px;
   right: 16px;
-  z-index: 5;
-}
-
-.todoCloseButton {
-  top: 18px;
-  right: 18px;
   z-index: 5;
 }
 
@@ -829,11 +928,32 @@ input[type="checkbox"]:checked::after {
 
 @media (max-width: 1060px) {
   .leftRail {
-    top: 295px;
-    width: 184px;
+    top: 286px;
+    width: 300px;
+    max-width: calc(100vw - 52px);
   }
-  .questPanel {
-    width: 280px;
+  .residentPanel {
+    padding: 14px 14px 16px;
+    border-radius: 20px;
+  }
+  .residentPanelHeader {
+    grid-template-columns: 22px auto 22px 62px;
+  }
+  .residentPanelHeader h2 {
+    font-size: 1.35rem;
+  }
+  .residentCards li,
+  .residentAddCard {
+    grid-template-columns: 50px 1fr 24px;
+    min-height: 50px;
+  }
+  .residentAvatar {
+    width: 44px;
+    height: 44px;
+  }
+  .residentCards b,
+  .residentAddCard span {
+    font-size: 1rem;
   }
   .dialogueBox {
     width: min(760px, calc(100vw - 28px));
@@ -866,10 +986,9 @@ input[type="checkbox"]:checked::after {
     grid-template-columns: 1fr auto;
   }
   .townNav nav {
-    display: none;
+    display: flex;
   }
   .leftRail,
-  .questPanel,
   .dialogueBox,
   .talkButton {
     position: static;

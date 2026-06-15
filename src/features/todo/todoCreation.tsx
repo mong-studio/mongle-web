@@ -6,28 +6,27 @@ import {
   postWebJson,
   type TodoCommitResponse,
   type TodoGenerateResult,
-} from "./todoApi.js";
+} from "../../shared/api/todoPlanning.js";
 
 export type TodoItem = {
   id: string;
   title: string;
   dueDate: string;
   tags: string[];
+  tagColors?: Record<string, string>;
   status: "candidate" | "saved" | "done";
 };
 
-export type QuestCommitPreview = {
-  questId: string;
-  content: string;
-  characterId: string;
-  todoId: string;
-  todoTitle: string;
-};
-
 export type TodoCommitResult = {
+  calendarEventCount?: number;
+  questPreviews?: {
+    characterId: string | null;
+    content: string;
+    questId: string;
+    todoId: string;
+    todoTitle: string;
+  }[];
   todos: TodoItem[];
-  questPreviews: QuestCommitPreview[];
-  calendarEventCount: number;
 };
 
 const TAG_COLORS: Record<string, { bg: string; fg: string; sel: string }> = {
@@ -264,20 +263,6 @@ export function TodoCreation({
       }));
       onTodosSaved({
         todos: savedItems,
-        questPreviews: result.todos.flatMap((t) =>
-          t.quest
-            ? [
-                {
-                  questId: t.quest.quest_id,
-                  content: t.quest.content,
-                  characterId: t.quest.character_id,
-                  todoId: t.todo_id,
-                  todoTitle: t.content,
-                },
-              ]
-            : [],
-        ),
-        calendarEventCount: result.calendar_events.length,
       });
       showToast(`${quests.length}개의 할 일이 오늘의 목록에 추가됐어요!`);
     } catch (error) {

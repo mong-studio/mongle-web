@@ -199,8 +199,8 @@
   border-radius: 50%;
 }
 .pmImageGlow--sun {
-  width: 62px;
-  height: 62px;
+  width: 90px;
+  height: 90px;
   background: radial-gradient(circle, #fce9a8 0%, rgba(252, 233, 168, 0) 70%);
 }
 .pmImageGlow--moon {
@@ -211,7 +211,8 @@
 
 .pmEmoji {
   position: relative;
-  font-size: 42px;
+  width: 62px;
+  height: 62px;
   line-height: 1;
   animation: pmFloaty 4s ease-in-out infinite;
 }

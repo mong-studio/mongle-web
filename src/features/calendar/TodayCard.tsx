@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Tag } from "../../shared/ui/Tag/index.js";
+import { Tag } from "../../shared/ui/Tag/Tag.js";
 import type { CalHook } from "./CalendarCore.js";
 import { Check } from "./CalendarCore.js";
 import { WD } from "./calEngine.js";

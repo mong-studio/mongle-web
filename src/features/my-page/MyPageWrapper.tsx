@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "../../shared/api/client.js";
-import { useAuthStore } from "../auth/store.js";
 import { MyPageModal, type Resident } from "./MyPage.js";
 
 type UserProfile = {
@@ -12,15 +11,15 @@ type UserProfile = {
 };
 
 type Props = {
+  fallbackUserName: string;
   residents: Resident[];
   onClose: () => void;
+  onLogout: () => void | Promise<void>;
   onNotice: (msg: string) => void;
 };
 
-export function MyPageWrapper({ residents, onClose, onNotice }: Props) {
+export function MyPageWrapper({ fallbackUserName, residents, onClose, onLogout, onNotice }: Props) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const logoutSession = useAuthStore((state) => state.logout);
-  const authUser = useAuthStore((state) => state.user);
 
   useEffect(() => {
     apiClient
@@ -32,7 +31,7 @@ export function MyPageWrapper({ residents, onClose, onNotice }: Props) {
   async function handleWithdraw() {
     try {
       await apiClient.delete("/auth/me/");
-      await logoutSession();
+      await onLogout();
       onClose();
       onNotice("계정이 탈퇴됐어요.");
     } catch (error) {
@@ -72,7 +71,7 @@ export function MyPageWrapper({ residents, onClose, onNotice }: Props) {
 
   return (
     <MyPageModal
-      userName={userProfile?.user_name ?? authUser?.userName ?? "몽글러"}
+      userName={userProfile?.user_name ?? fallbackUserName}
       userJob={userProfile?.job ?? ""}
       userBirth={userProfile?.birth ?? ""}
       tokenBalance={userProfile?.token_balance ?? 0}

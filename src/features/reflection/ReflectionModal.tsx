@@ -195,7 +195,7 @@ export function ReflectionModal({
   const isEditingExistingEntry = Boolean(editingEntry);
   const isReadOnly = !isEditingExistingEntry && (Boolean(todayEntry) || !isTodayPage);
   const hasEnoughEditTokens = tokenBalance >= EDIT_TOKEN_COST;
-  const expectedCreateReward =
+  const _expectedCreateReward =
     [good, regret].filter((value) => value.trim().length >= REFLECTION_REWARD_MIN_LENGTH).length *
     APPLE_REWARD_PER_FIELD;
 
@@ -286,6 +286,15 @@ export function ReflectionModal({
     setIsEditing(true);
     setEditingEntryId(entry.id);
     setPendingEditEntry(null);
+  }
+
+  function cancelEditReflection() {
+    setIsEditing(false);
+    setEditingEntryId(null);
+    setPendingEditEntry(null);
+    if (editingEntry) {
+      hydrateForm(editingEntry);
+    }
   }
 
   function updateReflectionText(field: "good" | "regret", value: string) {
@@ -489,7 +498,10 @@ export function ReflectionModal({
 
   function renderReflectionEditor() {
     return (
-      <section className="reflectionRightPage" aria-label="회고 작성">
+      <section
+        className={`reflectionRightPage${isEditingExistingEntry ? " reflectionEditRightPage" : ""}`}
+        aria-label={isEditingExistingEntry ? "회고 수정" : "회고 작성"}
+      >
         <article className="reflectionEssayCard reflectionEssayGood">
           <div className="reflectionEssayHeader">
             <h3>
@@ -627,10 +639,10 @@ export function ReflectionModal({
                   <DiaryIcon name="apple" />
                   <p>
                     <strong>회고 작성 보상</strong>
-                    30자 이상 작성한 항목 1개당 사과 {APPLE_REWARD_PER_FIELD}개 지급!
+                    30자 이상 작성한 항목 1개당 사과 2개 지급!
                   </p>
                   <b>
-                    <DiaryIcon name="apple" />+ {expectedCreateReward}{" "}
+                    <DiaryIcon name="apple" />+ 2{" "}
                   </b>
                 </div>
                 <div>
@@ -651,7 +663,10 @@ export function ReflectionModal({
           </>
         ) : editingEntry ? (
           <>
-            <section className="reflectionLeftPage" aria-label="수정할 회고 안내">
+            <section
+              className="reflectionLeftPage reflectionEditLeftPage"
+              aria-label="수정할 회고 안내"
+            >
               <header className="reflectionTitle">
                 <DiaryIcon name="calendar" />
                 <div>
@@ -668,13 +683,26 @@ export function ReflectionModal({
 
               <section className="reflectionEditGuideCard" aria-label="회고 수정 안내">
                 <DiaryIcon name="edit" />
-                <h3>회고 수정 안내</h3>
-                <p>수정 후 저장하면 사과 {EDIT_TOKEN_COST}개가 차감돼요.</p>
-                <div>
-                  <DiaryIcon name="apple" />
-                  <strong>- {EDIT_TOKEN_COST}</strong>
+                <div className="reflectionEditGuideCopy">
+                  <h3>회고 수정 안내</h3>
+                  <p>
+                    회고를 수정하고 저장하면
+                    <br />
+                    사과 {EDIT_TOKEN_COST}개가 사용돼요.
+                  </p>
                 </div>
-                <small>보유 사과 {tokenBalance}개</small>
+                <div className="reflectionEditCostRows">
+                  <div>
+                    <DiaryIcon name="apple" />
+                    <span className="reflectionEditCostLabel">보유 사과</span>
+                    <strong>{tokenBalance}개</strong>
+                  </div>
+                  <div>
+                    <span className="reflectionEditCostLabel">사용 사과</span>
+                    <strong>-{EDIT_TOKEN_COST}개</strong>
+                  </div>
+                </div>
+                <small>수정 후 저장하면 사과가 차감돼요.</small>
               </section>
             </section>
 
@@ -709,7 +737,27 @@ export function ReflectionModal({
           </button>
         ) : null}
 
-        {isTodayPage || editingEntry ? (
+        {isEditingExistingEntry ? (
+          <div className="reflectionEditActions">
+            <button
+              type="button"
+              className="reflectionSecondaryButton"
+              onClick={cancelEditReflection}
+              disabled={isSaving || isLoading}
+            >
+              돌아가기
+            </button>
+            <button
+              type="button"
+              className="reflectionPrimaryButton reflectionEditSaveButton"
+              onClick={saveReflection}
+              disabled={!canSaveReflection || isSaving || isLoading}
+            >
+              <DiaryIcon name="apple" />
+              {isSaving ? "저장 중" : "수정 완료"}
+            </button>
+          </div>
+        ) : isTodayPage ? (
           <div className="reflectionActions">
             <button
               type="button"
@@ -755,24 +803,28 @@ export function ReflectionModal({
         </div>
       ) : null}
 
-      <button
-        type="button"
-        className="reflectionArrow reflectionArrowPrev"
-        onClick={() => movePage("prev")}
-        disabled={pageIndex === 0 || isEditingExistingEntry}
-        aria-label="이전 회고 보기"
-      >
-        <WestRoundedIcon aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        className="reflectionArrow reflectionArrowNext"
-        onClick={() => movePage("next")}
-        disabled={pageIndex >= maxPageIndex || isEditingExistingEntry}
-        aria-label="다음 회고 보기"
-      >
-        <EastRoundedIcon aria-hidden="true" />
-      </button>
+      {!isEditingExistingEntry ? (
+        <>
+          <button
+            type="button"
+            className="reflectionArrow reflectionArrowPrev"
+            onClick={() => movePage("prev")}
+            disabled={pageIndex === 0}
+            aria-label="이전 회고 보기"
+          >
+            <WestRoundedIcon aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="reflectionArrow reflectionArrowNext"
+            onClick={() => movePage("next")}
+            disabled={pageIndex >= maxPageIndex}
+            aria-label="다음 회고 보기"
+          >
+            <EastRoundedIcon aria-hidden="true" />
+          </button>
+        </>
+      ) : null}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   type TodoChatFollowUpResult,
   type TodoCommitResponse,
   type TodoGenerateResult,
-} from "../todo/todoApi.js";
+} from "../../shared/api/todoPlanning.js";
 import type { TodoCommitResult } from "../todo/todoCreation.js";
 
 type PlannerMessage = {
