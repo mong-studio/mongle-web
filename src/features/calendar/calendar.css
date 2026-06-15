@@ -1,5 +1,5 @@
 /* ───────────────────────────────────── */
-/* CALENDAR WINDOW  (new design)          */
+/* CALENDAR WINDOW         */
 /* ───────────────────────────────────── */
 
 @import url("https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap");
@@ -399,7 +399,7 @@
   }
 }
 
-/* ── Themed scrollbar (몽글 톤) ───────────────────────────────── */
+/* ── Themed scrollbar ───────────────────────────────── */
 
 .calScroll {
   scrollbar-width: thin;
