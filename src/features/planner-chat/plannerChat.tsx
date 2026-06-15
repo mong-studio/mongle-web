@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./PlannerChat.css";
+import "./plannerChat.css";
 import {
   buildCommitPayload,
   groupPlannerDays,
