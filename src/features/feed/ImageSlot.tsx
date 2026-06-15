@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 interface ImageSlotProps {
-  id: string;
+  /** 백엔드(DB)가 내려준 이미지 URL. 없거나 로드 실패 시 placeholder 를 보여준다. */
+  imageUrl?: string;
   placeholder: string;
   width?: string | number;
   height?: string | number;
@@ -10,23 +11,13 @@ interface ImageSlotProps {
   pixelated?: boolean;
 }
 
-function readStorage(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeStorage(key: string, val: string | null) {
-  try {
-    if (val === null) localStorage.removeItem(key);
-    else localStorage.setItem(key, val);
-  } catch {}
+// 이모지/설명 텍스트가 아니라 실제로 불러올 수 있는 이미지 주소인지 판별한다.
+function isRenderableUrl(value?: string): value is string {
+  return !!value && /^(https?:\/\/|data:image\/|blob:)/.test(value);
 }
 
 export function ImageSlot({
-  id,
+  imageUrl,
   placeholder,
   width = "100%",
   height = 232,
@@ -34,25 +25,12 @@ export function ImageSlot({
   radius = 14,
   pixelated = false,
 }: ImageSlotProps) {
-  const [src, setSrc] = useState<string | null>(() => readStorage(`img-slot-${id}`));
-  const [over, setOver] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const depthRef = useRef(0);
+  // 로드에 실패한 URL만 기억한다. imageUrl 이 바뀌면 자동으로 다시 시도한다.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
-  function ingest(file: File) {
-    if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const url = reader.result as string;
-      setSrc(url);
-      writeStorage(`img-slot-${id}`, url);
-    };
-    reader.readAsDataURL(file);
-  }
+  const src = isRenderableUrl(imageUrl) && imageUrl !== failedUrl ? imageUrl : null;
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: file upload trigger div, keyboard not needed here
-    // biome-ignore lint/a11y/useKeyWithClickEvents: file upload trigger div, keyboard not needed here
     <div
       style={{
         width,
@@ -61,89 +39,30 @@ export function ImageSlot({
         background: tint,
         position: "relative",
         overflow: "hidden",
-        cursor: src ? "default" : "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        outline: over ? "2px solid rgba(200,100,66,.7)" : "none",
-        outlineOffset: -2,
-        transition: "outline .12s",
-      }}
-      onClick={() => {
-        if (!src) inputRef.current?.click();
-      }}
-      onDragEnter={(e) => {
-        e.preventDefault();
-        depthRef.current++;
-        setOver(true);
-      }}
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "copy";
-      }}
-      onDragLeave={() => {
-        if (--depthRef.current <= 0) {
-          depthRef.current = 0;
-          setOver(false);
-        }
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        depthRef.current = 0;
-        setOver(false);
-        const file = e.dataTransfer.files[0];
-        if (file) ingest(file);
       }}
     >
       {src ? (
-        <>
-          <img
-            src={src}
-            alt=""
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              imageRendering: pixelated ? "pixelated" : "auto",
-            }}
-          />
-          <button
-            type="button"
-            style={{
-              position: "absolute",
-              top: 6,
-              right: 6,
-              width: 22,
-              height: 22,
-              borderRadius: "50%",
-              background: "rgba(0,0,0,.52)",
-              border: "none",
-              color: "#fff",
-              fontSize: 13,
-              lineHeight: 1,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 0,
-            }}
-            aria-label="이미지 제거"
-            onClick={(e) => {
-              e.stopPropagation();
-              setSrc(null);
-              writeStorage(`img-slot-${id}`, null);
-            }}
-          >
-            ×
-          </button>
-        </>
+        <img
+          src={src}
+          alt=""
+          onError={() => setFailedUrl(imageUrl ?? null)}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            imageRendering: pixelated ? "pixelated" : "auto",
+          }}
+        />
       ) : (
         <div
           style={{
             textAlign: "center",
-            color: "rgba(96,72,48,.62)",
+            color: "rgba(96,72,48,.55)",
             fontSize: 13,
             padding: 12,
             pointerEvents: "none",
@@ -152,20 +71,8 @@ export function ImageSlot({
         >
           <div style={{ fontSize: 22, marginBottom: 5 }}>🖼</div>
           <div style={{ lineHeight: 1.4 }}>{placeholder}</div>
-          <div style={{ fontSize: 11, marginTop: 4, opacity: 0.65 }}>드래그하거나 클릭</div>
         </div>
       )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) ingest(f);
-          e.target.value = "";
-        }}
-      />
     </div>
   );
 }

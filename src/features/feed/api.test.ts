@@ -36,6 +36,7 @@ describe("feed API", () => {
         {
           post_id: "aaa",
           character: "char-1",
+          character_name: "몽실이",
           quest_id: "q-1",
           img_url: "https://example.com/img.png",
           content: "테스트 내용",
@@ -68,6 +69,7 @@ describe("feed API", () => {
       const mockPost = {
         post_id: "bbb",
         character: "char-1",
+        character_name: "몽실이",
         quest_id: "q-1",
         img_url: "",
         content: "상세 내용",
@@ -76,8 +78,18 @@ describe("feed API", () => {
           {
             comment_id: "c-1",
             user: "user-1",
+            user_name: "지희",
             content: "댓글",
             created_at: "2026-06-10T11:00:00Z",
+            replies: [
+              {
+                reply_id: "r-1",
+                character: "char-1",
+                character_name: "몽실이",
+                content: "고마워요!",
+                created_at: "2026-06-10T11:05:00Z",
+              },
+            ],
           },
         ],
         created_at: "2026-06-10T10:00:00Z",
@@ -106,8 +118,10 @@ describe("feed API", () => {
       const mockComment = {
         comment_id: "c-new",
         user: "user-1",
+        user_name: "지희",
         content: "새 댓글",
         created_at: "2026-06-10T12:00:00Z",
+        replies: [],
       };
       let capturedUrl: string | undefined;
       let capturedBody: unknown;
