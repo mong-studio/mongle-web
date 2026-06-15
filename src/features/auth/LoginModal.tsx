@@ -119,13 +119,6 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
           <img src="/assets/auth/main.png" alt="몽글마을 친구들" />
         </div>
 
-        {/* GREETING */}
-        {/* <div className="lgGreeting">
-          <span>✿</span>
-          <span className="lgGreetingText">오늘도 천천히, 함께 시작해볼까요?</span>
-          <span>✿</span>
-        </div> */}
-
         {/* EMAIL */}
         <div className="lgField">
           <span className="lgFieldIcon">
