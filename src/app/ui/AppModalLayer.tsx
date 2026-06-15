@@ -1,4 +1,5 @@
 import { LoginModal } from "../../features/auth/LoginModal.js";
+import { ResetPasswordModal } from "../../features/auth/ResetPasswordModal.js";
 import { SignupModal } from "../../features/auth/SignupModal.js";
 import type { AuthStatus, SessionUser } from "../../features/auth/store.js";
 import { CalendarModal } from "../../features/calendar/CalendarModal.js";
@@ -21,6 +22,7 @@ type AppModalLayerProps = {
   isBusy: boolean;
   loginOpen: boolean;
   reflectionOpen: boolean;
+  resetPwOpen: boolean;
   residents: Resident[];
   selectedKeywordCategories: string[];
   showMyPage: boolean;
@@ -41,6 +43,9 @@ type AppModalLayerProps = {
   onMyPageClose: () => void;
   onNotice: (message: string) => void;
   onReflectionClose: () => void;
+  onResetPwClose: () => void;
+  onResetPwComplete: (notice: string) => void;
+  onResetPwOpen: () => void;
   onRewardApples: (amount: number) => void;
   onSignupClose: () => void;
   onSignupComplete: (notice: string) => void;
@@ -60,6 +65,7 @@ export function AppModalLayer({
   isBusy,
   loginOpen,
   reflectionOpen,
+  resetPwOpen,
   residents,
   selectedKeywordCategories,
   showMyPage,
@@ -80,6 +86,9 @@ export function AppModalLayer({
   onMyPageClose,
   onNotice,
   onReflectionClose,
+  onResetPwClose,
+  onResetPwComplete,
+  onResetPwOpen,
   onRewardApples,
   onSignupClose,
   onSignupComplete,
@@ -134,6 +143,13 @@ export function AppModalLayer({
         open={loginOpen}
         onClose={onLoginClose}
         onSwitchToSignup={onSwitchLoginToSignup}
+        onResetPw={onResetPwOpen}
+      />
+
+      <ResetPasswordModal
+        open={resetPwOpen}
+        onClose={onResetPwClose}
+        onComplete={onResetPwComplete}
       />
 
       {characterSetupOpen ? (

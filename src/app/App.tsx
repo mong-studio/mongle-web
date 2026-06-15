@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LoginModal } from "../features/auth/LoginModal.js";
-import { ResetPasswordModal } from "../features/auth/ResetPasswordModal.js";
-import { SignupModal } from "../features/auth/SignupModal.js";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
@@ -432,6 +430,7 @@ export function App() {
         isBusy={isBusy}
         loginOpen={loginOpen}
         reflectionOpen={reflectionOpen}
+        resetPwOpen={resetPwOpen}
         residents={residents}
         selectedKeywordCategories={selectedKeywordCategories}
         showMyPage={showMyPage}
@@ -455,6 +454,19 @@ export function App() {
         onMyPageClose={() => setShowMyPage(false)}
         onNotice={showNotice}
         onReflectionClose={() => setReflectionOpen(false)}
+        onResetPwClose={() => {
+          setResetPwOpen(false);
+          setLoginOpen(true);
+        }}
+        onResetPwComplete={(notice) => {
+          setResetPwOpen(false);
+          showNotice(notice);
+          setLoginOpen(true);
+        }}
+        onResetPwOpen={() => {
+          setLoginOpen(false);
+          setResetPwOpen(true);
+        }}
         onRewardApples={rewardReflectionApples}
         onSignupClose={() => setSignupOpen(false)}
         onSignupComplete={(notice) => {
