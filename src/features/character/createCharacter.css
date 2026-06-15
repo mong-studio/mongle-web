@@ -289,53 +289,6 @@
   margin-top: 2px;
 }
 
-.ccCardThumbWrap {
-  position: relative;
-}
-
-.ccCardThumb {
-  width: 96px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid var(--cc-border-strong);
-  display: block;
-  box-shadow: 0 4px 10px -5px rgba(120, 90, 40, 0.5);
-}
-
-.ccCardClearBtn {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 23px;
-  height: 23px;
-  border-radius: 50%;
-  border: 2px solid var(--cc-border-strong);
-  background: var(--cc-panel);
-  color: var(--cc-ink-soft);
-  font-size: 11px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  transition: background 0.1s;
-}
-
-.ccCardClearBtn:hover {
-  background: var(--cc-card);
-}
-
-.ccCardFileName {
-  font-family: "Gowun Dodum", sans-serif;
-  font-size: 13px;
-  color: var(--cc-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 160px;
-}
-
 /* ── Name row ── */
 .ccNameRow {
   display: flex;
@@ -399,6 +352,28 @@
   margin-bottom: 11px;
 }
 
+.ccChipLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+
+.ccChipLabelRow .ccChipLabel {
+  margin-bottom: 0;
+}
+
+.ccChipCount {
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  color: var(--cc-ink-soft);
+  background: var(--cc-card);
+  border: 1.5px solid var(--cc-border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  line-height: 1.6;
+}
+
 .ccChips {
   display: flex;
   flex-wrap: wrap;
@@ -424,46 +399,6 @@
 
 .ccChipCheck {
   font-size: 12px;
-}
-
-.ccChipInput {
-  padding: 7px 13px;
-  border-radius: 999px;
-  border: 2px dashed var(--cc-border-active);
-  background: var(--cc-field-bg);
-  color: var(--cc-ink);
-  font-size: 14px;
-  width: 118px;
-  outline: none;
-  font-family: "Gowun Dodum", sans-serif;
-}
-
-.ccChipInput::placeholder {
-  color: #c4b493;
-  opacity: 1;
-}
-
-.ccAddChip {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 14px;
-  border-radius: 999px;
-  font-family: "Jua", sans-serif;
-  font-size: 15px;
-  line-height: 1;
-  cursor: pointer;
-  white-space: nowrap;
-  background: transparent;
-  color: var(--cc-ink-faint);
-  border: 2px dashed var(--cc-border-strong);
-  transition:
-    color 0.14s,
-    border-color 0.14s;
-}
-
-.ccAddChip:hover {
-  color: var(--cc-ink-soft);
-  border-color: var(--cc-border-active);
 }
 
 /* ── Description ── */
@@ -947,6 +882,62 @@
   font-size: 15px;
   color: var(--cc-ink-soft);
   line-height: 1.75;
+}
+
+/* ── Drop zone (idle-upload) ── */
+.ccDropZone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 2.5px dashed var(--cc-border-strong);
+  border-radius: 18px;
+  background: var(--cc-card);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  padding: 32px 20px;
+  min-height: 200px;
+}
+
+.ccDropZone:hover,
+.ccDropZone--active {
+  border-color: var(--cc-border-active);
+  background: var(--cc-card-active);
+}
+
+.ccDropIcon {
+  width: 52px;
+  height: auto;
+  image-rendering: pixelated;
+  opacity: 0.65;
+}
+
+.ccDropTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--cc-ink);
+  text-align: center;
+}
+
+.ccDropSub {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 13px;
+  color: var(--cc-ink-soft);
+  text-align: center;
+}
+
+/* ── Text idle (idle-text) ── */
+.ccTextIdle {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  justify-content: center;
+  padding: 8px 4px;
 }
 
 /* ── Toast ── */
