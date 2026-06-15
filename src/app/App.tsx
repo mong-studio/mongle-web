@@ -102,7 +102,7 @@ export function App() {
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneQuestCount = quests.filter((quest) => quest.done).length;
   const openVillageDialogue = useCallback(() => {
-    setDialogueOpen(true);
+    if (!overlayOpenRef.current) setDialogueOpen(true);
   }, []);
 
   useEffect(() => {
@@ -110,8 +110,6 @@ export function App() {
       if (event.origin !== window.location.origin) {
         return;
       }
-
-      if (overlayOpenRef.current) return;
 
       if (
         event.data?.type === "MONGLE_CHIEF_CLICKED" ||
