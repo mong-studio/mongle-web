@@ -1,0 +1,500 @@
+/* ── Animations ── */
+@keyframes suCardIn {
+  from {
+    transform: scale(0.97) translateY(10px);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes suToastIn {
+  from {
+    transform: translate(-50%, 14px);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
+@keyframes suSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Backdrop ── */
+.suBackdrop {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  background: rgba(54, 42, 22, 0.36);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 26px 18px;
+  z-index: 30;
+  box-sizing: border-box;
+}
+
+/* ── Modal card ── */
+.suModal {
+  position: relative;
+  width: 480px;
+  max-width: 96vw;
+  margin: auto;
+  background: #faf1d8;
+  border: 3px solid #d3a95f;
+  border-radius: 22px;
+  box-shadow:
+    0 28px 64px -24px rgba(60, 42, 18, 0.6),
+    inset 0 0 0 4px #faf1d8,
+    inset 0 0 0 6px #e8d3a2;
+  padding: 22px 28px 20px;
+  animation: suCardIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  box-sizing: border-box;
+  font-family: "Gowun Dodum", sans-serif;
+}
+
+/* ── Close button ── */
+.suClose {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #b7a483;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.suClose:hover {
+  background: #f0e4c4;
+  color: #5e4a30;
+}
+
+/* ── Eyebrow row ── */
+.suEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.suEyebrowText {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: #cc8334;
+  white-space: nowrap;
+}
+.suEyebrowLine {
+  flex: 1;
+  border-top: 2px dashed #e2cc97;
+  margin-right: 46px;
+}
+
+/* ── Title row ── */
+.suTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 6px;
+}
+.suTitle {
+  font-family: "Jua", sans-serif;
+  font-size: 36px;
+  color: #5e4a30;
+  margin: 0;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* ── Subtitle ── */
+.suSubtitle {
+  font-size: 13.5px;
+  color: #9a876a;
+  margin-top: 6px;
+}
+
+/* ── Dashed divider ── */
+.suDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 16px;
+}
+.suDividerLine {
+  flex: 1;
+  border-top: 2px dashed #e2cc97;
+}
+
+/* ── Utility ── */
+.suMirror {
+  transform: scaleX(-1);
+}
+.suSection {
+  margin-top: 14px;
+}
+
+/* ── Section label ── */
+.suLabel {
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  color: #5e4a30;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Inline row (input + button) ── */
+.suInlineRow {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* ── Text inputs ── */
+.suInput {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 13px;
+  border: 2px solid #e7d6ac;
+  background: #fffdf7;
+  color: #5e4a30;
+  font-size: 14px;
+  font-family: "Gowun Dodum", sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+.suInput:focus {
+  border-color: #e29a4c;
+}
+.suInput::placeholder {
+  color: #bfae8a;
+  opacity: 1;
+}
+.suInput--code {
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.suInput--verified,
+.suInput--verified:focus {
+  border-color: #7fb36a;
+}
+.suInput--warn,
+.suInput--warn:focus {
+  border-color: #e0a57e;
+}
+.suInlineRow .suInput {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Small amber button ── */
+.suAmberBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 4px 16px 0;
+  border-radius: 13px;
+  border: 2px solid #b27c3a;
+  background: linear-gradient(180deg, #dbaa69, #ca9148);
+  color: #6e4a1c;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    0 4px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.45);
+  text-shadow: 0 1px 0 rgba(255, 243, 215, 0.5);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+.suAmberBtn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.4);
+}
+.suAmberBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ── */
+.suSpinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #fff;
+  animation: suSpin 0.7s linear infinite;
+  flex: none;
+}
+.suSpinner--lg {
+  width: 18px;
+  height: 18px;
+  border-width: 3px;
+}
+
+/* ── Feedback lines ── */
+.suSuccessLine {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  color: #7fb36a;
+  font-size: 13.5px;
+}
+.suSuccessIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #7fb36a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex: none;
+}
+.suWarnLine {
+  color: #d9785a;
+  font-size: 13px;
+  margin-top: 7px;
+}
+
+/* ── 2-col grid ── */
+.suGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── Select ── */
+.suSelectWrap {
+  position: relative;
+}
+.suSelect {
+  width: 100%;
+  padding: 9px 38px 9px 14px;
+  border-radius: 13px;
+  border: 2px solid #e7d6ac;
+  background: #fffdf7;
+  color: #5e4a30;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 14px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+.suSelect:focus {
+  border-color: #e29a4c;
+}
+.suSelect--placeholder {
+  color: #bfae8a;
+}
+.suSelectCaret {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #9a876a;
+  font-size: 12px;
+}
+
+/* ── Date input ── */
+.suDateWrap {
+  position: relative;
+}
+.suDateInput {
+  color: #bfae8a;
+}
+.suDateInput.filled {
+  color: #5e4a30;
+}
+.suDateInput::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0;
+  width: 44px;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.suDateCaret {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+}
+
+/* ── Agreements box ── */
+.suAgreeBox {
+  margin-top: 16px;
+  border: 2px dashed #e2c58a;
+  border-radius: 16px;
+  background: #fcf6e4;
+  padding: 14px 18px;
+  position: relative;
+}
+.suAgreeCorner {
+  position: absolute;
+}
+.suAgreeCorner--tl {
+  left: 12px;
+  top: -12px;
+  width: 26px;
+  height: 26px;
+}
+.suAgreeCorner--tr {
+  right: 12px;
+  top: -12px;
+  width: 26px;
+  height: 26px;
+  transform: scaleX(-1);
+}
+.suAgreeCorner--bl {
+  left: 12px;
+  bottom: -14px;
+  width: 28px;
+  height: 28px;
+}
+.suAgreeCorner--br {
+  right: 12px;
+  bottom: -14px;
+  width: 28px;
+  height: 28px;
+  transform: scaleX(-1);
+}
+.suAgreeList {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.suAgreeRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+.suCheckbox {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 7px;
+  border: 2px solid #d3a95f;
+  background: #fffdf7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.14s ease;
+}
+.suCheckbox--on {
+  border-color: #cc8334;
+  background: #e29a4c;
+}
+.suCheckmark {
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+}
+.suAgreeLabel {
+  font-size: 15px;
+  color: #5e4a30;
+}
+.suAgreeTag--req {
+  color: #c77a4e;
+}
+.suAgreeTag--opt {
+  color: #b7a483;
+}
+
+/* ── Submit button ── */
+.suSubmitBtn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px 11px 9px;
+  border: 2px solid #b27c3a;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #dba85f, #c98c3d);
+  color: #6e4a1c;
+  font-family: "Jua", sans-serif;
+  font-size: 19px;
+  line-height: 1;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 #b27c3a,
+    0 13px 20px -8px rgba(190, 130, 40, 0.5),
+    inset 0 2px 0 rgba(255, 248, 225, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+  box-sizing: border-box;
+}
+.suSubmitBtn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 #b27c3a,
+    0 6px 10px -6px rgba(190, 130, 40, 0.5),
+    inset 0 2px 0 rgba(255, 248, 225, 0.45);
+}
+.suSubmitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.suSubmitLabel {
+  text-shadow: 0 1px 0 rgba(255, 243, 215, 0.5);
+  white-space: nowrap;
+}
+
+/* ── Toast ── */
+.suToast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fffdf6;
+  border: 2.5px solid #d3a95f;
+  border-radius: 16px;
+  padding: 13px 24px;
+  box-shadow: 0 16px 36px -14px rgba(60, 42, 18, 0.55);
+  animation: suToastIn 0.4s ease both;
+  font-family: "Jua", sans-serif;
+  font-size: 16px;
+  color: #5e4a30;
+  white-space: nowrap;
+}
+.suToastFlower {
+  color: #e29a4c;
+}

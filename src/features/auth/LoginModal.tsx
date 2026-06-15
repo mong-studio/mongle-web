@@ -7,9 +7,10 @@ type LoginModalProps = {
   open: boolean;
   onClose: () => void;
   onSwitchToSignup: () => void;
+  onResetPw: () => void;
 };
 
-export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps) {
+export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: LoginModalProps) {
   const login = useAuthStore((state: AuthState) => state.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -162,7 +163,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
               setEmailError("");
             }}
             onKeyDown={onKey}
-            autoComplete="email"
+            autoComplete="off"
           />
           {emailError && <span className="lgFieldError">{emailError}</span>}
         </div>
@@ -192,7 +193,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={onKey}
-            autoComplete="current-password"
+            autoComplete="off"
           />
           <button
             type="button"
@@ -217,11 +218,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
               회원가입
             </button>
             <span className="lgLinkSep">|</span>
-            <button
-              type="button"
-              className="lgLinkBtn"
-              onClick={() => showToast("비밀번호 찾기로 이동해요")}
-            >
+            <button type="button" className="lgLinkBtn" onClick={onResetPw}>
               비밀번호 찾기
             </button>
           </div>
@@ -262,6 +259,10 @@ export function LoginModal({ open, onClose, onSwitchToSignup }: LoginModalProps)
           <span className="lgFooterText">작은 습관이 몽글한 하루를 만들어요</span>
           <span>✿</span>
         </div>
+
+        <button type="button" className="lgClose" onClick={onClose} aria-label="닫기">
+          ✕
+        </button>
       </div>
 
       {toast && (

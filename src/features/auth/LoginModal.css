@@ -94,6 +94,32 @@
   font-family: "Gowun Dodum", sans-serif;
 }
 
+/* ── Close button ── */
+.lgClose {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #b7a483;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.lgClose:hover {
+  background: #f0e4c4;
+  color: #5e4a30;
+}
+
 /* ── Header ── */
 .lgHeader {
   display: flex;

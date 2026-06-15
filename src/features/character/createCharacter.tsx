@@ -83,11 +83,14 @@ export function CharacterModal({
   const [mode, setMode] = useState<"upload" | "text">("upload");
   const [nameError, setNameError] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [loadToastHidden, setLoadToastHidden] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const dragCounter = useRef(0);
   const wasBusyRef = useRef(false);
+  const characterNameRef = useRef(characterName);
+  characterNameRef.current = characterName;
+  const characterPersonaRef = useRef(characterPersona);
+  characterPersonaRef.current = characterPersona;
 
   const phase: "result" | "uploaded" | "generating" | "idle-upload" | "idle-text" = isBusy
     ? "generating"
@@ -104,7 +107,6 @@ export function CharacterModal({
       wasBusyRef.current = true;
       setShowResult(false);
       setProgress(0);
-      setLoadToastHidden(false);
       const iv = setInterval(() => {
         setProgress((p) => Math.min(Math.round(p + 3 + Math.random() * 5), 95));
       }, 90);
@@ -112,10 +114,9 @@ export function CharacterModal({
     }
     if (wasBusyRef.current) {
       wasBusyRef.current = false;
-      setShowResult(true);
+      if (!characterNameRef.current && !characterPersonaRef.current) setShowResult(true);
     }
     setProgress(0);
-    setLoadToastHidden(false);
   }, [isBusy]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
@@ -519,25 +520,6 @@ export function CharacterModal({
           </div>
         </div>
       </div>
-
-      {/* 로딩 토스트 */}
-      {phase === "generating" && !loadToastHidden && (
-        <div className="ccToast">
-          <img src="/assets/character/house.png" alt="" className="ccToastIcon" />
-          <div>
-            <div className="ccToastTitle">주민 입주 준비 중!</div>
-            <div className="ccToastBody">
-              멋진 주민이 태어나고 있어요!
-              <br />
-              조금만 기다려주세요!
-            </div>
-          </div>
-          <button type="button" className="ccToastClose" onClick={() => setLoadToastHidden(true)}>
-            ✕
-          </button>
-          <span className="ccToastStar">✦</span>
-        </div>
-      )}
     </div>
   );
 }
