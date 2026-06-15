@@ -40,8 +40,8 @@ describe("openConsultationMail", () => {
   it("includes a decoded subject and body", () => {
     openConsultationMail();
     const params = new URLSearchParams(new URL(assigned).search);
-    expect(params.get("subject")).toBe("[몽글마을] 일정 상담 문의");
-    expect(params.get("body")).toContain("일정 상담을 요청드려요");
+    expect(params.get("subject")).toBe("[몽글마을] 문의 사항");
+    expect(params.get("body")).toContain("문의드릴 내용이 있어요");
   });
 
   it("targets exactly the team support inbox", () => {
