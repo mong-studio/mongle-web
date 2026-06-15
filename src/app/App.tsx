@@ -6,7 +6,6 @@ import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import { CalendarBulletinBoard } from "../features/calendar/CalendarBulletinBoard.js";
 import { CalendarModal } from "../features/calendar/CalendarModal.js";
 import { CharacterModal } from "../features/character/createCharacter.js";
-import { ServerError } from "../features/error/ServerError.js";
 import { FeedModal } from "../features/feed/FeedModal.js";
 import { MyPageWrapper } from "../features/my-page/MyPageWrapper.js";
 import { PlannerChat } from "../features/planner-chat/plannerChat.js";
@@ -65,7 +64,6 @@ export function App() {
   const [sourceImagePreview, setSourceImagePreview] = useState("");
   const [notice, setNotice] = useState("오늘의 사과 보상은 20개까지 받을 수 있어요.");
   const [isBusy, setIsBusy] = useState(false);
-  const [characterError, setCharacterError] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
   const [signupOpen, setSignupOpen] = useState(false);
   const [resetPwOpen, setResetPwOpen] = useState(false);
@@ -221,8 +219,9 @@ export function App() {
       }));
       setCharacterSetupOpen(false);
       setActiveFeature(null);
-    } catch {
-      setCharacterError(true);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "원인 미상";
+      setNotice(`새 친구를 마을에 데려오지 못했어요. ${message}`);
     } finally {
       setIsBusy(false);
     }
@@ -550,16 +549,6 @@ export function App() {
           setLoginOpen(true);
         }}
       />
-
-      {characterError && (
-        <ServerError
-          onRetry={() => {
-            setCharacterError(false);
-            createCharacter();
-          }}
-          onGoHome={() => setCharacterError(false)}
-        />
-      )}
 
       {characterSetupOpen ? (
         <div className="modalBackdrop" role="presentation">
