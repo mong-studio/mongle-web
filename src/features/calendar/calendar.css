@@ -1,5 +1,5 @@
 /* ───────────────────────────────────── */
-/* CALENDAR WINDOW  (new design)          */
+/* CALENDAR WINDOW         */
 /* ───────────────────────────────────── */
 
 @import url("https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap");
@@ -397,4 +397,35 @@
     transform: none;
     animation: none;
   }
+}
+
+/* ── Themed scrollbar ───────────────────────────────── */
+
+.calScroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-soft) transparent;
+}
+.calScroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.calScroll::-webkit-scrollbar-track {
+  background: transparent;
+  /* 위·아래 여백을 둬 스크롤 손잡이가 모서리에 겹치지 않고 살짝 떠 있게 한다 */
+  margin: 8px 0;
+}
+.calScroll::-webkit-scrollbar-thumb {
+  background: var(--line-soft);
+  border-radius: 999px;
+  /* 트랙과 간격을 둬 알약 모양 손잡이가 떠 있는 느낌 */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.calScroll::-webkit-scrollbar-thumb:hover {
+  background: var(--line);
+  background-clip: padding-box;
+}
+.calScroll::-webkit-scrollbar-thumb:active {
+  background: var(--line-deep);
+  background-clip: padding-box;
 }
