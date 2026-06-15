@@ -91,6 +91,33 @@ export async function signup(payload: SignupPayload): Promise<SignupResponse> {
   return data;
 }
 
+export async function requestPasswordResetCode(email: string): Promise<void> {
+  await apiClient.post("/auth/email-verification", { email, purpose: "PASSWORD_RESET" });
+}
+
+export async function confirmPasswordResetCode(
+  email: string,
+  code: string,
+): Promise<{ verification_token: string }> {
+  const { data } = await apiClient.post<{ verification_token: string }>(
+    "/auth/email-verification/confirm",
+    { email, purpose: "PASSWORD_RESET", code },
+  );
+  return data;
+}
+
+export async function resetPassword(
+  email: string,
+  newPassword: string,
+  verificationToken: string,
+): Promise<void> {
+  await apiClient.post("/auth/password-reset", {
+    email,
+    new_password: newPassword,
+    verification_token: verificationToken,
+  });
+}
+
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 올바르지 않아요.",
   VALIDATION_ERROR: "입력값을 다시 확인해 주세요.",

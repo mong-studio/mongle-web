@@ -1,4 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LoginModal } from "../features/auth/LoginModal.js";
+import { ResetPasswordModal } from "../features/auth/ResetPasswordModal.js";
+import { SignupModal } from "../features/auth/SignupModal.js";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
@@ -78,6 +81,7 @@ export function App() {
   const [isBusy, setIsBusy] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
   const [signupOpen, setSignupOpen] = useState(false);
+  const [resetPwOpen, setResetPwOpen] = useState(false);
   const [showMyPage, setShowMyPage] = useState(false);
   const authStatus = useAuthStore((state: AuthState) => state.status);
   const authUser = useAuthStore((state: AuthState) => state.user);
@@ -87,6 +91,17 @@ export function App() {
   const [feedOpen, setFeedOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
   const [reflectionOpen, setReflectionOpen] = useState(false);
+
+  const overlayOpenRef = useRef(false);
+  overlayOpenRef.current =
+    loginOpen ||
+    signupOpen ||
+    resetPwOpen ||
+    showMyPage ||
+    characterSetupOpen ||
+    calendarOpen ||
+    feedOpen ||
+    activeFeature !== null;
 
   useEffect(() => {
     void useAuthStore.getState().restoreSession();
@@ -162,7 +177,7 @@ export function App() {
   }, [resetCharacterDraft]);
 
   const openVillageDialogue = useCallback(() => {
-    setDialogueOpen(true);
+    if (!overlayOpenRef.current) setDialogueOpen(true);
   }, []);
 
   const openVillageBoard = useCallback(() => {
@@ -211,7 +226,7 @@ export function App() {
         event.data?.type === "MONGLE_CHIEF_CLICKED" ||
         event.data?.type === "MONGLE_CHIEF_HOUSE_CLICKED"
       ) {
-        setDialogueOpen(true);
+        if (!overlayOpenRef.current) setDialogueOpen(true);
       }
 
       if (event.data?.type === "MONGLE_FEATURE_SELECTED") {
