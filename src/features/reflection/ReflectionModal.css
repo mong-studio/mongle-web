@@ -64,6 +64,8 @@ body ::-webkit-scrollbar {
 
 .reflectionIcon-sprout {
   width: clamp(20px, 2.1vw, 38px);
+  height: clamp(19px, 2.03vw, 37px);
+  aspect-ratio: 728 / 705;
 }
 
 .reflectionBookClose {
@@ -187,7 +189,7 @@ body ::-webkit-scrollbar {
   margin: 0;
   color: #4b3323;
   letter-spacing: 0;
-  font-size: clamp(1.3rem, 2.3vw, 2.5rem);
+  font-size: clamp(1.3rem, 2vw, 2.3rem);
   line-height: 1.08;
   white-space: nowrap;
 }
@@ -273,7 +275,7 @@ body ::-webkit-scrollbar {
   gap: 0.8em;
   margin: 0;
   font-size: clamp(0.7rem, 1vw, 1.18rem);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .reflectionTodoHead span:first-child {
@@ -297,7 +299,8 @@ body ::-webkit-scrollbar {
   grid-template-columns: 7% minmax(0, 1fr) 15%;
   align-items: center;
   border-bottom: 1px dashed rgba(219, 174, 111, 0.52);
-  column-gap: 4%;
+  column-gap: 3%;
+  padding: 0.5em 0;
 }
 
 .reflectionTodoList li:last-child {
@@ -309,7 +312,7 @@ body ::-webkit-scrollbar {
   aspect-ratio: 1;
   display: grid;
   place-items: center;
-  border: 2px solid #744629;
+  border: 2px solid #d79d79;
   border-radius: 5px;
   background: rgba(255, 252, 239, 0.75);
   color: #fff7dd;
@@ -330,7 +333,7 @@ body ::-webkit-scrollbar {
 
 .reflectionTodoList em {
   display: grid;
-  min-height: 2.2em;
+  min-height: 2em;
   place-items: center;
   border: 1px solid #eda75c;
   border-radius: 8px;
@@ -338,7 +341,7 @@ body ::-webkit-scrollbar {
   color: #e45a24;
   font-size: clamp(0.66rem, 0.95vw, 1.05rem);
   font-style: normal;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .reflectionTodoList em.isDone {
@@ -388,7 +391,7 @@ body ::-webkit-scrollbar {
 
 .reflectionRewardCard > div {
   display: grid;
-  grid-template-columns: 12% minmax(0, 1fr) 16%;
+  grid-template-columns: 11% minmax(0, 1fr) 17.8%;
   align-items: center;
   height: 50%;
   padding: 0 4%;
@@ -443,68 +446,108 @@ body ::-webkit-scrollbar {
 
 .reflectionEditGuideCard {
   position: absolute;
-  top: 29%;
+  top: 23.5%;
   left: 0;
   width: 100%;
-  height: 38%;
+  height: 65%;
   display: grid;
-  grid-template-columns: 18% minmax(0, 1fr) 19%;
-  grid-template-rows: auto auto 1fr;
+  grid-template-columns: 20% minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-content: start;
   align-items: center;
-  gap: 3%;
-  padding: 6% 6%;
+  column-gap: 5%;
+  overflow: hidden;
+  padding: 7% 7% 5.5%;
   border: 1.8px solid rgba(222, 174, 105, 0.68);
   border-radius: 15px;
-  background: rgba(255, 238, 212, 0.46);
+  background: rgba(255, 247, 224, 0.28);
   box-shadow: inset 0 0 0 1px rgba(255, 250, 232, 0.58);
 }
 
 .reflectionEditGuideCard > .reflectionIcon-edit {
-  grid-row: 1 / 4;
-  align-self: start;
+  grid-row: 1;
   justify-self: center;
-  width: clamp(36px, 4vw, 66px);
+  width: clamp(46px, 4.8vw, 78px);
 }
 
-.reflectionEditGuideCard h3 {
+.reflectionEditGuideCopy {
+  display: grid;
+  gap: 0.42em;
+}
+
+.reflectionEditGuideCopy h3 {
   margin: 0;
   color: #4b3323;
-  font-size: clamp(1rem, 1.45vw, 1.45rem);
+  font-size: clamp(1.12rem, 1.72vw, 1.88rem);
 }
 
-.reflectionEditGuideCard p {
+.reflectionEditGuideCopy p {
   margin: 0;
   color: #4c321f;
   font-family: "NanumSquareRoundBold", sans-serif;
-  font-size: clamp(0.72rem, 1.05vw, 1.05rem);
+  font-size: clamp(0.76rem, 1vw, 1.08rem);
   font-weight: 900;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
-.reflectionEditGuideCard div {
-  grid-column: 3;
-  grid-row: 1 / 3;
-  display: inline-flex;
+.reflectionEditCostRows {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.58em;
+  align-self: stretch;
+  align-content: center;
+  margin-top: 5.5%;
+  padding: 4.5% 3% 5%;
+  border-top: 2px dashed rgba(225, 183, 124, 0.5);
+  border-bottom: 1.5px solid rgba(210, 162, 101, 0.55);
+}
+
+.reflectionEditCostRows div {
+  display: grid;
+  grid-template-columns: 16% minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: center;
-  gap: 0.25em;
+  gap: 3%;
   color: #4c321f;
 }
 
-.reflectionEditGuideCard div .reflectionIcon-apple {
-  width: clamp(24px, 2.4vw, 42px);
+.reflectionEditCostRows div:last-child {
+  grid-template-columns: 16% minmax(0, 1fr) auto;
 }
 
-.reflectionEditGuideCard div strong {
-  font-size: clamp(1.05rem, 1.85vw, 1.9rem);
+.reflectionEditCostRows div:last-child::before {
+  content: "";
+}
+
+.reflectionEditCostRows .reflectionIcon-apple {
+  width: clamp(24px, 2.35vw, 40px);
+  justify-self: center;
+}
+
+.reflectionEditCostLabel {
+  font-family: "NanumSquareRoundBold", sans-serif;
+  font-size: clamp(0.74rem, 0.98vw, 1.06rem);
+  font-weight: 900;
+}
+
+.reflectionEditCostRows strong {
+  font-size: clamp(0.88rem, 1.28vw, 1.34rem);
+  white-space: nowrap;
+}
+
+.reflectionEditCostRows div:last-child strong {
+  color: #d7503d;
 }
 
 .reflectionEditGuideCard small {
-  grid-column: 2 / 4;
-  color: #9b6a3a;
+  grid-column: 1 / -1;
+  align-self: end;
+  justify-self: center;
+  margin-top: 3.5%;
+  color: #5f422b;
   font-family: "NanumSquareRoundBold", sans-serif;
-  font-size: clamp(0.62rem, 0.82vw, 0.9rem);
+  font-size: clamp(0.72rem, 0.94vw, 1.02rem);
   font-weight: 900;
+  text-align: center;
 }
 
 .reflectionEssayCard {
@@ -522,6 +565,28 @@ body ::-webkit-scrollbar {
 
 .reflectionEssayRegret {
   bottom: 0;
+}
+
+.reflectionEditRightPage {
+  top: 13%;
+  height: 68%;
+}
+
+.reflectionEditRightPage .reflectionEssayCard {
+  height: 48%;
+  padding: 3.8% 4.2%;
+}
+
+.reflectionEditRightPage .reflectionEssayGood {
+  top: 0;
+}
+
+.reflectionEditRightPage .reflectionEssayRegret {
+  bottom: 0;
+}
+
+.reflectionEditLeftPage .reflectionTitle {
+  top: 1.2%;
 }
 
 .reflectionEssayHeader {
@@ -548,6 +613,10 @@ body ::-webkit-scrollbar {
   min-height: 0;
 }
 
+.reflectionEditRightPage .reflectionField {
+  height: calc(100% - 2.65rem);
+}
+
 .reflectionFieldMeta {
   display: grid;
   min-width: 12.5em;
@@ -556,7 +625,6 @@ body ::-webkit-scrollbar {
   justify-content: flex-end;
   gap: 0.14em;
   color: #a37143;
-  font-family: "NanumSquareRoundBold", sans-serif;
   font-size: clamp(0.68rem, 0.8vw, 0.9rem);
   font-weight: 800;
 }
@@ -724,7 +792,6 @@ body ::-webkit-scrollbar {
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(255, 248, 224, 0.96), rgba(244, 217, 174, 0.92));
   color: #8a5528;
-  font-family: "NanumSquareRoundExtraBold", "NanumSquareRoundBold", sans-serif;
   font-size: clamp(0.58rem, 0.72vw, 0.78rem);
   font-weight: 900;
   line-height: 1;
@@ -855,7 +922,6 @@ body ::-webkit-scrollbar {
 .reflectionEmptyHistory p {
   margin: 0;
   color: #6c4a31;
-  font-family: "NanumSquareRoundBold", "Apple SD Gothic Neo", sans-serif;
   font-size: clamp(0.82rem, 1.08vw, 1.18rem);
   font-weight: 800;
 }
@@ -865,7 +931,6 @@ body ::-webkit-scrollbar {
   min-height: 1.2em;
   margin: 0;
   color: #c2412d;
-  font-family: "NanumSquareRoundBold", sans-serif;
   font-size: clamp(0.58rem, 0.72vw, 0.82rem);
   font-weight: 900;
   line-height: 1.2;
@@ -929,7 +994,6 @@ body ::-webkit-scrollbar {
   padding-top: clamp(12px, 1.3vw, 18px);
   border-top: 2px dashed rgba(225, 183, 124, 0.55);
   color: #4c321f;
-  font-family: "NanumSquareRoundBold", sans-serif;
   font-size: clamp(0.92rem, 1.2vw, 1.35rem);
   font-weight: 900;
   line-height: 1.45;
@@ -961,7 +1025,6 @@ body ::-webkit-scrollbar {
 
 .reflectionEditConfirm small {
   color: #6d4a31;
-  font-family: "NanumSquareRoundBold", sans-serif;
   font-size: clamp(0.82rem, 1.05vw, 1.16rem);
   font-weight: 900;
 }
@@ -972,7 +1035,6 @@ body ::-webkit-scrollbar {
   padding: 0;
   border-top: 0;
   color: #c2412d;
-  font-family: "NanumSquareRoundExtraBold", "NanumSquareRoundBold", sans-serif;
   font-size: clamp(0.76rem, 0.95vw, 1.05rem);
   font-weight: 900;
   line-height: 1.25;
@@ -993,7 +1055,6 @@ body ::-webkit-scrollbar {
   border-radius: 16px;
   background: linear-gradient(180deg, #fff8df, #f2d4a3);
   color: #7b512a;
-  font-family: "NanumSquareRoundExtraBold", "NanumSquareRoundBold", sans-serif;
   font-size: clamp(1.05rem, 1.6vw, 1.85rem);
   font-weight: 900;
   box-shadow:
@@ -1043,16 +1104,16 @@ body ::-webkit-scrollbar {
 }
 
 .reflectionPrimaryButton {
-  width: 90%;
-  min-height: clamp(38px, 3.5vw, 66px);
+  width: 88%;
+  min-height: clamp(38px, 3.1vw, 66px);
   border: 2px solid #945a25;
   border-radius: 14px;
-  background: linear-gradient(180deg, #efa957 0%, #cf782d 100%);
   color: #fff6d4;
   font-size: clamp(1.1rem, 1.8vw, 2.15rem);
   font-weight: 900;
   line-height: 1;
   text-shadow: 0 0 1px #884b1f;
+  background: linear-gradient(180deg, #efa957 0%, #cf782d 100%);
   box-shadow:
     inset 0 2.5px 0.5px 0 rgba(255, 231, 172, 0.72),
     inset 0 -2.5px 0 0 rgba(154, 103, 50, 0.32),
@@ -1068,12 +1129,62 @@ body ::-webkit-scrollbar {
 .reflectionActions p {
   margin: 0;
   color: #7f5832;
-  font-family: "NanumSquareRoundBold", sans-serif;
   font-size: clamp(0.52rem, 0.64vw, 0.75rem);
   font-weight: 900;
   line-height: 1.28;
   text-align: center;
   white-space: nowrap;
+}
+
+.reflectionEditActions {
+  position: absolute;
+  z-index: 3;
+  right: 11%;
+  bottom: 7.5%;
+  width: 33.5%;
+  display: grid;
+  grid-template-columns: 0.9fr 1.85fr;
+  gap: 5%;
+}
+
+.reflectionSecondaryButton,
+.reflectionEditSaveButton {
+  min-height: clamp(38px, 3.35vw, 58px);
+  border-radius: 14px;
+  font-size: clamp(0.82rem, 1.24vw, 1.38rem);
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    box-shadow 140ms ease,
+    filter 140ms ease,
+    transform 120ms ease;
+}
+
+.reflectionSecondaryButton {
+  border: 2px solid rgba(192, 139, 78, 0.68);
+  color: #8a5528;
+  background: #f7e6c288;
+  box-shadow:
+    inset 0 -2px 0 0 rgba(224, 188, 131, 0.596),
+    inset 0 2px 0 rgba(255, 255, 246, 0.9),
+    0 2px 0 0 rgba(154, 103, 50, 0.22),
+    0 0 3px 0 rgba(98, 61, 27, 0.18);
+}
+
+.reflectionEditSaveButton {
+  width: 60%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  padding: 0 0.8em;
+  white-space: nowrap;
+}
+
+.reflectionEditSaveButton .reflectionIcon-apple {
+  width: clamp(20px, 2vw, 36px);
 }
 
 .reflectionEditButton {
@@ -1085,19 +1196,19 @@ body ::-webkit-scrollbar {
   padding: 0 1.35em;
   border: 2px solid #8c5627;
   border-radius: 14px;
-  background: linear-gradient(180deg, #efa957 0%, #cf782d 100%);
   color: #fff7df;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35em;
-  font-family: "NanumSquareRoundExtraBold", sans-serif;
   font-size: clamp(0.8rem, 1.25vw, 1.28rem);
   font-weight: 900;
   text-shadow: 0 1px 0 #884b1f;
+  background: linear-gradient(180deg, #efa957 0%, #cf782d 100%);
   box-shadow:
-    inset 0 2px 0 rgba(255, 231, 172, 0.72),
-    0 3px 0 rgba(117, 73, 31, 0.25);
+    inset 0 2.5px 0.5px 0 rgba(255, 231, 172, 0.72),
+    inset 0 -2.5px 0 0 rgba(154, 103, 50, 0.32),
+    0 2.5px 0 rgba(117, 73, 31, 0.28);
   cursor: pointer;
   transition:
     background 140ms ease,
@@ -1121,9 +1232,9 @@ body ::-webkit-scrollbar {
   justify-content: center;
   border: 2px solid #bb8046a9;
   border-radius: 13px;
-  background: #f7e6c288;
   color: #9a6732;
   line-height: 1;
+  background: #f7e6c288;
   box-shadow:
     inset 0 -2px 0 0 rgba(224, 188, 131, 0.596),
     inset 0 2px 0 rgba(255, 255, 246, 0.9),

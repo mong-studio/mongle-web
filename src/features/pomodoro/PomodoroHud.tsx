@@ -150,7 +150,7 @@ export function PomodoroHud() {
           <div className="pmMain">
             <div className="pmImageWrap">
               <div className="pmImageGlow pmImageGlow--sun" />
-              <span className="pmEmoji">☀️</span>
+              <img src="/assets/hud/icon-sun.png" alt="" className="pmEmoji pmEmoji--sun" />
               <span className="pmPetal">✿</span>
             </div>
             <div className="pmTime pmTime--focus">{fmt(remaining)}</div>
@@ -177,7 +177,7 @@ export function PomodoroHud() {
               onClick={switchMode}
               disabled={running}
             >
-              <img src="/assets/character/ic-apple.png" alt="" className="pmActionIcon" />
+              <img src="/assets/hud/icon-apple.png" alt="" className="pmActionIcon" />
               집중
             </button>
             <button
@@ -206,7 +206,7 @@ export function PomodoroHud() {
           <div className="pmMain">
             <div className="pmImageWrap">
               <div className="pmImageGlow pmImageGlow--moon" />
-              <span className="pmEmoji pmEmoji--moon">🌙</span>
+              <img src="/assets/hud/moon.png" alt="" className="pmEmoji pmEmoji--moon" />
               <div className="pmMoonShadow pmMoonShadow--l" />
               <div className="pmMoonShadow pmMoonShadow--r" />
             </div>
