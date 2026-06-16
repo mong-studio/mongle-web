@@ -266,11 +266,11 @@ button {
 @keyframes noticeToastIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -12px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translateY(0);
   }
 }
 
@@ -288,8 +288,8 @@ button {
 .noticeToast {
   position: fixed;
   z-index: 45;
-  top: 26px;
-  left: 50%;
+  bottom: 32px;
+  right: 32px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -303,7 +303,6 @@ button {
   font-family: "Jua", sans-serif;
   font-size: 16px;
   line-height: 1.3;
-  transform: translateX(-50%);
   animation: noticeToastIn 0.4s ease both;
   pointer-events: none;
 }

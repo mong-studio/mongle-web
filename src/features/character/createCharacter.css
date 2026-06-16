@@ -873,6 +873,12 @@
   background: var(--cc-card-active);
 }
 
+.ccDropZone--error {
+  border-color: #d9785a;
+  background: #fdf0ec;
+  animation: ccShake 0.4s;
+}
+
 .ccDropIcon {
   width: 52px;
   height: auto;

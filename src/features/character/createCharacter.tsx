@@ -51,6 +51,7 @@ type Props = {
   onNameChange: (value: string) => void;
   onPersonaChange: (value: string) => void;
   onToggleKeyword: (keyword: string) => void;
+  onNotice: (message: string) => void;
   onSubmit: () => void;
   onClose: () => void;
 };
@@ -68,6 +69,7 @@ export function CharacterModal({
   onNameChange,
   onPersonaChange,
   onToggleKeyword,
+  onNotice,
   onSubmit,
   onClose,
 }: Props) {
@@ -76,6 +78,7 @@ export function CharacterModal({
 
   const [mode, setMode] = useState<"upload" | "text">("upload");
   const [nameError, setNameError] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [activeApple, setActiveApple] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -134,6 +137,12 @@ export function CharacterModal({
 
   function handleGenerate() {
     if (isBusy) return;
+    if (mode === "upload" && !sourceImagePreview) {
+      setImageError(true);
+      setTimeout(() => setImageError(false), 1500);
+      onNotice("이미지를 먼저 업로드해주세요.");
+      return;
+    }
     if (!characterName.trim()) {
       setNameError(true);
       setTimeout(() => setNameError(false), 1500);
@@ -370,7 +379,7 @@ export function CharacterModal({
               // biome-ignore lint/a11y/noStaticElementInteractions: 드롭존은 클릭/드래그로 동작
               // biome-ignore lint/a11y/useKeyWithClickEvents: 드롭존은 키보드 대신 클릭/드래그로 동작
               <div
-                className={`ccDropZone${dragOver ? " ccDropZone--active" : ""}`}
+                className={`ccDropZone${dragOver ? " ccDropZone--active" : ""}${imageError ? " ccDropZone--error" : ""}`}
                 onClick={() => fileInputRef.current?.click()}
                 onDragEnter={(e) => {
                   e.preventDefault();

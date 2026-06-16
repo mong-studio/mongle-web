@@ -185,6 +185,7 @@ export function AppModalLayer({
               onNameChange={onCharacterNameChange}
               onPersonaChange={onCharacterPersonaChange}
               onToggleKeyword={onToggleKeyword}
+              onNotice={onNotice}
               onSubmit={onCharacterSubmit}
               onClose={onCharacterSetupClose}
             />
