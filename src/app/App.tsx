@@ -6,6 +6,9 @@ import {
   resumePendingCharacter,
 } from "../features/character/api.js";
 import { hasPendingJob } from "../features/character/pendingJob.js";
+import { NotificationPanel } from "../features/notification/NotificationPanel.js";
+import { NotificationToastLayer } from "../features/notification/NotificationToast.js";
+import { useNotificationStore } from "../features/notification/store.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
@@ -104,6 +107,9 @@ export function App() {
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
   const [reflectionOpen, setReflectionOpen] = useState(false);
   const [lastCreatedResident, setLastCreatedResident] = useState<Resident | null>(null);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const pushToast = useNotificationStore((s) => s.pushToast);
+  const notifHistory = useNotificationStore((s) => s.history);
 
   const overlayOpenRef = useRef(false);
   overlayOpenRef.current =
@@ -409,7 +415,12 @@ export function App() {
         avatarUrl: resolveAvatarUrl(result.genImgUrl),
       };
       setResidents((current) => [...current, resident].slice(0, 10));
-      showNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
+      pushToast({
+        type: "resident",
+        title: "새 주민이 몽글마을에 입주했어요!",
+        body: `${resident.name}가 이장님 집으로 왔어요.`,
+        avatarUrl: resident.avatarUrl,
+      });
       setVillageVersion((current) => current + 1);
       resetCharacterDraft();
       setLastCreatedResident(resident);
@@ -456,7 +467,12 @@ export function App() {
       current.map((todo) => (todo.id === todoId ? { ...todo, status: "done" } : todo)),
     );
     setApples((current) => Math.min(MAX_DAILY_APPLES, current + 1));
-    showNotice(`${targetTodo.title} 완료! 사과 1개를 받았어요.`);
+    pushToast({
+      type: "reward",
+      title: `${targetTodo.title} 완료!`,
+      body: "사과를 보상으로 받았어요.",
+      rewardApples: 1,
+    });
   }
 
   function rewardReflectionApples(amount: number) {
@@ -496,8 +512,11 @@ export function App() {
 
       <HudButtonGroup
         onOpenDiary={() => setReflectionOpen(true)}
-        onOpenNotifications={() => showNotice("아직 확인할 새 알림이 없어요.")}
+        onOpenNotifications={() => setNotificationOpen((prev) => !prev)}
         onOpenPhone={() => setFeedOpen(true)}
+        unreadNotificationCount={
+          notifHistory.length > 0 && !notificationOpen ? notifHistory.length : undefined
+        }
       />
 
       <VillageDialogue
@@ -598,6 +617,10 @@ export function App() {
         }}
         onToggleKeyword={toggleKeywordCategory}
       />
+
+      <NotificationPanel open={notificationOpen} onClose={() => setNotificationOpen(false)} />
+
+      <NotificationToastLayer />
 
       <PomodoroHud />
     </main>

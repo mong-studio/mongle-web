@@ -1,0 +1,527 @@
+/* ══════════════════════════════════════════════════════════════
+   notification.css
+   두 가지 UI를 담당합니다:
+     1. NotificationToast  — 화면 우하단에 뜨는 크림색 카드 토스트
+     2. NotificationPanel  — 벨(알림) 버튼 누르면 나타나는 알림 목록 패널
+   ══════════════════════════════════════════════════════════════ */
+
+/* ┌─────────────────────────────────────────┐
+   │  1. TOAST — 화면 우하단 슬라이드 알림 카드  │
+   └─────────────────────────────────────────┘ */
+
+/* 토스트가 쌓이는 컨테이너.
+   pointer-events:none 으로 기본은 클릭 통과,
+   카드(.notifToastCard)에만 pointer-events:all 다시 켬 */
+.notifToastLayer {
+  position: fixed;
+  z-index: 46; /* HUD(z:8) · 패널(z:40) 위 */
+  bottom: 28px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+/* 크림색 그라데이션 카드
+   디자인 컬러: 배경 #fef8ea→#fcf2db, 테두리 #d8b277 */
+.notifToastCard {
+  position: relative;
+  width: min(320px, calc(100vw - 32px)); /* 화면 작아지면 꽉 참 */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px 10px 8px;
+  background: linear-gradient(180deg, #fef8ea 0%, #fcf2db 100%);
+  border: 3px solid #d8b277;
+  border-radius: 18px;
+  box-shadow:
+    0 10px 22px rgba(157, 116, 62, 0.2),
+    0 2px 0 rgba(157, 116, 62, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  pointer-events: all;
+}
+
+/* 캐릭터 아바타 — 픽셀아트이므로 image-rendering:pixelated */
+.notifToastAvatar {
+  width: 62px;
+  height: 62px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+/* 제목 + 본문 영역.
+   padding-right:44px 은 우상단 고정 메타(.notifToastMeta)가 겹치지 않게 */
+.notifToastBody {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px 44px 2px 4px;
+}
+
+/* 보상 배지가 있을 때는 배지가 메타와의 간격을 확보하므로 패딩 불필요 */
+.notifToastBodyReward {
+  padding-right: 4px;
+}
+
+/* 제목 — Jua 폰트, 한 줄 ellipsis */
+.notifToastTitle {
+  margin: 0;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  line-height: 1.3;
+  color: #5a4632;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 본문 부제 */
+.notifToastSub {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #ab9880;
+}
+
+/* 사과 보상 배지 (type:"reward" 일 때만 렌더링) */
+.notifToastReward {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 12px;
+}
+
+.notifToastApple {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* 보상 개수 (+1 등) — 강조색 #e0694e */
+.notifToastRewardCount {
+  font-family: "Jua", sans-serif;
+  font-size: 18px;
+  color: #e0694e;
+  transform: translateY(1px); /* 세로 광학 정렬 */
+  display: inline-block;
+}
+
+/* 우상단 고정: 경과시간 + 닫기(✕) 버튼 */
+.notifToastMeta {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notifToastTime {
+  font-size: 10px;
+  font-weight: 500;
+  color: #bca887;
+  white-space: nowrap;
+}
+
+.notifToastClose {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px;
+  font-size: 13px;
+  line-height: 1;
+  color: #b29c7e;
+  box-shadow: none;
+  min-height: unset;
+}
+
+.notifToastClose:hover {
+  color: #8a7457;
+}
+
+/* ┌───────────────────────────────────────────────────────────┐
+   │  2. NOTIFICATION PANEL — 벨 버튼 누르면 열리는 알림 목록    │
+   │                                                           │
+   │  ■ 위치 원칙                                               │
+   │    패널은 HudTodoList 왼쪽에 배치해 절대 겹치지 않게 함     │
+   │    말풍선 화살표는 패널 우상단에 위치 → 우측 위 벨 버튼 방향 │
+   │                                                           │
+   │  ■ 데스크탑 (>1060px) 기준 계산                            │
+   │    HudTodoList: right:22px  width:292px                   │
+   │      → 할일목록 왼쪽 끝 = right:314px 지점                 │
+   │    패널 오른쪽 끝 = 314 + 14(간격) = right:328px           │
+   │    패널 너비 = min(360px, 화면너비-344px)                   │
+   │    화살표 = 패널 우측에서 right:20px                        │
+   │                                                           │
+   │  ■ 태블릿 (≤1060px)                                       │
+   │    HudTodoList: right:24px  width:360px                   │
+   │      → 패널 오른쪽 끝 = right:396px                        │
+   │                                                           │
+   │  ■ 모바일 (≤760px)                                         │
+   │    HudTodoList 가 position:static 이 되므로                │
+   │    패널이 화면 전체 너비를 차지                               │
+   └───────────────────────────────────────────────────────────┘ */
+
+.notifPanel {
+  position: fixed;
+  z-index: 40;
+
+  /* ↓ 위치 조정 포인트 ↓ */
+  top: 166px; /* 위아래 위치 — 벨 버튼 하단(153px)에 화살표가 바로 붙도록 */
+  right: 182px; /* 좌우 위치 — 화살표(right:20px)가 벨 버튼 중앙(오른쪽 217px)에 오도록 계산:
+                           패널 border(3) + pointer right(20) + half-width(12) = 35
+                           217 - 35 = 182 */
+  width: min(300px, calc(100vw - 198px)); /* 182 + 16(좌측여백) = 198 */
+
+  background: linear-gradient(180deg, #fbf0ce 0%, #f8e8bf 100%);
+  border: 3px solid #d6a858;
+  border-radius: 18px;
+  box-shadow:
+    0 18px 40px rgba(150, 108, 40, 0.22),
+    0 3px 0 rgba(150, 108, 40, 0.12);
+  animation: notifPanelPop 220ms cubic-bezier(0.18, 0.86, 0.32, 1.1) both;
+}
+
+/* 열릴 때 살짝 위에서 튀어내려오는 애니메이션 */
+@keyframes notifPanelPop {
+  from {
+    transform: translateY(-10px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 말풍선 꼬리 (▲ 모양).
+   24px 사각형을 45° 회전해 삼각형처럼 보이게 하는 트릭.
+   top:-13px 으로 패널 위에 살짝 튀어나옴.
+   right:20px 으로 패널 오른쪽 끝 근처에 위치 → 우측 벨 버튼 방향 */
+.notifPanelPointer {
+  position: absolute;
+  top: -13px;
+  right: 20px; /* ↑ 화살표 좌우 위치 조정 */
+  width: 24px;
+  height: 24px;
+  background: #fbf0ce; /* 패널 배경 상단색과 동일해야 경계가 자연스러움 */
+  border-top: 3px solid #d6a858;
+  border-left: 3px solid #d6a858;
+  border-top-left-radius: 5px;
+  transform: rotate(45deg);
+}
+
+/* 패널 내부의 점선 테두리 프레임
+   margin으로 바깥 여백, padding으로 안쪽 콘텐츠 여백 */
+.notifPanelInner {
+  margin: 11px;
+  padding: 13px 12px 12px;
+}
+
+/* ── 헤더 ── */
+.notifPanelHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 2px;
+}
+
+/* 제목 그룹 — 패널 전체 너비 기준 정가운데 */
+.notifPanelHeaderTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+/* 새싹 장식 아이콘 (public/assets/notification/sprout.png) */
+.notifPanelSprout {
+  width: 20px;
+  height: 16px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+/* "알 림" 큰 제목 텍스트 */
+.notifPanelTitle {
+  margin: 0;
+  font-family: "Jua", sans-serif;
+  font-size: 20px;
+  letter-spacing: 3px; /* 자간 넓게 = 디자인 의도 */
+  color: #46341e;
+  line-height: 1;
+  padding-bottom: 2px;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* "모두 읽기" 버튼 — 누르면 history 전체 삭제 */
+.notifPanelMarkAll {
+  font-family: "Jua", sans-serif;
+  font-size: 11px;
+  color: #6a512f;
+  background: #fffdf4;
+  border: 2px solid #d6a858;
+  border-radius: 10px;
+  padding: 4px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  box-shadow: 0 2px 0 rgba(150, 108, 40, 0.18);
+  min-height: unset;
+}
+
+.notifPanelMarkAll:hover {
+  background: #fff7e6;
+}
+
+/* 데이지 장식 아이콘 (public/assets/notification/daisy.png) */
+.notifPanelDaisy {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+/* ── 헤더/목록/푸터 사이 점선 구분선 ── */
+.notifPanelDivider {
+  height: 0;
+  border: none;
+  border-top: 2px dashed #e2c285;
+  margin: 10px 2px 8px;
+  opacity: 0.8;
+}
+
+/* ── 알림 카드 목록 컨테이너 ── */
+.notifPanelList {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 285px; /* 카드 4개까지 표시, 초과 시 스크롤 */
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ── 개별 알림 카드 ── */
+.notifPanelCard {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  background: #fef8e6;
+  border: 2px solid #e7c98c;
+  border-radius: 14px;
+  padding: 9px 32px 9px 9px;
+  box-shadow:
+    0 3px 8px rgba(150, 108, 40, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* 캐릭터 아바타 or 아이콘 이미지 */
+.notifPanelCardIcon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  align-self: center;
+  image-rendering: pixelated;
+  user-select: none;
+}
+
+/* 제목 + 본문 + 시간 수직 배치 영역 */
+.notifPanelCardBody {
+  flex: 1 1 auto;
+  min-width: 0; /* flex 자식에서 overflow:hidden 작동하려면 필수 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+/* 알림 제목 — 길면 ... 처리 */
+.notifPanelCardTitle {
+  margin: 0;
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
+  line-height: 1.3;
+  color: #43321d;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 알림 본문 (한 줄, 사과 아이콘 인라인 포함) */
+.notifPanelCardSub {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #a18c6f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 사과 아이콘 (type:"reward" 일 때 본문 옆에 표시) */
+.notifPanelCardSubApple {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+/* 경과 시간 텍스트 ("방금 전" / "N분 전") */
+.notifPanelCardTime {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  color: #b8a888;
+}
+
+/* 카드 오른쪽 열: ✕ 닫기 버튼 절대 위치 기준 wrapper */
+.notifPanelCardRight {
+  display: contents;
+}
+
+/* 개별 카드 닫기 버튼 — 카드 우측 상단 고정 */
+.notifPanelCardDismiss {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 3px;
+  font-size: 16px;
+  line-height: 1;
+  color: #bda88a;
+  box-shadow: none;
+  min-height: unset;
+}
+
+.notifPanelCardDismiss:hover {
+  color: #8a7457;
+}
+
+/* 읽지 않음 표시 빨간 점 — 카드 안쪽 좌상단 */
+.notifPanelCardUnreadDot {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ed3b2e;
+  box-shadow: 0 0 0 2px rgba(237, 59, 46, 0.18);
+}
+
+/* 꽃 장식 아이콘 (flower_y.png / flower_p.png 교대로 사용) */
+.notifPanelCardFlower {
+  width: 16px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* ── 알림이 없을 때 표시되는 빈 상태 텍스트 ── */
+.notifPanelEmpty {
+  text-align: center;
+  padding: 22px 8px;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: #b09a7e;
+  margin: 0;
+}
+
+/* ── 하단 푸터: [데이지] [알림 더보기 >] [데이지] ── */
+.notifPanelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 2px;
+}
+
+.notifPanelFooterBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: #46341e;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+  min-height: unset;
+}
+
+.notifPanelFooterBtn:hover {
+  color: #6a4f2a;
+}
+
+/* ┌──────────────────────────────────────────┐
+   │  3. RESPONSIVE — 화면 크기별 위치 조정     │
+   └──────────────────────────────────────────┘ */
+
+/* 태블릿 (≤1060px)
+   HudButtonGroup → top:114px, 버튼크기:60px, right:96px, gap:10px
+   알림 버튼 중앙  → 96 + 60(일기장) + 10 + 60(핸드폰) + 10 + 30(half) = 266px from right
+   패널 right     → 266 - 3(border) - 20(pointer right) - 12(half-width) = 231px
+   패널 top       → 114 + 60(버튼높이) + 16(여백) = 190px             */
+@media (max-width: 1060px) {
+  .notifPanel {
+    top: 183px; /* 태블릿 벨 버튼 하단(174px) + 화살표 연결 */
+    right: 231px;
+    width: min(280px, calc(100vw - 247px)); /* 231 + 16(좌측여백) = 247 */
+  }
+  /* .notifPanelPointer는 right:20px 그대로 유지 */
+}
+
+/* 모바일 (≤760px)
+   HudTodoList 가 position:static 이 되어 우측에 없어짐
+   → 패널을 화면 전체 너비로 변경
+   HudButtonGroup → top:72px, 버튼크기:60px, right:14px, gap:8px
+   벨버튼 중앙 from 오른쪽 = 14 + 60 + 8 + 60 + 8 + 30 = 180px
+   화살표 right  = 180(벨중앙) − 16(패널right) − 12(화살표반폭) = 152px */
+@media (max-width: 760px) {
+  .notifToastLayer {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+  }
+
+  .notifToastCard {
+    width: 100%;
+  }
+
+  .notifPanel {
+    top: 145px; /* 모바일 벨 버튼 하단(132px) + 화살표 연결 */
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+
+  /* 모바일에서는 패널이 전체너비라 화살표를 벨 버튼 위치로 재조정 */
+  .notifPanelPointer {
+    right: 152px; /* 벨버튼 중앙 정렬 계산값 */
+    left: auto;
+    transform: rotate(45deg);
+  }
+}
