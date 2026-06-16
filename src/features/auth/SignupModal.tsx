@@ -244,11 +244,6 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           />
           <button type="button" className="suAmberBtn" onClick={handleSendCode} disabled={sending}>
             {sending && <span className="suSpinner" />}
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 23, height: 23, flex: "none" }}
-            />
             {sending ? "발송 중…" : "코드 발송"}
           </button>
         </div>
@@ -277,11 +272,6 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             onClick={handleVerifyCode}
             disabled={verified}
           >
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 23, height: 23, flex: "none" }}
-            />
             인증 확인
           </button>
         </div>
