@@ -389,12 +389,37 @@
 .suAgreeRow {
   display: flex;
   align-items: center;
+  gap: 0;
+}
+
+.suAgreeToggle {
+  display: flex;
+  align-items: center;
   gap: 11px;
+  flex: 1;
   border: none;
   background: transparent;
   cursor: pointer;
   padding: 0;
   text-align: left;
+}
+
+.suAgreeViewBtn {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #9a7040;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 2px 4px 8px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.12s;
+}
+
+.suAgreeViewBtn:hover {
+  color: #cc8334;
 }
 .suCheckbox {
   width: 24px;

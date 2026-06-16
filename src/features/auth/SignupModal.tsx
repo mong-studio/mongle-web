@@ -5,6 +5,7 @@ import {
   signup as signupRequest,
   toUserMessage,
 } from "./api.js";
+import { AI_CONSENT, ConsentDetailModal, PRIVACY_CONSENT } from "./ConsentDetailModal.js";
 import "./SignupModal.css";
 
 const JOBS = [
@@ -20,9 +21,21 @@ const JOBS = [
 ];
 
 const AGREEMENTS = [
-  { k: "terms" as const, label: "만 14세 이상입니다.", tag: "(필수)", req: true },
-  { k: "privacy" as const, label: "개인정보 수집·이용에 동의합니다.", tag: "(필수)", req: true },
-  { k: "ai" as const, label: "AI 학습 및 통계 활용에 동의합니다.", tag: "(선택)", req: false },
+  { k: "terms" as const, label: "만 14세 이상입니다.", tag: "(필수)", req: true, detail: null },
+  {
+    k: "privacy" as const,
+    label: "개인정보 수집·이용에 동의합니다.",
+    tag: "(필수)",
+    req: true,
+    detail: "privacy" as const,
+  },
+  {
+    k: "ai" as const,
+    label: "AI 학습 및 통계 활용에 동의합니다.",
+    tag: "(선택)",
+    req: false,
+    detail: "ai" as const,
+  },
 ];
 
 type SignupModalProps = {
@@ -46,6 +59,8 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [agree, setAgree] = useState({ terms: false, privacy: false, ai: false });
   const [toast, setToast] = useState("");
+  const [privacyDetailOpen, setPrivacyDetailOpen] = useState(false);
+  const [aiDetailOpen, setAiDetailOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -64,6 +79,8 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       setSubmitting(false);
       setAgree({ terms: false, privacy: false, ai: false });
       setToast("");
+      setPrivacyDetailOpen(false);
+      setAiDetailOpen(false);
       clearTimeout(toastTimer.current);
     }
   }, [open]);
@@ -169,284 +186,328 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
   if (!open) return null;
 
   return (
-    <div className="suBackdrop" role="presentation">
-      <section className="suModal" role="dialog" aria-modal="true" aria-labelledby="su-title">
-        <button type="button" className="suClose" onClick={onClose} aria-label="닫기">
-          ✕
-        </button>
-
-        {/* Eyebrow */}
-        <div className="suEyebrow">
-          <img
-            src="/assets/auth/flower.png"
-            alt=""
-            style={{ width: 19, height: 19, flex: "none" }}
-          />
-          <span className="suEyebrowText">MONGLE ACCOUNT</span>
-          <img
-            src="/assets/auth/flower.png"
-            alt=""
-            style={{ width: 19, height: 19, flex: "none" }}
-          />
-          <div className="suEyebrowLine" />
-        </div>
-
-        {/* Title */}
-        <div className="suTitleRow">
-          <img
-            src="/assets/auth/sprout.png"
-            alt=""
-            style={{ width: 26, height: 26, flex: "none" }}
-          />
-          <h1 id="su-title" className="suTitle">
-            회원가입
-          </h1>
-          <img
-            src="/assets/auth/sprout.png"
-            alt=""
-            style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
-          />
-        </div>
-        <p className="suSubtitle">이메일 인증 후 계정을 만들어 몽글마을을 방문해봐요!</p>
-
-        {/* Divider */}
-        <div className="suDivider">
-          <div className="suDividerLine" />
-          <img
-            src="/assets/auth/flower.png"
-            alt=""
-            style={{ width: 20, height: 20, flex: "none" }}
-          />
-          <div className="suDividerLine" />
-        </div>
-
-        {/* Email */}
-        <div className="suLabel">
-          <img
-            src="/assets/auth/flower.png"
-            alt=""
-            style={{ width: 23, height: 23, flex: "none" }}
-          />
-          이메일
-        </div>
-        <div className="suInlineRow">
-          <input
-            className="suInput"
-            type="email"
-            value={email}
-            autoComplete="off"
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setVerified(false);
-              setCodeSent(false);
-            }}
-            placeholder="user@example.com"
-          />
-          <button type="button" className="suAmberBtn" onClick={handleSendCode} disabled={sending}>
-            {sending && <span className="suSpinner" />}
-            {sending ? "발송 중…" : "코드 발송"}
+    <>
+      <div className="suBackdrop" role="presentation">
+        <section className="suModal" role="dialog" aria-modal="true" aria-labelledby="su-title">
+          <button type="button" className="suClose" onClick={onClose} aria-label="닫기">
+            ✕
           </button>
-        </div>
 
-        {/* Verification code */}
-        <div className="suLabel suSection">
-          <img
-            src="/assets/auth/flower.png"
-            alt=""
-            style={{ width: 23, height: 23, flex: "none" }}
-          />
-          인증 코드
-        </div>
-        <div className="suInlineRow">
-          <input
-            className={`suInput suInput--code${verified ? " suInput--verified" : ""}`}
-            value={code}
-            maxLength={6}
-            autoComplete="one-time-code"
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="ABCDEF"
-          />
-          <button
-            type="button"
-            className="suAmberBtn"
-            onClick={handleVerifyCode}
-            disabled={verified}
-          >
-            인증 확인
-          </button>
-        </div>
-        {verified && (
-          <div className="suSuccessLine">
-            <span className="suSuccessIcon">✓</span>
-            이메일 인증이 완료됐어요!
+          {/* Eyebrow */}
+          <div className="suEyebrow">
+            <img
+              src="/assets/auth/flower.png"
+              alt=""
+              style={{ width: 19, height: 19, flex: "none" }}
+            />
+            <span className="suEyebrowText">MONGLE ACCOUNT</span>
+            <img
+              src="/assets/auth/flower.png"
+              alt=""
+              style={{ width: 19, height: 19, flex: "none" }}
+            />
+            <div className="suEyebrowLine" />
           </div>
-        )}
 
-        {/* Password 2-col */}
-        <div className="suGrid2 suSection">
-          <div>
-            <div className="suLabel">
-              <img
-                src="/assets/auth/flower.png"
-                alt=""
-                style={{ width: 23, height: 23, flex: "none" }}
-              />
-              비밀번호
-            </div>
+          {/* Title */}
+          <div className="suTitleRow">
+            <img
+              src="/assets/auth/sprout.png"
+              alt=""
+              style={{ width: 26, height: 26, flex: "none" }}
+            />
+            <h1 id="su-title" className="suTitle">
+              회원가입
+            </h1>
+            <img
+              src="/assets/auth/sprout.png"
+              alt=""
+              style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
+            />
+          </div>
+          <p className="suSubtitle">이메일 인증 후 계정을 만들어 몽글마을을 방문해봐요!</p>
+
+          {/* Divider */}
+          <div className="suDivider">
+            <div className="suDividerLine" />
+            <img
+              src="/assets/auth/flower.png"
+              alt=""
+              style={{ width: 20, height: 20, flex: "none" }}
+            />
+            <div className="suDividerLine" />
+          </div>
+
+          {/* Email */}
+          <div className="suLabel">
+            <img
+              src="/assets/auth/flower.png"
+              alt=""
+              style={{ width: 23, height: 23, flex: "none" }}
+            />
+            이메일
+          </div>
+          <div className="suInlineRow">
             <input
               className="suInput"
-              type="password"
-              value={pw}
-              autoComplete="new-password"
-              onChange={(e) => setPw(e.target.value)}
-              placeholder="8~16자, 2종 이상 조합"
+              type="email"
+              value={email}
+              autoComplete="off"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setVerified(false);
+                setCodeSent(false);
+              }}
+              placeholder="user@example.com"
             />
+            <button
+              type="button"
+              className="suAmberBtn"
+              onClick={handleSendCode}
+              disabled={sending}
+            >
+              {sending && <span className="suSpinner" />}
+              {sending ? "발송 중…" : "코드 발송"}
+            </button>
           </div>
-          <div>
-            <div className="suLabel">
-              <img
-                src="/assets/auth/flower.png"
-                alt=""
-                style={{ width: 23, height: 23, flex: "none" }}
-              />
-              비밀번호 확인
-            </div>
+
+          {/* Verification code */}
+          <div className="suLabel suSection">
+            <img
+              src="/assets/auth/flower.png"
+              alt=""
+              style={{ width: 23, height: 23, flex: "none" }}
+            />
+            인증 코드
+          </div>
+          <div className="suInlineRow">
             <input
-              className={`suInput${pwMismatch ? " suInput--warn" : ""}`}
-              type="password"
-              value={pw2}
-              autoComplete="new-password"
-              onChange={(e) => setPw2(e.target.value)}
+              className={`suInput suInput--code${verified ? " suInput--verified" : ""}`}
+              value={code}
+              maxLength={6}
+              autoComplete="one-time-code"
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="ABCDEF"
             />
+            <button
+              type="button"
+              className="suAmberBtn"
+              onClick={handleVerifyCode}
+              disabled={verified}
+            >
+              인증 확인
+            </button>
           </div>
-        </div>
-        {pwMismatch && <div className="suWarnLine">✿ 비밀번호가 일치하지 않아요.</div>}
+          {verified && (
+            <div className="suSuccessLine">
+              <span className="suSuccessIcon">✓</span>
+              이메일 인증이 완료됐어요!
+            </div>
+          )}
 
-        {/* Nickname */}
-        <div className="suLabel suSection">
-          <img
-            src="/assets/auth/flower.png"
-            alt=""
-            style={{ width: 23, height: 23, flex: "none" }}
-          />
-          닉네임
-        </div>
-        <input
-          className="suInput"
-          value={nick}
-          maxLength={8}
-          onChange={(e) => setNick(e.target.value)}
-          placeholder="한글/영문/숫자 2~8자"
-        />
-
-        {/* Job + Birth 2-col */}
-        <div className="suGrid2 suSection">
-          <div>
-            <div className="suLabel">
-              <img
-                src="/assets/auth/flower.png"
-                alt=""
-                style={{ width: 23, height: 23, flex: "none" }}
-              />
-              직업
-            </div>
-            <div className="suSelectWrap">
-              <select
-                className={`suSelect${!job ? " suSelect--placeholder" : ""}`}
-                value={job}
-                onChange={(e) => setJob(e.target.value)}
-              >
-                <option value="" disabled>
-                  선택
-                </option>
-                {JOBS.map((j) => (
-                  <option key={j} value={j}>
-                    {j}
-                  </option>
-                ))}
-              </select>
-              <span className="suSelectCaret">▼</span>
-            </div>
-          </div>
-          <div>
-            <div className="suLabel">
-              <img
-                src="/assets/auth/flower.png"
-                alt=""
-                style={{ width: 23, height: 22, flex: "none" }}
-              />
-              생년월일
-            </div>
-            <div className="suDateWrap">
+          {/* Password 2-col */}
+          <div className="suGrid2 suSection">
+            <div>
+              <div className="suLabel">
+                <img
+                  src="/assets/auth/flower.png"
+                  alt=""
+                  style={{ width: 23, height: 23, flex: "none" }}
+                />
+                비밀번호
+              </div>
               <input
-                className={`suInput suDateInput${birth ? " filled" : ""}`}
-                type="date"
-                value={birth}
-                onChange={(e) => setBirth(e.target.value)}
+                className="suInput"
+                type="password"
+                value={pw}
+                autoComplete="new-password"
+                onChange={(e) => setPw(e.target.value)}
+                placeholder="8~16자, 2종 이상 조합"
               />
-              <span className="suDateCaret">
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#C49A5E"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="4.5" width="18" height="17" rx="3" />
-                  <path d="M3 9h18M8 2.5v4M16 2.5v4" />
-                </svg>
-              </span>
+            </div>
+            <div>
+              <div className="suLabel">
+                <img
+                  src="/assets/auth/flower.png"
+                  alt=""
+                  style={{ width: 23, height: 23, flex: "none" }}
+                />
+                비밀번호 확인
+              </div>
+              <input
+                className={`suInput${pwMismatch ? " suInput--warn" : ""}`}
+                type="password"
+                value={pw2}
+                autoComplete="new-password"
+                onChange={(e) => setPw2(e.target.value)}
+              />
             </div>
           </div>
-        </div>
+          {pwMismatch && <div className="suWarnLine">✿ 비밀번호가 일치하지 않아요.</div>}
 
-        {/* Agreements */}
-        <div className="suAgreeBox">
-          <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tl" />
-          <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tr" />
-          <img src="/assets/auth/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--bl" />
-          <img src="/assets/auth/flower3.png" alt="" className="suAgreeCorner suAgreeCorner--br" />
-          <div className="suAgreeList">
-            {AGREEMENTS.map(({ k, label, tag, req }) => (
-              <button key={k} type="button" className="suAgreeRow" onClick={() => toggleAgree(k)}>
-                <span className={`suCheckbox${agree[k] ? " suCheckbox--on" : ""}`}>
-                  {agree[k] && <span className="suCheckmark">✓</span>}
-                </span>
-                <span className="suAgreeLabel">
-                  {label} <span className={req ? "suAgreeTag--req" : "suAgreeTag--opt"}>{tag}</span>
-                </span>
-              </button>
-            ))}
+          {/* Nickname */}
+          <div className="suLabel suSection">
+            <img
+              src="/assets/auth/flower.png"
+              alt=""
+              style={{ width: 23, height: 23, flex: "none" }}
+            />
+            닉네임
           </div>
-        </div>
+          <input
+            className="suInput"
+            value={nick}
+            maxLength={8}
+            onChange={(e) => setNick(e.target.value)}
+            placeholder="한글/영문/숫자 2~8자"
+          />
 
-        {/* Submit */}
-        <button type="button" className="suSubmitBtn" onClick={handleSubmit} disabled={submitting}>
-          {/* <img
+          {/* Job + Birth 2-col */}
+          <div className="suGrid2 suSection">
+            <div>
+              <div className="suLabel">
+                <img
+                  src="/assets/auth/flower.png"
+                  alt=""
+                  style={{ width: 23, height: 23, flex: "none" }}
+                />
+                직업
+              </div>
+              <div className="suSelectWrap">
+                <select
+                  className={`suSelect${!job ? " suSelect--placeholder" : ""}`}
+                  value={job}
+                  onChange={(e) => setJob(e.target.value)}
+                >
+                  <option value="" disabled>
+                    선택
+                  </option>
+                  {JOBS.map((j) => (
+                    <option key={j} value={j}>
+                      {j}
+                    </option>
+                  ))}
+                </select>
+                <span className="suSelectCaret">▼</span>
+              </div>
+            </div>
+            <div>
+              <div className="suLabel">
+                <img
+                  src="/assets/auth/flower.png"
+                  alt=""
+                  style={{ width: 23, height: 22, flex: "none" }}
+                />
+                생년월일
+              </div>
+              <div className="suDateWrap">
+                <input
+                  className={`suInput suDateInput${birth ? " filled" : ""}`}
+                  type="date"
+                  value={birth}
+                  onChange={(e) => setBirth(e.target.value)}
+                />
+                <span className="suDateCaret">
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#C49A5E"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="4.5" width="18" height="17" rx="3" />
+                    <path d="M3 9h18M8 2.5v4M16 2.5v4" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Agreements */}
+          <div className="suAgreeBox">
+            <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tl" />
+            <img src="/assets/auth/bear.png" alt="" className="suAgreeCorner suAgreeCorner--tr" />
+            <img
+              src="/assets/auth/flower3.png"
+              alt=""
+              className="suAgreeCorner suAgreeCorner--bl"
+            />
+            <img
+              src="/assets/auth/flower3.png"
+              alt=""
+              className="suAgreeCorner suAgreeCorner--br"
+            />
+            <div className="suAgreeList">
+              {AGREEMENTS.map(({ k, label, tag, req, detail }) => (
+                <div key={k} className="suAgreeRow">
+                  <button type="button" className="suAgreeToggle" onClick={() => toggleAgree(k)}>
+                    <span className={`suCheckbox${agree[k] ? " suCheckbox--on" : ""}`}>
+                      {agree[k] && <span className="suCheckmark">✓</span>}
+                    </span>
+                    <span className="suAgreeLabel">
+                      {label}{" "}
+                      <span className={req ? "suAgreeTag--req" : "suAgreeTag--opt"}>{tag}</span>
+                    </span>
+                  </button>
+                  {detail && (
+                    <button
+                      type="button"
+                      className="suAgreeViewBtn"
+                      onClick={() =>
+                        detail === "privacy" ? setPrivacyDetailOpen(true) : setAiDetailOpen(true)
+                      }
+                    >
+                      보기
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="button"
+            className="suSubmitBtn"
+            onClick={handleSubmit}
+            disabled={submitting}
+          >
+            {/* <img
             src="/assets/auth/su-bigflower.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none" }}
           /> */}
-          {submitting && <span className="suSpinner suSpinner--lg" />}
-          <span className="suSubmitLabel">{submitting ? "가입하는 중…" : "회원가입"}</span>
-          {/* <img
+            {submitting && <span className="suSpinner suSpinner--lg" />}
+            <span className="suSubmitLabel">{submitting ? "가입하는 중…" : "회원가입"}</span>
+            {/* <img
             src="/assets/auth/su-bigflower.png"
             alt=""
             style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
           /> */}
-        </button>
-      </section>
+          </button>
+        </section>
 
-      {toast && (
-        <div className="suToast">
-          <span className="suToastFlower">✿</span>
-          {toast}
-        </div>
-      )}
-    </div>
+        {toast && (
+          <div className="suToast">
+            <span className="suToastFlower">✿</span>
+            {toast}
+          </div>
+        )}
+      </div>
+      <ConsentDetailModal
+        open={privacyDetailOpen}
+        onClose={() => setPrivacyDetailOpen(false)}
+        detail={PRIVACY_CONSENT}
+      />
+      <ConsentDetailModal
+        open={aiDetailOpen}
+        onClose={() => setAiDetailOpen(false)}
+        detail={AI_CONSENT}
+      />
+    </>
   );
 }

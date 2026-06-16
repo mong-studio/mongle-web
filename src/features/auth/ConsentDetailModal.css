@@ -1,0 +1,101 @@
+@keyframes cdmCardIn {
+  from {
+    transform: scale(0.97) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ── Backdrop ── */
+.cdmBackdrop {
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  background: rgba(54, 42, 22, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 26px 18px;
+  z-index: 40;
+  box-sizing: border-box;
+}
+
+/* ── Modal card ── */
+.cdmModal {
+  position: relative;
+  width: 480px;
+  max-width: 96vw;
+  margin: auto;
+  background: #faf1d8;
+  border: 3px solid #d3a95f;
+  border-radius: 22px;
+  box-shadow:
+    0 28px 64px -24px rgba(60, 42, 18, 0.6),
+    inset 0 0 0 4px #faf1d8,
+    inset 0 0 0 6px #e8d3a2;
+  padding: 22px 28px 20px;
+  animation: cdmCardIn 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  box-sizing: border-box;
+  font-family: "Gowun Dodum", sans-serif;
+}
+
+/* ── Title size override ── */
+.cdmTitle {
+  font-size: 24px;
+}
+
+/* ── Consent table ── */
+.cdmTable {
+  border: 2px solid #e7d6ac;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.cdmRow {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  border-bottom: 2px solid #e7d6ac;
+}
+
+.cdmRow:last-child {
+  border-bottom: none;
+}
+
+.cdmRowLabel {
+  background: #f5e8c4;
+  padding: 12px 14px;
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: #6e5c44;
+  display: flex;
+  align-items: center;
+}
+
+.cdmRowValue {
+  background: #fffdf7;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  color: #6e5c44;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* ── Note ── */
+.cdmNote {
+  display: flex;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #9a876a;
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+
+.cdmNoteStar {
+  color: #e29a4c;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
