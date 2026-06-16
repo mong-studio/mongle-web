@@ -250,7 +250,9 @@ export function CharacterModal({
             {/* 성격 키워드 */}
             <div className="ccChipSection">
               <div className="ccChipLabelRow">
-                <div className="ccFieldLabel ccChipLabel">성격 키워드</div>
+                <div className="ccFieldLabel ccChipLabel">
+                  성격 키워드<span className="ccOptional">선택</span>
+                </div>
                 <span className="ccChipCount">{selectedKeywordCategories.length}/3</span>
               </div>
               <div className="ccChips">

@@ -153,9 +153,8 @@
   right: 18px;
   width: 36px;
   height: 36px;
-  border-radius: 13px;
-  border: 2px solid var(--cc-border-strong);
-  background: var(--cc-panel);
+  border: none;
+  background: transparent;
   color: var(--cc-ink-soft);
   font-size: 19px;
   cursor: pointer;
@@ -163,13 +162,10 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-  transition:
-    background 0.12s,
-    color 0.12s;
+  transition: color 0.12s;
 }
 
 .ccCloseBtn:hover {
-  background: var(--cc-card);
   color: var(--cc-ink);
 }
 
@@ -346,13 +342,14 @@
 
 .ccChipCount {
   font-family: "Jua", sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   color: var(--cc-ink-soft);
   background: var(--cc-card);
   border: 1.5px solid var(--cc-border);
   border-radius: 999px;
   padding: 1px 8px;
   line-height: 1.6;
+  margin-left: auto;
 }
 
 .ccChips {
@@ -380,6 +377,17 @@
 
 .ccChipCheck {
   font-size: 12px;
+}
+
+.ccOptional {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 11px;
+  color: var(--cc-ink-faint);
+  border: 1.5px solid var(--cc-border);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 /* ── Description ── */
