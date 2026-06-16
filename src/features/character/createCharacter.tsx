@@ -74,7 +74,7 @@ export function CharacterModal({
 
   const [mode, setMode] = useState<"upload" | "text">("upload");
   const [nameError, setNameError] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [activeApple, setActiveApple] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const dragCounter = useRef(0);
@@ -98,17 +98,17 @@ export function CharacterModal({
     if (isBusy) {
       wasBusyRef.current = true;
       setShowResult(false);
-      setProgress(0);
+      setActiveApple(0);
       const iv = setInterval(() => {
-        setProgress((p) => Math.min(Math.round(p + 3 + Math.random() * 5), 95));
-      }, 90);
+        setActiveApple((a) => (a + 1) % 4);
+      }, 600);
       return () => clearInterval(iv);
     }
     if (wasBusyRef.current) {
       wasBusyRef.current = false;
       if (!characterNameRef.current && !characterPersonaRef.current) setShowResult(true);
     }
-    setProgress(0);
+    setActiveApple(0);
   }, [isBusy]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
@@ -299,60 +299,30 @@ export function CharacterModal({
           {/* 생성하기 */}
           <div className="ccGenSection">
             <div className="ccFieldLabel">생성하기</div>
-            {phase === "generating" ? (
-              <div className="ccAppleLoader">
-                <p className="ccAppleTitle">생성 중</p>
-                <div className="ccAppleRow">
-                  {[1, 2, 3, 4].map((n, i) => {
-                    const isActive = i === Math.min(Math.floor(progress / 25), 3);
-                    return (
-                      <div key={n} className="ccAppleStep">
-                        <img
-                          src={`/assets/icon/icon-apple${n}.png`}
-                          alt=""
-                          className={`ccAppleImg${isActive ? " ccAppleImg--active" : ""}`}
-                        />
-                        {i < 3 && (
-                          <span className="ccAppleArrow" aria-hidden="true">
-                            ▶
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="ccAppleCaption">
-                  <span aria-hidden="true">🌱</span>
-                  아그작 아그작
-                  <span aria-hidden="true">🌱</span>
-                </p>
+            <div className="ccGenRow">
+              <button
+                type="button"
+                className="ccGenBtn"
+                disabled={isBusy || residents.length >= 10}
+                onClick={handleGenerate}
+              >
+                <img src="/assets/icon/bear.png" alt="" className="ccBearIcon" />
+                캐릭터 생성하기
+              </button>
+              <div className="ccGenStatus">
+                {phase === "uploaded" && (
+                  <div className="ccStatusMsg">
+                    <span className="ccStatusStar">✿</span>
+                    업로드 완료! 캐릭터 생성하기를 눌러주세요.
+                  </div>
+                )}
+                {phase === "result" && (
+                  <div className="ccStatusDone">
+                    <span>✓</span> 생성 완료! 오른쪽에서 확인해 보세요.
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="ccGenRow">
-                <button
-                  type="button"
-                  className="ccGenBtn"
-                  disabled={residents.length >= 10}
-                  onClick={handleGenerate}
-                >
-                  <img src="/assets/icon/bear.png" alt="" className="ccBearIcon" />
-                  캐릭터 생성하기
-                </button>
-                <div className="ccGenStatus">
-                  {phase === "uploaded" && (
-                    <div className="ccStatusMsg">
-                      <span className="ccStatusStar">✿</span>
-                      업로드 완료! 캐릭터 생성하기를 눌러주세요.
-                    </div>
-                  )}
-                  {phase === "result" && (
-                    <div className="ccStatusDone">
-                      <span>✓</span> 생성 완료! 오른쪽에서 확인해 보세요.
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -372,22 +342,24 @@ export function CharacterModal({
                 </div>
                 <div className="ccUploadedName">{sourceImageName}</div>
                 <div className="ccUploadedHint">업로드한 이미지로 캐릭터를 만들 수 있어요!</div>
-                <div className="ccActionRow">
-                  <button
-                    type="button"
-                    className="ccDeleteBtn"
-                    onClick={() => onImageUpload(undefined)}
-                  >
-                    <span>✕</span> 삭제
-                  </button>
-                  <button
-                    type="button"
-                    className="ccChangeBtn"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <span>↻</span> 이미지 변경
-                  </button>
-                </div>
+                {!isBusy && (
+                  <div className="ccActionRow">
+                    <button
+                      type="button"
+                      className="ccDeleteBtn"
+                      onClick={() => onImageUpload(undefined)}
+                    >
+                      <span>✕</span> 삭제
+                    </button>
+                    <button
+                      type="button"
+                      className="ccChangeBtn"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <span>↻</span> 이미지 변경
+                    </button>
+                  </div>
+                )}
               </>
             )}
 
@@ -488,6 +460,29 @@ export function CharacterModal({
                     <button type="button" className="ccCompleteBtn" onClick={onClose}>
                       ✓ 완료
                     </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 생성 중 */}
+            {phase === "generating" && (
+              <>
+                <div className="ccPreviewImgBox ccPreviewImgBox--checker ccPreviewImgBox--burst">
+                  <img src="/assets/character/loading-burst.png" alt="" className="ccBurstImg" />
+                </div>
+                <div className="ccAppleLoader">
+                  <p className="ccAppleTitle">생성 중</p>
+                  <div className="ccAppleRow">
+                    {[1, 2, 3, 4].map((n, i) => (
+                      <div key={n} className="ccAppleStep">
+                        <img
+                          src={`/assets/icon/apple-stage-${n}.png`}
+                          alt=""
+                          className={`ccAppleImg${i === activeApple ? " ccAppleImg--active" : ""}`}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </>
