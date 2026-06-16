@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef } from "react";
-import { goHome, reloadPage } from "./serverErrorActions.js";
+import { goHome, openErrorReportMail, reloadPage } from "./serverErrorActions.js";
 import "./serverError.css";
 
 // Resolve against the app base so assets keep working if `vite.base` changes.
@@ -11,7 +11,7 @@ export type ServerErrorProps = {
   onRetry?: () => void;
   /** "메인으로 돌아가기" — defaults to navigating to the village home. */
   onGoHome?: () => void;
-  /** Bottom note — "다시 접속". Defaults to onRetry. */
+  /** Bottom note — "오류 신고하기". Defaults to opening an error-report mail. */
   onReconnect?: () => void;
 };
 
@@ -27,7 +27,7 @@ export function ServerError({ onRetry, onGoHome, onReconnect }: ServerErrorProps
   const reduce = useReducedMotion();
   const handleRetry = onRetry ?? reloadPage;
   const handleHome = onGoHome ?? goHome;
-  const handleReconnect = onReconnect ?? handleRetry;
+  const handleReconnect = onReconnect ?? openErrorReportMail;
 
   // This page replaces the whole app surface, so move focus to it on mount —
   // the standard SPA route-change pattern so screen-reader users land here.
@@ -100,21 +100,16 @@ export function ServerError({ onRetry, onGoHome, onReconnect }: ServerErrorProps
 
         <motion.div className="se-scene-wrap" {...rise(0.4)}>
           <picture>
-            <source srcSet={`${ASSET_BASE}/scene500.webp`} type="image/webp" />
+            <source srcSet={`${ASSET_BASE}/server-error-scene.webp`} type="image/webp" />
             <img
               className="se-scene"
-              src={`${ASSET_BASE}/scene500.png`}
+              src={`${ASSET_BASE}/server-error-scene.png`}
               alt="고장난 기계를 고치는 이장님과 토끼"
-              width={838}
-              height={352}
+              width={696}
+              height={280}
               decoding="async"
             />
           </picture>
-          <div className="se-bubble">
-            금방
-            <br />
-            고쳐볼게요!
-          </div>
         </motion.div>
 
         <div className="se-divider" aria-hidden="true">
@@ -136,7 +131,7 @@ export function ServerError({ onRetry, onGoHome, onReconnect }: ServerErrorProps
 
         <motion.button type="button" className="se-note" onClick={handleReconnect} {...rise(0.58)}>
           <img src={`${ASSET_BASE}/hamster_t.png`} alt="" aria-hidden="true" />
-          <span className="se-note-txt">문제가 계속되면 잠시 후 다시 접속해주세요.</span>
+          <span className="se-note-txt">문제가 계속되면 이장님께 오류를 신고해주세요.</span>
           <span className="se-chev" aria-hidden="true">
             &rsaquo;
           </span>
