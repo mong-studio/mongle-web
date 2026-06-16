@@ -88,6 +88,7 @@ export function App() {
   const [feedOpen, setFeedOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
   const [reflectionOpen, setReflectionOpen] = useState(false);
+  const [lastCreatedResident, setLastCreatedResident] = useState<Resident | null>(null);
 
   const overlayOpenRef = useRef(false);
   overlayOpenRef.current =
@@ -159,6 +160,7 @@ export function App() {
     setSelectedKeywordCategories([]);
     setSourceImagePreview("");
     setSourceImageName("");
+    setLastCreatedResident(null);
   }, []);
 
   const closeActiveFeature = useCallback(() => {
@@ -297,6 +299,7 @@ export function App() {
           : buildApiUrl(result.image_url),
       };
       setResidents((current) => [...current, resident].slice(0, 10));
+      setLastCreatedResident(resident);
       showNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
       setSourceImagePreview("");
@@ -408,6 +411,7 @@ export function App() {
         sourceImageName={sourceImageName}
         sourceImagePreview={sourceImagePreview}
         onClose={closeActiveFeature}
+        lastCreatedResident={lastCreatedResident}
         onCreateCharacter={createCharacter}
         onImageUpload={handleSourceImageUpload}
         onNameChange={setCharacterName}
@@ -442,6 +446,7 @@ export function App() {
         onCharacterNameChange={setCharacterName}
         onCharacterPersonaChange={setCharacterPersona}
         onCharacterSetupClose={closeCharacterSetup}
+        lastCreatedResident={lastCreatedResident}
         onCharacterSubmit={createCharacter}
         onFeedClose={() => setFeedOpen(false)}
         onLoginClose={() => setLoginOpen(false)}

@@ -20,6 +20,7 @@ type AppModalLayerProps = {
   characterSetupOpen: boolean;
   feedOpen: boolean;
   isBusy: boolean;
+  lastCreatedResident: Resident | null;
   loginOpen: boolean;
   reflectionOpen: boolean;
   resetPwOpen: boolean;
@@ -63,6 +64,7 @@ export function AppModalLayer({
   characterSetupOpen,
   feedOpen,
   isBusy,
+  lastCreatedResident,
   loginOpen,
   reflectionOpen,
   resetPwOpen,
@@ -178,6 +180,7 @@ export function AppModalLayer({
               characterPersona={characterPersona}
               selectedKeywordCategories={selectedKeywordCategories}
               isBusy={isBusy}
+              lastCreatedResident={lastCreatedResident}
               onImageUpload={onCharacterImageUpload}
               onNameChange={onCharacterNameChange}
               onPersonaChange={onCharacterPersonaChange}

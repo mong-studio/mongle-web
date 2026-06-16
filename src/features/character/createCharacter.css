@@ -253,6 +253,8 @@
   width: 58px;
   height: auto;
   image-rendering: pixelated;
+  align-items: center;
+  justify-content: center;
 }
 
 .ccCardHead {

@@ -14,6 +14,7 @@ type FeatureModalHostProps = {
   characterName: string;
   characterPersona: string;
   isBusy: boolean;
+  lastCreatedResident: Resident | null;
   residents: Resident[];
   savedTodos: TodoItem[];
   selectedKeywordCategories: string[];
@@ -43,6 +44,7 @@ export function FeatureModalHost({
   characterName,
   characterPersona,
   isBusy,
+  lastCreatedResident,
   residents,
   savedTodos,
   selectedKeywordCategories,
@@ -115,6 +117,7 @@ export function FeatureModalHost({
             characterPersona={characterPersona}
             selectedKeywordCategories={selectedKeywordCategories}
             isBusy={isBusy}
+            lastCreatedResident={lastCreatedResident}
             onImageUpload={onImageUpload}
             onNameChange={onNameChange}
             onPersonaChange={onPersonaChange}

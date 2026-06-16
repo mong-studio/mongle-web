@@ -46,6 +46,7 @@ type Props = {
   characterPersona: string;
   selectedKeywordCategories: string[];
   isBusy: boolean;
+  lastCreatedResident?: Resident | null;
   onImageUpload: (file: File | undefined) => void;
   onNameChange: (value: string) => void;
   onPersonaChange: (value: string) => void;
@@ -62,6 +63,7 @@ export function CharacterModal({
   characterPersona,
   selectedKeywordCategories,
   isBusy,
+  lastCreatedResident,
   onImageUpload,
   onNameChange,
   onPersonaChange,
@@ -409,18 +411,22 @@ export function CharacterModal({
             {/* 생성 완료 결과 */}
             {phase === "result" && (
               <>
-                <div className="ccPreviewImgBox">
+                <div
+                  className={`ccPreviewImgBox${lastCreatedResident?.avatarUrl ? " ccPreviewImgBox--checker" : ""}`}
+                >
                   <img
-                    src="/assets/character/preview-scene.png"
-                    alt="마을 미리보기"
-                    className="ccPreviewBg"
+                    src={lastCreatedResident?.avatarUrl ?? "/assets/character/preview-scene.png"}
+                    alt="생성된 캐릭터"
+                    className={lastCreatedResident?.avatarUrl ? "ccUploadedImg" : "ccPreviewBg"}
                   />
                 </div>
                 <div className="ccResultInfo">
                   <div className="ccResultHeader">
-                    <img src="/assets/character/avatar.png" alt="아바타" className="ccAvatar" />
+                    {lastCreatedResident?.avatarUrl && (
+                      <img src={lastCreatedResident.avatarUrl} alt="아바타" className="ccAvatar" />
+                    )}
                     <span className="ccResultNameText">
-                      {characterName || "이름을 입력해주세요"}
+                      {lastCreatedResident?.name || characterName || "이름을 입력해주세요"}
                     </span>
                   </div>
                   {selectedKeywordCategories.length > 0 && (
@@ -447,7 +453,11 @@ export function CharacterModal({
                       })}
                     </div>
                   )}
-                  {characterPersona && <div className="ccResultDesc">{characterPersona}</div>}
+                  {(lastCreatedResident?.personality || characterPersona) && (
+                    <div className="ccResultDesc">
+                      {lastCreatedResident?.personality || characterPersona}
+                    </div>
+                  )}
                   <div className="ccActionRow">
                     <button
                       type="button"
