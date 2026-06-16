@@ -31,18 +31,11 @@ const SNS: SnsItem[] = [
     bg: "#FEE500",
     run: shareToKakao,
     icon: (
-      <svg aria-hidden="true" width="26" height="26" viewBox="0 0 40 40">
-        <ellipse cx="20" cy="19.5" rx="16" ry="14" fill="#3C1E1E" />
+      <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24">
         <path
-          d="M13 22c1-4 7-7 13-4"
-          stroke="#FEE500"
-          strokeWidth="2.2"
-          fill="none"
-          strokeLinecap="round"
+          fill="#3C1E1E"
+          d="M12 3.5C6.75 3.5 2.5 6.83 2.5 10.94c0 2.62 1.74 4.92 4.36 6.23-.19.69-.7 2.52-.8 2.91-.13.49.18.48.38.35.15-.1 2.42-1.65 3.41-2.32.57.08 1.16.13 1.75.13 5.25 0 9.5-3.33 9.5-7.43S17.25 3.5 12 3.5Z"
         />
-        <circle cx="15" cy="18" r="2" fill="#FEE500" />
-        <circle cx="20" cy="16.5" r="2" fill="#FEE500" />
-        <circle cx="25" cy="18" r="2" fill="#FEE500" />
       </svg>
     ),
   },
@@ -72,7 +65,7 @@ const SNS: SnsItem[] = [
   {
     id: "link",
     label: "링크 복사",
-    bg: "#f0ebe3",
+    bg: "#FBE3CC",
     run: shareCopyLink,
     icon: (
       <svg
@@ -122,7 +115,7 @@ export function ShareSheet({ th, share, onClose }: ShareSheetProps) {
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation only */}
       <div
         className="share-sheet"
-        style={{ background: th.cardBg }}
+        style={{ background: th.cardBg, borderColor: th.modalEdge }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="share-handle" style={{ background: th.modalEdge }} />

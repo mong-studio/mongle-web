@@ -290,7 +290,7 @@
 .share-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(58, 42, 26, 0.4);
   z-index: 200;
   display: flex;
   align-items: flex-end;
@@ -299,9 +299,10 @@
 }
 .share-sheet {
   width: 100%;
-  border-radius: 22px 22px 0 0;
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid;
   padding: 12px 20px 32px;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 -10px 30px -12px rgba(94, 71, 40, 0.45);
   animation: sheetUp 0.22s ease;
 }
 @keyframes sheetUp {
@@ -343,13 +344,17 @@
   padding: 0;
 }
 .share-sns-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
   display: grid;
   place-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 14px -5px rgba(94, 71, 40, 0.4);
   flex-shrink: 0;
+  transition: transform 0.12s ease;
+}
+.share-sns-item:active .share-sns-icon {
+  transform: scale(0.92);
 }
 .share-sns-label {
   font-size: 11.5px;
@@ -359,13 +364,14 @@
   width: 100%;
   padding: 13px;
   border: 1px solid;
-  border-radius: 12px;
+  border-radius: 16px;
   font-family: "Jua", sans-serif;
   font-size: 15px;
   cursor: pointer;
+  transition: transform 0.12s ease;
 }
 .share-cancel:active {
-  transform: scale(0.99);
+  transform: scale(0.98);
 }
 .share-sns-item:disabled {
   opacity: 0.55;
@@ -376,8 +382,8 @@
   font-size: 12.5px;
   line-height: 1.5;
   text-align: center;
-  padding: 10px 14px;
-  border-radius: 10px;
+  padding: 11px 14px;
+  border-radius: 13px;
   margin-bottom: 14px;
   animation: sheetUp 0.2s ease;
 }
