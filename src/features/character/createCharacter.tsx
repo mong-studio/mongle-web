@@ -30,14 +30,6 @@ function getChipColor(idx: number) {
   return CHIP_COLORS[idx % CHIP_COLORS.length];
 }
 
-function getProgressMsg(p: number) {
-  if (p >= 100) return "거의 다 됐어요!";
-  if (p >= 80) return "오두막 앞에서 포즈 잡는 중! ✦";
-  if (p >= 50) return "좋아하는 음식을 정하는 중…";
-  if (p >= 25) return "성격을 콩닥콩닥 빚는 중이에요…";
-  return "마을에 어울리는 주민을 찾고 있어요!";
-}
-
 type Resident = {
   id: string;
   name: string;
@@ -54,6 +46,7 @@ type Props = {
   characterPersona: string;
   selectedKeywordCategories: string[];
   isBusy: boolean;
+  lastCreatedResident?: Resident | null;
   onImageUpload: (file: File | undefined) => void;
   onNameChange: (value: string) => void;
   onPersonaChange: (value: string) => void;
@@ -70,6 +63,7 @@ export function CharacterModal({
   characterPersona,
   selectedKeywordCategories,
   isBusy,
+  lastCreatedResident,
   onImageUpload,
   onNameChange,
   onPersonaChange,
@@ -82,7 +76,7 @@ export function CharacterModal({
 
   const [mode, setMode] = useState<"upload" | "text">("upload");
   const [nameError, setNameError] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [activeApple, setActiveApple] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const dragCounter = useRef(0);
@@ -106,17 +100,17 @@ export function CharacterModal({
     if (isBusy) {
       wasBusyRef.current = true;
       setShowResult(false);
-      setProgress(0);
+      setActiveApple(0);
       const iv = setInterval(() => {
-        setProgress((p) => Math.min(Math.round(p + 3 + Math.random() * 5), 95));
-      }, 90);
+        setActiveApple((a) => (a + 1) % 4);
+      }, 600);
       return () => clearInterval(iv);
     }
     if (wasBusyRef.current) {
       wasBusyRef.current = false;
-      if (!characterNameRef.current && !characterPersonaRef.current) setShowResult(true);
+      setShowResult(true);
     }
-    setProgress(0);
+    setActiveApple(0);
   }, [isBusy]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
@@ -193,7 +187,7 @@ export function CharacterModal({
                   setShowResult(false);
                 }}
               >
-                <img src="/assets/character/icon-photo.png" alt="" className="ccCardIcon" />
+                <img src="/assets/character/photo.png" alt="" className="ccCardIcon" />
                 <div>
                   <div className="ccCardHead">이미지 업로드</div>
                   <div className="ccCardSub">사진을 업로드해주세요</div>
@@ -209,7 +203,7 @@ export function CharacterModal({
                   if (sourceImagePreview) onImageUpload(undefined);
                 }}
               >
-                <img src="/assets/character/icon-wand.png" alt="" className="ccCardIcon" />
+                <img src="/assets/character/magicWand.png" alt="" className="ccCardIcon" />
                 <div>
                   <div className="ccCardHead">텍스트로 자동 생성</div>
                   <div className="ccCardSub">설명만으로 자동 생성해요</div>
@@ -314,8 +308,8 @@ export function CharacterModal({
                 disabled={isBusy || residents.length >= 10}
                 onClick={handleGenerate}
               >
-                <img src="/assets/character/icon-bear.png" alt="" className="ccBearIcon" />
-                {isBusy ? "생성 중…" : "캐릭터 생성하기"}
+                <img src="/assets/icon/bear.png" alt="" className="ccBearIcon" />
+                캐릭터 생성하기
               </button>
               <div className="ccGenStatus">
                 {phase === "uploaded" && (
@@ -323,19 +317,6 @@ export function CharacterModal({
                     <span className="ccStatusStar">✿</span>
                     업로드 완료! 캐릭터 생성하기를 눌러주세요.
                   </div>
-                )}
-                {phase === "generating" && (
-                  <>
-                    <div className="ccProgressHeader">
-                      <span className="ccProgressStar">✦</span>
-                      <span className="ccProgressLabel">생성 중…</span>
-                      <span className="ccProgressPct">{progress}%</span>
-                    </div>
-                    <div className="ccProgressBar">
-                      <div className="ccProgressFill" style={{ width: `${progress}%` }} />
-                    </div>
-                    <div className="ccProgressMsg">{getProgressMsg(progress)}</div>
-                  </>
                 )}
                 {phase === "result" && (
                   <div className="ccStatusDone">
@@ -355,40 +336,6 @@ export function CharacterModal({
           </div>
 
           <div className="ccPreviewPanel">
-            {/* 생성 중 */}
-            {phase === "generating" && (
-              <>
-                <div className="ccPreviewImgBox">
-                  <img src="/assets/character/loading-burst.png" alt="" className="ccPreviewBg" />
-                  <div className="ccShimmer" />
-                </div>
-                <div className="ccLoadingInfo">
-                  <img src="/assets/character/loading-rabbit.png" alt="" className="ccRabbit" />
-                  <div>
-                    <div className="ccLoadingTitle">
-                      마을에 어울리는 주민을
-                      <br />
-                      만들고 있어요...
-                    </div>
-                    <div className="ccLoadingSub">잠시만 기다려주세요!</div>
-                  </div>
-                </div>
-                <div className="ccDots">
-                  {([0, 0.18, 0.36, 0.54] as const).map((delay) => (
-                    <span key={delay} className="ccDot" style={{ animationDelay: `${delay}s` }} />
-                  ))}
-                </div>
-                <div className="ccPreviewProgress">
-                  <span className="ccProgressDot" />
-                  <div className="ccProgressBar">
-                    <div className="ccProgressFill" style={{ width: `${progress}%` }} />
-                  </div>
-                  <span className="ccProgressDot" />
-                </div>
-                <div className="ccPreviewPct">{progress}%</div>
-              </>
-            )}
-
             {/* 이미지 업로드됨 */}
             {phase === "uploaded" && (
               <>
@@ -397,22 +344,24 @@ export function CharacterModal({
                 </div>
                 <div className="ccUploadedName">{sourceImageName}</div>
                 <div className="ccUploadedHint">업로드한 이미지로 캐릭터를 만들 수 있어요!</div>
-                <div className="ccActionRow">
-                  <button
-                    type="button"
-                    className="ccDeleteBtn"
-                    onClick={() => onImageUpload(undefined)}
-                  >
-                    <span>✕</span> 삭제
-                  </button>
-                  <button
-                    type="button"
-                    className="ccChangeBtn"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <span>↻</span> 이미지 변경
-                  </button>
-                </div>
+                {!isBusy && (
+                  <div className="ccActionRow">
+                    <button
+                      type="button"
+                      className="ccDeleteBtn"
+                      onClick={() => onImageUpload(undefined)}
+                    >
+                      <span>✕</span> 삭제
+                    </button>
+                    <button
+                      type="button"
+                      className="ccChangeBtn"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <span>↻</span> 이미지 변경
+                    </button>
+                  </div>
+                )}
               </>
             )}
 
@@ -440,7 +389,7 @@ export function CharacterModal({
                   onImageUpload(e.dataTransfer.files?.[0]);
                 }}
               >
-                <img src="/assets/character/icon-photo.png" alt="" className="ccDropIcon" />
+                <img src="/assets/character/photo.png" alt="" className="ccDropIcon" />
                 <div className="ccDropTitle">여기에 파일을 올려주세요</div>
                 <div className="ccDropSub">드래그 앤 드롭 또는 클릭하여 업로드</div>
               </div>
@@ -449,7 +398,7 @@ export function CharacterModal({
             {/* 텍스트 자동생성 모드 */}
             {phase === "idle-text" && (
               <div className="ccTextIdle">
-                <img src="/assets/character/icon-wand.png" alt="" className="ccDropIcon" />
+                <img src="/assets/character/magicWand.png" alt="" className="ccDropIcon" />
                 <div className="ccDropTitle">텍스트로 자동 생성 모드</div>
                 <div className="ccDropSub">
                   이름과 성격 키워드, 설명을 입력하면
@@ -462,18 +411,22 @@ export function CharacterModal({
             {/* 생성 완료 결과 */}
             {phase === "result" && (
               <>
-                <div className="ccPreviewImgBox">
+                <div
+                  className={`ccPreviewImgBox${lastCreatedResident?.avatarUrl ? " ccPreviewImgBox--checker" : ""}`}
+                >
                   <img
-                    src="/assets/character/preview-scene.png"
-                    alt="마을 미리보기"
-                    className="ccPreviewBg"
+                    src={lastCreatedResident?.avatarUrl ?? "/assets/character/preview-scene.png"}
+                    alt="생성된 캐릭터"
+                    className={lastCreatedResident?.avatarUrl ? "ccUploadedImg" : "ccPreviewBg"}
                   />
                 </div>
                 <div className="ccResultInfo">
                   <div className="ccResultHeader">
-                    <img src="/assets/character/avatar.png" alt="아바타" className="ccAvatar" />
+                    {lastCreatedResident?.avatarUrl && (
+                      <img src={lastCreatedResident.avatarUrl} alt="아바타" className="ccAvatar" />
+                    )}
                     <span className="ccResultNameText">
-                      {characterName || "이름을 입력해주세요"}
+                      {lastCreatedResident?.name || characterName || "이름을 입력해주세요"}
                     </span>
                   </div>
                   {selectedKeywordCategories.length > 0 && (
@@ -500,7 +453,11 @@ export function CharacterModal({
                       })}
                     </div>
                   )}
-                  {characterPersona && <div className="ccResultDesc">{characterPersona}</div>}
+                  {(lastCreatedResident?.personality || characterPersona) && (
+                    <div className="ccResultDesc">
+                      {lastCreatedResident?.personality || characterPersona}
+                    </div>
+                  )}
                   <div className="ccActionRow">
                     <button
                       type="button"
@@ -513,6 +470,29 @@ export function CharacterModal({
                     <button type="button" className="ccCompleteBtn" onClick={onClose}>
                       ✓ 완료
                     </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 생성 중 */}
+            {phase === "generating" && (
+              <>
+                <div className="ccPreviewImgBox ccPreviewImgBox--checker ccPreviewImgBox--burst">
+                  <img src="/assets/character/loading-burst.png" alt="" className="ccBurstImg" />
+                </div>
+                <div className="ccAppleLoader">
+                  <p className="ccAppleTitle">생성 중</p>
+                  <div className="ccAppleRow">
+                    {[1, 2, 3, 4].map((n, i) => (
+                      <div key={n} className="ccAppleStep">
+                        <img
+                          src={`/assets/icon/apple-stage-${n}.png`}
+                          alt=""
+                          className={`ccAppleImg${i === activeApple ? " ccAppleImg--active" : ""}`}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </>
