@@ -106,7 +106,7 @@ export function CharacterModal({
     }
     if (wasBusyRef.current) {
       wasBusyRef.current = false;
-      if (!characterNameRef.current && !characterPersonaRef.current) setShowResult(true);
+      setShowResult(true);
     }
     setActiveApple(0);
   }, [isBusy]);
@@ -156,9 +156,9 @@ export function CharacterModal({
       {/* ── 헤더 ── */}
       <div className="ccHeader">
         <div className="ccHeaderTitle">
-          <img src="/assets/icon/flower3.png" alt="" className="ccFlower" />
+          <img src="/assets/icon/flower3.png" alt="" className="ccFlower ccFlower--l" />
           <h1 className="ccTitle">주민 캐릭터 만들기</h1>
-          <img src="/assets/icon/flower3.png" alt="" className="ccFlower" />
+          <img src="/assets/icon/flower3.png" alt="" className="ccFlower ccFlower--r" />
         </div>
         <button type="button" className="ccCloseBtn" onClick={onClose} aria-label="닫기">
           ✕
@@ -387,7 +387,7 @@ export function CharacterModal({
                   onImageUpload(e.dataTransfer.files?.[0]);
                 }}
               >
-                <img src="/assets/character/icon-photo.png" alt="" className="ccDropIcon" />
+                <img src="/assets/character/photo.png" alt="" className="ccDropIcon" />
                 <div className="ccDropTitle">여기에 파일을 올려주세요</div>
                 <div className="ccDropSub">드래그 앤 드롭 또는 클릭하여 업로드</div>
               </div>
@@ -396,7 +396,7 @@ export function CharacterModal({
             {/* 텍스트 자동생성 모드 */}
             {phase === "idle-text" && (
               <div className="ccTextIdle">
-                <img src="/assets/character/icon-wand.png" alt="" className="ccDropIcon" />
+                <img src="/assets/character/magicWand.png" alt="" className="ccDropIcon" />
                 <div className="ccDropTitle">텍스트로 자동 생성 모드</div>
                 <div className="ccDropSub">
                   이름과 성격 키워드, 설명을 입력하면
