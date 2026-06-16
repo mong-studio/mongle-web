@@ -4,9 +4,9 @@ import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import {
   fetchCharacters,
   generateCharacter,
-  hasPendingCharacterJob,
   resumePendingCharacter,
 } from "../features/character/api.js";
+import { hasPendingJob } from "../features/character/pendingJob.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
@@ -276,7 +276,7 @@ export function App() {
       return;
     }
     resumedRef.current = true;
-    if (!hasPendingCharacterJob()) {
+    if (!hasPendingJob()) {
       return;
     }
 

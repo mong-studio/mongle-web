@@ -1,5 +1,6 @@
+import axios from "axios";
 import { apiClient } from "../../shared/api/client.js";
-import { clearPendingJob, hasPendingJob, loadPendingJob, savePendingJob } from "./pendingJob.js";
+import { clearPendingJob, loadPendingJob, savePendingJob } from "./pendingJob.js";
 
 // 백엔드 캐릭터 생성은 3단계 비동기 파이프라인이다.
 //   1. (선택) source-images presigned PUT 발급 → S3 직접 업로드
@@ -91,16 +92,8 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-type AxiosLikeError = {
-  response?: { status?: number; data?: { error?: unknown } };
-};
-
-function isAxiosLikeError(error: unknown): error is AxiosLikeError {
-  return typeof error === "object" && error !== null && "response" in error;
-}
-
 function toFriendlyMessage(error: unknown): string {
-  if (isAxiosLikeError(error)) {
+  if (axios.isAxiosError(error)) {
     const code = error.response?.data?.error;
     if (typeof code === "string" && ERROR_MESSAGES[code]) {
       return ERROR_MESSAGES[code];
@@ -223,11 +216,6 @@ export async function generateCharacter(
   } catch (error) {
     throw new Error(toFriendlyMessage(error));
   }
-}
-
-/** 진행 중인(영속화된) 생성 잡이 있는지. */
-export function hasPendingCharacterJob(): boolean {
-  return hasPendingJob();
 }
 
 /**
