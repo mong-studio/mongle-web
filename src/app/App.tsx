@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
+import {
+  fetchCharacters,
+  generateCharacter,
+  resumePendingCharacter,
+} from "../features/character/api.js";
+import { hasPendingJob } from "../features/character/pendingJob.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
@@ -60,6 +66,14 @@ function buildApiUrl(path: string) {
   return `${API_BASE}${path}`;
 }
 
+// 백엔드 gen_img_url(절대 URL이거나 상대 경로)을 화면용 아바타 URL로 변환한다.
+function resolveAvatarUrl(genImgUrl: string | undefined): string | undefined {
+  if (!genImgUrl) {
+    return undefined;
+  }
+  return genImgUrl.startsWith("http") ? genImgUrl : buildApiUrl(genImgUrl);
+}
+
 export function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
@@ -72,6 +86,7 @@ export function App() {
   const [selectedKeywordCategories, setSelectedKeywordCategories] = useState<string[]>([]);
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
+  const [sourceImageFile, setSourceImageFile] = useState<File | null>(null);
   const [notice, setNotice] = useState("오늘의 사과 보상은 20개까지 받을 수 있어요.");
   const [noticeVisible, setNoticeVisible] = useState(true);
   const noticeTimerRef = useRef<number | null>(null);
@@ -159,19 +174,29 @@ export function App() {
     setSelectedKeywordCategories([]);
     setSourceImagePreview("");
     setSourceImageName("");
+    setSourceImageFile(null);
   }, []);
 
   const closeActiveFeature = useCallback(() => {
+    // 주민 생성 중에는 모달을 닫지 못하도록 막는다(백그라운드 Job 진행 중).
+    if (isBusy) {
+      showNotice("주민을 만드는 중이에요. 끝날 때까지 조금만 기다려 주세요.");
+      return;
+    }
     if (activeFeature === "character") {
       resetCharacterDraft();
     }
     setActiveFeature(null);
-  }, [activeFeature, resetCharacterDraft]);
+  }, [activeFeature, isBusy, resetCharacterDraft, showNotice]);
 
   const closeCharacterSetup = useCallback(() => {
+    if (isBusy) {
+      showNotice("주민을 만드는 중이에요. 끝날 때까지 조금만 기다려 주세요.");
+      return;
+    }
     resetCharacterDraft();
     setCharacterSetupOpen(false);
-  }, [resetCharacterDraft]);
+  }, [isBusy, resetCharacterDraft, showNotice]);
 
   const openVillageDialogue = useCallback(() => {
     if (!overlayOpenRef.current) setDialogueOpen(true);
@@ -212,6 +237,98 @@ export function App() {
   useEffect(() => {
     void fetchTodoTagColors();
   }, [fetchTodoTagColors]);
+
+  const fetchResidents = useCallback(async () => {
+    if (authStatus !== "authenticated") {
+      setResidents([]);
+      return;
+    }
+
+    try {
+      const items = await fetchCharacters();
+      setResidents(
+        items.slice(0, 10).map((item) => ({
+          id: item.characterId,
+          name: item.name,
+          personality: "",
+          speechStyle: "",
+          avatarUrl: resolveAvatarUrl(item.genImgUrl),
+        })),
+      );
+    } catch {
+      setResidents([]);
+    }
+  }, [authStatus]);
+
+  useEffect(() => {
+    void fetchResidents();
+  }, [fetchResidents]);
+
+  // 새로고침/이탈로 중단됐던 생성 잡을 로그인 후 한 번 이어서 마무리한다.
+  const resumedRef = useRef(false);
+  useEffect(() => {
+    if (authStatus !== "authenticated") {
+      resumedRef.current = false;
+      return;
+    }
+    if (resumedRef.current) {
+      return;
+    }
+    resumedRef.current = true;
+    if (!hasPendingJob()) {
+      return;
+    }
+
+    let cancelled = false;
+    setIsBusy(true);
+    showNotice("이전에 만들던 주민을 마무리하는 중이에요…");
+    void (async () => {
+      try {
+        const result = await resumePendingCharacter();
+        if (cancelled || !result) {
+          return;
+        }
+        const resident: Resident = {
+          id: result.characterId,
+          name: result.name,
+          personality: "",
+          speechStyle: "",
+          avatarUrl: resolveAvatarUrl(result.genImgUrl),
+        };
+        setResidents((current) => [...current, resident].slice(0, 10));
+        showNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
+        setVillageVersion((current) => current + 1);
+        useAuthStore.setState((state) => ({
+          user: state.user ? { ...state.user, hasCharacter: true } : null,
+        }));
+      } catch (error) {
+        if (!cancelled) {
+          showNotice(error instanceof Error ? error.message : "이전 작업을 마무리하지 못했어요.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsBusy(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authStatus, showNotice]);
+
+  // 생성 중 새로고침/탭 종료 시 브라우저 기본 경고를 띄운다.
+  useEffect(() => {
+    if (!isBusy) {
+      return;
+    }
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isBusy]);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -268,45 +385,37 @@ export function App() {
       showNotice("주민 이름과 페르소나를 모두 적어주세요.");
       return;
     }
+    const keywords = selectedKeywordCategories.slice(0, 3);
+    if (keywords.length === 0) {
+      showNotice("성격 카테고리를 최소 1개 골라주세요.");
+      return;
+    }
     setIsBusy(true);
+    showNotice("새 친구를 그리는 중이에요. 잠시만 기다려 주세요.");
     try {
-      const keywords = selectedKeywordCategories.slice(0, 3);
-
-      const { data: result } = await apiClient.post<{
-        character_id: string;
-        name: string;
-        personality: string;
-        speech_style: string;
-        image_url?: string;
-      }>("/characters/generate/", {
+      const result = await generateCharacter({
         name,
         persona,
-        source_image_url: sourceImagePreview || null,
-        personality_keywords: keywords,
+        personalityKeywords: keywords,
+        sourceImageFile,
       });
-      if (!result.image_url) {
-        throw new Error("친구 그림을 그리는 데 실패했어요. 잠시 후 다시 시도해 주세요.");
-      }
       const resident: Resident = {
-        id: result.character_id,
+        id: result.characterId,
         name: result.name,
-        personality: result.personality,
-        speechStyle: result.speech_style,
-        avatarUrl: result.image_url.startsWith("http")
-          ? result.image_url
-          : buildApiUrl(result.image_url),
+        personality: result.persona,
+        speechStyle: "",
+        avatarUrl: resolveAvatarUrl(result.genImgUrl),
       };
       setResidents((current) => [...current, resident].slice(0, 10));
       showNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
-      setSourceImagePreview("");
-      setSourceImageName("");
+      resetCharacterDraft();
       useAuthStore.setState((state) => ({
         user: state.user ? { ...state.user, hasCharacter: true } : null,
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
-      showNotice(`새 친구를 마을에 데려오지 못했어요. ${message}`);
+      showNotice(message);
     } finally {
       setIsBusy(false);
     }
@@ -316,10 +425,11 @@ export function App() {
     if (!file) {
       setSourceImageName("");
       setSourceImagePreview("");
+      setSourceImageFile(null);
       return;
     }
-    if (!file.type.startsWith("image/")) {
-      showNotice("이미지 파일만 업로드할 수 있어요.");
+    if (file.type !== "image/jpeg" && file.type !== "image/png") {
+      showNotice("프로필 사진은 JPG 또는 PNG만 올릴 수 있어요.");
       return;
     }
 
@@ -327,6 +437,7 @@ export function App() {
     reader.onload = () => {
       setSourceImageName(file.name);
       setSourceImagePreview(String(reader.result || ""));
+      setSourceImageFile(file);
       showNotice("애착인형 사진을 불러왔어요. 이 이미지를 기반으로 주민을 만들게요.");
     };
     reader.readAsDataURL(file);
