@@ -25,14 +25,6 @@
     transform: translateY(-5px);
   }
 }
-@keyframes ccShimmer {
-  0% {
-    background-position: -150% 0;
-  }
-  100% {
-    background-position: 250% 0;
-  }
-}
 @keyframes ccTwinkle {
   0%,
   100% {
@@ -448,9 +440,9 @@
 }
 
 .ccGenBtn {
-  flex: 1 1 200px;
+  flex: 1 1 150px;
   min-width: 170px;
-  padding: 12px 16px;
+  padding: 12px 14px;
   border: none;
   border-radius: 16px;
   background: var(--cc-primary);
@@ -490,8 +482,7 @@
 }
 
 .ccBearIcon {
-  width: 22px;
-  height: 22px;
+  width: 40px;
   image-rendering: pixelated;
 }
 
@@ -608,10 +599,11 @@
 .ccPreviewBg {
   position: absolute;
   inset: 0;
-  width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  align-items: center;
+  justify-content: center;
 }
 
 .ccUploadedImg {
@@ -623,109 +615,72 @@
   display: block;
 }
 
-.ccShimmer {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 28%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 72%
-  );
-  background-size: 240% 100%;
-  animation: ccShimmer 1.9s linear infinite;
+/* ── Apple loader ── */
+@keyframes ccAppleBounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.05);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.12);
+  }
 }
 
-/* Loading state */
-.ccLoadingInfo {
+.ccAppleLoader {
+  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  margin-top: 2px;
+  gap: 22px;
+  padding: 24px 16px;
 }
 
-.ccRabbit {
-  width: 78px;
-  height: auto;
-  image-rendering: pixelated;
-  animation: ccFloaty 2.4s ease-in-out infinite;
-  flex-shrink: 0;
-}
-
-.ccLoadingTitle {
+.ccAppleTitle {
   font-family: "Jua", sans-serif;
-  font-size: 18px;
+  font-size: 30px;
   color: var(--cc-ink);
-  line-height: 1.4;
+  margin: 0;
+  letter-spacing: 1px;
 }
 
-.ccLoadingSub {
-  font-family: "Jua", sans-serif;
-  font-size: 14px;
-  color: var(--cc-ink-soft);
-  margin-top: 5px;
-}
-
-.ccDots {
+.ccAppleRow {
   display: flex;
-  justify-content: center;
-  gap: 9px;
+  align-items: center;
 }
 
-.ccDot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--cc-border-strong);
-  animation: ccTwinkle 1.1s infinite;
-  display: inline-block;
-}
-
-.ccPreviewProgress {
+.ccAppleStep {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 2px;
 }
 
-.ccProgressDot {
-  position: relative;
-  width: 22px;
-  height: 22px;
+.ccAppleImg {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transition: transform 0.2s ease;
+}
+
+.ccAppleImg--active {
+  animation: ccAppleBounce 0.7s ease-in-out infinite;
+}
+
+.ccAppleArrow {
+  color: var(--cc-primary-dk);
+  font-size: 13px;
   flex-shrink: 0;
 }
 
-.ccProgressDot::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(120, 90, 40, 0.3);
-}
-
-.ccProgressDot::after {
-  content: "";
-  position: absolute;
-  left: 7px;
-  top: 7px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--cc-primary);
-}
-
-.ccPreviewProgress .ccProgressBar {
-  flex: 1;
-  height: 16px;
-}
-
-.ccPreviewPct {
-  text-align: center;
+.ccAppleCaption {
   font-family: "Jua", sans-serif;
-  font-size: 15px;
-  color: var(--cc-go-dk);
+  font-size: 17px;
+  color: var(--cc-ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
 }
 
 /* Uploaded state */

@@ -164,9 +164,9 @@ export function CharacterModal({
       {/* ── 헤더 ── */}
       <div className="ccHeader">
         <div className="ccHeaderTitle">
-          <img src="/assets/icon/flower3.png" alt="" className="ccFlower ccFlower--l" />
+          <img src="/assets/icon/flower3.png" alt="" className="ccFlower" />
           <h1 className="ccTitle">주민 캐릭터 만들기</h1>
-          <img src="/assets/icon/flower3.png" alt="" className="ccFlower ccFlower--r" />
+          <img src="/assets/icon/flower3.png" alt="" className="ccFlower" />
         </div>
         <button type="button" className="ccCloseBtn" onClick={onClose} aria-label="닫기">
           ✕
@@ -193,7 +193,7 @@ export function CharacterModal({
                   setShowResult(false);
                 }}
               >
-                <img src="/assets/character/icon-photo.png" alt="" className="ccCardIcon" />
+                <img src="/assets/character/photo.png" alt="" className="ccCardIcon" />
                 <div>
                   <div className="ccCardHead">이미지 업로드</div>
                   <div className="ccCardSub">사진을 업로드해주세요</div>
@@ -209,7 +209,7 @@ export function CharacterModal({
                   if (sourceImagePreview) onImageUpload(undefined);
                 }}
               >
-                <img src="/assets/character/icon-wand.png" alt="" className="ccCardIcon" />
+                <img src="/assets/character/magicWand.png" alt="" className="ccCardIcon" />
                 <div>
                   <div className="ccCardHead">텍스트로 자동 생성</div>
                   <div className="ccCardSub">설명만으로 자동 생성해요</div>
@@ -314,7 +314,7 @@ export function CharacterModal({
                 disabled={isBusy || residents.length >= 10}
                 onClick={handleGenerate}
               >
-                <img src="/assets/character/icon-bear.png" alt="" className="ccBearIcon" />
+                <img src="/assets/icon/bear.png" alt="" className="ccBearIcon" />
                 {isBusy ? "생성 중…" : "캐릭터 생성하기"}
               </button>
               <div className="ccGenStatus">
@@ -357,36 +357,33 @@ export function CharacterModal({
           <div className="ccPreviewPanel">
             {/* 생성 중 */}
             {phase === "generating" && (
-              <>
-                <div className="ccPreviewImgBox">
-                  <img src="/assets/character/loading-burst.png" alt="" className="ccPreviewBg" />
-                  <div className="ccShimmer" />
+              <div className="ccAppleLoader">
+                <p className="ccAppleTitle">로딩 중...</p>
+                <div className="ccAppleRow">
+                  {[1, 2, 3, 4].map((n, i) => {
+                    const isActive = i === Math.min(Math.floor(progress / 25), 3);
+                    return (
+                      <div key={n} className="ccAppleStep">
+                        <img
+                          src={`/assets/icon/apple-stage${n}.png`}
+                          alt=""
+                          className={`ccAppleImg${isActive ? " ccAppleImg--active" : ""}`}
+                        />
+                        {i < 3 && (
+                          <span className="ccAppleArrow" aria-hidden="true">
+                            ▶
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="ccLoadingInfo">
-                  <img src="/assets/character/loading-rabbit.png" alt="" className="ccRabbit" />
-                  <div>
-                    <div className="ccLoadingTitle">
-                      마을에 어울리는 주민을
-                      <br />
-                      만들고 있어요...
-                    </div>
-                    <div className="ccLoadingSub">잠시만 기다려주세요!</div>
-                  </div>
-                </div>
-                <div className="ccDots">
-                  {([0, 0.18, 0.36, 0.54] as const).map((delay) => (
-                    <span key={delay} className="ccDot" style={{ animationDelay: `${delay}s` }} />
-                  ))}
-                </div>
-                <div className="ccPreviewProgress">
-                  <span className="ccProgressDot" />
-                  <div className="ccProgressBar">
-                    <div className="ccProgressFill" style={{ width: `${progress}%` }} />
-                  </div>
-                  <span className="ccProgressDot" />
-                </div>
-                <div className="ccPreviewPct">{progress}%</div>
-              </>
+                <p className="ccAppleCaption">
+                  <span aria-hidden="true">🌱</span>
+                  아그작 아그작
+                  <span aria-hidden="true">🌱</span>
+                </p>
+              </div>
             )}
 
             {/* 이미지 업로드됨 */}
