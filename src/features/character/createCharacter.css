@@ -900,6 +900,19 @@
   text-align: center;
 }
 
+.ccDropConstraints {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: center;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 11.5px;
+  color: var(--cc-ink-faint);
+}
+
 /* ── Text idle (idle-text) ── */
 .ccTextIdle {
   display: flex;

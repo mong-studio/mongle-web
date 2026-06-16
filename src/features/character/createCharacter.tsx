@@ -184,7 +184,7 @@ export function CharacterModal({
           <div className="ccSection">
             <div className="ccSectionLabel">
               <span className="ccNumBadge">1</span>
-              <span className="ccSectionTitle">이미지 입력</span>
+              <span className="ccSectionTitle">캐릭터 생성 방식</span>
             </div>
             <div className="ccCards">
               {/* 업로드 카드 */}
@@ -400,7 +400,10 @@ export function CharacterModal({
               >
                 <img src="/assets/character/photo.png" alt="" className="ccDropIcon" />
                 <div className="ccDropTitle">여기에 파일을 올려주세요</div>
-                <div className="ccDropSub">드래그 앤 드롭 또는 클릭하여 업로드</div>
+                <div className="ccDropSub">드래그 앤 드롭 또는 클릭하여 업로드 가능해요!</div>
+                <ul className="ccDropConstraints">
+                  <li>PNG · JPG · JPEG 파일 (최대 5MB)</li>
+                </ul>
               </div>
             )}
 
