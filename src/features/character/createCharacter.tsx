@@ -30,14 +30,6 @@ function getChipColor(idx: number) {
   return CHIP_COLORS[idx % CHIP_COLORS.length];
 }
 
-function getProgressMsg(p: number) {
-  if (p >= 100) return "거의 다 됐어요!";
-  if (p >= 80) return "오두막 앞에서 포즈 잡는 중! ✦";
-  if (p >= 50) return "좋아하는 음식을 정하는 중…";
-  if (p >= 25) return "성격을 콩닥콩닥 빚는 중이에요…";
-  return "마을에 어울리는 주민을 찾고 있어요!";
-}
-
 type Resident = {
   id: string;
   name: string;
@@ -307,65 +299,16 @@ export function CharacterModal({
           {/* 생성하기 */}
           <div className="ccGenSection">
             <div className="ccFieldLabel">생성하기</div>
-            <div className="ccGenRow">
-              <button
-                type="button"
-                className="ccGenBtn"
-                disabled={isBusy || residents.length >= 10}
-                onClick={handleGenerate}
-              >
-                <img src="/assets/icon/bear.png" alt="" className="ccBearIcon" />
-                {isBusy ? "생성 중…" : "캐릭터 생성하기"}
-              </button>
-              <div className="ccGenStatus">
-                {phase === "uploaded" && (
-                  <div className="ccStatusMsg">
-                    <span className="ccStatusStar">✿</span>
-                    업로드 완료! 캐릭터 생성하기를 눌러주세요.
-                  </div>
-                )}
-                {phase === "generating" && (
-                  <>
-                    <div className="ccProgressHeader">
-                      <span className="ccProgressStar">✦</span>
-                      <span className="ccProgressLabel">생성 중…</span>
-                      <span className="ccProgressPct">{progress}%</span>
-                    </div>
-                    <div className="ccProgressBar">
-                      <div className="ccProgressFill" style={{ width: `${progress}%` }} />
-                    </div>
-                    <div className="ccProgressMsg">{getProgressMsg(progress)}</div>
-                  </>
-                )}
-                {phase === "result" && (
-                  <div className="ccStatusDone">
-                    <span>✓</span> 생성 완료! 오른쪽에서 확인해 보세요.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── 오른쪽 ── */}
-        <div className="ccRight">
-          <div className="ccSectionLabel">
-            <span className="ccNumBadge">3</span>
-            <span className="ccSectionTitle">미리보기</span>
-          </div>
-
-          <div className="ccPreviewPanel">
-            {/* 생성 중 */}
-            {phase === "generating" && (
+            {phase === "generating" ? (
               <div className="ccAppleLoader">
-                <p className="ccAppleTitle">로딩 중...</p>
+                <p className="ccAppleTitle">생성 중</p>
                 <div className="ccAppleRow">
                   {[1, 2, 3, 4].map((n, i) => {
                     const isActive = i === Math.min(Math.floor(progress / 25), 3);
                     return (
                       <div key={n} className="ccAppleStep">
                         <img
-                          src={`/assets/icon/apple-stage${n}.png`}
+                          src={`/assets/icon/icon-apple${n}.png`}
                           alt=""
                           className={`ccAppleImg${isActive ? " ccAppleImg--active" : ""}`}
                         />
@@ -384,8 +327,43 @@ export function CharacterModal({
                   <span aria-hidden="true">🌱</span>
                 </p>
               </div>
+            ) : (
+              <div className="ccGenRow">
+                <button
+                  type="button"
+                  className="ccGenBtn"
+                  disabled={residents.length >= 10}
+                  onClick={handleGenerate}
+                >
+                  <img src="/assets/icon/bear.png" alt="" className="ccBearIcon" />
+                  캐릭터 생성하기
+                </button>
+                <div className="ccGenStatus">
+                  {phase === "uploaded" && (
+                    <div className="ccStatusMsg">
+                      <span className="ccStatusStar">✿</span>
+                      업로드 완료! 캐릭터 생성하기를 눌러주세요.
+                    </div>
+                  )}
+                  {phase === "result" && (
+                    <div className="ccStatusDone">
+                      <span>✓</span> 생성 완료! 오른쪽에서 확인해 보세요.
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
+          </div>
+        </div>
 
+        {/* ── 오른쪽 ── */}
+        <div className="ccRight">
+          <div className="ccSectionLabel">
+            <span className="ccNumBadge">3</span>
+            <span className="ccSectionTitle">미리보기</span>
+          </div>
+
+          <div className="ccPreviewPanel">
             {/* 이미지 업로드됨 */}
             {phase === "uploaded" && (
               <>
