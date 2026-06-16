@@ -409,10 +409,10 @@ export function App() {
         avatarUrl: resolveAvatarUrl(result.genImgUrl),
       };
       setResidents((current) => [...current, resident].slice(0, 10));
-      setLastCreatedResident(resident);
       showNotice(`${resident.name} 주민이 몽글마을에 들어왔어요.`);
       setVillageVersion((current) => current + 1);
       resetCharacterDraft();
+      setLastCreatedResident(resident);
       useAuthStore.setState((state) => ({
         user: state.user ? { ...state.user, hasCharacter: true } : null,
       }));
