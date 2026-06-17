@@ -283,7 +283,7 @@ export function CharacterModal({
                         onToggleKeyword(kw);
                       }}
                     >
-                      {selected && <span className="ccChipCheck">✓</span>}
+                      {/* {selected && <span className="ccChipCheck">✓</span>} */}
                       {kw}
                     </button>
                   );
