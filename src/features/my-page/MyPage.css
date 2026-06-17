@@ -47,6 +47,17 @@
   }
 }
 
+@keyframes mpPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes mpToastIn {
   0% {
     transform: translateX(-50%) translateY(20px) scale(0.96);
@@ -80,116 +91,42 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   background: linear-gradient(180deg, #bfe3f2 0%, #d8ebb0 50%, #a9d18a 100%);
   background-attachment: fixed;
   color: var(--mp-ink);
-  scrollbar-width: thin;
-  scrollbar-color: #dcc79c transparent;
-}
-
-.mpPage::-webkit-scrollbar {
-  width: 11px;
-}
-
-.mpPage::-webkit-scrollbar-thumb {
-  background: #dcc79c;
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-/* ── 배경 블롭 ── */
-.mpBlobs {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.mpBlob {
-  position: absolute;
-  border-radius: 50%;
-}
-
-.mpBlob1 {
-  top: 8%;
-  left: 9%;
-  width: 140px;
-  height: 140px;
-  background: #fff;
-  opacity: 0.42;
-  filter: blur(8px);
-}
-
-.mpBlob2 {
-  top: 18%;
-  right: 13%;
-  width: 96px;
-  height: 96px;
-  background: #fff;
-  opacity: 0.4;
-  filter: blur(7px);
-}
-
-.mpBlob3 {
-  bottom: 7%;
-  left: 6%;
-  width: 170px;
-  height: 170px;
-  background: #8fc47a;
-  opacity: 0.45;
-  filter: blur(11px);
-}
-
-.mpBlob4 {
-  bottom: 5%;
-  right: 8%;
-  width: 150px;
-  height: 150px;
-  background: #9ecb86;
-  opacity: 0.45;
-  filter: blur(11px);
-}
-
-.mpBlob5 {
-  top: 46%;
-  left: 2%;
-  width: 80px;
-  height: 80px;
-  background: #f4c0cf;
-  opacity: 0.34;
-  filter: blur(9px);
-}
-
-/* ── 컨테이너 ── */
-.mpContainer {
-  position: relative;
-  z-index: 1;
-  max-width: 1340px;
-  margin: 0 auto;
-  padding: 26px 26px 44px;
-}
-
-/* ── 메인 카드 ── */
-.mpCard {
-  background: var(--mp-bg);
-  border: 3px solid var(--mp-border-strong);
-  border-radius: 30px;
-  box-shadow: 0 28px 64px -24px rgba(80, 58, 26, 0.55);
-  overflow: hidden;
+  animation: mpPageIn 0.32s ease-out both;
 }
 
 /* ── 헤더 바 ── */
 .mpHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 16px 26px;
+  padding: 1px 26px;
+  background: rgba(251, 243, 222, 0.93);
+  backdrop-filter: blur(10px);
   border-bottom: 2px solid var(--mp-divider);
+}
+
+/* ── 컨테이너 ── */
+.mpContainer {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 16px 26px 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .mpHeaderBrand {
@@ -201,8 +138,7 @@
 }
 
 .mpBrandLogo {
-  width: 38px;
-  height: 38px;
+  height: 90px;
   flex-shrink: 0;
 }
 
@@ -223,7 +159,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 10px 20px;
+  padding: 10px 10px;
   border-radius: 14px;
   border: 2px solid var(--mp-border);
   background: var(--mp-panel);
@@ -239,7 +175,7 @@
 }
 
 .mpGoVillage img {
-  width: 24px;
+  /* width: 24px; */
   height: 24px;
 }
 
@@ -340,11 +276,12 @@
 
 /* ── 타이틀 ── */
 .mpTitleRow {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 26px;
-  padding: 26px 30px 8px;
+  padding: 16px 30px 8px;
 }
 
 .mpTitleFlower {
@@ -403,26 +340,30 @@
   white-space: nowrap;
 }
 
-/* ── 본문 ── */
+/* ── 본문 (2열: 주민 리스트 | 정보+설정) ── */
 .mpBody {
-  padding: 18px 30px 30px;
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
   gap: 22px;
+  align-items: stretch;
+  overflow: hidden;
 }
 
-/* ── 상단 2열 그리드 ── */
-.mpTopRow {
-  display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 22px;
+/* ── 오른쪽 컬럼 ── */
+.mpRightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
 }
 
 /* ── 섹션 제목 공통 ── */
 .mpSecHead {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: left;
+  justify-content: left;
   gap: 9px;
   margin-bottom: 16px;
   font-family: "Jua", sans-serif;
@@ -435,23 +376,61 @@
   color: var(--mp-accent-soft);
 }
 
-/* ── 프로필 + 기본정보 카드 ── */
+/* ── 프로필 카드 ── */
 .mpProfileCard {
   background: var(--mp-panel);
   border: 2px solid var(--mp-border);
   border-radius: 22px;
-  padding: 24px;
-  display: grid;
-  grid-template-columns: 230px 1fr;
-  gap: 26px;
-  align-items: center;
-}
-
-.mpAvatarCol {
+  padding: 24px 24px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 20px;
+}
+
+/* ── 기본 정보 카드 ── */
+.mpInfoCard {
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border);
+  border-radius: 22px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 프로필 bio ── */
+.mpBioBox {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--mp-card);
+  border: 1.5px solid var(--mp-border);
+  border-radius: 15px;
+  padding: 13px 14px;
+}
+
+.mpBioText {
+  flex: 1;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--mp-ink-soft);
+  line-height: 1.55;
+}
+
+.mpBioEditBtn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1.5px solid var(--mp-border);
+  border-radius: 9px;
+  padding: 5px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.mpBioEditBtn:hover {
+  background: var(--mp-soft);
 }
 
 .mpAvatarRing {
@@ -459,6 +438,7 @@
   width: 188px;
   height: 188px;
   flex-shrink: 0;
+  margin-bottom: 14px;
 }
 
 .mpAvatarImg {
@@ -544,11 +524,6 @@
   font-size: 19px;
   color: var(--mp-ink);
   white-space: nowrap;
-}
-
-.mpInfoValIcon {
-  width: 22px;
-  height: 22px;
 }
 
 .mpInfoEditBtn {
@@ -820,14 +795,84 @@
 }
 
 /* ── 내 주민들 ── */
+.mpResList {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #dcc79c transparent;
+}
+
+.mpResListItem {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 14px;
+  background: var(--mp-card);
+  border: 1.5px solid var(--mp-border);
+  border-radius: 15px;
+  transition: background 0.13s;
+}
+
+.mpResListItem:hover {
+  background: var(--mp-soft);
+}
+
+.mpResListImgWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 11px;
+  overflow: hidden;
+  border: 2px solid var(--mp-border-strong);
+  flex-shrink: 0;
+}
+
+.mpResListImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mpResListAv {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Jua", sans-serif;
+  font-size: 1.4rem;
+  color: #3a2408;
+}
+
+.mpResListInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.mpResListName {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--mp-ink);
+  margin-bottom: 5px;
+}
+
 .mpResSection {
   background: var(--mp-panel);
   border: 2px solid var(--mp-border);
   border-radius: 22px;
   padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .mpResSectionHead {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
