@@ -11,6 +11,7 @@ import { NotificationToastLayer } from "../features/notification/NotificationToa
 import { useNotificationStore } from "../features/notification/store.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
+import { completeTodo as completeTodoRequest } from "../features/todo/todoApi.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
 import { PhaserVillage } from "../features/village/PhaserVillage.js";
 import { apiClient } from "../shared/api/client.js";
@@ -26,44 +27,19 @@ import { VillageDialogue } from "./ui/VillageDialogue.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 const MAX_DAILY_APPLES = 20;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const INITIAL_TODOS: TodoItem[] = [
-  {
-    id: "todo-1",
-    title: "아침 스트레칭",
-    dueDate: "2026-05-26",
-    tags: ["건강"],
-    status: "saved",
-  },
-  {
-    id: "todo-2",
-    title: "마을 배달 도와주기",
-    dueDate: "2026-05-26",
-    tags: ["작업"],
-    status: "done",
-  },
-  {
-    id: "todo-3",
-    title: "채집 10개 하기",
-    dueDate: "2026-05-26",
-    tags: ["작업"],
-    status: "saved",
-  },
-  {
-    id: "todo-4",
-    title: "책 20분 읽기",
-    dueDate: "2026-05-26",
-    tags: ["성장"],
-    status: "saved",
-  },
-  {
-    id: "todo-5",
-    title: "일기 쓰기",
-    dueDate: "2026-05-26",
-    tags: ["성장"],
-    status: "saved",
-  },
-];
+type ApiTodo = {
+  todo_id: string;
+  content: string;
+  status: "IN_PROGRESS" | "COMPLETED" | "FAILED";
+  todo_date: string;
+  tag_content?: string;
+  quest?: {
+    content: string;
+    character_name?: string | null;
+  } | null;
+};
 
 function buildApiUrl(path: string) {
   return `${API_BASE}${path}`;
@@ -81,9 +57,9 @@ export function App() {
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
-  const [todos, setTodos] = useState<TodoItem[]>(INITIAL_TODOS);
+  const [todos, setTodos] = useState<TodoItem[]>([]);
   const [todoTagColors, setTodoTagColors] = useState<Record<string, string>>({});
-  const [apples, setApples] = useState(12);
+  const [apples, setApples] = useState(0);
   const [characterName, setCharacterName] = useState("");
   const [characterPersona, setCharacterPersona] = useState("");
   const [selectedKeywordCategories, setSelectedKeywordCategories] = useState<string[]>([]);
@@ -100,6 +76,7 @@ export function App() {
   const [showMyPage, setShowMyPage] = useState(false);
   const authStatus = useAuthStore((state: AuthState) => state.status);
   const authUser = useAuthStore((state: AuthState) => state.user);
+  const authUserId = authUser?.userId;
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -171,6 +148,46 @@ export function App() {
       setCharacterSetupOpen(true);
     }
   }, [authStatus, authUser]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated" || !authUserId) {
+      setTodos([]);
+      return;
+    }
+
+    let cancelled = false;
+    apiClient
+      .get<ApiTodo[]>("/todos/")
+      .then((res) => {
+        if (cancelled) {
+          return;
+        }
+        setTodos(
+          res.data.map((todo) => ({
+            id: todo.todo_id,
+            title: todo.content,
+            dueDate: todo.todo_date,
+            tags: todo.tag_content ? [todo.tag_content] : [],
+            status: todo.status === "COMPLETED" ? "done" : "saved",
+            assignedQuest: todo.quest
+              ? {
+                  characterName: todo.quest.character_name ?? null,
+                  content: todo.quest.content,
+                }
+              : null,
+          })),
+        );
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTodos([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authStatus, authUserId]);
 
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneTodoCount = savedTodos.filter((todo) => todo.status === "done").length;
@@ -456,22 +473,32 @@ export function App() {
     reader.readAsDataURL(file);
   }
 
-  function completeHudTodo(todoId: string) {
+  async function completeHudTodo(todoId: string) {
     const targetTodo = todos.find((todo) => todo.id === todoId);
     if (!targetTodo || targetTodo.status === "candidate" || targetTodo.status === "done") {
       return;
     }
 
-    setTodos((current) =>
-      current.map((todo) => (todo.id === todoId ? { ...todo, status: "done" } : todo)),
-    );
-    setApples((current) => Math.min(MAX_DAILY_APPLES, current + 1));
-    pushToast({
-      type: "reward",
-      title: `${targetTodo.title} 완료!`,
-      body: "사과를 보상으로 받았어요.",
-      rewardApples: 1,
-    });
+    if (!UUID_PATTERN.test(todoId)) {
+      setTodos((current) =>
+        current.map((todo) => (todo.id === todoId ? { ...todo, status: "done" } : todo)),
+      );
+      setApples((current) => Math.min(MAX_DAILY_APPLES, current + 1));
+      showNotice(`${targetTodo.title} 완료! 사과 1개를 받았어요.`);
+      return;
+    }
+
+    try {
+      await completeTodoRequest(todoId);
+      setTodos((current) =>
+        current.map((todo) => (todo.id === todoId ? { ...todo, status: "done" } : todo)),
+      );
+      setApples((current) => Math.min(MAX_DAILY_APPLES, current + 1));
+      showNotice(`${targetTodo.title} 완료! 사과 1개를 받았어요.`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "원인 미상";
+      showNotice(`TODO 완료 처리에 실패했어요. ${message}`);
+    }
   }
 
   function rewardReflectionApples(amount: number) {
@@ -530,7 +557,6 @@ export function App() {
 
       <FeatureModalHost
         activeFeature={activeFeature}
-        apiBase={API_BASE}
         characterName={characterName}
         characterPersona={characterPersona}
         isBusy={isBusy}

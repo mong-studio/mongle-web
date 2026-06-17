@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./todoCreation.css";
-import {
-  buildCommitPayload,
-  formatTodayIso,
-  postWebJson,
-  type TodoCommitResponse,
-  type TodoGenerateResult,
-} from "../../shared/api/todoPlanning.js";
+import { confirmTodos, formatTodayIso, generateTodos, previewTodoQuests } from "./todoApi.js";
 
 export type TodoItem = {
   id: string;
@@ -15,12 +9,18 @@ export type TodoItem = {
   tags: string[];
   tagColors?: Record<string, string>;
   status: "candidate" | "saved" | "done";
+  assignedQuest?: {
+    characterName: string | null;
+    content: string;
+    isTemporary?: boolean;
+  } | null;
 };
 
 export type TodoCommitResult = {
   calendarEventCount?: number;
   questPreviews?: {
     characterId: string | null;
+    characterName?: string | null;
     content: string;
     questId: string;
     todoId: string;
@@ -43,21 +43,6 @@ const EXTRA_COLORS = [
   { bg: "#FBDAC0", fg: "#C0763E", sel: "#EBA877" },
 ];
 const BUILT_IN_TAGS = Object.keys(TAG_COLORS);
-const ANIMALS = ["choco", "nabi", "mongsil", "tosil", "kong", "mul"];
-const ANIMAL_NAMES = ["초코", "나비", "몽실이", "토실이", "콩이", "물동이"];
-const DESCS = [
-  "몸을 가볍게 움직여보기!",
-  "보송한 하루 만들기!",
-  "먼지를 싹 정리하기!",
-  "바람 쐬며 기분 전환하기!",
-  "건강 챙기고 힘내기!",
-  "촉촉한 하루 보내기!",
-  "오늘도 활기차게 시작!",
-  "조금씩 꾸준히 해봐요!",
-  "기분 좋은 하루 만들기!",
-  "한 걸음씩 천천히!",
-];
-
 function getTagColor(tag: string, idx: number) {
   return TAG_COLORS[tag] ?? EXTRA_COLORS[idx % EXTRA_COLORS.length];
 }
@@ -66,18 +51,37 @@ function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function isImeComposing(event: React.KeyboardEvent<HTMLInputElement>) {
+  return event.nativeEvent.isComposing || event.key === "Process" || event.keyCode === 229;
+}
+
 type LocalTodo = { id: string; name: string; tags: string[] };
+type ResidentPreview = {
+  id: string;
+  name: string;
+  personality?: string;
+  persona?: string;
+  avatarUrl?: string;
+};
 type Quest = {
   id: string;
+  characterAvatarUrl: string | null;
+  characterId: string | null;
+  characterName: string | null;
+  isTemporaryQuest: boolean;
+  questText: string | null;
+  previewId: string;
   title: string;
   tags: string[];
-  animal: string;
-  who: string;
-  desc: string;
 };
 
+function createFallbackQuestText(resident: ResidentPreview) {
+  // TODO: AI 서버 연결 확인 후 프론트 테스트용 fallback 제거하기.
+  return `${resident.name}가 몽글마을 산책하기`;
+}
+
 type TodoCreationProps = {
-  apiBase: string;
+  residents: ResidentPreview[];
   savedTodos: TodoItem[];
   onNotice: (message: string) => void;
   onTodosSaved: (result: TodoCommitResult) => void;
@@ -85,7 +89,7 @@ type TodoCreationProps = {
 };
 
 export function TodoCreation({
-  apiBase,
+  residents,
   savedTodos: _savedTodos,
   onNotice,
   onTodosSaved,
@@ -94,7 +98,6 @@ export function TodoCreation({
   const [sentence, setSentence] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiTodos, setAiTodos] = useState<LocalTodo[]>([]);
 
   const [manualText, setManualText] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -105,14 +108,10 @@ export function TodoCreation({
 
   const [page, setPage] = useState<0 | 1>(0);
   const [quests, setQuests] = useState<Quest[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [addingTagFor, setAddingTagFor] = useState<string | null>(null);
-  const [questTagText, setQuestTagText] = useState("");
   const [isBusy, setIsBusy] = useState(false);
   const [toast, setToast] = useState("");
 
   const tagInputRef = useRef<HTMLInputElement>(null);
-  const questTagInputRef = useRef<HTMLInputElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(
@@ -157,6 +156,32 @@ export function TodoCreation({
     setManualText("");
   }
 
+  function updateTodoName(id: string, name: string) {
+    setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, name } : todo)));
+  }
+
+  function removeTodoTag(id: string, tag: string) {
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, tags: todo.tags.filter((item) => item !== tag) } : todo,
+      ),
+    );
+  }
+
+  function applySelectedTags(id: string) {
+    if (!selectedTags.length) {
+      showToast("먼저 적용할 태그를 선택해주세요.");
+      return;
+    }
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id
+          ? { ...todo, tags: Array.from(new Set([...todo.tags, ...selectedTags])) }
+          : todo,
+      ),
+    );
+  }
+
   function deleteTodo(id: string) {
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }
@@ -170,74 +195,83 @@ export function TodoCreation({
     }
     setAiLoading(true);
     try {
-      const result = await postWebJson<TodoGenerateResult>(apiBase, "/api/v1/todos/generate/", {
-        prompt: raw,
-      });
+      const result = await generateTodos(raw);
       const items = [...result.todos, ...result.calendar_events].map((t) => ({
         id: createId("ai"),
         name: t.title,
         tags: t.tags ?? [],
       }));
-      setAiTodos(items);
+      setTodos((prev) => [...prev, ...items]);
       setConfirmed(true);
       showToast(`AI가 ${items.length}개의 할 일로 나눴어요!`);
     } catch {
-      const parts = raw
-        .split(/[,.\n·]|그리고|하고|및/)
-        .map((x) => x.trim())
-        .filter((x) => x.length > 1);
-      const fallback = parts.slice(0, 6).map((p) => ({ id: createId("ai"), name: p, tags: [] }));
-      setAiTodos(fallback);
-      setConfirmed(true);
-      showToast("할 일로 나눴어요!");
+      setConfirmed(false);
+      showToast("AI가 할 일을 나누지 못했어요. 잠시 후 다시 시도해주세요.");
     } finally {
       setAiLoading(false);
     }
   }
 
-  function handleGenerate() {
-    const all = [...aiTodos, ...todos];
-    if (!all.length) {
+  async function handleGenerate() {
+    if (!todos.length) {
       showToast("할 일을 먼저 추가해주세요!");
       return;
     }
-    const newQuests: Quest[] = all.map((t, i) => ({
-      id: createId("q"),
-      title: t.name,
-      tags: t.tags.length ? t.tags : ["일상"],
-      animal: ANIMALS[i % ANIMALS.length],
-      who: ANIMAL_NAMES[i % ANIMAL_NAMES.length],
-      desc: DESCS[i % DESCS.length],
-    }));
-    setQuests(newQuests);
-    setPage(1);
-    showToast("퀘스트를 생성했어요!");
-  }
-
-  function deleteQuest(id: string) {
-    setQuests((prev) => prev.filter((q) => q.id !== id));
-    if (editingId === id) setEditingId(null);
-  }
-
-  function updateQuestTitle(id: string, title: string) {
-    setQuests((prev) => prev.map((q) => (q.id === id ? { ...q, title } : q)));
-  }
-
-  function removeQuestTag(id: string, tag: string) {
-    setQuests((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, tags: q.tags.filter((t) => t !== tag) } : q)),
-    );
-  }
-
-  function commitQuestTag(id: string) {
-    const t = questTagText.trim();
-    if (t) {
-      setQuests((prev) =>
-        prev.map((q) => (q.id === id && !q.tags.includes(t) ? { ...q, tags: [...q.tags, t] } : q)),
-      );
+    if (isBusy) {
+      return;
     }
-    setAddingTagFor(null);
-    setQuestTagText("");
+    setIsBusy(true);
+    try {
+      const result = await previewTodoQuests({
+        todos: todos.map((todo) => ({
+          content: todo.name,
+          tags: todo.tags.length ? todo.tags : ["일상"],
+        })),
+      });
+      setQuests(
+        result.todos.map((todo, index) => {
+          const residentByQuest = residents.find(
+            (resident) => resident.id === todo.quest?.character_id,
+          );
+          const fallbackResident = residents[index % Math.max(1, residents.length)];
+          const fallbackQuest =
+            !todo.quest && fallbackResident
+              ? {
+                  character_id: fallbackResident.id,
+                  character_name: fallbackResident.name,
+                  character_image_url: fallbackResident.avatarUrl ?? null,
+                  content: createFallbackQuestText(fallbackResident),
+                }
+              : null;
+          const quest = todo.quest ?? fallbackQuest;
+          return {
+            id: todo.preview_id,
+            characterAvatarUrl:
+              residentByQuest?.avatarUrl ??
+              quest?.character_image_url ??
+              fallbackResident?.avatarUrl ??
+              null,
+            characterId: quest?.character_id ?? null,
+            characterName: quest?.character_name ?? null,
+            isTemporaryQuest: !todo.quest && Boolean(fallbackQuest),
+            questText: quest?.content ?? null,
+            previewId: todo.preview_id,
+            title: todo.content,
+            tags: todo.tags.length ? todo.tags : ["일상"],
+          };
+        }),
+      );
+      setPage(1);
+      showToast(
+        result.quest_distribution_triggered
+          ? "캐릭터 퀘스트를 생성했어요!"
+          : "AI 연결 전이라 임시 퀘스트를 표시했어요.",
+      );
+    } catch (error) {
+      onNotice(`퀘스트 생성 실패: ${error instanceof Error ? error.message : "원인 미상"}`);
+    } finally {
+      setIsBusy(false);
+    }
   }
 
   async function handleAddToToday() {
@@ -248,23 +282,63 @@ export function TodoCreation({
     setIsBusy(true);
     const today = formatTodayIso();
     try {
-      const items = quests.map((q) => ({ title: q.title, dueDate: today, tags: q.tags }));
-      const result = await postWebJson<TodoCommitResponse>(
-        apiBase,
-        "/api/v1/todos/commit/",
-        buildCommitPayload(items),
-      );
-      const savedItems = result.todos.map((t) => ({
-        id: t.todo_id,
-        title: t.content,
-        dueDate: t.todo_date,
-        tags: t.tags,
-        status: "saved" as const,
-      }));
+      const result = await confirmTodos({
+        todos: quests.map((q) => ({
+          content: q.title,
+          todo_date: today,
+          tags: q.tags,
+          quest:
+            !q.isTemporaryQuest && q.characterId && q.questText
+              ? {
+                  character_id: q.characterId,
+                  content: q.questText,
+                }
+              : null,
+        })),
+      });
+      const savedItems = result.todos.map((todo, index) => {
+        const previewQuest = quests[index];
+        const savedQuest = todo.quest
+          ? {
+              characterName: todo.quest.character_name,
+              content: todo.quest.content,
+              isTemporary: false,
+            }
+          : previewQuest?.questText
+            ? {
+                characterName: previewQuest.characterName,
+                content: previewQuest.questText,
+                isTemporary: previewQuest.isTemporaryQuest,
+              }
+            : null;
+        return {
+          id: todo.todo_id,
+          title: todo.content,
+          dueDate: todo.todo_date,
+          tags: todo.tags,
+          status: "saved" as const,
+          assignedQuest: savedQuest,
+        };
+      });
       onTodosSaved({
         todos: savedItems,
+        questPreviews: result.todos.flatMap((todo) =>
+          todo.quest
+            ? [
+                {
+                  questId: todo.quest.quest_id,
+                  content: todo.quest.content,
+                  characterId: todo.quest.character_id,
+                  characterName: todo.quest.character_name,
+                  todoId: todo.todo_id,
+                  todoTitle: todo.content,
+                },
+              ]
+            : [],
+        ),
       });
-      showToast(`${quests.length}개의 할 일이 오늘의 목록에 추가됐어요!`);
+      showToast(`${savedItems.length}개의 할 일이 오늘의 목록에 추가됐어요!`);
+      onClose?.();
     } catch (error) {
       onNotice(`TODO 저장 실패: ${error instanceof Error ? error.message : "원인 미상"}`);
     } finally {
@@ -299,7 +373,6 @@ export function TodoCreation({
             <div className="tdSectionHead">
               <span className="tdNumBadge">1</span>
               <span className="tdSectionTitle">무엇을 계획하고 싶나요?</span>
-              <img src="/assets/character/mp-lock.png" alt="" className="tdLockIcon" />
             </div>
             <div className="tdTextareaWrap">
               <textarea
@@ -343,6 +416,9 @@ export function TodoCreation({
                 onChange={(e) => setManualText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    if (isImeComposing(e)) {
+                      return;
+                    }
                     e.preventDefault();
                     addTodo();
                   }
@@ -388,6 +464,9 @@ export function TodoCreation({
                   onChange={(e) => setTagText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
+                      if (isImeComposing(e)) {
+                        return;
+                      }
                       e.preventDefault();
                       commitTag();
                     } else if (e.key === "Escape") {
@@ -416,7 +495,12 @@ export function TodoCreation({
                       </span>
                     ))}
                   </span>
-                  <span className="tdTodoName">{todo.name}</span>
+                  <input
+                    className="tdTodoNameInput"
+                    value={todo.name}
+                    onChange={(event) => updateTodoName(todo.id, event.target.value)}
+                    aria-label="TODO 항목 수정"
+                  />
                   <div className="tdTodoChips">
                     {todo.tags.map((tag, i) => {
                       const c = getTagColor(tag, i);
@@ -427,10 +511,25 @@ export function TodoCreation({
                           style={{ background: c.bg, color: c.fg }}
                         >
                           #{tag}
+                          <button
+                            type="button"
+                            className="tdHashRemove"
+                            onClick={() => removeTodoTag(todo.id, tag)}
+                            aria-label={`${tag} 태그 제거`}
+                          >
+                            ×
+                          </button>
                         </span>
                       );
                     })}
                   </div>
+                  <button
+                    type="button"
+                    className="tdApplyTagBtn"
+                    onClick={() => applySelectedTags(todo.id)}
+                  >
+                    태그 적용
+                  </button>
                   <button type="button" className="tdDeleteBtn" onClick={() => deleteTodo(todo.id)}>
                     삭제
                   </button>
@@ -439,8 +538,14 @@ export function TodoCreation({
             </div>
           </div>
 
-          <button type="button" className="tdGenerateBtn" onClick={handleGenerate}>
-            <span className="tdGenStar">✨</span> 생성하기
+          <button
+            type="button"
+            className="tdGenerateBtn"
+            onClick={() => void handleGenerate()}
+            disabled={isBusy}
+          >
+            {isBusy ? <span className="tdSpinner" /> : <span className="tdGenStar">✨</span>}
+            {isBusy ? "생성 중..." : "생성하기"}
           </button>
         </div>
       )}
@@ -448,14 +553,6 @@ export function TodoCreation({
       {/* ── PAGE 1: QUEST PREVIEW ── */}
       {page === 1 && (
         <div className="tdPanel tdSingle tdPageIn">
-          <button
-            type="button"
-            className="tdBackBtn"
-            onClick={() => setPage(0)}
-            aria-label="돌아가기"
-          >
-            ←
-          </button>
           <div className="tdRightHeader">
             <div className="tdRightTitle">
               <img src="/assets/character/deco-flowers-l.png" alt="" className="tdFlowerSm" />
@@ -473,100 +570,44 @@ export function TodoCreation({
             {quests.length === 0 ? (
               <div className="tdQuestEmpty">돌아가서 TODO를 추가해주세요!!</div>
             ) : (
-              quests.map((q) => {
-                const isEditing = editingId === q.id;
-                return (
-                  <div key={q.id} className="tdQuestRow">
-                    <img src="/assets/character/avatar.png" alt="" className="tdAnimalAvatar" />
-                    <div className="tdQuestContent">
-                      {isEditing ? (
-                        <input
-                          className="tdQuestTitleInput"
-                          value={q.title}
-                          onChange={(e) => updateQuestTitle(q.id, e.target.value)}
-                        />
-                      ) : (
-                        <span className="tdQuestTitleText">{q.title}</span>
-                      )}
-                      <div className="tdQuestTagRow">
-                        {q.tags.map((tag, i) => {
-                          const c = getTagColor(tag, i);
-                          return (
-                            <span
-                              key={tag}
-                              className="tdQuestChip"
-                              style={{ background: c.bg, color: c.fg }}
-                            >
-                              {tag}
-                              {isEditing && (
-                                <button
-                                  type="button"
-                                  className="tdTagRemove"
-                                  onClick={() => removeQuestTag(q.id, tag)}
-                                >
-                                  ×
-                                </button>
-                              )}
-                            </span>
-                          );
-                        })}
-                        {isEditing &&
-                          (addingTagFor === q.id ? (
-                            <input
-                              ref={questTagInputRef}
-                              className="tdQuestTagInput"
-                              value={questTagText}
-                              onChange={(e) => setQuestTagText(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  commitQuestTag(q.id);
-                                } else if (e.key === "Escape") {
-                                  setAddingTagFor(null);
-                                  setQuestTagText("");
-                                }
-                              }}
-                              onBlur={() => commitQuestTag(q.id)}
-                              placeholder="태그"
-                            />
-                          ) : (
-                            <button
-                              type="button"
-                              className="tdQuestTagAdd"
-                              onClick={() => {
-                                setAddingTagFor(q.id);
-                                setQuestTagText("");
-                                setTimeout(() => questTagInputRef.current?.focus(), 0);
-                              }}
-                            >
-                              +
-                            </button>
-                          ))}
-                      </div>
+              quests.map((q) => (
+                <div key={q.id} className="tdQuestRow">
+                  <img
+                    src={q.characterAvatarUrl ?? "/assets/character/avatar.png"}
+                    alt=""
+                    className="tdAnimalAvatar"
+                  />
+                  <div className="tdQuestContent">
+                    <span className="tdQuestTitleText">{q.title}</span>
+                    <div className="tdQuestTagRow">
+                      {q.tags.map((tag, i) => {
+                        const c = getTagColor(tag, i);
+                        return (
+                          <span
+                            key={tag}
+                            className="tdQuestChip"
+                            style={{ background: c.bg, color: c.fg }}
+                          >
+                            {tag}
+                          </span>
+                        );
+                      })}
                     </div>
-                    <div className="tdQuestBtns">
-                      <button
-                        type="button"
-                        className={`tdEditBtn${isEditing ? " tdEditBtn--active" : ""}`}
-                        onClick={() => {
-                          setEditingId(isEditing ? null : q.id);
-                          setAddingTagFor(null);
-                          setQuestTagText("");
-                        }}
-                      >
-                        {isEditing ? "완료" : "수정"}
-                      </button>
-                      <button
-                        type="button"
-                        className="tdQuestDeleteBtn"
-                        onClick={() => deleteQuest(q.id)}
-                      >
-                        삭제
-                      </button>
+                    <div className="tdQuestDesc">
+                      <span className="tdAccentStar">✦</span>
+                      {q.questText ? (
+                        <span>
+                          <b>{q.characterName ?? "캐릭터"}</b>
+                          <span className="tdQuestLabel">퀘스트</span>
+                          {q.questText}
+                        </span>
+                      ) : (
+                        <span>아직 이 할 일에 부여된 캐릭터 퀘스트가 없어요.</span>
+                      )}
                     </div>
                   </div>
-                );
-              })
+                </div>
+              ))
             )}
           </div>
 

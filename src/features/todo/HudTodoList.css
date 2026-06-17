@@ -51,9 +51,9 @@
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) auto;
   gap: 4px;
-  align-items: center;
-  min-height: 49px;
-  padding: 6px 0;
+  align-items: start;
+  min-height: 58px;
+  padding: 8px 0;
   border-bottom: 2px solid rgba(225, 181, 76, 0.24);
 }
 
@@ -91,19 +91,51 @@
   text-shadow: 0 2px 0 rgba(255, 246, 211, 0.75);
 }
 
+.hudTodoBody {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
 .hudTodoList p {
   margin: 0;
+}
+
+.hudTodoTitle {
   min-width: 0;
   overflow: hidden;
   color: #5a4528;
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.96rem;
+  font-weight: 900;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.hudTodoQuest {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  color: #8a6b38;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.32;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.hudTodoQuest b {
+  color: #6cab45;
+  font-weight: 900;
+}
+
+.hudTodoQuest span {
+  margin: 0 4px;
+  color: #bd7b3d;
+}
+
 .hudTodoList small {
+  margin-top: 1px;
   min-width: 55px;
   padding: 6px 9px;
   border: 1.6px solid #bd7b3d;
@@ -121,10 +153,14 @@
   opacity: 0.82;
 }
 
-.hudTodoList li.isDone p {
+.hudTodoList li.isDone .hudTodoTitle {
   color: #8a6b38;
   text-decoration: line-through;
   text-decoration-thickness: 2px;
+}
+
+.hudTodoList li.isDone .hudTodoQuest {
+  opacity: 0.72;
 }
 
 .hudTodoList .emptyTodo {

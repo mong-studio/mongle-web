@@ -1,15 +1,7 @@
 import { useState } from "react";
 import "./plannerChat.css";
-import {
-  buildCommitPayload,
-  groupPlannerDays,
-  type PlannerDay,
-  postWebJson,
-  type TodoChatFollowUpResult,
-  type TodoCommitResponse,
-  type TodoGenerateResult,
-} from "../../shared/api/todoPlanning.js";
 import type { TodoCommitResult } from "../todo/todoCreation.js";
+import { chatTodos, confirmPlannerTodos, groupPlannerDays, type PlannerDay } from "./plannerApi.js";
 
 type PlannerMessage = {
   id: string;
@@ -18,7 +10,6 @@ type PlannerMessage = {
 };
 
 type PlannerChatProps = {
-  apiBase: string;
   onNotice: (message: string) => void;
   onTodosSaved: (result: TodoCommitResult) => void;
 };
@@ -49,7 +40,7 @@ function buildPeriodLabel(days: PlannerDay[]) {
   return `${formatPlannerDate(days[0].date)} ~ ${formatPlannerDate(days[days.length - 1].date)}`;
 }
 
-export function PlannerChat({ apiBase, onNotice, onTodosSaved }: PlannerChatProps) {
+export function PlannerChat({ onNotice, onTodosSaved }: PlannerChatProps) {
   const [input, setInput] = useState("");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<PlannerMessage[]>([
@@ -96,14 +87,10 @@ export function PlannerChat({ apiBase, onNotice, onTodosSaved }: PlannerChatProp
     setIsBusy(true);
 
     try {
-      const result = await postWebJson<TodoChatFollowUpResult | TodoGenerateResult>(
-        apiBase,
-        "/api/v1/todos/chat/",
-        {
-          message,
-          thread_id: threadId,
-        },
-      );
+      const result = await chatTodos({
+        message,
+        thread_id: threadId,
+      });
       if ("thread_id" in result && typeof result.thread_id === "string") {
         setThreadId(result.thread_id);
       }
@@ -129,28 +116,16 @@ export function PlannerChat({ apiBase, onNotice, onTodosSaved }: PlannerChatProp
         ]);
       }
     } catch {
-      const fallbackDays = [
-        {
-          date: "2026-05-26",
-          tasks: [
-            {
-              title: `${message.slice(0, 24)} 시작점 정리`,
-              detail: "25분 안에 끝낼 수 있는 첫 작업으로 쪼개요.",
-              tags: ["계획"],
-            },
-          ],
-        },
-      ];
-      setDays(fallbackDays);
+      setDays([]);
       setMessages((current) => [
         ...current,
         {
           id: createId("msg"),
           role: "chief",
-          text: "AI API가 꺼져 있어 로컬 플랜으로 먼저 정리했어요.",
+          text: "플랜을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
         },
       ]);
-      onNotice("플래너 결과를 TODO로 저장할 수 있어요.");
+      onNotice("플래너 결과를 불러오지 못했어요.");
     } finally {
       setIsBusy(false);
     }
@@ -174,17 +149,25 @@ export function PlannerChat({ apiBase, onNotice, onTodosSaved }: PlannerChatProp
 
     setIsBusy(true);
     try {
-      const result = await postWebJson<TodoCommitResponse>(
-        apiBase,
-        "/api/v1/todos/commit/",
-        buildCommitPayload(nextTodos),
-      );
+      const result = await confirmPlannerTodos({
+        todos: nextTodos.map((todo) => ({
+          content: todo.title,
+          todo_date: todo.dueDate,
+          tags: todo.tags,
+        })),
+      });
       const savedTodoItems = result.todos.map((todo) => ({
         id: todo.todo_id,
         title: todo.content,
         dueDate: todo.todo_date,
         tags: todo.tags,
         status: "saved" as const,
+        assignedQuest: todo.quest
+          ? {
+              characterName: todo.quest.character_name,
+              content: todo.quest.content,
+            }
+          : null,
       }));
       onTodosSaved({
         todos: savedTodoItems,
@@ -195,19 +178,18 @@ export function PlannerChat({ apiBase, onNotice, onTodosSaved }: PlannerChatProp
                   questId: todo.quest.quest_id,
                   content: todo.quest.content,
                   characterId: todo.quest.character_id,
+                  characterName: todo.quest.character_name,
                   todoId: todo.todo_id,
                   todoTitle: todo.content,
                 },
               ]
             : [],
         ),
-        calendarEventCount: result.calendar_events.length,
+        calendarEventCount: 0,
       });
       setDays([]);
       resetPlanner();
-      onNotice(
-        `${savedTodoItems.length}개의 오늘 할 일이 저장됐고 ${result.calendar_events.length}개의 일정이 반영됐어요.`,
-      );
+      onNotice(`${savedTodoItems.length}개의 할 일이 저장됐어요.`);
     } catch (error) {
       onNotice(`플랜 저장 실패: ${error instanceof Error ? error.message : "원인 미상"}`);
     } finally {

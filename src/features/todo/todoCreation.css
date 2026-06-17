@@ -186,12 +186,6 @@
 
 .tdFlower {
   height: 38px;
-  animation: tdFloaty 3.5s ease-in-out infinite;
-}
-
-.tdFlower--r {
-  animation-duration: 3.8s;
-  animation-delay: 0.2s;
 }
 
 /* ── Sections ── */
@@ -223,13 +217,6 @@
   font-family: "Jua", sans-serif;
   font-size: 18px;
   color: var(--td-ink);
-}
-
-.tdLockIcon {
-  width: 20px;
-  height: 20px;
-  margin-left: auto;
-  opacity: 0.5;
 }
 
 /* ── Textarea ── */
@@ -508,6 +495,24 @@
   flex: 1;
 }
 
+.tdTodoNameInput {
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 8px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--td-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+  outline: none;
+}
+
+.tdTodoNameInput:focus {
+  border-color: var(--td-accent);
+  background: var(--td-field);
+}
+
 .tdTodoChips {
   display: flex;
   gap: 5px;
@@ -518,11 +523,37 @@
 .tdHashChip {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 3px 9px;
   border-radius: 999px;
   font-family: "Gowun Dodum", sans-serif;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.tdHashRemove {
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  color: inherit;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.tdApplyTagBtn {
+  flex-shrink: 0;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1.5px solid #9ac36f;
+  background: #f6fbef;
+  color: var(--td-green-dk);
+  cursor: pointer;
+  font-family: "Jua", sans-serif;
+  font-size: 13px;
 }
 
 .tdDeleteBtn {
@@ -577,28 +608,15 @@
     0 6px 10px -6px rgba(90, 150, 60, 0.5);
 }
 
+.tdGenerateBtn:disabled {
+  cursor: wait;
+  opacity: 0.78;
+  transform: none;
+}
+
 .tdGenStar {
   display: inline-block;
   animation: tdTwinkle 1.5s infinite;
-}
-
-/* ── Back button ── */
-.tdBackBtn {
-  position: absolute;
-  top: 14px;
-  left: 16px;
-  border: none;
-  background: transparent;
-  color: var(--td-ink-soft);
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 4px;
-  transition: color 0.12s;
-}
-
-.tdBackBtn:hover {
-  color: var(--td-ink);
 }
 
 /* ── Right panel header ── */
@@ -689,80 +707,6 @@
   padding: 2px 0;
 }
 
-.tdQuestTitleInput {
-  width: 100%;
-  border: none;
-  border-bottom: 1.5px solid var(--td-accent);
-  background: transparent;
-  color: var(--td-ink);
-  font-family: "Jua", sans-serif;
-  font-size: 17px;
-  outline: none;
-  padding: 2px 0;
-  box-sizing: border-box;
-}
-
-.tdQuestBtns {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-self: center;
-  flex-shrink: 0;
-}
-
-.tdQuestDeleteBtn {
-  padding: 5px 13px;
-  border-radius: 8px;
-  border: 1.5px solid var(--td-border-strong);
-  background: transparent;
-  color: var(--td-ink-soft);
-  font-family: "Jua", sans-serif;
-  font-size: 13px;
-  cursor: pointer;
-  transition:
-    background 0.12s,
-    color 0.12s,
-    border-color 0.12s;
-}
-
-.tdQuestDeleteBtn:hover {
-  background: #fde8e8;
-  border-color: #d9836a;
-  color: #c04a3a;
-}
-
-.tdEditBtn {
-  flex-shrink: 0;
-  padding: 5px 13px;
-  border-radius: 8px;
-  border: 1.5px solid var(--td-border-strong);
-  background: transparent;
-  color: var(--td-ink-soft);
-  font-family: "Jua", sans-serif;
-  font-size: 13px;
-  cursor: pointer;
-  transition:
-    background 0.12s,
-    color 0.12s,
-    border-color 0.12s;
-  align-self: flex-start;
-  margin-top: 4px;
-}
-
-.tdEditBtn:hover {
-  background: var(--td-field);
-  color: var(--td-ink);
-}
-
-.tdEditBtn--active {
-  border-color: var(--td-green-dk);
-  color: var(--td-green-dk);
-}
-
-.tdEditBtn--active:hover {
-  background: #f1f7e8;
-}
-
 .tdQuestTagRow {
   display: flex;
   align-items: center;
@@ -782,65 +726,31 @@
   white-space: nowrap;
 }
 
-.tdTagRemove {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-  padding: 0;
-  opacity: 0.6;
-  transition: opacity 0.12s;
-  color: inherit;
-}
-
-.tdTagRemove:hover {
-  opacity: 1;
-}
-
-.tdQuestTagInput {
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1.5px dashed var(--td-accent);
-  background: var(--td-panel);
-  color: var(--td-ink);
-  font-size: 12px;
-  width: 70px;
-  outline: none;
-  font-family: "Gowun Dodum", sans-serif;
-}
-
-.tdQuestTagAdd {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1.5px dashed var(--td-border-strong);
-  background: transparent;
-  color: var(--td-ink-faint);
-  font-size: 15px;
-  line-height: 1;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.12s,
-    color 0.12s;
-  padding: 0;
-}
-
-.tdQuestTagAdd:hover {
-  background: var(--td-field);
-  color: var(--td-ink);
-}
-
 .tdQuestDesc {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   margin-top: 4px;
   color: var(--td-ink-soft);
   font-size: 13px;
+  line-height: 1.45;
+}
+
+.tdQuestDesc b {
+  color: var(--td-ink);
+  font-weight: 700;
+}
+
+.tdQuestLabel {
+  display: inline-flex;
+  margin: 0 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #edf7df;
+  color: var(--td-green-dk);
+  font-family: "Jua", sans-serif;
+  font-size: 11px;
+  vertical-align: 1px;
 }
 
 .tdAccentStar {

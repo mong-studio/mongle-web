@@ -58,7 +58,15 @@ export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: Hud
               >
                 <span className="srOnly">{isDone ? "완료됨" : "미완료"}</span>
               </button>
-              <p>{todo.title}</p>
+              <div className="hudTodoBody">
+                <p className="hudTodoTitle">{todo.title}</p>
+                {todo.assignedQuest?.content ? (
+                  <p className="hudTodoQuest">
+                    <b>{todo.assignedQuest.characterName ?? "캐릭터"}</b>
+                    {todo.assignedQuest.content}
+                  </p>
+                ) : null}
+              </div>
               <small style={getHudTagStyle(tagTodo, tag)}>#{tag}</small>
             </li>
           );

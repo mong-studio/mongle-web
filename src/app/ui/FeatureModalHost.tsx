@@ -10,7 +10,6 @@ import type { Resident } from "../model/appTypes.js";
 
 type FeatureModalHostProps = {
   activeFeature: FeatureId | null;
-  apiBase: string;
   characterName: string;
   characterPersona: string;
   isBusy: boolean;
@@ -40,7 +39,6 @@ function CloseIcon() {
 
 export function FeatureModalHost({
   activeFeature,
-  apiBase,
   characterName,
   characterPersona,
   isBusy,
@@ -130,7 +128,7 @@ export function FeatureModalHost({
 
         {activeFeature === "todo" ? (
           <TodoCreation
-            apiBase={apiBase}
+            residents={residents}
             savedTodos={savedTodos}
             onNotice={onNotice}
             onTodosSaved={onTodosSaved}
@@ -139,7 +137,7 @@ export function FeatureModalHost({
         ) : null}
 
         {activeFeature === "planner" ? (
-          <PlannerChat apiBase={apiBase} onNotice={onNotice} onTodosSaved={onTodosSaved} />
+          <PlannerChat onNotice={onNotice} onTodosSaved={onTodosSaved} />
         ) : null}
       </section>
     </div>
