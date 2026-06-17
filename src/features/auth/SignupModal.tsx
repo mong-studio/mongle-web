@@ -54,6 +54,10 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
   const [birth, setBirth] = useState("");
   const [sending, setSending] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval>>();
+  const [codeTimer, setCodeTimer] = useState(0);
+  const codeTimerRef = useRef<ReturnType<typeof setInterval>>();
   const [verified, setVerified] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -82,6 +86,10 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       setPrivacyDetailOpen(false);
       setAiDetailOpen(false);
       clearTimeout(toastTimer.current);
+      clearInterval(cooldownRef.current);
+      setCooldown(0);
+      clearInterval(codeTimerRef.current);
+      setCodeTimer(0);
     }
   }, [open]);
 
@@ -104,6 +112,27 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       await requestEmailVerification(email.trim());
       setCodeSent(true);
       showToast("인증 코드를 보냈어요! 메일함을 확인해주세요");
+      setCooldown(30);
+      cooldownRef.current = setInterval(() => {
+        setCooldown((c) => {
+          if (c <= 1) {
+            clearInterval(cooldownRef.current);
+            return 0;
+          }
+          return c - 1;
+        });
+      }, 1000);
+      clearInterval(codeTimerRef.current);
+      setCodeTimer(180);
+      codeTimerRef.current = setInterval(() => {
+        setCodeTimer((t) => {
+          if (t <= 1) {
+            clearInterval(codeTimerRef.current);
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
     } catch (err) {
       showToast(toUserMessage(err));
     } finally {
@@ -140,25 +169,48 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       showToast("이메일 인증을 먼저 완료해주세요");
       return;
     }
-    if (pw.length < 8) {
-      showToast("비밀번호는 8자 이상이어야 해요");
+    if (pw.includes(" ")) {
+      showToast("비밀번호에 공백을 포함할 수 없어요");
+      return;
+    }
+    if (pw.length < 8 || pw.length > 16) {
+      showToast("비밀번호는 8~16자로 입력해주세요");
+      return;
+    }
+    const pwTypeCount = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^a-zA-Z0-9]/].filter((r) =>
+      r.test(pw),
+    ).length;
+    if (pwTypeCount < 2) {
+      showToast("대문자·소문자·숫자·특수문자 중 2종류 이상을 포함해주세요");
       return;
     }
     if (pw !== pw2) {
       showToast("비밀번호가 일치하지 않아요");
       return;
     }
-    if (nick.trim().length < 2) {
-      showToast("닉네임을 2자 이상 입력해주세요");
+    const nickTrimmed = nick.trim();
+    if (nickTrimmed.length < 2 || nickTrimmed.length > 8) {
+      showToast("닉네임은 2~8자로 입력해주세요");
       return;
     }
-    if (!job) {
-      showToast("직업을 선택해주세요");
+    if (!/^[가-힣a-zA-Z0-9]+$/.test(nickTrimmed)) {
+      showToast("닉네임은 한글·영문·숫자만 사용할 수 있어요");
       return;
     }
     if (!birth) {
       showToast("생년월일을 입력해주세요");
       return;
+    }
+    {
+      const today = new Date();
+      const b = new Date(birth);
+      let age = today.getFullYear() - b.getFullYear();
+      const m = today.getMonth() - b.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
+      if (age < 14) {
+        showToast("생년월일을 확인해 주세요 (만 14세 이상 가입 가능)");
+        return;
+      }
     }
     if (!agree.terms || !agree.privacy) {
       showToast("필수 약관에 동의해주세요");
@@ -195,57 +247,35 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
 
           {/* Eyebrow */}
           <div className="suEyebrow">
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 19, height: 19, flex: "none" }}
-            />
+            <img src="/assets/auth/flower.png" alt="" className="suEyebrowImg" />
             <span className="suEyebrowText">MONGLE ACCOUNT</span>
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 19, height: 19, flex: "none" }}
-            />
+            <img src="/assets/auth/flower.png" alt="" className="suEyebrowImg" />
             <div className="suEyebrowLine" />
           </div>
 
           {/* Title */}
           <div className="suTitleRow">
-            <img
-              src="/assets/auth/sprout.png"
-              alt=""
-              style={{ width: 26, height: 26, flex: "none" }}
-            />
+            <img src="/assets/auth/sprout.png" alt="" className="suTitleImg" />
             <h1 id="su-title" className="suTitle">
               회원가입
             </h1>
-            <img
-              src="/assets/auth/sprout.png"
-              alt=""
-              style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
-            />
+            <img src="/assets/auth/sprout.png" alt="" className="suTitleImg suMirror" />
           </div>
-          <p className="suSubtitle">이메일 인증 후 계정을 만들어 몽글마을을 방문해봐요!</p>
 
           {/* Divider */}
           <div className="suDivider">
             <div className="suDividerLine" />
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 20, height: 20, flex: "none" }}
-            />
+            <img src="/assets/auth/flower.png" alt="" className="suDividerImg" />
             <div className="suDividerLine" />
           </div>
 
           {/* Email */}
-          <div className="suLabel">
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 23, height: 23, flex: "none" }}
-            />
-            이메일
+          <div className="suLabel suLabel--between">
+            <span className="suLabelInner">
+              <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
+              이메일
+            </span>
+            {cooldown > 0 && <span className="suLabelStatus">{cooldown}초 후 재발송</span>}
           </div>
           <div className="suInlineRow">
             <input
@@ -253,6 +283,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
               type="email"
               value={email}
               autoComplete="off"
+              disabled={verified}
               onChange={(e) => {
                 setEmail(e.target.value);
                 setVerified(false);
@@ -262,23 +293,35 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             />
             <button
               type="button"
-              className="suAmberBtn"
+              className="suAmberBtn suSendBtn"
               onClick={handleSendCode}
-              disabled={sending}
+              disabled={sending || cooldown > 0 || verified}
             >
-              {sending && <span className="suSpinner" />}
               {sending ? "발송 중…" : "코드 발송"}
             </button>
           </div>
 
           {/* Verification code */}
-          <div className="suLabel suSection">
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 23, height: 23, flex: "none" }}
-            />
-            인증 코드
+          <div className="suLabel suLabel--between suSection">
+            <span className="suLabelInner">
+              <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
+              인증 코드
+            </span>
+            {codeSent &&
+              !verified &&
+              (codeTimer > 0 ? (
+                <span
+                  className={`suLabelStatus${codeTimer <= 30 ? " suLabelStatus--warning" : ""}`}
+                >
+                  {String(Math.floor(codeTimer / 60)).padStart(2, "0")}:
+                  {String(codeTimer % 60).padStart(2, "0")} 남음
+                </span>
+              ) : (
+                <span className="suLabelStatus suLabelStatus--warning">
+                  시간 초과 · 코드를 재발송해주세요
+                </span>
+              ))}
+            {verified && <span className="suLabelStatus suLabelStatus--success">✓ 인증 완료</span>}
           </div>
           <div className="suInlineRow">
             <input
@@ -286,6 +329,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
               value={code}
               maxLength={6}
               autoComplete="one-time-code"
+              disabled={verified}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="ABCDEF"
             />
@@ -298,22 +342,12 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
               인증 확인
             </button>
           </div>
-          {verified && (
-            <div className="suSuccessLine">
-              <span className="suSuccessIcon">✓</span>
-              이메일 인증이 완료됐어요!
-            </div>
-          )}
 
           {/* Password 2-col */}
           <div className="suGrid2 suSection">
             <div>
               <div className="suLabel">
-                <img
-                  src="/assets/auth/flower.png"
-                  alt=""
-                  style={{ width: 23, height: 23, flex: "none" }}
-                />
+                <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
                 비밀번호
               </div>
               <input
@@ -327,11 +361,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             </div>
             <div>
               <div className="suLabel">
-                <img
-                  src="/assets/auth/flower.png"
-                  alt=""
-                  style={{ width: 23, height: 23, flex: "none" }}
-                />
+                <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
                 비밀번호 확인
               </div>
               <input
@@ -343,15 +373,10 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
               />
             </div>
           </div>
-          {pwMismatch && <div className="suWarnLine">✿ 비밀번호가 일치하지 않아요.</div>}
 
           {/* Nickname */}
           <div className="suLabel suSection">
-            <img
-              src="/assets/auth/flower.png"
-              alt=""
-              style={{ width: 23, height: 23, flex: "none" }}
-            />
+            <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
             닉네임
           </div>
           <input
@@ -366,12 +391,8 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           <div className="suGrid2 suSection">
             <div>
               <div className="suLabel">
-                <img
-                  src="/assets/auth/flower.png"
-                  alt=""
-                  style={{ width: 23, height: 23, flex: "none" }}
-                />
-                직업
+                <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
+                직업 <span className="suOptionalBadge">(선택)</span>
               </div>
               <div className="suSelectWrap">
                 <select
@@ -379,9 +400,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
                   value={job}
                   onChange={(e) => setJob(e.target.value)}
                 >
-                  <option value="" disabled>
-                    선택
-                  </option>
+                  <option value="">선택</option>
                   {JOBS.map((j) => (
                     <option key={j} value={j}>
                       {j}
@@ -393,11 +412,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             </div>
             <div>
               <div className="suLabel">
-                <img
-                  src="/assets/auth/flower.png"
-                  alt=""
-                  style={{ width: 23, height: 22, flex: "none" }}
-                />
+                <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
                 생년월일
               </div>
               <div className="suDateWrap">
@@ -413,7 +428,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
                     height="22"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#C49A5E"
+                    stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -476,18 +491,8 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
             onClick={handleSubmit}
             disabled={submitting}
           >
-            {/* <img
-            src="/assets/auth/su-bigflower.png"
-            alt=""
-            style={{ width: 26, height: 26, flex: "none" }}
-          /> */}
             {submitting && <span className="suSpinner suSpinner--lg" />}
             <span className="suSubmitLabel">{submitting ? "가입하는 중…" : "회원가입"}</span>
-            {/* <img
-            src="/assets/auth/su-bigflower.png"
-            alt=""
-            style={{ width: 26, height: 26, flex: "none", transform: "scaleX(-1)" }}
-          /> */}
           </button>
         </section>
 

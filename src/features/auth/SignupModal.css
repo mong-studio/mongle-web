@@ -15,14 +15,30 @@
     transform: translate(-50%, 0);
   }
 }
-@keyframes suSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 
-/* ── Backdrop ── */
+/* ── Design tokens ── */
 .suBackdrop {
+  --su-font-head: "Jua", sans-serif;
+  --su-font-body: "Gowun Dodum", sans-serif;
+  --su-ink: #5e4a30;
+  --su-ink-soft: #9a876a;
+  --su-ink-faint: #b7a483;
+  --su-placeholder: #bfae8a;
+  --su-bg: #faf1d8;
+  --su-bg-input: #fffdf7;
+  --su-bg-agree: #fcf6e4;
+  --su-border: #d3a95f;
+  --su-border-input: #e7d6ac;
+  --su-border-dashed: #e2cc97;
+  --su-amber-border: #b27c3a;
+  --su-amber: #e29a4c;
+  --su-amber-hi: #cc8334;
+  --su-btn-ink: #6e4a1c;
+  --su-success: #7fb36a;
+  --su-error: #d9534f;
+  --su-warn: #d9785a;
+  --su-caret: #c49a5e;
+
   position: fixed;
   inset: 0;
   overflow: auto;
@@ -41,17 +57,17 @@
   width: 480px;
   max-width: 96vw;
   margin: auto;
-  background: #faf1d8;
-  border: 3px solid #d3a95f;
+  background: var(--su-bg);
+  border: 3px solid var(--su-border);
   border-radius: 22px;
   box-shadow:
     0 28px 64px -24px rgba(60, 42, 18, 0.6),
-    inset 0 0 0 4px #faf1d8,
+    inset 0 0 0 4px var(--su-bg),
     inset 0 0 0 6px #e8d3a2;
   padding: 22px 28px 20px;
   animation: suCardIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
   box-sizing: border-box;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--su-font-body);
 }
 
 /* ── Close button ── */
@@ -64,7 +80,7 @@
   border-radius: 9px;
   border: none;
   background: transparent;
-  color: #b7a483;
+  color: var(--su-ink-faint);
   font-size: 15px;
   cursor: pointer;
   display: flex;
@@ -77,7 +93,7 @@
 }
 .suClose:hover {
   background: #f0e4c4;
-  color: #5e4a30;
+  color: var(--su-ink);
 }
 
 /* ── Eyebrow row ── */
@@ -87,15 +103,15 @@
   gap: 10px;
 }
 .suEyebrowText {
-  font-family: "Jua", sans-serif;
+  font-family: var(--su-font-head);
   font-size: 15px;
   letter-spacing: 2px;
-  color: #cc8334;
+  color: var(--su-amber-hi);
   white-space: nowrap;
 }
 .suEyebrowLine {
   flex: 1;
-  border-top: 2px dashed #e2cc97;
+  border-top: 2px dashed var(--su-border-dashed);
   margin-right: 46px;
 }
 
@@ -104,22 +120,15 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  margin-top: 6px;
+  margin: 6px;
 }
 .suTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--su-font-head);
   font-size: 36px;
-  color: #5e4a30;
+  color: var(--su-ink);
   margin: 0;
   letter-spacing: 1px;
   white-space: nowrap;
-}
-
-/* ── Subtitle ── */
-.suSubtitle {
-  font-size: 13.5px;
-  color: #9a876a;
-  margin-top: 6px;
 }
 
 /* ── Dashed divider ── */
@@ -127,11 +136,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 14px 0 16px;
 }
 .suDividerLine {
   flex: 1;
-  border-top: 2px dashed #e2cc97;
+  border-top: 2px dashed var(--su-border-dashed);
 }
 
 /* ── Utility ── */
@@ -142,15 +150,65 @@
   margin-top: 14px;
 }
 
+/* ── Icon sizes ── */
+.suEyebrowImg {
+  width: 19px;
+  height: 19px;
+  flex: none;
+}
+.suTitleImg {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+.suDividerImg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.suLabelImg {
+  width: 23px;
+  height: 23px;
+  flex: none;
+}
+
 /* ── Section label ── */
 .suLabel {
-  font-family: "Jua", sans-serif;
+  font-family: var(--su-font-head);
   font-size: 15px;
-  color: #5e4a30;
+  color: var(--su-ink);
   margin-bottom: 8px;
+  margin-right: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.suLabel--between {
+  justify-content: space-between;
+  margin-right: 0;
+}
+.suLabelInner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Label status texts (쿨다운 / 타이머 / 인증완료) ── */
+.suLabelStatus {
+  font-size: 12px;
+  color: var(--su-ink-soft);
+}
+.suLabelStatus--warning {
+  color: var(--su-error);
+}
+.suLabelStatus--success {
+  color: var(--su-success);
+}
+
+/* ── Optional field badge ── */
+.suOptionalBadge {
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 /* ── Inline row (input + button) ── */
@@ -165,20 +223,20 @@
   width: 100%;
   padding: 9px 14px;
   border-radius: 13px;
-  border: 2px solid #e7d6ac;
-  background: #fffdf7;
-  color: #5e4a30;
+  border: 2px solid var(--su-border-input);
+  background: var(--su-bg-input);
+  color: var(--su-ink);
   font-size: 14px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--su-font-body);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s ease;
 }
 .suInput:focus {
-  border-color: #e29a4c;
+  border-color: var(--su-amber);
 }
 .suInput::placeholder {
-  color: #bfae8a;
+  color: var(--su-placeholder);
   opacity: 1;
 }
 .suInput--code {
@@ -187,7 +245,7 @@
 }
 .suInput--verified,
 .suInput--verified:focus {
-  border-color: #7fb36a;
+  border-color: var(--su-success);
 }
 .suInput--warn,
 .suInput--warn:focus {
@@ -206,16 +264,16 @@
   gap: 7px;
   padding: 4px 16px 0;
   border-radius: 13px;
-  border: 2px solid #b27c3a;
+  border: 2px solid var(--su-amber-border);
   background: linear-gradient(180deg, #dbaa69, #ca9148);
-  color: #6e4a1c;
-  font-family: "Jua", sans-serif;
+  color: var(--su-btn-ink);
+  font-family: var(--su-font-head);
   font-size: 14px;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   box-shadow:
-    0 4px 0 #b27c3a,
+    0 4px 0 var(--su-amber-border),
     inset 0 2px 0 rgba(255, 248, 225, 0.45);
   text-shadow: 0 1px 0 rgba(255, 243, 215, 0.5);
   transition:
@@ -225,55 +283,34 @@
 .suAmberBtn:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow:
-    0 1px 0 #b27c3a,
+    0 1px 0 var(--su-amber-border),
     inset 0 2px 0 rgba(255, 248, 225, 0.4);
 }
 .suAmberBtn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
+.suSendBtn {
+  min-width: 5.5rem;
+}
 
 /* ── Spinner ── */
+@keyframes suSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .suSpinner {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  display: inline-block;
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
+  border-radius: 50%;
   animation: suSpin 0.7s linear infinite;
   flex: none;
 }
 .suSpinner--lg {
   width: 18px;
   height: 18px;
-  border-width: 3px;
-}
-
-/* ── Feedback lines ── */
-.suSuccessLine {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 8px;
-  color: #7fb36a;
-  font-size: 13.5px;
-}
-.suSuccessIcon {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #7fb36a;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  flex: none;
-}
-.suWarnLine {
-  color: #d9785a;
-  font-size: 13px;
-  margin-top: 7px;
 }
 
 /* ── 2-col grid ── */
@@ -291,10 +328,10 @@
   width: 100%;
   padding: 10px 38px 10px 14px;
   border-radius: 13px;
-  border: 2px solid #e7d6ac;
-  background: #fffdf7;
-  color: #5e4a30;
-  font-family: "Gowun Dodum", sans-serif;
+  border: 2px solid var(--su-border-input);
+  background: var(--su-bg-input);
+  color: var(--su-ink);
+  font-family: var(--su-font-body);
   font-size: 14px;
   outline: none;
   appearance: none;
@@ -304,10 +341,10 @@
   transition: border-color 0.15s ease;
 }
 .suSelect:focus {
-  border-color: #e29a4c;
+  border-color: var(--su-amber);
 }
 .suSelect--placeholder {
-  color: #bfae8a;
+  color: var(--su-placeholder);
 }
 .suSelectCaret {
   position: absolute;
@@ -315,7 +352,7 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #9a876a;
+  color: var(--su-ink-soft);
   font-size: 12px;
 }
 
@@ -324,10 +361,10 @@
   position: relative;
 }
 .suDateInput {
-  color: #bfae8a;
+  color: var(--su-placeholder);
 }
 .suDateInput.filled {
-  color: #5e4a30;
+  color: var(--su-ink);
 }
 .suDateInput::-webkit-calendar-picker-indicator {
   position: absolute;
@@ -344,6 +381,7 @@
   transform: translateY(-50%);
   pointer-events: none;
   display: flex;
+  color: var(--su-caret);
 }
 
 /* ── Agreements box ── */
@@ -351,7 +389,7 @@
   margin-top: 16px;
   border: 2px dashed #e2c58a;
   border-radius: 16px;
-  background: #fcf6e4;
+  background: var(--su-bg-agree);
   padding: 14px 18px;
   position: relative;
 }
@@ -378,9 +416,9 @@
   right: 12px;
   bottom: -12px;
   width: 40px;
-
   transform: scaleX(-1);
 }
+
 .suAgreeList {
   display: flex;
   flex-direction: column;
@@ -403,13 +441,12 @@
   padding: 0;
   text-align: left;
 }
-
 .suAgreeViewBtn {
   flex-shrink: 0;
   border: none;
   background: transparent;
   color: #9a7040;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--su-font-body);
   font-size: 12px;
   cursor: pointer;
   padding: 4px 2px 4px 8px;
@@ -417,40 +454,41 @@
   text-underline-offset: 2px;
   transition: color 0.12s;
 }
-
 .suAgreeViewBtn:hover {
-  color: #cc8334;
+  color: var(--su-amber-hi);
 }
+
 .suCheckbox {
   width: 24px;
   height: 24px;
   flex: none;
   border-radius: 7px;
-  border: 2px solid #d3a95f;
-  background: #fffdf7;
+  border: 2px solid var(--su-border);
+  background: var(--su-bg-input);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.14s ease;
 }
 .suCheckbox--on {
-  border-color: #cc8334;
-  background: #e29a4c;
+  border-color: var(--su-amber-hi);
+  background: var(--su-amber);
 }
 .suCheckmark {
   color: #fff;
   font-size: 12px;
   line-height: 1;
 }
+
 .suAgreeLabel {
   font-size: 15px;
-  color: #5e4a30;
+  color: var(--su-ink);
 }
 .suAgreeTag--req {
   color: #c77a4e;
 }
 .suAgreeTag--opt {
-  color: #b7a483;
+  color: var(--su-ink-faint);
 }
 
 /* ── Submit button ── */
@@ -458,17 +496,17 @@
   width: 100%;
   margin-top: 16px;
   padding: 13px 11px 9px;
-  border: 2px solid #b27c3a;
+  border: 2px solid var(--su-amber-border);
   border-radius: 16px;
   background: linear-gradient(180deg, #dba85f, #c98c3d);
-  color: #6e4a1c;
-  font-family: "Jua", sans-serif;
+  color: var(--su-btn-ink);
+  font-family: var(--su-font-head);
   font-size: 19px;
   line-height: 1;
   letter-spacing: 2px;
   cursor: pointer;
   box-shadow:
-    0 5px 0 #b27c3a,
+    0 5px 0 var(--su-amber-border),
     0 13px 20px -8px rgba(190, 130, 40, 0.5),
     inset 0 2px 0 rgba(255, 248, 225, 0.5);
   display: flex;
@@ -483,7 +521,7 @@
 .suSubmitBtn:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow:
-    0 2px 0 #b27c3a,
+    0 2px 0 var(--su-amber-border),
     0 6px 10px -6px rgba(190, 130, 40, 0.5),
     inset 0 2px 0 rgba(255, 248, 225, 0.45);
 }
@@ -507,16 +545,16 @@
   align-items: center;
   gap: 10px;
   background: #fffdf6;
-  border: 2.5px solid #d3a95f;
+  border: 2.5px solid var(--su-border);
   border-radius: 16px;
   padding: 13px 24px;
   box-shadow: 0 16px 36px -14px rgba(60, 42, 18, 0.55);
   animation: suToastIn 0.4s ease both;
-  font-family: "Jua", sans-serif;
+  font-family: var(--su-font-head);
   font-size: 16px;
-  color: #5e4a30;
+  color: var(--su-ink);
   white-space: nowrap;
 }
 .suToastFlower {
-  color: #e29a4c;
+  color: var(--su-amber);
 }
