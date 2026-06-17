@@ -53,20 +53,11 @@ export function MyPageWrapper({ fallbackUserName, residents, onClose, onLogout, 
     }
   }
 
-  async function handleUpdatePassword(current: string, next: string, confirm: string) {
-    if (next !== confirm) {
-      onNotice("새 비밀번호가 일치하지 않아요.");
-      return;
-    }
-    try {
-      await apiClient.post("/auth/change-password/", {
-        current_password: current,
-        new_password: next,
-      });
-      onNotice("비밀번호가 변경됐어요.");
-    } catch (error) {
-      onNotice(error instanceof Error ? error.message : "비밀번호 변경에 실패했어요.");
-    }
+  async function handleUpdatePassword(current: string, next: string) {
+    await apiClient.post("/auth/change-password/", {
+      current_password: current,
+      new_password: next,
+    });
   }
 
   return (

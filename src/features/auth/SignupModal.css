@@ -86,6 +86,12 @@
   align-items: center;
   gap: 10px;
 }
+.suEyebrowImg {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: none;
+}
 .suEyebrowText {
   font-family: "Jua", sans-serif;
   font-size: 15px;
@@ -100,6 +106,12 @@
 }
 
 /* ── Title row ── */
+.suTitleImg {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex: none;
+}
 .suTitleRow {
   display: flex;
   align-items: center;
@@ -123,6 +135,12 @@
 }
 
 /* ── Dashed divider ── */
+.suDividerImg {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex: none;
+}
 .suDivider {
   display: flex;
   align-items: center;
@@ -143,6 +161,12 @@
 }
 
 /* ── Section label ── */
+.suLabelImg {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex: none;
+}
 .suLabel {
   font-family: "Jua", sans-serif;
   font-size: 15px;
