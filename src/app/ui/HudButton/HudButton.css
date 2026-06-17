@@ -70,20 +70,14 @@
 
 .hudButtonBadge {
   position: absolute;
-  top: -6px;
-  right: -8px;
-  min-width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  padding: 0 4px;
-  border: 2px solid rgba(126, 45, 34, 0.45);
-  border-radius: 999px;
-  background: linear-gradient(180deg, #ef6b58, #cb3f34);
-  color: #fff8ec;
-  font-size: 0.7rem;
-  line-height: 1;
-  box-shadow: 0 2px 0 rgba(89, 50, 30, 0.18);
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border: none;
+  border-radius: 50%;
+  background: #ed3b2e;
+  box-shadow: 0 0 0 2px rgba(237, 59, 46, 0.18);
 }
 
 @media (max-width: 1060px) {

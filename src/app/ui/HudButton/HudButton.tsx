@@ -28,8 +28,8 @@ export function HudButton({
     >
       <span className="hudButtonIconWrap">
         <img src={iconSrc} alt="" className="hudButtonIcon" />
-        {showBadge ? <span className="hudButtonBadge">{badgeCount}</span> : null}
       </span>
+      {showBadge ? <span className="hudButtonBadge" /> : null}
       <span className="hudButtonText">{label}</span>
     </button>
   );
