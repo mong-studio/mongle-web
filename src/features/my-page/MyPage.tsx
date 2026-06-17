@@ -12,6 +12,7 @@ export type Resident = {
 
 type Props = {
   userName: string;
+  userEmail: string;
   userJob: string;
   userBirth: string;
   joinDate: string;
@@ -70,6 +71,7 @@ function parseKeywords(s: string) {
 
 export function MyPageModal({
   userName,
+  userEmail,
   userJob,
   userBirth,
   tokenBalance,
@@ -81,6 +83,7 @@ export function MyPageModal({
 }: Props) {
   const [changePwOpen, setChangePwOpen] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
+  const [nicknameDraft, setNicknameDraft] = useState(userName);
   const [jobDraft, setJobDraft] = useState(userJob);
   const [birthDraft, setBirthDraft] = useState(userBirth);
   const [profileIdx, setProfileIdx] = useState<number | null>(null);
@@ -97,12 +100,13 @@ export function MyPageModal({
   );
 
   useEffect(() => {
+    setNicknameDraft(userName);
     setJobDraft(userJob);
     setBirthDraft(userBirth);
-  }, [userJob, userBirth]);
+  }, [userName, userJob, userBirth]);
 
   async function handleSaveInfo() {
-    await onUpdateProfile(userName, jobDraft, birthDraft);
+    await onUpdateProfile(nicknameDraft, jobDraft, birthDraft);
     setEditingInfo(false);
     showToast("기본 정보가 저장되었어요!");
   }
@@ -137,39 +141,15 @@ export function MyPageModal({
           </button>
 
           <div className="mpHeaderRight">
-            <div className="mpTokenChip">
-              <img src="/assets/icon/icon-apple.png" alt="토큰" />
-              <span>{tokenBalance}</span>
-            </div>
-
-            <button
-              type="button"
-              className="mpBellBtn"
-              onClick={() => {
-                setBellOpen((o) => !o);
-                setNameMenuOpen(false);
-              }}
-            >
-              <img src="/assets/myPage/icon-bell.png" alt="알림" />
-            </button>
-
-            <button
-              type="button"
-              className="mpNameBtn"
-              onClick={() => {
-                setNameMenuOpen((o) => !o);
-                setBellOpen(false);
-              }}
-            >
-              <img src="/assets/character/mp-avatar-sm.png" alt="" className="mpNameAvatar" />
-              <span>{userName}</span>
-              <span
-                className="mpCaret"
-                style={{ transform: nameMenuOpen ? "rotate(180deg)" : undefined }}
-              >
-                ▾
+            <div className="mpTokenChip" role="status" aria-label={`보유 사과 ${tokenBalance}개`}>
+              <span className="mpTokenIcon" aria-hidden="true">
+                🍎
               </span>
-            </button>
+              <b className="mpTokenCount">{tokenBalance}</b>
+              <span className="mpTokenPlus" aria-hidden="true">
+                +
+              </span>
+            </div>
           </div>
         </header>
         <div className="mpContainer">
@@ -204,6 +184,7 @@ export function MyPageModal({
                   <span>내 주민들</span>
                   <span className="mpResHeadStar">✿</span>
                 </div>
+                <span className="mpResCount">{residents.length} / 10</span>
               </div>
               {residents.length === 0 ? (
                 <div className="mpResEmpty">
@@ -287,6 +268,7 @@ export function MyPageModal({
                         type="button"
                         className="mpInfoCancelBtn"
                         onClick={() => {
+                          setNicknameDraft(userName);
                           setJobDraft(userJob);
                           setBirthDraft(userBirth);
                           setEditingInfo(false);
@@ -299,14 +281,24 @@ export function MyPageModal({
                 </div>
                 <div className="mpInfoRows">
                   <div className="mpInfoRow">
-                    <img src="/assets/icon/icon-apple.png" alt="" className="mpInfoIcon" />
-                    <span className="mpInfoLabel">보유 토큰</span>
-                    <span className="mpInfoVal">{tokenBalance}개</span>
+                    <img src="/assets/auth/flower.png" alt="" className="mpInfoIcon" />
+                    <span className="mpInfoLabel">이메일</span>
+                    <span className="mpInfoVal mpInfoVal">{userEmail || "—"}</span>
                   </div>
                   <div className="mpInfoRow">
-                    <img src="/assets/character/ic-house.png" alt="" className="mpInfoIcon" />
-                    <span className="mpInfoLabel">마을 주민 수</span>
-                    <span className="mpInfoVal">{residents.length}명</span>
+                    <img src="/assets/myPage/icon-bear.png" alt="" className="mpInfoIcon" />
+                    <span className="mpInfoLabel">닉네임</span>
+                    {editingInfo ? (
+                      <input
+                        className="mpInfoTextInput"
+                        type="text"
+                        value={nicknameDraft}
+                        maxLength={20}
+                        onChange={(e) => setNicknameDraft(e.target.value)}
+                      />
+                    ) : (
+                      <span className="mpInfoVal">{userName}</span>
+                    )}
                   </div>
                   <div className="mpInfoRow">
                     <img src="/assets/myPage/icon-bag.png" alt="" className="mpInfoIcon" />
@@ -356,7 +348,7 @@ export function MyPageModal({
                   className="mpSettingsRow"
                   onClick={() => setChangePwOpen(true)}
                 >
-                  <img src="/assets/character/mp-lock.png" alt="" />
+                  <img src="/assets/myPage/lock-flower.png" alt="" />
                   비밀번호 변경
                   <span className="mpChevron" aria-hidden="true">
                     ›

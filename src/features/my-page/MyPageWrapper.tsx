@@ -4,6 +4,7 @@ import { MyPageModal, type Resident } from "./MyPage.js";
 
 type UserProfile = {
   user_name: string;
+  email: string;
   job: string;
   birth: string | null;
   token_balance: number;
@@ -63,6 +64,7 @@ export function MyPageWrapper({ fallbackUserName, residents, onClose, onLogout, 
   return (
     <MyPageModal
       userName={userProfile?.user_name ?? fallbackUserName}
+      userEmail={userProfile?.email ?? ""}
       userJob={userProfile?.job ?? ""}
       userBirth={userProfile?.birth ?? ""}
       tokenBalance={userProfile?.token_balance ?? 0}
