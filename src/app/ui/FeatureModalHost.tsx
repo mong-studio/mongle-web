@@ -122,6 +122,7 @@ export function FeatureModalHost({
             onNameChange={onNameChange}
             onPersonaChange={onPersonaChange}
             onToggleKeyword={onToggleKeyword}
+            onNotice={onNotice}
             onSubmit={onCreateCharacter}
             onClose={onClose}
           />

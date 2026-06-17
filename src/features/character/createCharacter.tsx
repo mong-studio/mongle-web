@@ -51,6 +51,7 @@ type Props = {
   onNameChange: (value: string) => void;
   onPersonaChange: (value: string) => void;
   onToggleKeyword: (keyword: string) => void;
+  onNotice: (message: string) => void;
   onSubmit: () => void;
   onClose: () => void;
 };
@@ -68,6 +69,7 @@ export function CharacterModal({
   onNameChange,
   onPersonaChange,
   onToggleKeyword,
+  onNotice,
   onSubmit,
   onClose,
 }: Props) {
@@ -76,6 +78,7 @@ export function CharacterModal({
 
   const [mode, setMode] = useState<"upload" | "text">("upload");
   const [nameError, setNameError] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [activeApple, setActiveApple] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -134,6 +137,12 @@ export function CharacterModal({
 
   function handleGenerate() {
     if (isBusy) return;
+    if (mode === "upload" && !sourceImagePreview) {
+      setImageError(true);
+      setTimeout(() => setImageError(false), 1500);
+      onNotice("이미지를 먼저 업로드해주세요.");
+      return;
+    }
     if (!characterName.trim()) {
       setNameError(true);
       setTimeout(() => setNameError(false), 1500);
@@ -175,7 +184,7 @@ export function CharacterModal({
           <div className="ccSection">
             <div className="ccSectionLabel">
               <span className="ccNumBadge">1</span>
-              <span className="ccSectionTitle">이미지 입력</span>
+              <span className="ccSectionTitle">캐릭터 생성 방식</span>
             </div>
             <div className="ccCards">
               {/* 업로드 카드 */}
@@ -241,7 +250,9 @@ export function CharacterModal({
             {/* 성격 키워드 */}
             <div className="ccChipSection">
               <div className="ccChipLabelRow">
-                <div className="ccFieldLabel ccChipLabel">성격 키워드</div>
+                <div className="ccFieldLabel ccChipLabel">
+                  성격 키워드<span className="ccOptional">선택</span>
+                </div>
                 <span className="ccChipCount">{selectedKeywordCategories.length}/3</span>
               </div>
               <div className="ccChips">
@@ -272,7 +283,7 @@ export function CharacterModal({
                         onToggleKeyword(kw);
                       }}
                     >
-                      {selected && <span className="ccChipCheck">✓</span>}
+                      {/* {selected && <span className="ccChipCheck">✓</span>} */}
                       {kw}
                     </button>
                   );
@@ -370,7 +381,7 @@ export function CharacterModal({
               // biome-ignore lint/a11y/noStaticElementInteractions: 드롭존은 클릭/드래그로 동작
               // biome-ignore lint/a11y/useKeyWithClickEvents: 드롭존은 키보드 대신 클릭/드래그로 동작
               <div
-                className={`ccDropZone${dragOver ? " ccDropZone--active" : ""}`}
+                className={`ccDropZone${dragOver ? " ccDropZone--active" : ""}${imageError ? " ccDropZone--error" : ""}`}
                 onClick={() => fileInputRef.current?.click()}
                 onDragEnter={(e) => {
                   e.preventDefault();
@@ -391,7 +402,10 @@ export function CharacterModal({
               >
                 <img src="/assets/character/photo.png" alt="" className="ccDropIcon" />
                 <div className="ccDropTitle">여기에 파일을 올려주세요</div>
-                <div className="ccDropSub">드래그 앤 드롭 또는 클릭하여 업로드</div>
+                <div className="ccDropSub">드래그 앤 드롭 또는 클릭하여 업로드 가능해요!</div>
+                <ul className="ccDropConstraints">
+                  <li>PNG · JPG · JPEG 파일 (최대 5MB)</li>
+                </ul>
               </div>
             )}
 

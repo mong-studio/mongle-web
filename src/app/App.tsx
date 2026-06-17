@@ -368,7 +368,6 @@ export function App() {
         return current.filter((item) => item !== keyword);
       }
       if (current.length >= 3) {
-        showNotice("성격 카테고리는 최대 3개까지 선택할 수 있어요.");
         return current;
       }
       return [...current, keyword];
