@@ -11,7 +11,7 @@ import { NotificationToastLayer } from "../features/notification/NotificationToa
 import { useNotificationStore } from "../features/notification/store.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
-import { completeTodo as completeTodoRequest } from "../features/todo/todoApi.js";
+import { completeTodo as completeTodoRequest, formatTodayIso } from "../features/todo/todoApi.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
 import { PhaserVillage } from "../features/village/PhaserVillage.js";
 import { apiClient } from "../shared/api/client.js";
@@ -35,11 +35,16 @@ type ApiTodo = {
   status: "IN_PROGRESS" | "COMPLETED" | "FAILED";
   todo_date: string;
   tag_content?: string;
+  tag_contents?: string[];
+  tags?: (string | { content?: string | null })[];
   quest?: {
     content: string;
     character_name?: string | null;
   } | null;
 };
+
+const MAX_TODO_TAGS = 3;
+const MAX_TODO_TAG_LENGTH = 10;
 
 function buildApiUrl(path: string) {
   return `${API_BASE}${path}`;
@@ -51,6 +56,20 @@ function resolveAvatarUrl(genImgUrl: string | undefined): string | undefined {
     return undefined;
   }
   return genImgUrl.startsWith("http") ? genImgUrl : buildApiUrl(genImgUrl);
+}
+
+function normalizeTodoTags(tags: string[]) {
+  const normalized = tags.map((tag) => tag.trim().slice(0, MAX_TODO_TAG_LENGTH)).filter(Boolean);
+  return Array.from(new Set(normalized)).slice(0, MAX_TODO_TAGS);
+}
+
+function getApiTodoTags(todo: ApiTodo) {
+  const tagValues = [
+    ...(todo.tags ?? []).map((tag) => (typeof tag === "string" ? tag : (tag.content ?? ""))),
+    ...(todo.tag_contents ?? []),
+    todo.tag_content ?? "",
+  ];
+  return normalizeTodoTags(tagValues);
 }
 
 export function App() {
@@ -156,26 +175,29 @@ export function App() {
     }
 
     let cancelled = false;
+    const today = formatTodayIso();
     apiClient
-      .get<ApiTodo[]>("/todos/")
+      .get<ApiTodo[]>("/todos/", { params: { todo_date: today } })
       .then((res) => {
         if (cancelled) {
           return;
         }
         setTodos(
-          res.data.map((todo) => ({
-            id: todo.todo_id,
-            title: todo.content,
-            dueDate: todo.todo_date,
-            tags: todo.tag_content ? [todo.tag_content] : [],
-            status: todo.status === "COMPLETED" ? "done" : "saved",
-            assignedQuest: todo.quest
-              ? {
-                  characterName: todo.quest.character_name ?? null,
-                  content: todo.quest.content,
-                }
-              : null,
-          })),
+          res.data
+            .filter((todo) => todo.todo_date === today)
+            .map((todo) => ({
+              id: todo.todo_id,
+              title: todo.content,
+              dueDate: todo.todo_date,
+              tags: getApiTodoTags(todo),
+              status: todo.status === "COMPLETED" ? "done" : "saved",
+              assignedQuest: todo.quest
+                ? {
+                    characterName: todo.quest.character_name ?? null,
+                    content: todo.quest.content,
+                  }
+                : null,
+            })),
         );
       })
       .catch(() => {

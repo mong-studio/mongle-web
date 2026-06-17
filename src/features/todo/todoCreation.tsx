@@ -43,12 +43,20 @@ const EXTRA_COLORS = [
   { bg: "#FBDAC0", fg: "#C0763E", sel: "#EBA877" },
 ];
 const BUILT_IN_TAGS = Object.keys(TAG_COLORS);
+const MAX_TAGS_PER_TODO = 3;
+const MAX_TAG_LENGTH = 10;
+
 function getTagColor(tag: string, idx: number) {
   return TAG_COLORS[tag] ?? EXTRA_COLORS[idx % EXTRA_COLORS.length];
 }
 
 function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeTodoTags(tags: string[]) {
+  const normalized = tags.map((tag) => tag.trim().slice(0, MAX_TAG_LENGTH)).filter(Boolean);
+  return Array.from(new Set(normalized)).slice(0, MAX_TAGS_PER_TODO);
 }
 
 function isImeComposing(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -128,9 +136,16 @@ export function TodoCreation({
   }
 
   function toggleTag(tag: string) {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
+    setSelectedTags((prev) => {
+      if (prev.includes(tag)) {
+        return prev.filter((t) => t !== tag);
+      }
+      if (prev.length >= MAX_TAGS_PER_TODO) {
+        showToast("태그는 할 일마다 최대 3개까지 선택할 수 있어요.");
+        return prev;
+      }
+      return normalizeTodoTags([...prev, tag]);
+    });
   }
 
   function startAddTag() {
@@ -139,11 +154,17 @@ export function TodoCreation({
   }
 
   function commitTag() {
-    const t = tagText.trim();
+    const t = tagText.trim().slice(0, MAX_TAG_LENGTH);
     const known = [...BUILT_IN_TAGS, ...customTags];
     if (t && !known.includes(t)) {
       setCustomTags((prev) => [...prev, t]);
-      setSelectedTags((prev) => [...prev, t]);
+      setSelectedTags((prev) => {
+        if (prev.length >= MAX_TAGS_PER_TODO) {
+          showToast("태그가 추가됐어요. 선택은 최대 3개까지 가능해요.");
+          return prev;
+        }
+        return normalizeTodoTags([...prev, t]);
+      });
     }
     setAddingTag(false);
     setTagText("");
@@ -152,7 +173,10 @@ export function TodoCreation({
   function addTodo() {
     const name = manualText.trim();
     if (!name) return;
-    setTodos((prev) => [...prev, { id: createId("td"), name, tags: [...selectedTags] }]);
+    setTodos((prev) => [
+      ...prev,
+      { id: createId("td"), name, tags: normalizeTodoTags(selectedTags) },
+    ]);
     setManualText("");
   }
 
@@ -176,7 +200,7 @@ export function TodoCreation({
     setTodos((prev) =>
       prev.map((todo) =>
         todo.id === id
-          ? { ...todo, tags: Array.from(new Set([...todo.tags, ...selectedTags])) }
+          ? { ...todo, tags: normalizeTodoTags([...todo.tags, ...selectedTags]) }
           : todo,
       ),
     );
@@ -199,7 +223,7 @@ export function TodoCreation({
       const items = [...result.todos, ...result.calendar_events].map((t) => ({
         id: createId("ai"),
         name: t.title,
-        tags: t.tags ?? [],
+        tags: normalizeTodoTags(t.tags ?? []),
       }));
       setTodos((prev) => [...prev, ...items]);
       setConfirmed(true);
@@ -225,7 +249,7 @@ export function TodoCreation({
       const result = await previewTodoQuests({
         todos: todos.map((todo) => ({
           content: todo.name,
-          tags: todo.tags.length ? todo.tags : ["일상"],
+          tags: todo.tags.length ? normalizeTodoTags(todo.tags) : ["일상"],
         })),
       });
       setQuests(
@@ -257,7 +281,7 @@ export function TodoCreation({
             questText: quest?.content ?? null,
             previewId: todo.preview_id,
             title: todo.content,
-            tags: todo.tags.length ? todo.tags : ["일상"],
+            tags: todo.tags.length ? normalizeTodoTags(todo.tags) : ["일상"],
           };
         }),
       );
@@ -286,7 +310,7 @@ export function TodoCreation({
         todos: quests.map((q) => ({
           content: q.title,
           todo_date: today,
-          tags: q.tags,
+          tags: normalizeTodoTags(q.tags),
           quest:
             !q.isTemporaryQuest && q.characterId && q.questText
               ? {
@@ -315,7 +339,7 @@ export function TodoCreation({
           id: todo.todo_id,
           title: todo.content,
           dueDate: todo.todo_date,
-          tags: todo.tags,
+          tags: normalizeTodoTags(todo.tags),
           status: "saved" as const,
           assignedQuest: savedQuest,
         };
@@ -461,6 +485,7 @@ export function TodoCreation({
                   ref={tagInputRef}
                   className="tdTagInput"
                   value={tagText}
+                  maxLength={MAX_TAG_LENGTH}
                   onChange={(e) => setTagText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
@@ -476,6 +501,7 @@ export function TodoCreation({
                   }}
                   onBlur={commitTag}
                   placeholder="태그명"
+                  aria-label="태그명 입력, 최대 10글자"
                 />
               ) : (
                 <button type="button" className="tdAddTag" onClick={startAddTag}>
