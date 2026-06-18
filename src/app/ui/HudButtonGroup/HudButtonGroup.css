@@ -1,25 +1,17 @@
 .hudButtonGroup {
-  position: absolute;
-  z-index: 8;
-  top: 83px;
-  right: 22px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 @media (max-width: 1060px) {
   .hudButtonGroup {
-    top: 114px;
-    right: 96px;
-    gap: 10px;
+    gap: 7px;
   }
 }
 
 @media (max-width: 760px) {
   .hudButtonGroup {
-    top: 72px;
-    right: 14px;
-    gap: 8px;
+    gap: 6px;
   }
 }

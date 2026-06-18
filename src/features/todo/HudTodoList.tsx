@@ -144,7 +144,8 @@ export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: Hud
         ) : null}
       </ul>
       <button type="button" className="hudTodoAddButton" onClick={onAddTodo}>
-        <span aria-hidden="true">+</span>할 일 추가
+        <span aria-hidden="true">+</span>
+        <b>할 일 추가</b>
       </button>
       <p className="hudTodoFooter">
         완료하면 주민이 피드를 올려요!

@@ -1,12 +1,12 @@
 .hudButton {
   position: relative;
-  width: 70px;
-  height: 70px;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  place-items: center;
-  gap: 1px;
-  padding: 5px 4px 4px;
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
   border: 3px solid #e1b54c;
   border-radius: 12px;
   background-color: rgb(250, 238, 210);
@@ -43,10 +43,13 @@
 
 .hudButtonIconWrap {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease;
 }
 
 .hudButtonIcon {
@@ -56,16 +59,49 @@
   object-fit: contain;
 }
 
+.hudButton--bell .hudButtonIcon {
+  transform: scale(1.58);
+}
+
+.hudButton--phone .hudButtonIcon {
+  transform: scale(1.73);
+}
+
+.hudButton--diary .hudButtonIcon {
+  transform: scale(1.62);
+}
+
+.hudButton--settings .hudButtonIcon {
+  transform: scale(1.78);
+}
+
 .hudButtonText {
-  display: block;
-  max-width: 100%;
-  color: #4a2d18cf;
-  font-size: 0.72rem;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 0 5px;
+  background: var(--mongle-hud-fill);
+  color: #fff6d7;
+  font-size: 0.78rem;
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.12;
   text-align: center;
-  white-space: nowrap;
-  margin-top: 1px;
+  opacity: 0;
+  text-shadow: 0 2px 0 rgba(80, 45, 20, 0.32);
+  transition: opacity 130ms ease;
+}
+
+.hudButton:hover .hudButtonText,
+.hudButton:focus-visible .hudButtonText {
+  opacity: 1;
+}
+
+.hudButton:hover .hudButtonIconWrap,
+.hudButton:focus-visible .hudButtonIconWrap {
+  opacity: 0;
+  transform: scale(0.88);
 }
 
 .hudButtonBadge {
@@ -82,15 +118,14 @@
 
 @media (max-width: 1060px) {
   .hudButton {
-    width: 60px;
-    height: 60px;
-    padding: 6px 5px 5px;
+    width: 54px;
+    height: 54px;
     border-radius: 12px;
   }
 
   .hudButtonIconWrap {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
   }
 
   .hudButtonText {
@@ -100,9 +135,8 @@
 
 @media (max-width: 760px) {
   .hudButton {
-    width: 60px;
-    height: 60px;
-    padding: 6px 5px 5px;
+    width: 48px;
+    height: 48px;
     border-width: 2px;
     border-radius: 12px;
   }
@@ -113,8 +147,8 @@
   }
 
   .hudButtonIconWrap {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
   }
 
   .hudButtonText {

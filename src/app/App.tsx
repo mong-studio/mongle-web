@@ -20,9 +20,7 @@ import type { Resident, TodoTagColor } from "./model/appTypes.js";
 import { AppHeader } from "./ui/AppHeader.js";
 import { AppModalLayer } from "./ui/AppModalLayer.js";
 import { FeatureModalHost } from "./ui/FeatureModalHost.js";
-import { HudButtonGroup } from "./ui/HudButtonGroup/HudButtonGroup.js";
 import { NoticeToast } from "./ui/NoticeToast.js";
-import { ResidentPanel } from "./ui/ResidentPanel.js";
 import { VillageDialogue } from "./ui/VillageDialogue.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
@@ -541,30 +539,25 @@ export function App() {
         apples={apples}
         authStatus={authStatus}
         authUser={authUser}
+        onOpenDiary={() => setReflectionOpen(true)}
+        onOpenNotifications={() => setNotificationOpen((prev) => !prev)}
+        onOpenPhone={() => setFeedOpen(true)}
         onLogin={() => setLoginOpen(true)}
         onLogout={() => void logoutSession()}
         onOpenSettings={openSettings}
         onSignup={() => setSignupOpen(true)}
+        unreadNotificationCount={
+          notifHistory.length > 0 && !notificationOpen ? notifHistory.length : undefined
+        }
       />
 
       <NoticeToast message={notice} visible={noticeVisible} />
-
-      <ResidentPanel residents={residents} onAddResident={() => openFeature("character")} />
 
       <HudTodoList
         todos={todos}
         tagColors={todoTagColors}
         onCompleteTodo={completeHudTodo}
         onAddTodo={() => openFeature("todo")}
-      />
-
-      <HudButtonGroup
-        onOpenDiary={() => setReflectionOpen(true)}
-        onOpenNotifications={() => setNotificationOpen((prev) => !prev)}
-        onOpenPhone={() => setFeedOpen(true)}
-        unreadNotificationCount={
-          notifHistory.length > 0 && !notificationOpen ? notifHistory.length : undefined
-        }
       />
 
       <VillageDialogue

@@ -704,11 +704,51 @@ class VillageScene extends Phaser.Scene {
   }
 
   private getHudAvoidRects(width: number, height: number) {
+    const headerHeight = width <= 760 ? 74 : 92;
+    const logoWidth = width <= 760 ? 140 : width <= 1060 ? 168 : 188;
+    const topRightWidth = width <= 760 ? 250 : width <= 1060 ? 440 : 500;
+    const todoTop = width <= 1060 ? 190 : 80;
+    const todoWidth = Math.min(360, Math.max(0, width - 38));
+    const todoHeight = Math.min(width <= 1060 ? 590 : 586, Math.max(0, height - 18));
+    const bottomButtonWidth = width <= 760 ? Math.min(220, width) : 230;
+    const bottomButtonHeight = 94;
+    const minimapWidth =
+      width <= 760
+        ? Math.min(258, Math.max(0, width - 28))
+        : height <= 820
+          ? Math.min(256, Math.max(0, width - 56))
+          : width <= 1060
+            ? Math.min(346, Math.max(0, width - 48))
+            : Math.min(292, Math.max(0, width - 64));
+    const minimapHeight = width <= 760 ? 184 : height <= 820 ? 186 : width <= 1060 ? 238 : 210;
+    const minimapX = width <= 760 ? 14 : height <= 820 ? 28 : width <= 1060 ? 24 : 20;
+
     return [
-      new Phaser.Geom.Rectangle(0, 0, Math.min(360, width), Math.min(520, height)),
-      new Phaser.Geom.Rectangle(Math.max(0, width - 390), 0, 390, Math.min(650, height)),
-      new Phaser.Geom.Rectangle(Math.max(0, width - 360), Math.max(0, height - 290), 360, 290),
-      new Phaser.Geom.Rectangle(Math.max(0, width / 2 - 500), Math.max(0, height - 240), 1000, 240),
+      new Phaser.Geom.Rectangle(0, 0, Math.min(logoWidth, width), Math.min(headerHeight, height)),
+      new Phaser.Geom.Rectangle(
+        Math.max(0, width - topRightWidth),
+        0,
+        topRightWidth,
+        Math.min(headerHeight, height),
+      ),
+      new Phaser.Geom.Rectangle(
+        Math.max(0, width - todoWidth - 20),
+        Math.min(todoTop, height),
+        todoWidth + 20,
+        Math.min(todoHeight, Math.max(0, height - todoTop)),
+      ),
+      new Phaser.Geom.Rectangle(
+        Math.max(0, width / 2 - bottomButtonWidth / 2),
+        Math.max(0, height - bottomButtonHeight),
+        bottomButtonWidth,
+        bottomButtonHeight,
+      ),
+      new Phaser.Geom.Rectangle(
+        minimapX,
+        Math.max(0, height - minimapHeight),
+        minimapWidth + 20,
+        minimapHeight,
+      ),
     ];
   }
 
