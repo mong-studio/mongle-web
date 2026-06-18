@@ -1,7 +1,7 @@
 .pmHud {
   position: fixed;
-  top: 80px;
-  left: 26px;
+  top: 100px;
+  left: 23px;
   z-index: 7;
   font-family: var(--font-tmoney-dungunbaram);
   font-weight: 800;
@@ -28,16 +28,6 @@
     transform: scale(1.12);
   }
 }
-@keyframes pmCardIn {
-  0% {
-    transform: scale(0.96) translateY(-8px);
-    opacity: 0;
-  }
-  100% {
-    transform: none;
-    opacity: 1;
-  }
-}
 @keyframes pmToastIn {
   0% {
     transform: translateX(-50%) translateY(-14px) scale(0.96);
@@ -62,7 +52,7 @@
   padding: 10px 16px 14px;
   position: relative;
   overflow: hidden;
-  animation: pmCardIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  animation: var(--mongle-hud-pop);
   box-sizing: border-box;
 }
 

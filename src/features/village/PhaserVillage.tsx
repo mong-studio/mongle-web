@@ -10,6 +10,9 @@ const BOARD_KEY = "village-board";
 const BOARD_PATH = "/assets/objects/board.png";
 const CHIEF_HOUSE_KEY = "chief-house";
 const CHIEF_HOUSE_PATH = "/assets/objects/chief_house.png";
+const RESIDENT_HOUSE_COLORS = ["blue", "green", "purple", "yellow"] as const;
+const RESIDENT_HOUSE_DISPLAY_WIDTH = 84;
+const RESIDENT_HOUSE_DISPLAY_HEIGHT = 76;
 const CHIEF_NPC_KEY = "chief-npc";
 const CHIEF_NPC_PATH = "/assets/mongle_chief.png";
 const CHIEF_NPC_SPEED = 10;
@@ -300,6 +303,12 @@ class VillageScene extends Phaser.Scene {
       if (!this.textures.exists(BOARD_KEY)) {
         this.load.image(BOARD_KEY, BOARD_PATH);
       }
+      for (const color of RESIDENT_HOUSE_COLORS) {
+        const key = `resident-house-${color}`;
+        if (!this.textures.exists(key)) {
+          this.load.image(key, `/assets/objects/house_${color}.png`);
+        }
+      }
 
       this.load.once(Phaser.Loader.Events.COMPLETE, resolve);
       this.load.start();
@@ -438,7 +447,60 @@ class VillageScene extends Phaser.Scene {
       [78, -236],
       [-390, -14],
       [358, -36],
+      [-140, 300],
+      [230, 280],
     ];
+
+    const residentHouseMarkers: MinimapMarker[] = [];
+    this.residents.slice(0, residentOffsets.length).forEach((resident, index) => {
+      const [offsetX, offsetY] = residentOffsets[index];
+      const hx = Phaser.Math.Clamp(centerX + offsetX, 0, map.width * map.tilewidth);
+      const hy = Phaser.Math.Clamp(centerY + offsetY, 0, map.height * map.tileheight);
+      const color = RESIDENT_HOUSE_COLORS[index % RESIDENT_HOUSE_COLORS.length];
+      const houseKey = `resident-house-${color}`;
+
+      this.blockedWorldRects.push(
+        new Phaser.Geom.Rectangle(
+          hx - RESIDENT_HOUSE_DISPLAY_WIDTH / 2 - 8,
+          hy - RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.86 - 8,
+          RESIDENT_HOUSE_DISPLAY_WIDTH + 16,
+          RESIDENT_HOUSE_DISPLAY_HEIGHT + 8,
+        ),
+      );
+
+      const houseHint: ActiveObjectHint = {
+        label: `${resident.name}의 집`,
+        worldX: hx,
+        worldY: hy - RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.86 - 6,
+      };
+      const houseObj = this.add
+        .image(hx, hy, houseKey)
+        .setOrigin(0.5, 0.86)
+        .setDisplaySize(RESIDENT_HOUSE_DISPLAY_WIDTH, RESIDENT_HOUSE_DISPLAY_HEIGHT)
+        .setDepth(hy)
+        .setInteractive();
+
+      houseObj.on("pointerover", () => {
+        this.activeObjectHint = houseHint;
+        this.publishObjectHint({ ...houseHint, visible: true });
+      });
+      houseObj.on("pointerout", () => {
+        if (this.activeObjectHint === houseHint) {
+          this.activeObjectHint = null;
+          this.lastObjectHintSignature = "";
+          this.publishObjectHint({ ...houseHint, visible: false });
+        }
+      });
+
+      residentHouseMarkers.push({
+        id: resident.id,
+        label: resident.name,
+        type: "resident",
+        x: hx,
+        y: hy,
+      });
+    });
+
     this.minimapMarkers = [
       {
         id: "chief-house",
@@ -454,16 +516,7 @@ class VillageScene extends Phaser.Scene {
         x: this.chiefNpc?.x ?? centerX + 92,
         y: this.chiefNpc?.y ?? centerY + 52,
       },
-      ...this.residents.slice(0, residentOffsets.length).map((resident, index) => {
-        const [offsetX, offsetY] = residentOffsets[index];
-        return {
-          id: resident.id,
-          label: resident.name,
-          type: "resident" as const,
-          x: Phaser.Math.Clamp(centerX + offsetX, 0, map.width * map.tilewidth),
-          y: Phaser.Math.Clamp(centerY + offsetY, 0, map.height * map.tileheight),
-        };
-      }),
+      ...residentHouseMarkers,
     ];
   }
 
@@ -651,11 +704,51 @@ class VillageScene extends Phaser.Scene {
   }
 
   private getHudAvoidRects(width: number, height: number) {
+    const headerHeight = width <= 760 ? 74 : 92;
+    const logoWidth = width <= 760 ? 140 : width <= 1060 ? 168 : 188;
+    const topRightWidth = width <= 760 ? 250 : width <= 1060 ? 440 : 500;
+    const todoTop = width <= 1060 ? 190 : 80;
+    const todoWidth = Math.min(360, Math.max(0, width - 38));
+    const todoHeight = Math.min(width <= 1060 ? 590 : 586, Math.max(0, height - 18));
+    const bottomButtonWidth = width <= 760 ? Math.min(220, width) : 230;
+    const bottomButtonHeight = 94;
+    const minimapWidth =
+      width <= 760
+        ? Math.min(258, Math.max(0, width - 28))
+        : height <= 820
+          ? Math.min(256, Math.max(0, width - 56))
+          : width <= 1060
+            ? Math.min(346, Math.max(0, width - 48))
+            : Math.min(292, Math.max(0, width - 64));
+    const minimapHeight = width <= 760 ? 184 : height <= 820 ? 186 : width <= 1060 ? 238 : 210;
+    const minimapX = width <= 760 ? 14 : height <= 820 ? 28 : width <= 1060 ? 24 : 20;
+
     return [
-      new Phaser.Geom.Rectangle(0, 0, Math.min(360, width), Math.min(520, height)),
-      new Phaser.Geom.Rectangle(Math.max(0, width - 390), 0, 390, Math.min(650, height)),
-      new Phaser.Geom.Rectangle(Math.max(0, width - 360), Math.max(0, height - 290), 360, 290),
-      new Phaser.Geom.Rectangle(Math.max(0, width / 2 - 500), Math.max(0, height - 240), 1000, 240),
+      new Phaser.Geom.Rectangle(0, 0, Math.min(logoWidth, width), Math.min(headerHeight, height)),
+      new Phaser.Geom.Rectangle(
+        Math.max(0, width - topRightWidth),
+        0,
+        topRightWidth,
+        Math.min(headerHeight, height),
+      ),
+      new Phaser.Geom.Rectangle(
+        Math.max(0, width - todoWidth - 20),
+        Math.min(todoTop, height),
+        todoWidth + 20,
+        Math.min(todoHeight, Math.max(0, height - todoTop)),
+      ),
+      new Phaser.Geom.Rectangle(
+        Math.max(0, width / 2 - bottomButtonWidth / 2),
+        Math.max(0, height - bottomButtonHeight),
+        bottomButtonWidth,
+        bottomButtonHeight,
+      ),
+      new Phaser.Geom.Rectangle(
+        minimapX,
+        Math.max(0, height - minimapHeight),
+        minimapWidth + 20,
+        minimapHeight,
+      ),
     ];
   }
 

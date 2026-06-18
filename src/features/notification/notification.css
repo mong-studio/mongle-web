@@ -149,35 +149,17 @@
    │  2. NOTIFICATION PANEL — 벨 버튼 누르면 열리는 알림 목록    │
    │                                                           │
    │  ■ 위치 원칙                                               │
-   │    패널은 HudTodoList 왼쪽에 배치해 절대 겹치지 않게 함     │
-   │    말풍선 화살표는 패널 우상단에 위치 → 우측 위 벨 버튼 방향 │
-   │                                                           │
-   │  ■ 데스크탑 (>1060px) 기준 계산                            │
-   │    HudTodoList: right:22px  width:292px                   │
-   │      → 할일목록 왼쪽 끝 = right:314px 지점                 │
-   │    패널 오른쪽 끝 = 314 + 14(간격) = right:328px           │
-   │    패널 너비 = min(360px, 화면너비-344px)                   │
-   │    화살표 = 패널 우측에서 right:20px                        │
-   │                                                           │
-   │  ■ 태블릿 (≤1060px)                                       │
-   │    HudTodoList: right:24px  width:360px                   │
-   │      → 패널 오른쪽 끝 = right:396px                        │
-   │                                                           │
-   │  ■ 모바일 (≤760px)                                         │
-   │    HudTodoList 가 position:static 이 되므로                │
-   │    패널이 화면 전체 너비를 차지                               │
+   │    알림 버튼이 헤더 사과 배지 왼쪽에 있으므로 패널도 헤더 아래 │
+   │    말풍선처럼 열린다.                                      │
    └───────────────────────────────────────────────────────────┘ */
 
 .notifPanel {
   position: fixed;
   z-index: 40;
 
-  /* ↓ 위치 조정 포인트 ↓ */
-  top: 166px; /* 위아래 위치 — 벨 버튼 하단(153px)에 화살표가 바로 붙도록 */
-  right: 182px; /* 좌우 위치 — 화살표(right:20px)가 벨 버튼 중앙(오른쪽 217px)에 오도록 계산:
-                           패널 border(3) + pointer right(20) + half-width(12) = 35
-                           217 - 35 = 182 */
-  width: min(300px, calc(100vw - 198px)); /* 182 + 16(좌측여백) = 198 */
+  top: 90px;
+  right: 351px;
+  width: min(300px, calc(100vw - 367px));
 
   background: linear-gradient(180deg, #fbf0ce 0%, #f8e8bf 100%);
   border: 3px solid #d6a858;
@@ -480,26 +462,14 @@
    │  3. RESPONSIVE — 화면 크기별 위치 조정     │
    └──────────────────────────────────────────┘ */
 
-/* 태블릿 (≤1060px)
-   HudButtonGroup → top:114px, 버튼크기:60px, right:96px, gap:10px
-   알림 버튼 중앙  → 96 + 60(일기장) + 10 + 60(핸드폰) + 10 + 30(half) = 266px from right
-   패널 right     → 266 - 3(border) - 20(pointer right) - 12(half-width) = 231px
-   패널 top       → 114 + 60(버튼높이) + 16(여백) = 190px             */
 @media (max-width: 1060px) {
   .notifPanel {
-    top: 183px; /* 태블릿 벨 버튼 하단(174px) + 화살표 연결 */
-    right: 231px;
-    width: min(280px, calc(100vw - 247px)); /* 231 + 16(좌측여백) = 247 */
+    top: 86px;
+    right: 334px;
+    width: min(280px, calc(100vw - 350px));
   }
-  /* .notifPanelPointer는 right:20px 그대로 유지 */
 }
 
-/* 모바일 (≤760px)
-   HudTodoList 가 position:static 이 되어 우측에 없어짐
-   → 패널을 화면 전체 너비로 변경
-   HudButtonGroup → top:72px, 버튼크기:60px, right:14px, gap:8px
-   벨버튼 중앙 from 오른쪽 = 14 + 60 + 8 + 60 + 8 + 30 = 180px
-   화살표 right  = 180(벨중앙) − 16(패널right) − 12(화살표반폭) = 152px */
 @media (max-width: 760px) {
   .notifToastLayer {
     bottom: 16px;
@@ -512,15 +482,14 @@
   }
 
   .notifPanel {
-    top: 145px; /* 모바일 벨 버튼 하단(132px) + 화살표 연결 */
+    top: 82px;
     right: 16px;
     left: 16px;
     width: auto;
   }
 
-  /* 모바일에서는 패널이 전체너비라 화살표를 벨 버튼 위치로 재조정 */
   .notifPanelPointer {
-    right: 152px; /* 벨버튼 중앙 정렬 계산값 */
+    right: min(301px, calc(100vw - 89px));
     left: auto;
     transform: rotate(45deg);
   }

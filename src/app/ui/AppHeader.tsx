@@ -1,55 +1,144 @@
+import { useEffect, useRef, useState } from "react";
 import type { AuthStatus, SessionUser } from "../../features/auth/store.js";
+import { HudButtonGroup } from "./HudButtonGroup/HudButtonGroup.js";
 
 type AppHeaderProps = {
   apples: number;
   authStatus: AuthStatus;
   authUser: SessionUser | null;
+  onOpenDiary: () => void;
+  onOpenNotifications: () => void;
+  onOpenPhone: () => void;
   onLogin: () => void;
   onLogout: () => void;
   onOpenSettings: () => void;
   onSignup: () => void;
+  unreadNotificationCount?: number;
 };
 
 export function AppHeader({
   apples,
   authStatus,
   authUser,
+  onOpenDiary,
+  onOpenNotifications,
+  onOpenPhone,
   onLogin,
   onLogout,
   onOpenSettings,
   onSignup,
+  unreadNotificationCount,
 }: AppHeaderProps) {
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+  const settingsMenuRef = useRef<HTMLDivElement | null>(null);
+  const isAuthenticated = authStatus === "authenticated" && Boolean(authUser);
+
+  useEffect(() => {
+    if (!settingsMenuOpen) {
+      return;
+    }
+
+    function closeOnOutsideClick(event: MouseEvent) {
+      if (
+        event.target instanceof Node &&
+        settingsMenuRef.current &&
+        !settingsMenuRef.current.contains(event.target)
+      ) {
+        setSettingsMenuOpen(false);
+      }
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setSettingsMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [settingsMenuOpen]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSettingsMenuOpen(false);
+    }
+  }, [isAuthenticated]);
+
+  function closeSettingsMenu() {
+    setSettingsMenuOpen(false);
+  }
+
+  function openSettingsMenu() {
+    if (!isAuthenticated) {
+      onOpenSettings();
+      return;
+    }
+    setSettingsMenuOpen((open) => !open);
+  }
+
+  function openMyPage() {
+    closeSettingsMenu();
+    onOpenSettings();
+  }
+
+  function logout() {
+    closeSettingsMenu();
+    onLogout();
+  }
+
   return (
     <header className="townNav">
-      <nav aria-label="몽글마을 메뉴">
-        <button type="button" className="settingsOnlyButton" onClick={onOpenSettings}>
-          <img className="settingsOnlyButtonIcon" src="/assets/hud/setting.png" alt="" />
-          <span>설정</span>
-        </button>
-      </nav>
+      <div className="brandBadge">
+        <img className="navLogo" src="/assets/hud/square_logo.png" alt="몽글 로고" />
+      </div>
       <div className="navUserArea">
-        {authStatus === "authenticated" && authUser ? (
+        {isAuthenticated ? (
           <>
-            <div className="tokenBadge" role="status" aria-label={`보유 사과 ${apples}개`}>
-              <span className="tokenBadgeIcon" aria-hidden="true">
-                🍎
-              </span>
-              <b className="tokenBadgeCount">{apples}</b>
-              <span className="tokenBadgePlus" aria-hidden="true">
-                +
-              </span>
+            <div className="headerHudMenu" ref={settingsMenuRef}>
+              <HudButtonGroup
+                onOpenDiary={() => {
+                  closeSettingsMenu();
+                  onOpenDiary();
+                }}
+                onOpenNotifications={() => {
+                  closeSettingsMenu();
+                  onOpenNotifications();
+                }}
+                onOpenPhone={() => {
+                  closeSettingsMenu();
+                  onOpenPhone();
+                }}
+                onOpenSettings={openSettingsMenu}
+                unreadNotificationCount={unreadNotificationCount}
+              />
+              {settingsMenuOpen ? (
+                <div className="settingsDropdown" role="menu" aria-label="설정 메뉴">
+                  <span className="settingsDropdownPointer" aria-hidden="true" />
+                  <button type="button" role="menuitem" onClick={openMyPage}>
+                    마이페이지
+                  </button>
+                  <button type="button" role="menuitem" onClick={logout}>
+                    로그아웃
+                  </button>
+                </div>
+              ) : null}
             </div>
-            <button type="button" className="loginButton" onClick={onLogout}>
-              로그아웃
-            </button>
+            <div className="tokenBadge" role="status" aria-label={`보유 사과 ${apples}개`}>
+              <img className="tokenBadgeIcon" src="/assets/hud/icon-apple.png" alt="" />
+              <b className="tokenBadgeCount">{apples}</b>
+            </div>
           </>
         ) : authStatus === "anonymous" ? (
           <>
             <button type="button" className="loginButton" onClick={onLogin}>
-              로그인
+              <span className="mainHoverLabel">로그인</span>
             </button>
             <button type="button" className="loginButton" onClick={onSignup}>
-              회원가입
+              <span className="mainHoverLabel">회원가입</span>
             </button>
           </>
         ) : null}
