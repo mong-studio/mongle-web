@@ -81,8 +81,6 @@ export function MyPageModal({
   const [jobDraft, setJobDraft] = useState(userJob);
   const [birthDraft, setBirthDraft] = useState(userBirth);
   const [profileIdx, setProfileIdx] = useState<number | null>(null);
-  const [bellOpen, setBellOpen] = useState(false);
-  const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -109,11 +107,6 @@ export function MyPageModal({
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(""), 2600);
-  }
-
-  function closeAll() {
-    setBellOpen(false);
-    setNameMenuOpen(false);
   }
 
   const activeRes = profileIdx !== null ? residents[profileIdx] : null;
