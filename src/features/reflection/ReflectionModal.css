@@ -8,9 +8,7 @@ body ::-webkit-scrollbar {
   aspect-ratio: 1258 / 708;
   margin: 0 auto;
   color: #4c321f;
-  font-family:
-    "NanumSquareRoundExtraBold", "NanumSquareRoundBold", "Apple SD Gothic Neo", "Malgun Gothic",
-    sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   filter: drop-shadow(0 22px 42px rgba(36, 24, 15, 0.28));
 }
 
@@ -28,9 +26,7 @@ body ::-webkit-scrollbar {
 .reflectionBook h3,
 .reflectionBook strong,
 .reflectionBook button {
-  font-family:
-    "NanumSquareRoundExtraBold", "NanumSquareRoundBold", "Apple SD Gothic Neo", "Malgun Gothic",
-    sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
 }
 
 .reflectionIcon {
@@ -123,7 +119,7 @@ body ::-webkit-scrollbar {
   border-radius: 14px;
   background: rgba(255, 246, 217, 0.94);
   color: #6f4727;
-  font-family: "NanumSquareRoundExtraBold", "NanumSquareRoundBold", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: clamp(0.82rem, 1vw, 1.08rem);
   box-shadow: 0 6px 16px rgba(65, 43, 24, 0.16);
   transform: translate(-50%, -50%);
@@ -275,7 +271,7 @@ body ::-webkit-scrollbar {
   gap: 0.8em;
   margin: 0;
   font-size: clamp(0.7rem, 1vw, 1.18rem);
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .reflectionTodoHead span:first-child {
@@ -341,7 +337,7 @@ body ::-webkit-scrollbar {
   color: #e45a24;
   font-size: clamp(0.66rem, 0.95vw, 1.05rem);
   font-style: normal;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .reflectionTodoList em.isDone {
@@ -408,7 +404,7 @@ body ::-webkit-scrollbar {
 
 .reflectionRewardCard strong {
   font-size: clamp(1.1rem, 1.3vw, 1.2rem);
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .reflectionRewardCard p {
@@ -417,7 +413,7 @@ body ::-webkit-scrollbar {
   margin: 0;
   color: #4c321f;
   font-size: clamp(0.6rem, 1vw, 1rem);
-  font-weight: 500;
+  font-weight: normal;
 }
 
 .reflectionRewardCard b {
@@ -484,7 +480,7 @@ body ::-webkit-scrollbar {
 .reflectionEditGuideCopy p {
   margin: 0;
   color: #4c321f;
-  font-family: "NanumSquareRoundBold", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: clamp(0.76rem, 1vw, 1.08rem);
   font-weight: 900;
   line-height: 1.5;
@@ -524,7 +520,7 @@ body ::-webkit-scrollbar {
 }
 
 .reflectionEditCostLabel {
-  font-family: "NanumSquareRoundBold", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: clamp(0.74rem, 0.98vw, 1.06rem);
   font-weight: 900;
 }
@@ -544,7 +540,7 @@ body ::-webkit-scrollbar {
   justify-self: center;
   margin-top: 3.5%;
   color: #5f422b;
-  font-family: "NanumSquareRoundBold", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: clamp(0.72rem, 0.94vw, 1.02rem);
   font-weight: 900;
   text-align: center;
@@ -664,9 +660,9 @@ body ::-webkit-scrollbar {
   background-size: 100% var(--reflection-writing-line-height);
   background-attachment: local;
   color: #35261a;
-  font-family: "Gowun Dodum", "NanumSquareRoundBold", "Apple SD Gothic Neo", cursive;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: clamp(0.82rem, 1.05vw, 1.18rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: var(--reflection-writing-line-height);
 }
 
@@ -855,9 +851,9 @@ body ::-webkit-scrollbar {
   );
   background-size: 100% var(--reflection-writing-line-height);
   color: #35261a;
-  font-family: "Gowun Dodum", "NanumSquareRoundBold", "Apple SD Gothic Neo", cursive;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: clamp(0.76rem, 1.02vw, 1.08rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: var(--reflection-writing-line-height);
   white-space: pre-line;
 }

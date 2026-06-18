@@ -1,9 +1,8 @@
 /* ─────────────────────────────────────────────────────────────────────────
    feed.css — 몽글마을 피드 (우리 마을 소식)
    Claude Design 핸드오프(몽실이 피드.html) 재현.
-   Jua = 디스플레이(제목), Gowun Dodum = 본문.
+   TMoneyDungunbaram = 전체 UI 폰트.
    ───────────────────────────────────────────────────────────────────────── */
-@import url("https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap");
 
 /* ── modal wrapper (inside modalBackdrop) ───────────────────────────────── */
 .feed-modal-wrapper {
@@ -26,7 +25,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: "Gowun Dodum", "Apple SD Gothic Neo", system-ui, sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -65,7 +64,7 @@
   min-width: 0;
 }
 .mtitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
   line-height: 1.1;
   letter-spacing: 0.2px;
@@ -124,7 +123,7 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
   line-height: 1;
   user-select: none;
@@ -140,11 +139,11 @@
   flex-wrap: wrap;
 }
 .mg-name {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15.5px;
 }
 .mg-badge {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 12.5px;
   padding: 2.5px 9px;
   border-radius: 999px;
@@ -322,7 +321,7 @@
   margin: 0 auto 16px;
 }
 .share-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   text-align: center;
   margin-bottom: 20px;
@@ -365,7 +364,7 @@
   padding: 13px;
   border: 1px solid;
   border-radius: 16px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   cursor: pointer;
   transition: transform 0.12s ease;
@@ -378,7 +377,7 @@
   cursor: default;
 }
 .share-toast {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 12.5px;
   line-height: 1.5;
   text-align: center;
@@ -440,7 +439,7 @@
   line-height: 1.1;
 }
 .pf-topbar-name {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 17px;
 }
 .pf-topbar-sub {
@@ -450,7 +449,7 @@
 .pd-topbar-title {
   flex: 1;
   text-align: center;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 17px;
 }
 
@@ -489,7 +488,7 @@
   display: grid;
   place-items: center;
   background: linear-gradient(155deg, #fbe7d2, #f4d2b4);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 40px;
   line-height: 1;
 }
@@ -505,7 +504,7 @@
   min-width: 48px;
 }
 .pf-stat-val {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
 }
 .pf-stat-label {
@@ -522,12 +521,12 @@
   padding: 14px 6px 0;
 }
 .pf-name {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
   white-space: nowrap;
 }
 .pf-badge {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 12.5px;
   padding: 2.5px 9px;
   border-radius: 999px;
@@ -542,7 +541,7 @@
   flex: 1;
   height: 42px;
   border-radius: 13px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   border: none;
   cursor: pointer;
@@ -611,7 +610,7 @@
   display: grid;
   place-items: center;
   background: linear-gradient(155deg, #fbe7d2, #f4d2b4);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
 }
 .pd-author-txt {
@@ -622,7 +621,7 @@
   align-items: center;
   gap: 7px;
   flex-wrap: wrap;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15.5px;
 }
 .pd-author-meta {
@@ -681,7 +680,7 @@
   padding: 4px 4px 0;
 }
 .pd-comments-h {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   margin-bottom: 12px;
 }
@@ -707,7 +706,7 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13px;
 }
 .pd-comment-bubble {
@@ -721,7 +720,7 @@
   border-radius: 14px 4px 14px 14px;
 }
 .pd-comment-bubble b {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-weight: 400;
   margin-right: 7px;
 }
@@ -760,7 +759,7 @@
   display: grid;
   place-items: center;
   background: linear-gradient(155deg, #f4e8ce, #e8d0a8);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
 }
 .pd-ci-field {
@@ -775,7 +774,7 @@
   outline: none;
 }
 .pd-ci-send {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13.5px;
   padding: 0 4px;
   border: none;

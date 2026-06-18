@@ -66,10 +66,10 @@
   padding-right: 4px;
 }
 
-/* 제목 — Jua 폰트, 한 줄 ellipsis */
+/* 제목 — TMoneyDungunbaram 폰트, 한 줄 ellipsis */
 .notifToastTitle {
   margin: 0;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   line-height: 1.3;
   color: #5a4632;
@@ -83,7 +83,7 @@
 .notifToastSub {
   margin: 4px 0 0;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: normal;
   line-height: 1.3;
   color: #ab9880;
 }
@@ -105,7 +105,7 @@
 
 /* 보상 개수 (+1 등) — 강조색 #e0694e */
 .notifToastRewardCount {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
   color: #e0694e;
   transform: translateY(1px); /* 세로 광학 정렬 */
@@ -124,7 +124,7 @@
 
 .notifToastTime {
   font-size: 10px;
-  font-weight: 500;
+  font-weight: normal;
   color: #bca887;
   white-space: nowrap;
 }
@@ -255,7 +255,7 @@
 /* "알 림" 큰 제목 텍스트 */
 .notifPanelTitle {
   margin: 0;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 20px;
   letter-spacing: 3px; /* 자간 넓게 = 디자인 의도 */
   color: #46341e;
@@ -267,7 +267,7 @@
 
 /* "모두 읽기" 버튼 — 누르면 history 전체 삭제 */
 .notifPanelMarkAll {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 11px;
   color: #6a512f;
   background: #fffdf4;
@@ -353,7 +353,7 @@
 /* 알림 제목 — 길면 ... 처리 */
 .notifPanelCardTitle {
   margin: 0;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13px;
   line-height: 1.3;
   color: #43321d;
@@ -370,7 +370,7 @@
   align-items: center;
   gap: 3px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: normal;
   line-height: 1.3;
   color: #a18c6f;
   white-space: nowrap;
@@ -390,7 +390,7 @@
 .notifPanelCardTime {
   margin: 0;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: normal;
   color: #b8a888;
 }
 
@@ -442,7 +442,7 @@
 .notifPanelEmpty {
   text-align: center;
   padding: 22px 8px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   color: #b09a7e;
   margin: 0;
@@ -464,7 +464,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   color: #46341e;
   letter-spacing: 0.5px;

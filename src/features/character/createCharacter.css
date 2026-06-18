@@ -1,6 +1,6 @@
 /* ============================================================
    CharacterModal — Design v2 (cc prefix, scoped to .ccModal)
-   Fonts: Jua (headings), Gowun Dodum (body)
+   Font: TMoneyDungunbaram
    ============================================================ */
 
 /* Reset featureModal wrapper */
@@ -107,7 +107,7 @@
   box-shadow: 0 30px 70px -22px rgba(80, 58, 26, 0.62);
   animation: ccModalIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
   position: relative;
-  font-family: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   color: var(--cc-ink);
   box-sizing: border-box;
 }
@@ -126,7 +126,7 @@
 }
 
 .ccTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 26px;
   color: var(--cc-ink);
   margin: 0;
@@ -191,7 +191,7 @@
   border-radius: 50%;
   background: var(--cc-num-bg);
   color: var(--cc-num-ink);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   display: flex;
   align-items: center;
@@ -200,7 +200,7 @@
 }
 
 .ccSectionTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
   color: var(--cc-ink);
   white-space: nowrap;
@@ -254,13 +254,13 @@
 }
 
 .ccCardHead {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   color: var(--cc-ink);
 }
 
 .ccCardSub {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 12px;
   color: var(--cc-ink-soft);
   margin-top: 2px;
@@ -278,7 +278,7 @@
 }
 
 .ccFieldLabel {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   color: var(--cc-ink);
   flex-shrink: 0;
@@ -298,7 +298,7 @@
   background: var(--cc-field-bg);
   color: var(--cc-ink);
   font-size: 15px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   outline: none;
   transition: border-color 0.15s;
   box-sizing: border-box;
@@ -315,7 +315,7 @@
 
 .ccNameError {
   color: #d9785a;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13px;
   margin: 8px 0 0 66px;
 }
@@ -342,7 +342,7 @@
 }
 
 .ccChipCount {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 11px;
   color: var(--cc-ink-soft);
   background: var(--cc-card);
@@ -366,7 +366,7 @@
   gap: 4px;
   padding: 5px 11px;
   border-radius: 999px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13px;
   line-height: 1;
   cursor: pointer;
@@ -382,7 +382,7 @@
 }
 
 .ccOptional {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 11px;
   color: var(--cc-ink-faint);
   border: 1.5px solid var(--cc-border);
@@ -409,7 +409,7 @@
   background: var(--cc-field-bg);
   color: var(--cc-ink);
   font-size: 14px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   line-height: 1.5;
   outline: none;
   min-height: 76px;
@@ -459,7 +459,7 @@
   border-radius: 16px;
   background: var(--cc-primary);
   color: var(--cc-primary-ink);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   cursor: pointer;
   box-shadow:
@@ -533,14 +533,14 @@
 }
 
 .ccProgressLabel {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   color: var(--cc-ink);
 }
 
 .ccProgressPct {
   margin-left: auto;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   color: var(--cc-go-dk);
 }
@@ -570,7 +570,7 @@
   align-items: center;
   gap: 8px;
   color: var(--cc-go-dk);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
 }
 
@@ -684,7 +684,7 @@
 }
 
 .ccAppleTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 25px;
   color: var(--cc-ink);
   margin: 0;
@@ -717,7 +717,7 @@
 
 /* Uploaded state */
 .ccUploadedName {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13.5px;
   color: var(--cc-ink-soft);
   overflow: hidden;
@@ -726,7 +726,7 @@
 }
 
 .ccUploadedHint {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   color: var(--cc-ink);
 }
@@ -745,7 +745,7 @@
   border: 2px solid #e7ae9e;
   background: var(--cc-panel);
   color: #c56f58;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -765,7 +765,7 @@
   border: 2px solid var(--cc-border-strong);
   background: var(--cc-card);
   color: var(--cc-ink);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -791,7 +791,7 @@
   border-radius: 14px;
   background: var(--cc-go);
   color: #fff;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 17px;
   cursor: pointer;
   box-shadow:
@@ -839,7 +839,7 @@
 }
 
 .ccResultNameText {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 26px;
   color: var(--cc-ink);
   white-space: nowrap;
@@ -852,7 +852,7 @@
 }
 
 .ccResultDesc {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   color: var(--cc-ink-soft);
   line-height: 1.75;
@@ -897,14 +897,14 @@
 }
 
 .ccDropTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 17px;
   color: var(--cc-ink);
   text-align: center;
 }
 
 .ccDropSub {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13px;
   color: var(--cc-ink-soft);
   text-align: center;
@@ -918,7 +918,7 @@
   flex-direction: column;
   gap: 3px;
   text-align: center;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 11.5px;
   color: var(--cc-ink-faint);
 }

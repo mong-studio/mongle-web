@@ -2,7 +2,7 @@
   width: min(780px, calc(100vw - 40px));
   margin: 0 auto;
   color: #5a371f;
-  font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
 }
 
 .plannerOuterFrame {
@@ -53,7 +53,7 @@
   margin: 0 0 8px;
   color: #a77733;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.03em;
   text-align: center;
 }
@@ -65,7 +65,7 @@
   line-height: 1.26;
   text-align: center;
   word-break: keep-all;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .plannerHeroLead {
@@ -99,7 +99,7 @@
   margin-bottom: 10px;
   color: #7a5028;
   font-size: 0.84rem;
-  font-weight: 700;
+  font-weight: 800;
   text-align: center;
 }
 
@@ -220,7 +220,7 @@
   min-height: 46px;
   border-radius: 14px;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .plannerSendButton,
@@ -260,7 +260,7 @@
 .plannerLedgerMeta span {
   color: #7e552d;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   text-align: center;
 }
 
@@ -305,7 +305,7 @@
 .plannerLedgerDayCard li b {
   font-size: 0.74rem;
   line-height: 1.35;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .plannerTodoDot {

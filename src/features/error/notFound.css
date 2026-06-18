@@ -1,8 +1,7 @@
 /* 404 — "길을 잃어버렸어요" cozy pixel-village error page.
    Ported faithfully from the Claude Design handoff (404.html).
-   Fonts: Jua (display), Gowun Dodum (body) — same pattern as calendar.css.
+   Font: TMoneyDungunbaram.
    Sizing is rem-based (1rem = 16px) so the page scales with the root font size. */
-@import url("https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap");
 
 .nf-root {
   --cream: #feedd3;
@@ -26,7 +25,7 @@
   padding: 3rem 1.5rem;
   background: var(--cream);
   color: var(--brown-900);
-  font-family: "Gowun Dodum", "Apple SD Gothic Neo", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -118,7 +117,7 @@
   margin-top: 0.125rem;
 }
 .nf-num {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 9.25rem;
   line-height: 1;
   color: var(--brown-num);
@@ -139,7 +138,7 @@
 }
 
 .nf-title {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 2.875rem;
   color: var(--brown-900);
   margin-top: 0.25rem;
@@ -235,7 +234,7 @@
   gap: 0.75rem;
   height: 4.625rem;
   border-radius: 1.125rem;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 1.5rem;
   cursor: pointer;
   text-decoration: none;
@@ -318,7 +317,7 @@
   flex: 1;
 }
 .nf-note .nf-chev {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   color: #bfa073;
   font-size: 1.375rem;
 }
