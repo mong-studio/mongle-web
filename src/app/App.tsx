@@ -509,10 +509,6 @@ export function App() {
       return;
     }
     const keywords = selectedKeywordCategories.slice(0, 3);
-    if (keywords.length === 0) {
-      showNotice("성격 카테고리를 최소 1개 골라주세요.");
-      return;
-    }
     setIsBusy(true);
     showNotice("새 친구를 그리는 중이에요. 잠시만 기다려 주세요.");
     try {
