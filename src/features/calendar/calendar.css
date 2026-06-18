@@ -2,11 +2,9 @@
 /* CALENDAR WINDOW         */
 /* ───────────────────────────────────── */
 
-@import url("https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap");
-
 :root {
-  --font-display: "Jua", "Noto Sans KR", sans-serif;
-  --font-body: "Gowun Dodum", "Noto Sans KR", sans-serif;
+  --font-display: var(--font-tmoney-dungunbaram);
+  --font-body: var(--font-tmoney-dungunbaram);
 
   --cream-0: #fffdf7;
   --cream-1: #fcf4e2;

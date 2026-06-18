@@ -3,7 +3,8 @@
   top: 80px;
   left: 26px;
   z-index: 7;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
+  font-weight: 800;
 }
 
 /* ── Animations ── */
@@ -380,7 +381,7 @@
   padding: 7px 12px;
   border-radius: 999px;
   border: 2px solid transparent;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13px;
   white-space: nowrap;
   cursor: pointer;
@@ -475,7 +476,7 @@
   padding: 12px 22px;
   box-shadow: 0 14px 30px -12px rgba(60, 42, 18, 0.5);
   animation: pmToastIn 0.4s ease both;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   color: #6e5c44;
   white-space: nowrap;

@@ -67,7 +67,7 @@
   padding: 22px 28px 20px;
   animation: suCardIn 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
   box-sizing: border-box;
-  font-family: var(--su-font-body);
+  font-family: var(--font-tmoney-dungunbaram);
 }
 
 /* ── Close button ── */
@@ -109,7 +109,7 @@
   flex: none;
 }
 .suEyebrowText {
-  font-family: var(--su-font-head);
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   letter-spacing: 2px;
   color: var(--su-amber-hi);
@@ -135,7 +135,7 @@
   margin: 6px;
 }
 .suTitle {
-  font-family: var(--su-font-head);
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 36px;
   color: var(--su-ink);
   margin: 0;
@@ -198,7 +198,7 @@
   flex: none;
 }
 .suLabel {
-  font-family: var(--su-font-head);
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   color: var(--su-ink);
   margin-bottom: 8px;
@@ -251,7 +251,7 @@
   background: var(--su-bg-input);
   color: var(--su-ink);
   font-size: 14px;
-  font-family: var(--su-font-body);
+  font-family: var(--font-tmoney-dungunbaram);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s ease;
@@ -290,8 +290,8 @@
   border-radius: 13px;
   border: 2px solid var(--su-amber-border);
   background: linear-gradient(180deg, #dbaa69, #ca9148);
-  color: var(--su-btn-ink);
-  font-family: var(--su-font-head);
+  color: #6e4a1c;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   line-height: 1;
   white-space: nowrap;
@@ -352,10 +352,11 @@
   width: 100%;
   padding: 10px 38px 10px 14px;
   border-radius: 13px;
+
+  font-family: var(--font-tmoney-dungunbaram);
   border: 2px solid var(--su-border-input);
   background: var(--su-bg-input);
   color: var(--su-ink);
-  font-family: var(--su-font-body);
   font-size: 14px;
   outline: none;
   appearance: none;
@@ -470,7 +471,7 @@
   border: none;
   background: transparent;
   color: #9a7040;
-  font-family: var(--su-font-body);
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 12px;
   cursor: pointer;
   padding: 4px 2px 4px 8px;
@@ -524,7 +525,7 @@
   border-radius: 16px;
   background: linear-gradient(180deg, #dba85f, #c98c3d);
   color: var(--su-btn-ink);
-  font-family: var(--su-font-head);
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 19px;
   line-height: 1;
   letter-spacing: 2px;
@@ -574,7 +575,7 @@
   padding: 13px 24px;
   box-shadow: 0 16px 36px -14px rgba(60, 42, 18, 0.55);
   animation: suToastIn 0.4s ease both;
-  font-family: var(--su-font-head);
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   color: var(--su-ink);
   white-space: nowrap;

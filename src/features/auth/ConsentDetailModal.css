@@ -39,7 +39,7 @@
   padding: 22px 28px 20px;
   animation: cdmCardIn 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
   box-sizing: border-box;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
 }
 
 /* ── Title size override ── */
@@ -68,7 +68,7 @@
 .cdmRowLabel {
   background: #f5e8c4;
   padding: 12px 14px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   color: #6e5c44;
   display: flex;

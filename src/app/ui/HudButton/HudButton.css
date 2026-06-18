@@ -14,7 +14,7 @@
     inset 0 -3px 1px 0 rgba(178, 104, 31, 0.14),
     0 4px 0 rgba(57, 36, 22, 0.22),
     0 8px 14px rgba(23, 22, 16, 0.22);
-  font-family: "NanumSquareRoundExtraBold", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   transition:
     transform 120ms ease,
     box-shadow 120ms ease,

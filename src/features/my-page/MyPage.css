@@ -94,7 +94,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   background: linear-gradient(160deg, #ead8a8 0%, #f5e8c8 45%, #faf1d8 100%);
   background-attachment: fixed;
   color: var(--mp-ink);
@@ -143,7 +143,7 @@
 }
 
 .mpBrandName {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 25px;
   color: var(--mp-ink);
   white-space: nowrap;
@@ -164,7 +164,7 @@
   border: 2px solid #b27c3a;
   background: linear-gradient(180deg, #dbaa69, #ca9148);
   color: #6e4a1c;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   cursor: pointer;
   white-space: nowrap;
@@ -317,7 +317,7 @@
 }
 
 .mpNameBtn span:not(.mpCaret) {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 17px;
   color: var(--mp-ink);
   white-space: nowrap;
@@ -381,7 +381,7 @@
 }
 
 .mpTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 40px;
   color: var(--mp-accent);
   margin: 0;
@@ -423,7 +423,7 @@
   padding-bottom: 12px;
   margin-bottom: 16px;
   border-bottom: 2px dashed var(--mp-divider);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 19px;
   color: var(--mp-ink);
   white-space: nowrap;
@@ -535,7 +535,7 @@
 }
 
 .mpNamePlateText {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 21px;
   color: #fff;
   text-shadow: 0 1px 1px rgba(120, 80, 30, 0.5);
@@ -572,7 +572,7 @@
 }
 
 .mpInfoLabel {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   color: var(--mp-ink);
   white-space: nowrap;
@@ -583,14 +583,14 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 19px;
   color: var(--mp-ink);
   white-space: nowrap;
 }
 
 .mpInfoValMuted {
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 19px;
   color: var(--mp-ink-soft);
 }
@@ -604,7 +604,7 @@
   background: var(--mp-panel);
   color: var(--mp-ink-soft);
   font-size: 13px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   cursor: pointer;
   box-sizing: border-box;
   transition: background 0.13s;
@@ -629,7 +629,7 @@
   background: linear-gradient(180deg, #dbaa69, #ca9148);
   color: #6e4a1c;
   font-size: 13px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   cursor: pointer;
   box-sizing: border-box;
   box-shadow:
@@ -660,7 +660,7 @@
   background: var(--mp-panel);
   color: var(--mp-ink-soft);
   font-size: 13px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   cursor: pointer;
   box-sizing: border-box;
   transition: background 0.13s;
@@ -677,7 +677,7 @@
   border: 2px solid var(--mp-border);
   background: var(--mp-panel);
   color: var(--mp-ink);
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   cursor: pointer;
   outline: none;
@@ -703,7 +703,7 @@
   border: 2px solid var(--mp-border);
   background: var(--mp-panel);
   color: var(--mp-ink);
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   outline: none;
   width: 140px;
@@ -723,7 +723,7 @@
   border: 2px solid var(--mp-border);
   background: var(--mp-panel);
   color: var(--mp-ink);
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   outline: none;
   height: 38px;
@@ -771,7 +771,7 @@
 }
 
 .mpPwTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
   color: var(--mp-ink);
   white-space: nowrap;
@@ -796,7 +796,7 @@
   border: 2px solid var(--mp-border-strong);
   background: var(--mp-panel);
   color: var(--mp-ink);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   cursor: pointer;
   position: relative;
@@ -830,7 +830,7 @@
   border: 2px solid #e8d8b0;
   background: var(--mp-panel);
   font-size: 14px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   color: var(--mp-ink);
   outline: none;
   box-sizing: border-box;
@@ -851,7 +851,7 @@
   border: none;
   background: var(--mp-accent);
   color: #fff;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   cursor: pointer;
   transition: opacity 0.13s;
@@ -878,7 +878,7 @@
   border: 2px solid #b27c3a;
   background: linear-gradient(180deg, #dbaa69, #ca9148);
   color: #6e4a1c;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   cursor: pointer;
   position: relative;
@@ -920,8 +920,9 @@
   border: 1.5px solid rgba(180, 50, 30, 0.28);
   border-radius: 10px;
   color: #b03020;
-  font-size: 12px;
-  font-family: "Gowun Dodum", sans-serif;
+  /* font-size: 12px; */
+  font-size: 14px;
+  font-family: var(--font-tmoney-dungunbaram);
   cursor: pointer;
   opacity: 0.7;
   transition:
@@ -984,7 +985,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 1.4rem;
   color: #3a2408;
 }
@@ -995,7 +996,7 @@
 }
 
 .mpResListName {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 17px;
   color: var(--mp-ink);
   margin-bottom: 5px;
@@ -1029,7 +1030,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 20px;
   color: var(--mp-ink);
   white-space: nowrap;
@@ -1040,7 +1041,7 @@
 }
 
 .mpResCount {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   color: var(--mp-ink-soft);
 }
@@ -1059,7 +1060,7 @@
   background: var(--mp-panel);
   color: var(--mp-ink-soft);
   font-size: 14px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   cursor: pointer;
   transition: background 0.13s;
 }
@@ -1095,7 +1096,7 @@
 }
 
 .mpTipTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   color: var(--mp-ink);
   margin-bottom: 8px;
@@ -1145,13 +1146,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 2rem;
   color: #3a2408;
 }
 
 .mpResName {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 20px;
   color: var(--mp-ink);
   text-align: center;
@@ -1170,7 +1171,7 @@
   align-items: center;
   padding: 5px 12px;
   border-radius: 999px;
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 13px;
   line-height: 1.1;
   white-space: nowrap;
@@ -1186,7 +1187,7 @@
   border: 2px solid var(--mp-border-strong);
   background: var(--mp-panel);
   color: var(--mp-ink);
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 14px;
   cursor: pointer;
   transition:
@@ -1206,7 +1207,7 @@
 }
 
 .mpResEmpty p {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 18px;
   color: var(--mp-ink-soft);
   margin: 0 0 8px;
@@ -1251,7 +1252,7 @@
   border: none;
   background: transparent;
   color: var(--mp-ink);
-  font-family: "Gowun Dodum", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   cursor: pointer;
   transition: background 0.13s;
@@ -1277,7 +1278,7 @@
 }
 
 .mpBellPopTitle {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 16px;
   color: var(--mp-ink);
   padding: 4px 6px 10px;
@@ -1373,7 +1374,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 4rem;
   color: #3a2408;
 }
@@ -1383,7 +1384,7 @@
 }
 
 .mpResOverlayName {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 28px;
   color: var(--mp-ink);
   margin-bottom: 14px;
@@ -1448,7 +1449,7 @@
 }
 
 .mpToast span:last-child {
-  font-family: "Jua", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
   color: var(--mp-ink);
 }

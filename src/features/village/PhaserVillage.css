@@ -11,7 +11,7 @@
     0 4px 0 rgba(57, 36, 22, 0.22),
     0 8px 8px rgba(23, 22, 16, 0.18);
   color: #633b23;
-  font-family: "NanumSquareRoundExtraBold", "NanumSquareRoundBold", "Malgun Gothic", sans-serif;
+  font-family: var(--font-tmoney-dungunbaram);
   font-size: 11px;
   font-weight: 900;
   line-height: 1;
