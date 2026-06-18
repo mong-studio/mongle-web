@@ -120,6 +120,7 @@ export async function resetPassword(
 
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 올바르지 않아요.",
+  INVALID_CURRENT_PASSWORD: "현재 비밀번호가 올바르지 않아요.",
   VALIDATION_ERROR: "입력값을 다시 확인해 주세요.",
   EMAIL_DUPLICATED: "이미 가입된 이메일이에요.",
   EMAIL_NOT_VERIFIED: "이메일 인증을 먼저 완료해 주세요.",

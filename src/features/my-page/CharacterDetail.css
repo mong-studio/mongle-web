@@ -1,0 +1,380 @@
+/* ── 주민 상세 조회 모달 ── */
+/* CSS 변수 (--mp-*) 는 .mpPage에서 상속됩니다 */
+
+.mpRdBg {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(60, 42, 18, 0.42);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.mpRdModal {
+  width: 900px;
+  max-width: 96vw;
+  max-height: 88vh;
+  background: var(--mp-bg);
+  border: 3px solid var(--mp-border-strong);
+  border-radius: 22px;
+  box-shadow:
+    0 32px 72px -24px rgba(60, 42, 18, 0.65),
+    inset 0 0 0 4px var(--mp-bg),
+    inset 0 0 0 6px var(--mp-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: mpOverlayIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes mpOverlayIn {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.mpRdHdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px 14px;
+  border-bottom: 2px dashed var(--mp-divider);
+  flex-shrink: 0;
+}
+
+.mpRdHdrTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Jua", sans-serif;
+  font-size: 22px;
+  color: var(--mp-ink);
+}
+
+.mpRdHdrIcon {
+  height: 24px;
+  object-fit: contain;
+}
+
+.mpRdHdrStar {
+  color: var(--mp-border-strong);
+  font-size: 13px;
+}
+
+.mpRdClose {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--mp-ink-faint);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.mpRdClose:hover {
+  background: var(--mp-soft);
+  color: var(--mp-ink);
+}
+
+.mpRdBody {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px 22px;
+  overflow: hidden;
+}
+
+.mpRdLeft {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mp-border) transparent;
+}
+
+.mpRdRight {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mp-border) transparent;
+}
+
+.mpRdImgCard {
+  position: relative;
+  border-radius: 16px;
+  border: 2.5px solid var(--mp-border-strong);
+  overflow: hidden;
+  background: var(--mp-soft);
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 220px;
+  margin: 0 auto;
+}
+
+.mpRdImgTagGroup {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mpRdImgTag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: "Gowun Dodum", sans-serif;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.mpRdImgTag--green {
+  background: #d6f0c8;
+  color: #3e7c28;
+  border: 1.5px solid #8aca6e;
+}
+
+.mpRdImgTag--pink {
+  background: #fde8ee;
+  color: #c04070;
+  border: 1.5px solid #f0a0bc;
+}
+
+.mpRdImgWrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.mpRdImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mpRdAv {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Jua", sans-serif;
+  font-size: 5rem;
+  color: #3a2408;
+}
+
+.mpRdName {
+  font-family: "Jua", sans-serif;
+  font-size: 26px;
+  color: var(--mp-ink);
+  text-align: center;
+  margin: 14px 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mpRdNameFlower {
+  color: var(--mp-accent);
+  font-size: 13px;
+}
+
+.mpRdDivider {
+  border: none;
+  border-top: 2px dashed var(--mp-divider);
+  margin: 0 0 16px;
+}
+
+.mpRdSecHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--mp-ink);
+  margin-bottom: 12px;
+}
+
+.mpRdSecIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpRdQuestIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpRdInfoIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpRdMoveBtnIcon {
+  height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpRdChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.cdResChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.mpRdDesc {
+  font-size: 14px;
+  color: var(--mp-ink-soft);
+  line-height: 1.9;
+  margin: 0;
+}
+
+.mpRdSec {
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.mpRdQuestEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  font-size: 14px;
+  color: var(--mp-ink-soft);
+  font-family: "Gowun Dodum", sans-serif;
+}
+
+.mpRdQuestBody {
+  height: 160px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mp-border) transparent;
+}
+
+.mpRdQuestList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.mpRdQuestItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: var(--mp-soft);
+  border-radius: 10px;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 14px;
+  color: var(--mp-ink);
+}
+
+.mpRdQuestItemIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpRdInfoRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.mpRdInfoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 4px;
+  border-bottom: 1.5px dashed var(--mp-divider);
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 14px;
+}
+
+.mpRdInfoRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.mpRdInfoKey {
+  color: var(--mp-ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mpRdInfoVal {
+  color: var(--mp-ink);
+  font-family: "Jua", sans-serif;
+  font-size: 15px;
+}
+
+.mpRdMoveBtnWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.mpRdMoveBtn {
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(180, 50, 30, 0.28);
+  background: transparent;
+  color: #b03020;
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition:
+    opacity 0.13s,
+    background 0.13s;
+}
+
+.mpRdMoveBtn:hover {
+  opacity: 1;
+  background: rgba(180, 50, 30, 0.05);
+}

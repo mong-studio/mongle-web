@@ -1,9 +1,12 @@
+import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
+import type { Resident } from "../../app/model/appTypes.js";
 import { apiClient } from "../../shared/api/client.js";
-import { MyPageModal, type Resident } from "./MyPage.js";
+import { MyPageModal } from "./MyPage.js";
 
 type UserProfile = {
   user_name: string;
+  email: string;
   job: string;
   birth: string | null;
   token_balance: number;
@@ -53,25 +56,33 @@ export function MyPageWrapper({ fallbackUserName, residents, onClose, onLogout, 
     }
   }
 
-  async function handleUpdatePassword(current: string, next: string, confirm: string) {
-    if (next !== confirm) {
-      onNotice("새 비밀번호가 일치하지 않아요.");
-      return;
-    }
+  const PASSWORD_ERROR_MESSAGES: Record<string, string> = {
+    INVALID_CURRENT_PASSWORD: "현재 비밀번호가 올바르지 않아요.",
+    VALIDATION_ERROR: "입력값을 다시 확인해 주세요.",
+  };
+
+  async function handleUpdatePassword(current: string, next: string) {
     try {
       await apiClient.post("/auth/change-password/", {
         current_password: current,
         new_password: next,
       });
-      onNotice("비밀번호가 변경됐어요.");
     } catch (error) {
-      onNotice(error instanceof Error ? error.message : "비밀번호 변경에 실패했어요.");
+      if (isAxiosError(error)) {
+        const code = (error.response?.data as { error?: { message?: string } } | undefined)?.error
+          ?.message;
+        if (code && PASSWORD_ERROR_MESSAGES[code]) {
+          throw new Error(PASSWORD_ERROR_MESSAGES[code]);
+        }
+      }
+      throw error;
     }
   }
 
   return (
     <MyPageModal
       userName={userProfile?.user_name ?? fallbackUserName}
+      userEmail={userProfile?.email ?? ""}
       userJob={userProfile?.job ?? ""}
       userBirth={userProfile?.birth ?? ""}
       tokenBalance={userProfile?.token_balance ?? 0}

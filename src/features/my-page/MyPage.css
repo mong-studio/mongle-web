@@ -47,6 +47,17 @@
   }
 }
 
+@keyframes mpPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes mpToastIn {
   0% {
     transform: translateX(-50%) translateY(20px) scale(0.96);
@@ -61,135 +72,61 @@
 
 /* ── 페이지 루트 ── */
 .mpPage {
-  --mp-bg: #fbf3de;
-  --mp-panel: #fffdf6;
-  --mp-card: #fbefcf;
-  --mp-soft: #faf0d6;
-  --mp-border: #ead8ac;
-  --mp-border-strong: #d9be84;
-  --mp-border-active: #e8a24e;
-  --mp-ink: #6e5c44;
+  --mp-bg: #faf1d8;
+  --mp-panel: #fffdf7;
+  --mp-card: #fcf6e4;
+  --mp-soft: #f5e8c8;
+  --mp-border: #e7d6ac;
+  --mp-border-strong: #d3a95f;
+  --mp-border-active: #e29a4c;
+  --mp-ink: #5e4a30;
   --mp-ink-soft: #9a876a;
-  --mp-ink-faint: #bcaa88;
-  --mp-accent: #e89a6c;
-  --mp-accent-soft: #efb48e;
-  --mp-divider: #ecddb8;
+  --mp-ink-faint: #bfae8a;
+  --mp-accent: #cc8334;
+  --mp-accent-soft: #d3a95f;
+  --mp-divider: #e2cc97;
   --mp-plate: #c99a5e;
   --mp-plate-dk: #a87b43;
 
   position: fixed;
   inset: 0;
   z-index: 200;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  background: linear-gradient(180deg, #bfe3f2 0%, #d8ebb0 50%, #a9d18a 100%);
+  background: linear-gradient(160deg, #ead8a8 0%, #f5e8c8 45%, #faf1d8 100%);
   background-attachment: fixed;
   color: var(--mp-ink);
-  scrollbar-width: thin;
-  scrollbar-color: #dcc79c transparent;
-}
-
-.mpPage::-webkit-scrollbar {
-  width: 11px;
-}
-
-.mpPage::-webkit-scrollbar-thumb {
-  background: #dcc79c;
-  border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-/* ── 배경 블롭 ── */
-.mpBlobs {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.mpBlob {
-  position: absolute;
-  border-radius: 50%;
-}
-
-.mpBlob1 {
-  top: 8%;
-  left: 9%;
-  width: 140px;
-  height: 140px;
-  background: #fff;
-  opacity: 0.42;
-  filter: blur(8px);
-}
-
-.mpBlob2 {
-  top: 18%;
-  right: 13%;
-  width: 96px;
-  height: 96px;
-  background: #fff;
-  opacity: 0.4;
-  filter: blur(7px);
-}
-
-.mpBlob3 {
-  bottom: 7%;
-  left: 6%;
-  width: 170px;
-  height: 170px;
-  background: #8fc47a;
-  opacity: 0.45;
-  filter: blur(11px);
-}
-
-.mpBlob4 {
-  bottom: 5%;
-  right: 8%;
-  width: 150px;
-  height: 150px;
-  background: #9ecb86;
-  opacity: 0.45;
-  filter: blur(11px);
-}
-
-.mpBlob5 {
-  top: 46%;
-  left: 2%;
-  width: 80px;
-  height: 80px;
-  background: #f4c0cf;
-  opacity: 0.34;
-  filter: blur(9px);
-}
-
-/* ── 컨테이너 ── */
-.mpContainer {
-  position: relative;
-  z-index: 1;
-  max-width: 1340px;
-  margin: 0 auto;
-  padding: 26px 26px 44px;
-}
-
-/* ── 메인 카드 ── */
-.mpCard {
-  background: var(--mp-bg);
-  border: 3px solid var(--mp-border-strong);
-  border-radius: 30px;
-  box-shadow: 0 28px 64px -24px rgba(80, 58, 26, 0.55);
-  overflow: hidden;
+  animation: mpPageIn 0.32s ease-out both;
 }
 
 /* ── 헤더 바 ── */
 .mpHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 16px 26px;
-  border-bottom: 2px solid var(--mp-divider);
+  padding: 1px 26px;
+  background: rgba(250, 241, 216, 0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--mp-border-strong);
+}
+
+/* ── 컨테이너 ── */
+.mpContainer {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 16px 26px 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .mpHeaderBrand {
@@ -201,8 +138,7 @@
 }
 
 .mpBrandLogo {
-  width: 38px;
-  height: 38px;
+  height: 90px;
   flex-shrink: 0;
 }
 
@@ -223,29 +159,38 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 10px 20px;
+  padding: 10px 18px;
   border-radius: 14px;
-  border: 2px solid var(--mp-border);
-  background: var(--mp-panel);
-  color: var(--mp-ink);
+  border: 2px solid #b27c3a;
+  background: linear-gradient(180deg, #dbaa69, #ca9148);
+  color: #6e4a1c;
   font-family: "Jua", sans-serif;
   font-size: 16px;
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    background 0.13s,
-    border-color 0.13s;
   flex-shrink: 0;
+  box-shadow:
+    0 4px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.45);
+  text-shadow: 0 1px 0 rgba(255, 243, 215, 0.5);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
 }
 
 .mpGoVillage img {
-  width: 24px;
   height: 24px;
 }
 
 .mpGoVillage:hover {
-  background: var(--mp-card);
-  border-color: var(--mp-border-strong);
+  opacity: 0.92;
+}
+
+.mpGoVillage:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.4);
 }
 
 .mpHeaderRight {
@@ -257,24 +202,71 @@
 }
 
 .mpTokenChip {
-  display: flex;
+  min-height: 48px;
+  min-width: 160px;
+  padding: 0 10px 0 18px;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 14px;
-  border: 2px solid var(--mp-border-strong);
-  background: var(--mp-panel);
+  justify-content: space-between;
+  gap: 12px;
+  border: 2px solid #bd7b3d;
+  border-radius: 12px;
+  background-color: rgb(250, 238, 210);
+  box-shadow:
+    inset 0 -3px 1px 0 rgba(178, 104, 31, 0.14),
+    0 4px 0 rgba(57, 36, 22, 0.22),
+    0 8px 8px rgba(23, 22, 16, 0.22);
+  color: #633b23;
+  font-weight: 950;
 }
 
-.mpTokenChip img {
-  width: 24px;
-  height: 24px;
+.mpTokenIcon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
-.mpTokenChip span {
-  font-family: "Jua", sans-serif;
-  font-size: 18px;
-  color: var(--mp-ink);
+.mpEditIcon {
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpMenuIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpBellIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpTokenCount {
+  min-width: 32px;
+  font-size: 1.08rem;
+  text-align: center;
+}
+
+.mpTokenPlus {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #e2b56f;
+  border-radius: 8px;
+  background: #fff4d0;
+  box-shadow:
+    inset 0 -4px 0 rgba(221, 177, 92, 0.16),
+    0 2px 0 rgba(167, 104, 45, 0.18);
+  color: #9a5a2d;
+  font-size: 1.2rem;
+  font-weight: 950;
 }
 
 .mpBellBtn {
@@ -340,11 +332,12 @@
 
 /* ── 타이틀 ── */
 .mpTitleRow {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 26px;
-  padding: 26px 30px 8px;
+  padding: 16px 30px 8px;
 }
 
 .mpTitleFlower {
@@ -403,28 +396,33 @@
   white-space: nowrap;
 }
 
-/* ── 본문 ── */
+/* ── 본문 (2열: 주민 리스트 | 정보+설정) ── */
 .mpBody {
-  padding: 18px 30px 30px;
-  display: flex;
-  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
   gap: 22px;
+  align-items: stretch;
+  overflow: hidden;
 }
 
-/* ── 상단 2열 그리드 ── */
-.mpTopRow {
-  display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 22px;
+/* ── 오른쪽 컬럼 ── */
+.mpRightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
 }
 
 /* ── 섹션 제목 공통 ── */
 .mpSecHead {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 9px;
+  padding-bottom: 12px;
   margin-bottom: 16px;
+  border-bottom: 2px dashed var(--mp-divider);
   font-family: "Jua", sans-serif;
   font-size: 19px;
   color: var(--mp-ink);
@@ -432,26 +430,68 @@
 }
 
 .mpSecFleur {
-  color: var(--mp-accent-soft);
+  color: var(--mp-accent);
 }
 
-/* ── 프로필 + 기본정보 카드 ── */
+/* ── 프로필 카드 ── */
 .mpProfileCard {
   background: var(--mp-panel);
   border: 2px solid var(--mp-border);
   border-radius: 22px;
-  padding: 24px;
-  display: grid;
-  grid-template-columns: 230px 1fr;
-  gap: 26px;
-  align-items: center;
-}
-
-.mpAvatarCol {
+  padding: 24px 24px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 20px;
+}
+
+/* ── 기본 정보 카드 ── */
+.mpInfoCard {
+  background: var(--mp-bg);
+  border: 3px solid var(--mp-border-strong);
+  border-radius: 22px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 18px 40px -18px rgba(80, 58, 26, 0.4),
+    inset 0 0 0 4px var(--mp-bg),
+    inset 0 0 0 6px var(--mp-border);
+}
+
+/* ── 프로필 bio ── */
+.mpBioBox {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--mp-card);
+  border: 1.5px solid var(--mp-border);
+  border-radius: 15px;
+  padding: 13px 14px;
+}
+
+.mpBioText {
+  flex: 1;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--mp-ink-soft);
+  line-height: 1.55;
+}
+
+.mpBioEditBtn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1.5px solid var(--mp-border);
+  border-radius: 9px;
+  padding: 5px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.mpBioEditBtn:hover {
+  background: var(--mp-soft);
 }
 
 .mpAvatarRing {
@@ -459,6 +499,7 @@
   width: 188px;
   height: 188px;
   flex-shrink: 0;
+  margin-bottom: 14px;
 }
 
 .mpAvatarImg {
@@ -516,15 +557,17 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  background: var(--mp-card);
-  border: 1.5px solid var(--mp-border);
-  border-radius: 15px;
-  padding: 14px 18px;
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border);
+  border-radius: 13px;
+  padding: 0 16px;
+  height: 58px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .mpInfoIcon {
-  width: 28px;
-  height: 28px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -546,21 +589,24 @@
   white-space: nowrap;
 }
 
-.mpInfoValIcon {
-  width: 22px;
-  height: 22px;
+.mpInfoValMuted {
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 19px;
+  color: var(--mp-ink-soft);
 }
 
 .mpInfoEditBtn {
   margin-left: auto;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1.5px solid var(--mp-border-strong);
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border-strong);
   background: var(--mp-panel);
   color: var(--mp-ink-soft);
   font-size: 13px;
   font-family: "Gowun Dodum", sans-serif;
   cursor: pointer;
+  box-sizing: border-box;
   transition: background 0.13s;
   white-space: nowrap;
 }
@@ -576,30 +622,47 @@
 }
 
 .mpInfoSaveBtn {
-  padding: 4px 14px;
-  border-radius: 999px;
-  border: none;
-  background: var(--mp-accent);
-  color: #fff;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 13px;
+  border: 2px solid #b27c3a;
+  background: linear-gradient(180deg, #dbaa69, #ca9148);
+  color: #6e4a1c;
   font-size: 13px;
   font-family: "Jua", sans-serif;
   cursor: pointer;
-  transition: opacity 0.13s;
+  box-sizing: border-box;
+  box-shadow:
+    0 3px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.45);
+  text-shadow: 0 1px 0 rgba(255, 243, 215, 0.5);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
 }
 
 .mpInfoSaveBtn:hover {
-  opacity: 0.85;
+  opacity: 0.92;
+}
+
+.mpInfoSaveBtn:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.4);
 }
 
 .mpInfoCancelBtn {
-  padding: 4px 14px;
-  border-radius: 999px;
-  border: 1.5px solid var(--mp-border);
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border);
   background: var(--mp-panel);
   color: var(--mp-ink-soft);
   font-size: 13px;
   font-family: "Gowun Dodum", sans-serif;
   cursor: pointer;
+  box-sizing: border-box;
   transition: background 0.13s;
 }
 
@@ -609,9 +672,9 @@
 
 .mpInfoSelect {
   margin-left: auto;
-  padding: 6px 28px 6px 10px;
-  border-radius: 10px;
-  border: 2px solid var(--mp-border-active);
+  padding: 0 30px 0 12px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border);
   background: var(--mp-panel);
   color: var(--mp-ink);
   font-family: "Gowun Dodum", sans-serif;
@@ -619,39 +682,78 @@
   cursor: pointer;
   outline: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6018' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a876a' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-color: var(--mp-panel);
   max-width: 160px;
+  height: 38px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
 }
 
-.mpInfoDateInput {
+.mpInfoSelect:focus {
+  border-color: var(--mp-border-active);
+}
+
+.mpInfoTextInput {
   margin-left: auto;
-  padding: 6px 10px;
-  border-radius: 10px;
-  border: 2px solid var(--mp-border-active);
+  padding: 0 12px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border);
   background: var(--mp-panel);
   color: var(--mp-ink);
   font-family: "Gowun Dodum", sans-serif;
   font-size: 14px;
   outline: none;
+  width: 140px;
+  height: 38px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.mpInfoTextInput:focus {
+  border-color: var(--mp-border-active);
+}
+
+.mpInfoDateInput {
+  margin-left: auto;
+  padding: 0 12px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border);
+  background: var(--mp-panel);
+  color: var(--mp-ink);
+  font-family: "Gowun Dodum", sans-serif;
+  font-size: 14px;
+  outline: none;
+  height: 38px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.mpInfoDateInput:focus {
+  border-color: var(--mp-border-active);
 }
 
 /* ── 계정 설정 카드 ── */
 .mpSettingsCard {
-  background: var(--mp-panel);
-  border: 2px solid var(--mp-border);
+  flex: 1;
+  background: var(--mp-bg);
+  border: 3px solid var(--mp-border-strong);
   border-radius: 22px;
   padding: 24px;
   display: flex;
   flex-direction: column;
+  box-shadow:
+    0 18px 40px -18px rgba(80, 58, 26, 0.4),
+    inset 0 0 0 4px var(--mp-bg),
+    inset 0 0 0 6px var(--mp-border);
 }
 
 .mpPwBlock {
-  background: var(--mp-card);
-  border: 1.5px solid var(--mp-border);
-  border-radius: 18px;
+  background: var(--mp-panel);
+  border: 2px solid var(--mp-border);
+  border-radius: 13px;
   padding: 18px;
   margin-bottom: 0;
 }
@@ -771,26 +873,38 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 15px 18px;
-  border-radius: 15px;
-  border: 1.5px solid var(--mp-border);
-  background: var(--mp-panel);
-  color: var(--mp-ink);
+  padding: 13px 18px;
+  border-radius: 13px;
+  border: 2px solid #b27c3a;
+  background: linear-gradient(180deg, #dbaa69, #ca9148);
+  color: #6e4a1c;
   font-family: "Jua", sans-serif;
   font-size: 16px;
   cursor: pointer;
   position: relative;
-  transition: background 0.13s;
+  box-shadow:
+    0 4px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.45);
+  text-shadow: 0 1px 0 rgba(255, 243, 215, 0.5);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
 }
 
 .mpSettingsRow img {
-  width: 24px;
   height: 24px;
   flex-shrink: 0;
 }
 
 .mpSettingsRow:hover {
-  background: var(--mp-card);
+  opacity: 0.92;
+}
+
+.mpSettingsRow:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 #b27c3a,
+    inset 0 2px 0 rgba(255, 248, 225, 0.4);
 }
 
 .mpSettingsRow .mpChevron {
@@ -798,17 +912,18 @@
 }
 
 .mpWithdrawBtn {
-  width: 100%;
-  margin-top: 13px;
-  padding: 11px 0;
+  display: block;
+  margin-left: auto;
+  margin-top: 10px;
+  padding: 5px 14px;
   background: transparent;
   border: 1.5px solid rgba(180, 50, 30, 0.28);
-  border-radius: 13px;
+  border-radius: 10px;
   color: #b03020;
-  font-size: 14px;
+  font-size: 12px;
   font-family: "Gowun Dodum", sans-serif;
   cursor: pointer;
-  opacity: 0.75;
+  opacity: 0.7;
   transition:
     opacity 0.13s,
     background 0.13s;
@@ -820,18 +935,94 @@
 }
 
 /* ── 내 주민들 ── */
-.mpResSection {
+.mpResList {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #dcc79c transparent;
+}
+
+.mpResListItem {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 14px;
   background: var(--mp-panel);
   border: 2px solid var(--mp-border);
+  border-radius: 13px;
+  transition: background 0.13s;
+}
+
+.mpResListItem:hover {
+  background: var(--mp-card);
+}
+
+.mpResListImgWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 11px;
+  overflow: hidden;
+  border: 2px solid var(--mp-border-strong);
+  flex-shrink: 0;
+}
+
+.mpResListImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mpResListAv {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Jua", sans-serif;
+  font-size: 1.4rem;
+  color: #3a2408;
+}
+
+.mpResListInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.mpResListName {
+  font-family: "Jua", sans-serif;
+  font-size: 17px;
+  color: var(--mp-ink);
+  margin-bottom: 5px;
+}
+
+.mpResSection {
+  background: var(--mp-bg);
+  border: 3px solid var(--mp-border-strong);
   border-radius: 22px;
   padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow:
+    0 18px 40px -18px rgba(80, 58, 26, 0.4),
+    inset 0 0 0 4px var(--mp-bg),
+    inset 0 0 0 6px var(--mp-border);
 }
 
 .mpResSectionHead {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-bottom: 12px;
   margin-bottom: 16px;
+  border-bottom: 2px dashed var(--mp-divider);
 }
 
 .mpResHeadLeft {
@@ -846,6 +1037,12 @@
 
 .mpResHeadStar {
   color: #6e9a47;
+}
+
+.mpResCount {
+  font-family: "Jua", sans-serif;
+  font-size: 14px;
+  color: var(--mp-ink-soft);
 }
 
 .mpTipWrap {
@@ -984,19 +1181,23 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1.5px solid var(--mp-border-strong);
+  padding: 8px 14px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border-strong);
   background: var(--mp-panel);
   color: var(--mp-ink);
   font-family: "Jua", sans-serif;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.13s;
+  transition:
+    background 0.13s,
+    border-color 0.13s;
+  flex-shrink: 0;
 }
 
 .mpResProfileBtn:hover {
-  background: var(--mp-soft);
+  background: var(--mp-card);
+  border-color: var(--mp-accent);
 }
 
 .mpResEmpty {
