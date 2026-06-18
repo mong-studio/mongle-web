@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
 import { apiClient } from "../../shared/api/client.js";
@@ -55,11 +56,27 @@ export function MyPageWrapper({ fallbackUserName, residents, onClose, onLogout, 
     }
   }
 
+  const PASSWORD_ERROR_MESSAGES: Record<string, string> = {
+    INVALID_CURRENT_PASSWORD: "현재 비밀번호가 올바르지 않아요.",
+    VALIDATION_ERROR: "입력값을 다시 확인해 주세요.",
+  };
+
   async function handleUpdatePassword(current: string, next: string) {
-    await apiClient.post("/auth/change-password/", {
-      current_password: current,
-      new_password: next,
-    });
+    try {
+      await apiClient.post("/auth/change-password/", {
+        current_password: current,
+        new_password: next,
+      });
+    } catch (error) {
+      if (isAxiosError(error)) {
+        const code = (error.response?.data as { error?: { message?: string } } | undefined)?.error
+          ?.message;
+        if (code && PASSWORD_ERROR_MESSAGES[code]) {
+          throw new Error(PASSWORD_ERROR_MESSAGES[code]);
+        }
+      }
+      throw error;
+    }
   }
 
   return (
