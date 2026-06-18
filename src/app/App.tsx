@@ -618,9 +618,11 @@ export function App() {
         apples={apples}
         authStatus={authStatus}
         authUser={authUser}
-        onOpenDiary={() => setReflectionOpen(true)}
-        onOpenNotifications={() => setNotificationOpen((prev) => !prev)}
-        onOpenPhone={() => setFeedOpen(true)}
+        onOpenDiary={() => void guardFeatureAccess(() => setReflectionOpen(true))}
+        onOpenNotifications={() =>
+          void guardFeatureAccess(() => setNotificationOpen((prev) => !prev))
+        }
+        onOpenPhone={() => void guardFeatureAccess(() => setFeedOpen(true))}
         onLogin={() => setLoginOpen(true)}
         onLogout={() => void logoutSession()}
         onOpenSettings={openSettings}
@@ -637,17 +639,6 @@ export function App() {
         tagColors={todoTagColors}
         onCompleteTodo={completeHudTodo}
         onAddTodo={() => openFeature("todo")}
-      />
-
-      <HudButtonGroup
-        onOpenDiary={() => void guardFeatureAccess(() => setReflectionOpen(true))}
-        onOpenNotifications={() =>
-          void guardFeatureAccess(() => setNotificationOpen((prev) => !prev))
-        }
-        onOpenPhone={() => void guardFeatureAccess(() => setFeedOpen(true))}
-        unreadNotificationCount={
-          notifHistory.length > 0 && !notificationOpen ? notifHistory.length : undefined
-        }
       />
 
       <VillageDialogue
