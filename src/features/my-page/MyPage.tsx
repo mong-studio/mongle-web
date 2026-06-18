@@ -1,14 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import type { Resident } from "../../app/model/appTypes.js";
 import { ChangePasswordModal } from "./ChangePasswordModal.js";
+import { CharacterDetail } from "./CharacterDetail.js";
 import "./MyPage.css";
-
-export type Resident = {
-  id: string;
-  name: string;
-  personality: string;
-  speechStyle: string;
-  avatarUrl?: string;
-};
 
 type Props = {
   userName: string;
@@ -231,7 +225,7 @@ export function MyPageModal({
                         className="mpResProfileBtn"
                         onClick={() => setProfileIdx(i)}
                       >
-                        👤 보기
+                        보기
                       </button>
                     </div>
                   ))}
@@ -281,7 +275,7 @@ export function MyPageModal({
                 </div>
                 <div className="mpInfoRows">
                   <div className="mpInfoRow">
-                    <img src="/assets/auth/flower.png" alt="" className="mpInfoIcon" />
+                    <img src="/assets/myPage/icon-email.png" alt="" className="mpInfoIcon" />
                     <span className="mpInfoLabel">이메일</span>
                     <span className="mpInfoVal mpInfoVal">{userEmail || "—"}</span>
                   </div>
@@ -350,9 +344,6 @@ export function MyPageModal({
                 >
                   <img src="/assets/myPage/lock-flower.png" alt="" />
                   비밀번호 변경
-                  <span className="mpChevron" aria-hidden="true">
-                    ›
-                  </span>
                 </button>
                 <button type="button" className="mpWithdrawBtn" onClick={onWithdraw}>
                   회원 탈퇴
@@ -422,75 +413,14 @@ export function MyPageModal({
           </>
         )}
 
-        {/* ── 주민 프로필 오버레이 ── */}
+        {/* ── 주민 상세 조회 ── */}
         {activeRes && (
-          <div
-            className="mpResOverlayBg"
-            onClick={() => setProfileIdx(null)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setProfileIdx(null);
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${activeRes.name} 프로필`}
-          >
-            <div
-              className="mpResOverlay"
-              role="document"
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <button
-                type="button"
-                className="mpResOverlayClose"
-                onClick={() => setProfileIdx(null)}
-                aria-label="닫기"
-              >
-                ✕
-              </button>
-              <div className="mpResOverlayImgWrap">
-                {activeRes.avatarUrl ? (
-                  <img src={activeRes.avatarUrl} alt={activeRes.name} className="mpResOverlayImg" />
-                ) : (
-                  <div
-                    className="mpResOverlayAv"
-                    style={{
-                      background: AV_COLORS[(profileIdx as number) % AV_COLORS.length],
-                    }}
-                  >
-                    {activeRes.name.charAt(0)}
-                  </div>
-                )}
-              </div>
-              <div className="mpResOverlayBody">
-                <div className="mpResOverlayName">{activeRes.name}</div>
-                <div className="mpResOverlayChips">
-                  {parseKeywords(activeRes.personality).map((kw, ki) => (
-                    <span
-                      key={kw}
-                      className="mpResChip"
-                      style={{
-                        background: CHIP_COLORS[ki % CHIP_COLORS.length].bg,
-                        color: CHIP_COLORS[ki % CHIP_COLORS.length].fg,
-                      }}
-                    >
-                      {kw}
-                    </span>
-                  ))}
-                </div>
-                <div className="mpResOverlayRows">
-                  <div className="mpResOverlayRow">
-                    <span className="mpResOverlayKey">성격</span>
-                    <span className="mpResOverlayVal">{activeRes.personality}</span>
-                  </div>
-                  <div className="mpResOverlayRow">
-                    <span className="mpResOverlayKey">말투</span>
-                    <span className="mpResOverlayVal">{activeRes.speechStyle}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CharacterDetail
+            resident={activeRes}
+            residentIdx={profileIdx as number}
+            onClose={() => setProfileIdx(null)}
+            onShowToast={showToast}
+          />
         )}
 
         {/* ── 토스트 ── */}

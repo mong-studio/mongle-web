@@ -545,8 +545,7 @@
 }
 
 .mpInfoIcon {
-  width: 28px;
-  height: 28px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -576,14 +575,16 @@
 
 .mpInfoEditBtn {
   margin-left: auto;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1.5px solid var(--mp-border-strong);
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border-strong);
   background: var(--mp-panel);
   color: var(--mp-ink-soft);
   font-size: 13px;
   font-family: "Gowun Dodum", sans-serif;
   cursor: pointer;
+  box-sizing: border-box;
   transition: background 0.13s;
   white-space: nowrap;
 }
@@ -599,7 +600,8 @@
 }
 
 .mpInfoSaveBtn {
-  padding: 5px 16px;
+  height: 32px;
+  padding: 0 16px;
   border-radius: 13px;
   border: 2px solid #b27c3a;
   background: linear-gradient(180deg, #dbaa69, #ca9148);
@@ -607,6 +609,7 @@
   font-size: 13px;
   font-family: "Jua", sans-serif;
   cursor: pointer;
+  box-sizing: border-box;
   box-shadow:
     0 3px 0 #b27c3a,
     inset 0 2px 0 rgba(255, 248, 225, 0.45);
@@ -628,14 +631,16 @@
 }
 
 .mpInfoCancelBtn {
-  padding: 4px 14px;
-  border-radius: 999px;
-  border: 1.5px solid var(--mp-border);
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 2px solid var(--mp-border);
   background: var(--mp-panel);
   color: var(--mp-ink-soft);
   font-size: 13px;
   font-family: "Gowun Dodum", sans-serif;
   cursor: pointer;
+  box-sizing: border-box;
   transition: background 0.13s;
 }
 
