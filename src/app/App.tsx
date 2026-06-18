@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import {
+  type CharacterListItem,
   fetchCharacters,
   generateCharacter,
   resumePendingCharacter,
@@ -70,6 +71,36 @@ function getApiTodoTags(todo: ApiTodo) {
     todo.tag_content ?? "",
   ];
   return normalizeTodoTags(tagValues);
+}
+
+function toResidentPreviews(items: CharacterListItem[]): Resident[] {
+  return items.slice(0, 10).map((item) => ({
+    id: item.characterId,
+    name: item.name,
+    personality: "",
+    speechStyle: "",
+    avatarUrl: resolveAvatarUrl(item.genImgUrl),
+  }));
+}
+
+function hasUserCreatedCharacter(items: CharacterListItem[]) {
+  return items.length > 0;
+}
+
+function hasUserCreatedResident(residents: Resident[]) {
+  return residents.length > 0;
+}
+
+function areResidentsEqual(a: Resident[], b: Resident[]) {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return a.every(
+    (resident, index) =>
+      resident.id === b[index]?.id &&
+      resident.name === b[index]?.name &&
+      resident.avatarUrl === b[index]?.avatarUrl,
+  );
 }
 
 export function App() {
@@ -163,12 +194,6 @@ export function App() {
   }, [notice]);
 
   useEffect(() => {
-    if (authStatus === "authenticated" && authUser?.hasCharacter === false) {
-      setCharacterSetupOpen(true);
-    }
-  }, [authStatus, authUser]);
-
-  useEffect(() => {
     if (authStatus !== "authenticated" || !authUserId) {
       setTodos([]);
       return;
@@ -245,13 +270,54 @@ export function App() {
     setCharacterSetupOpen(false);
   }, [isBusy, resetCharacterDraft, showNotice]);
 
+  const guardFeatureAccess = useCallback(
+    async (onAllowed: () => void) => {
+      if (authStatus !== "authenticated") {
+        showNotice("로그인이 필요해요.");
+        setLoginOpen(true);
+        return false;
+      }
+
+      try {
+        const items = await fetchCharacters();
+        const hasCharacter = hasUserCreatedCharacter(items);
+        const nextResidents = toResidentPreviews(items);
+        setResidents((current) =>
+          areResidentsEqual(current, nextResidents) ? current : nextResidents,
+        );
+        useAuthStore.setState((state) => ({
+          user:
+            state.user && state.user.hasCharacter !== hasCharacter
+              ? { ...state.user, hasCharacter }
+              : state.user,
+        }));
+
+        if (!hasCharacter) {
+          showNotice("먼저 마을에 함께할 주민을 만들어 주세요.");
+          return false;
+        }
+
+        onAllowed();
+        return true;
+      } catch {
+        showNotice("주민 정보를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.");
+        return false;
+      }
+    },
+    [authStatus, showNotice],
+  );
+
   const openVillageDialogue = useCallback(() => {
-    if (!overlayOpenRef.current) setDialogueOpen(true);
-  }, []);
+    if (!overlayOpenRef.current) {
+      void guardFeatureAccess(() => setDialogueOpen(true));
+    }
+  }, [guardFeatureAccess]);
 
   const openVillageBoard = useCallback(() => {
-    if (!overlayOpenRef.current) setCalendarOpen(true);
-  }, []);
+    if (!overlayOpenRef.current) {
+      void guardFeatureAccess(() => setCalendarOpen(true));
+    }
+  }, [guardFeatureAccess]);
 
   const openSettings = useCallback(() => {
     if (authStatus === "authenticated") {
@@ -293,14 +359,9 @@ export function App() {
 
     try {
       const items = await fetchCharacters();
-      setResidents(
-        items.slice(0, 10).map((item) => ({
-          id: item.characterId,
-          name: item.name,
-          personality: "",
-          speechStyle: "",
-          avatarUrl: resolveAvatarUrl(item.genImgUrl),
-        })),
+      const nextResidents = toResidentPreviews(items);
+      setResidents((current) =>
+        areResidentsEqual(current, nextResidents) ? current : nextResidents,
       );
     } catch {
       setResidents([]);
@@ -310,6 +371,27 @@ export function App() {
   useEffect(() => {
     void fetchResidents();
   }, [fetchResidents]);
+
+  const openFeature = useCallback(
+    async (feature: FeatureId) => {
+      if (feature === "character") {
+        if (authStatus !== "authenticated") {
+          showNotice("로그인이 필요해요.");
+          setLoginOpen(true);
+          return;
+        }
+        setDialogueOpen(true);
+        setActiveFeature(feature);
+        return;
+      }
+
+      await guardFeatureAccess(() => {
+        setDialogueOpen(true);
+        setActiveFeature(feature);
+      });
+    },
+    [authStatus, guardFeatureAccess, showNotice],
+  );
 
   // 새로고침/이탈로 중단됐던 생성 잡을 로그인 후 한 번 이어서 마무리한다.
   const resumedRef = useRef(false);
@@ -387,25 +469,22 @@ export function App() {
         event.data?.type === "MONGLE_CHIEF_CLICKED" ||
         event.data?.type === "MONGLE_CHIEF_HOUSE_CLICKED"
       ) {
-        if (!overlayOpenRef.current) setDialogueOpen(true);
+        if (!overlayOpenRef.current) {
+          void guardFeatureAccess(() => setDialogueOpen(true));
+        }
       }
 
       if (event.data?.type === "MONGLE_FEATURE_SELECTED") {
         const feature = event.data.payload?.feature as FeatureId;
         if (feature in FEATURES) {
-          setActiveFeature(feature);
+          void openFeature(feature);
         }
       }
     }
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
-
-  function openFeature(feature: FeatureId) {
-    setDialogueOpen(true);
-    setActiveFeature(feature);
-  }
+  }, [guardFeatureAccess, openFeature]);
 
   function toggleKeywordCategory(keyword: string) {
     setSelectedKeywordCategories((current) => {
@@ -559,9 +638,11 @@ export function App() {
       />
 
       <HudButtonGroup
-        onOpenDiary={() => setReflectionOpen(true)}
-        onOpenNotifications={() => setNotificationOpen((prev) => !prev)}
-        onOpenPhone={() => setFeedOpen(true)}
+        onOpenDiary={() => void guardFeatureAccess(() => setReflectionOpen(true))}
+        onOpenNotifications={() =>
+          void guardFeatureAccess(() => setNotificationOpen((prev) => !prev))
+        }
+        onOpenPhone={() => void guardFeatureAccess(() => setFeedOpen(true))}
         unreadNotificationCount={
           notifHistory.length > 0 && !notificationOpen ? notifHistory.length : undefined
         }
@@ -573,7 +654,7 @@ export function App() {
         residents={residents}
         savedTodos={savedTodos}
         onClose={() => setDialogueOpen(false)}
-        onOpen={() => setDialogueOpen(true)}
+        onOpen={openVillageDialogue}
         onOpenFeature={openFeature}
       />
 
@@ -669,7 +750,14 @@ export function App() {
 
       <NotificationToastLayer />
 
-      <PomodoroHud />
+      <PomodoroHud
+        canResumeSavedRun={
+          authStatus === "authenticated" &&
+          authUser?.hasCharacter === true &&
+          hasUserCreatedResident(residents)
+        }
+        onBeforeStart={() => guardFeatureAccess(() => undefined)}
+      />
     </main>
   );
 }
