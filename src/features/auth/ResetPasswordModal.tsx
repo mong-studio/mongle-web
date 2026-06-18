@@ -115,8 +115,22 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
   if (!open) return null;
 
   return (
-    <div className="suBackdrop" role="presentation">
-      <section className="suModal" role="dialog" aria-modal="true" aria-labelledby="rp-title">
+    <div
+      className="suBackdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rp-title"
+      onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+    >
+      <section
+        className="suModal"
+        role="document"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         <button type="button" className="suClose" onClick={onClose} aria-label="닫기">
           ✕
         </button>
