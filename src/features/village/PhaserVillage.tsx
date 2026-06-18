@@ -10,6 +10,9 @@ const BOARD_KEY = "village-board";
 const BOARD_PATH = "/assets/objects/board.png";
 const CHIEF_HOUSE_KEY = "chief-house";
 const CHIEF_HOUSE_PATH = "/assets/objects/chief_house.png";
+const RESIDENT_HOUSE_COLORS = ["blue", "green", "purple", "yellow"] as const;
+const RESIDENT_HOUSE_DISPLAY_WIDTH = 84;
+const RESIDENT_HOUSE_DISPLAY_HEIGHT = 76;
 const CHIEF_NPC_KEY = "chief-npc";
 const CHIEF_NPC_PATH = "/assets/mongle_chief.png";
 const CHIEF_NPC_SPEED = 10;
@@ -300,6 +303,12 @@ class VillageScene extends Phaser.Scene {
       if (!this.textures.exists(BOARD_KEY)) {
         this.load.image(BOARD_KEY, BOARD_PATH);
       }
+      for (const color of RESIDENT_HOUSE_COLORS) {
+        const key = `resident-house-${color}`;
+        if (!this.textures.exists(key)) {
+          this.load.image(key, `/assets/objects/house_${color}.png`);
+        }
+      }
 
       this.load.once(Phaser.Loader.Events.COMPLETE, resolve);
       this.load.start();
@@ -438,7 +447,60 @@ class VillageScene extends Phaser.Scene {
       [78, -236],
       [-390, -14],
       [358, -36],
+      [-140, 300],
+      [230, 280],
     ];
+
+    const residentHouseMarkers: MinimapMarker[] = [];
+    this.residents.slice(0, residentOffsets.length).forEach((resident, index) => {
+      const [offsetX, offsetY] = residentOffsets[index];
+      const hx = Phaser.Math.Clamp(centerX + offsetX, 0, map.width * map.tilewidth);
+      const hy = Phaser.Math.Clamp(centerY + offsetY, 0, map.height * map.tileheight);
+      const color = RESIDENT_HOUSE_COLORS[index % RESIDENT_HOUSE_COLORS.length];
+      const houseKey = `resident-house-${color}`;
+
+      this.blockedWorldRects.push(
+        new Phaser.Geom.Rectangle(
+          hx - RESIDENT_HOUSE_DISPLAY_WIDTH / 2 - 8,
+          hy - RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.86 - 8,
+          RESIDENT_HOUSE_DISPLAY_WIDTH + 16,
+          RESIDENT_HOUSE_DISPLAY_HEIGHT + 8,
+        ),
+      );
+
+      const houseHint: ActiveObjectHint = {
+        label: `${resident.name}의 집`,
+        worldX: hx,
+        worldY: hy - RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.86 - 6,
+      };
+      const houseObj = this.add
+        .image(hx, hy, houseKey)
+        .setOrigin(0.5, 0.86)
+        .setDisplaySize(RESIDENT_HOUSE_DISPLAY_WIDTH, RESIDENT_HOUSE_DISPLAY_HEIGHT)
+        .setDepth(hy)
+        .setInteractive();
+
+      houseObj.on("pointerover", () => {
+        this.activeObjectHint = houseHint;
+        this.publishObjectHint({ ...houseHint, visible: true });
+      });
+      houseObj.on("pointerout", () => {
+        if (this.activeObjectHint === houseHint) {
+          this.activeObjectHint = null;
+          this.lastObjectHintSignature = "";
+          this.publishObjectHint({ ...houseHint, visible: false });
+        }
+      });
+
+      residentHouseMarkers.push({
+        id: resident.id,
+        label: resident.name,
+        type: "resident",
+        x: hx,
+        y: hy,
+      });
+    });
+
     this.minimapMarkers = [
       {
         id: "chief-house",
@@ -454,16 +516,7 @@ class VillageScene extends Phaser.Scene {
         x: this.chiefNpc?.x ?? centerX + 92,
         y: this.chiefNpc?.y ?? centerY + 52,
       },
-      ...this.residents.slice(0, residentOffsets.length).map((resident, index) => {
-        const [offsetX, offsetY] = residentOffsets[index];
-        return {
-          id: resident.id,
-          label: resident.name,
-          type: "resident" as const,
-          x: Phaser.Math.Clamp(centerX + offsetX, 0, map.width * map.tilewidth),
-          y: Phaser.Math.Clamp(centerY + offsetY, 0, map.height * map.tileheight),
-        };
-      }),
+      ...residentHouseMarkers,
     ];
   }
 
