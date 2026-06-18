@@ -22,13 +22,7 @@ export type CalSchedule = {
   tag_id?: number;
 };
 
-export type CalTag = {
-  tag_id: number;
-  content: string;
-  color: string;
-};
-
-export type TagItem = { id: number; content: string; color: string };
+export type { CalTag, TagItem } from "../../shared/tags/types.js";
 
 export function todoToEvent(t: CalTodo): CalEvent {
   const sr = ymdStrToSerial(t.todo_date);
@@ -39,6 +33,7 @@ export function todoToEvent(t: CalTodo): CalEvent {
     title: t.content,
     short: t.content.slice(0, 8),
     done: t.status === "COMPLETED",
+    failed: t.status === "FAILED",
     s: sr,
     e: sr,
     color: t.tag_color || c.color,

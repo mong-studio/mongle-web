@@ -1,0 +1,30 @@
+.tagPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tagPickerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tagPickerNew {
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  border: 2px dashed var(--line-soft);
+  background: var(--cream-0);
+  color: var(--ink-3);
+  transition: all 0.14s;
+}
+.tagPickerNew.isSel {
+  border: 2px solid var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-deep);
+}

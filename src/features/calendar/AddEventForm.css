@@ -1,0 +1,116 @@
+.addEventForm {
+  background: var(--cream-0);
+  border: 2px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aefKindSet {
+  display: flex;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.aefLegend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.aefKind {
+  flex: 1;
+  padding: 9px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  text-align: center;
+  border: 2px solid var(--line-soft);
+  background: var(--cream-1);
+  color: var(--ink-3);
+  font-family: var(--font-display);
+  font-size: 14px;
+  transition: all 0.14s;
+}
+.aefKind.isSel {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-deep);
+}
+.aefRadioInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.aefInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-soft);
+  background: var(--cream-1);
+  color: var(--ink-1);
+  font-family: var(--font-display);
+  font-size: 17px;
+  outline: none;
+}
+
+.aefTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-soft);
+  background: var(--cream-1);
+  color: var(--ink-1);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  resize: none;
+  line-height: 1.5;
+}
+
+.aefError {
+  margin: 0 0 4px;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  background: #fee2e2;
+  color: #b91c1c;
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.aefActions {
+  display: flex;
+  gap: 9px;
+}
+.aefCancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  border: 2px solid var(--line);
+  background: var(--cream-1);
+  color: var(--ink-2);
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+.aefSubmit {
+  flex: 2;
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: none;
+  font-family: var(--font-display);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}

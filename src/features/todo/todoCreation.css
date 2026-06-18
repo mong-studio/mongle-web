@@ -111,7 +111,7 @@
   position: relative;
   width: 600px;
   max-width: min(600px, 90vw);
-  max-height: calc(100vh - 72px);
+  max-height: calc(100dvh - 72px);
   overflow: hidden;
 }
 
@@ -198,9 +198,9 @@
 }
 
 .tdNumBadge {
-  width: 26px;
+  width: 56px;
   height: 26px;
-  border-radius: 50%;
+  border-radius: 2.5rem;
   background: var(--td-num);
   color: #fff6e6;
   font-family: var(--font-tmoney-dungunbaram);
@@ -378,66 +378,6 @@
 
 .tdAddBtn:hover {
   background: #f1f7e8;
-}
-
-/* ── Tag chips ── */
-.tdChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.tdChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 8px 15px;
-  border-radius: 999px;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-  transition: all 0.14s ease;
-  white-space: nowrap;
-}
-
-.tdChipCheck {
-  font-size: 11px;
-}
-
-.tdTagInput {
-  padding: 7px 13px;
-  border-radius: 999px;
-  border: 2px dashed var(--td-accent);
-  background: var(--td-panel);
-  color: var(--td-ink);
-  font-size: 14px;
-  width: 100px;
-  outline: none;
-  font-family: var(--font-tmoney-dungunbaram);
-}
-
-.tdTagInput::placeholder {
-  color: #c4b493;
-  opacity: 1;
-}
-
-.tdAddTag {
-  padding: 8px 15px;
-  border-radius: 999px;
-  border: 2px dashed var(--td-border-strong);
-  background: transparent;
-  color: var(--td-ink-faint);
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.12s;
-}
-
-.tdAddTag:hover {
-  background: var(--td-field);
 }
 
 /* ── Todo list ── */
@@ -831,4 +771,27 @@
   font-size: 15px;
   color: var(--td-ink);
   white-space: nowrap;
+}
+
+/* 동작 최소화 선호 시 진입/장식 애니메이션을 끄고, 무한 반짝임(tdTwinkle/tdFloaty)을 정지한다.
+   로딩 스피너만 느린 회전으로 유지해 '멈춤'으로 오해되지 않게 한다. */
+@media (prefers-reduced-motion: reduce) {
+  .tdFlower,
+  .tdFlowerSm,
+  .tdStar,
+  .tdAccentStar,
+  .tdPanel,
+  .tdPageIn,
+  .tdTodoRow,
+  .tdQuestRow,
+  .tdToast {
+    animation: none;
+  }
+  .tdGenerateBtn,
+  .tdAddTodayBtn {
+    transition: none;
+  }
+  .tdSpinner {
+    animation-duration: 1.4s;
+  }
 }

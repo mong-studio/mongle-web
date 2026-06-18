@@ -1,0 +1,72 @@
+/* Radix Dialog는 body로 포털되므로 오버레이·패널 모두 fixed로 화면에 고정한다. */
+.dayModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(70, 48, 22, 0.34);
+  backdrop-filter: blur(3px);
+}
+
+.dayModalPanel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* transform이 아닌 translate 속성으로 가운데 정렬 → motion의 scale 트랜스폼과 충돌하지 않는다. */
+  translate: -50% -50%;
+  z-index: 61;
+  width: min(472px, calc(100vw - 32px));
+  max-height: calc(100dvh - 52px);
+  display: flex;
+  flex-direction: column;
+  background: var(--cream-1);
+  border-radius: var(--r-xl);
+  border: 2px solid var(--line);
+  box-shadow: var(--sh-pop);
+  overflow: hidden;
+}
+
+.dayModalScrollBody {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.dayModalListWrap {
+  padding: 2px 19px 10px;
+}
+.dayModalEmpty {
+  text-align: center;
+  padding: 28px 0;
+  color: var(--ink-3);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+.dayModalList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.dayModalAddWrap {
+  padding: 8px 19px 19px;
+}
+.dayModalAddBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  cursor: pointer;
+  border: 2px dashed var(--line);
+  background: var(--cream-0);
+  color: var(--ink-2);
+  font-family: var(--font-display);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.dayModalAddBtnPlus {
+  font-size: 20px;
+  line-height: 1;
+}

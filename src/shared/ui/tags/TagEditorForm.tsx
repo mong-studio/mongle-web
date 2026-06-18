@@ -44,8 +44,9 @@ export function TagEditorForm({
     >
       <input
         value={name}
-        onChange={(e) => onNameChange(e.target.value)}
-        placeholder="태그 이름"
+        onChange={(e) => onNameChange(e.target.value.slice(0, 10))}
+        maxLength={10}
+        placeholder="태그 이름 (최대 10자)"
         style={{
           width: "100%",
           boxSizing: "border-box",
