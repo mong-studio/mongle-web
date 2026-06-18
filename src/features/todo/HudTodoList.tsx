@@ -21,7 +21,7 @@ const FALLBACK_TAG_COLORS: Record<string, string> = {
   운동: "#D9943C",
   휴식: "#CF7E97",
 };
-const MAX_HUD_TAGS = 3;
+const MAX_HUD_TAGS = 1;
 const MAX_HUD_TAG_LENGTH = 10;
 
 function getDisplayTags(tags: string[]) {
