@@ -115,21 +115,21 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
   if (!open) return null;
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
     <div
-      className="suBackdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="rp-title"
-      onClick={onClose}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") onClose();
+      className="modalBackdrop suBackdrop"
+      role="presentation"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
       }}
     >
       <section
         className="suModal"
-        role="document"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="rp-title"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
       >
         <button type="button" className="suClose" onClick={onClose} aria-label="닫기">
           ✕

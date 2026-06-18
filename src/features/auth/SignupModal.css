@@ -39,16 +39,9 @@
   --su-warn: #d9785a;
   --su-caret: #c49a5e;
 
-  position: fixed;
-  inset: 0;
+  /* tall auth forms need scroll from top, not grid-center */
   overflow: auto;
-  background: rgba(54, 42, 22, 0.36);
-  display: flex;
   align-items: flex-start;
-  justify-content: center;
-  padding: 26px 18px;
-  z-index: 30;
-  box-sizing: border-box;
 }
 
 /* ── Modal card ── */
