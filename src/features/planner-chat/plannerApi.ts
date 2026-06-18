@@ -1,10 +1,12 @@
-export type ApiEnvelope<T> = {
+import { apiClient } from "../../shared/api/client.js";
+
+type ApiEnvelope<T> = {
   status: string;
   result: T;
   error: unknown;
 };
 
-export type TaskCandidatePayload = {
+type TaskCandidatePayload = {
   title: string;
   due_date: string;
   tags?: string[];
@@ -34,7 +36,15 @@ export type PlannerDay = {
   }[];
 };
 
-export type TodoCommitResponse = {
+type PlannerConfirmPayload = {
+  todos: {
+    content: string;
+    todo_date: string;
+    tags?: string[];
+  }[];
+};
+
+type PlannerConfirmResponse = {
   todos: {
     todo_id: string;
     content: string;
@@ -44,54 +54,13 @@ export type TodoCommitResponse = {
       quest_id: string;
       content: string;
       character_id: string;
+      character_name: string;
     } | null;
-  }[];
-  calendar_events: {
-    schedule_id: string;
-    title: string;
-    start_date: string;
-    end_date?: string | null;
-    tags: string[];
   }[];
   quest_distribution_triggered?: boolean;
 };
 
-export function formatTodayIso() {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
-
-export function buildCommitPayload(
-  items: Array<{ title: string; dueDate: string; tags: string[] }>,
-) {
-  const today = formatTodayIso();
-  const todos: TaskCandidatePayload[] = [];
-  const calendarEvents: TaskCandidatePayload[] = [];
-
-  for (const item of items) {
-    const payload = {
-      title: item.title,
-      due_date: item.dueDate,
-      tags: item.tags,
-    };
-    if (item.dueDate === today) {
-      todos.push(payload);
-    } else {
-      calendarEvents.push(payload);
-    }
-  }
-
-  return { todos, calendar_events: calendarEvents };
-}
-
-export function extractErrorMessage(body: unknown, fallback: string) {
-  if (typeof body === "string") {
-    return body;
-  }
+function extractErrorMessage(body: unknown, fallback: string) {
   if (body && typeof body === "object") {
     const record = body as Record<string, unknown>;
     if (typeof record.error === "string") {
@@ -107,7 +76,7 @@ export function extractErrorMessage(body: unknown, fallback: string) {
   return fallback;
 }
 
-export function unwrapApiResult<T>(body: T | ApiEnvelope<T>): T {
+function unwrapApiResult<T>(body: T | ApiEnvelope<T>): T {
   if (
     body &&
     typeof body === "object" &&
@@ -124,20 +93,23 @@ export function unwrapApiResult<T>(body: T | ApiEnvelope<T>): T {
   return body as T;
 }
 
-export async function postWebJson<T>(apiBase: string, path: string, payload: unknown): Promise<T> {
-  const response = await fetch(`${apiBase}${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
+export async function chatTodos(payload: {
+  message: string;
+  thread_id?: string | null;
+}): Promise<TodoChatFollowUpResult | TodoGenerateResult> {
+  const { data } = await apiClient.post<
+    | TodoChatFollowUpResult
+    | TodoGenerateResult
+    | ApiEnvelope<TodoChatFollowUpResult | TodoGenerateResult>
+  >("/todos/chat/", payload);
+  return unwrapApiResult(data);
+}
 
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(extractErrorMessage(body, "서버 요청에 실패했어요."));
-  }
-
-  return unwrapApiResult(body as T | ApiEnvelope<T>);
+export async function confirmPlannerTodos(
+  payload: PlannerConfirmPayload,
+): Promise<PlannerConfirmResponse> {
+  const { data } = await apiClient.post<PlannerConfirmResponse>("/todos/confirm/", payload);
+  return data;
 }
 
 export function groupPlannerDays(result: TodoGenerateResult): PlannerDay[] {
