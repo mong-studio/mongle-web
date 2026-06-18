@@ -18,12 +18,7 @@ function saveLocal(mode: Mode, remaining: number, running: boolean) {
   }
 }
 
-type PomodoroHudProps = {
-  canResumeSavedRun: boolean;
-  onBeforeStart: () => boolean | Promise<boolean>;
-};
-
-export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudProps) {
+export function PomodoroHud() {
   const [mode, setMode] = useState<Mode>("focus");
   const [remaining, setRemaining] = useState(DUR.focus);
   const [running, setRunning] = useState(false);
@@ -48,15 +43,6 @@ export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudPro
   const lastSaveRef = useRef(0);
 
   useEffect(() => {
-    if (canResumeSavedRun || !runningRef.current) {
-      return;
-    }
-    setRunning(false);
-    saveLocal(modeRef.current, remainingRef.current, false);
-    lastSaveRef.current = Date.now();
-  }, [canResumeSavedRun]);
-
-  useEffect(() => {
     try {
       const raw = localStorage.getItem("pomodoro_hud");
       if (raw) {
@@ -70,19 +56,13 @@ export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudPro
           setRemaining(s.remaining);
           remainingRef.current = s.remaining;
         }
-        if (s.running === true && canResumeSavedRun) {
+        if (s.running === true) {
           setRunning(true);
           runningRef.current = true;
           startedAtRef.current = Date.now();
           baseRemainingRef.current =
             typeof s.remaining === "number" && s.remaining > 0 ? s.remaining : DUR.focus;
           lastSaveRef.current = Date.now();
-        } else if (s.running === true) {
-          saveLocal(
-            s.mode === "focus" || s.mode === "break" ? s.mode : "focus",
-            typeof s.remaining === "number" && s.remaining > 0 ? s.remaining : DUR.focus,
-            false,
-          );
         }
       }
     } catch {
@@ -121,15 +101,11 @@ export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudPro
       clearTimeout(toastTimer.current);
       clearTimeout(spinTimer.current);
     };
-  }, [canResumeSavedRun]);
+  }, []);
 
-  async function toggleRun() {
+  function toggleRun() {
     const next = !runningRef.current;
     if (next) {
-      const canStart = await onBeforeStart();
-      if (!canStart) {
-        return;
-      }
       startedAtRef.current = Date.now();
       baseRemainingRef.current = remainingRef.current;
       lastSaveRef.current = Date.now();
