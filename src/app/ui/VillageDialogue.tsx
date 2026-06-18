@@ -24,7 +24,7 @@ export function VillageDialogue({
   if (!open) {
     return (
       <button type="button" className="talkButton" onClick={onOpen}>
-        이장님과 대화
+        <span className="mainHoverLabel">이장님과 대화</span>
       </button>
     );
   }
