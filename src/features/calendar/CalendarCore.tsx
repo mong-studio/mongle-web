@@ -2,8 +2,6 @@ import { useCallback, useMemo, useState } from "react";
 import type { CalEvent, CatKey, CellData } from "./calEngine.js";
 import { assignLanes, CATS, dateToSerial, monthMatrix, serial } from "./calEngine.js";
 
-// ── useCalendar hook ──────────────────────────────────────────
-
 export type CalHook = ReturnType<typeof useCalendar>;
 
 export function useCalendar(baseEvents: CalEvent[]) {
@@ -14,9 +12,8 @@ export function useCalendar(baseEvents: CalEvent[]) {
   const [sel, setSelRaw] = useState<{ y: number; m: number; d: number } | null>(null);
   const [selAdd, setSelAdd] = useState(false);
   const [extra, setExtra] = useState<CalEvent[]>([]);
-  const [done, setDone] = useState<Set<string>>(
-    () => new Set(baseEvents.filter((e) => e.done).map((e) => e.id)),
-  );
+  // 우측 패널이 보여줄 "선택된 날". 달을 넘겨도 같은 일자를 유지해 그 달의 해당 날짜를 보여준다.
+  const [selDay, setSelDay] = useState(today.getDate());
 
   const setSel = useCallback((ymd: typeof sel) => {
     setSelAdd(false);
@@ -45,20 +42,10 @@ export function useCalendar(baseEvents: CalEvent[]) {
     [],
   );
 
-  const toToday = useCallback(
-    () => setView({ y: today.getFullYear(), m: today.getMonth() }),
-    [today],
-  );
-
-  const toggle = useCallback(
-    (id: string) =>
-      setDone((s) => {
-        const n = new Set(s);
-        n.has(id) ? n.delete(id) : n.add(id);
-        return n;
-      }),
-    [],
-  );
+  const toToday = useCallback(() => {
+    setView({ y: today.getFullYear(), m: today.getMonth() });
+    setSelDay(today.getDate());
+  }, [today]);
 
   const allEvents = useCallback(() => baseEvents.concat(extra), [baseEvents, extra]);
 
@@ -78,6 +65,11 @@ export function useCalendar(baseEvents: CalEvent[]) {
 
   const weeks = useMemo(() => monthMatrix(view.y, view.m, todaySr), [view.y, view.m, todaySr]);
 
+  const selDate = useMemo(() => {
+    const daysInMonth = new Date(view.y, view.m + 1, 0).getDate();
+    return { y: view.y, m: view.m, d: Math.min(selDay, daysInMonth) };
+  }, [view.y, view.m, selDay]);
+
   const spanData = useMemo(() => {
     const flat = weeks.flat() as CellData[];
     if (!flat.length) return { spans: [] as CalEvent[], laneMap: {} as Record<string, number> };
@@ -96,8 +88,8 @@ export function useCalendar(baseEvents: CalEvent[]) {
     setSel,
     selAdd,
     openAdd,
-    done,
-    toggle,
+    selDate,
+    setSelDay,
     step,
     toToday,
     getEvents,
@@ -150,8 +142,6 @@ export function Check({ on, onClick }: { on: boolean; onClick?: () => void }) {
     </button>
   );
 }
-
-// ── CatChip ───────────────────────────────────────────────────
 
 export function CatChip({
   catKey,

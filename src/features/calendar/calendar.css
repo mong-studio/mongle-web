@@ -58,10 +58,43 @@
 
 .calWindow {
   width: min(1460px, calc(100vw - 52px));
-  height: min(1140px, calc(100vh - 52px));
+  height: min(1140px, calc(100dvh - 52px));
   border-radius: 30px;
   overflow: hidden;
   position: relative;
+}
+
+/* ── Responsive: phones ───────────────────────────────── */
+/* ponytail: 인라인 레이아웃이 막지 않는 속성(flex-direction/overflow/display)은
+   클래스로 덮고, 인라인으로 박힌 flex 값만 !important로 뒤집는다. */
+@media (max-width: 760px) {
+  .modalBackdrop {
+    padding: 8px;
+  }
+  .calWindow {
+    width: min(1460px, calc(100vw - 16px));
+    height: min(1140px, calc(100dvh - 16px));
+    border-radius: 18px;
+  }
+  /* 본문: 좌우 2단 → 상하 스택 + 스크롤 */
+  .calBody {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .calBodyMain {
+    flex: 0 0 auto !important;
+    height: 56vh;
+  }
+  .calBodySide {
+    flex: 0 0 auto !important;
+  }
+  /* 헤더: 줄바꿈 허용, 가운데 정렬용 spacer 제거 */
+  .calHeader {
+    flex-wrap: wrap;
+  }
+  .calHeaderSpacer {
+    display: none;
+  }
 }
 
 /* ── Bulletin board widget ───────────────────────────────────── */
@@ -213,13 +246,13 @@
 }
 
 .calDay {
-  transition: box-shadow 0.12s;
+  transition: background 0.12s;
 }
 .calDay:hover {
-  box-shadow: inset 0 0 0 2000px rgba(238, 155, 54, 0.07);
+  background: rgba(238, 155, 54, 0.07);
 }
 .calDay:active {
-  box-shadow: inset 0 0 0 2000px rgba(238, 155, 54, 0.15);
+  background: rgba(238, 155, 54, 0.15);
 }
 
 .calEventBar {
@@ -389,11 +422,39 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .calBtn-nav,
+  .calBtn-ghost,
+  .calBtn-accent,
+  .calDay,
+  .calEventBar,
+  .calBtn-dashed,
+  .calBtn-tag,
+  .calTagGroup,
+  .calBtn-swatch,
+  .calBtn-cancel,
+  .calBtn-submit,
   .calMiniDay,
-  .calBtn-icon {
+  .calBtn-icon,
+  .bulletinBoard,
+  .calBtn-nav:hover,
+  .calBtn-ghost:hover,
+  .calBtn-accent:hover:not([disabled]),
+  .calEventBar:hover,
+  .calBtn-dashed:hover,
+  .calBtn-tag:hover,
+  .calTagGroup:hover,
+  .calBtn-swatch:hover,
+  .calBtn-cancel:hover,
+  .calBtn-submit:hover:not(:disabled),
+  .calMiniDay:hover,
+  .calBtn-icon:hover,
+  .bulletinBoard:hover {
     transition: none;
     transform: none;
     animation: none;
+  }
+  .calSpinner {
+    animation-duration: 1.4s;
   }
 }
 

@@ -6,6 +6,7 @@ type DeleteConfirmDialogProps = {
   title: string;
   description: string;
   onConfirm: () => void;
+  confirmLabel?: string;
 };
 
 export function DeleteConfirmDialog({
@@ -13,6 +14,7 @@ export function DeleteConfirmDialog({
   title,
   description,
   onConfirm,
+  confirmLabel = "삭제",
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog.Root>
@@ -102,7 +104,7 @@ export function DeleteConfirmDialog({
                   boxShadow: "inset 0 -2px 0 rgba(0,0,0,.13)",
                 }}
               >
-                삭제
+                {confirmLabel}
               </button>
             </AlertDialog.Action>
           </div>

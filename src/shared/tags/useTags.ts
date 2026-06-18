@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
-import { apiClient } from "../../shared/api/client.js";
+import { apiClient } from "../api/client.js";
 import type { CalTag, TagItem } from "./types.js";
 
-export function useTagManager(isAuthenticated: boolean) {
+// 유저 태그(/tags/) CRUD 훅. calendar·todo가 공유한다.
+// createTag는 즉시 생성하고 새 id를 돌려준다(피커에서 생성 직후 선택용).
+export function useTags(enabled: boolean) {
   const [tags, setTags] = useState<CalTag[]>([]);
 
   const tagItems = useMemo<TagItem[]>(
@@ -11,18 +13,18 @@ export function useTagManager(isAuthenticated: boolean) {
   );
 
   const fetchTags = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!enabled) return;
     try {
-      const res = await apiClient.get("/todos/tags/");
+      const res = await apiClient.get("/tags/");
       setTags(res.data as CalTag[]);
     } catch {
-      /* ignore */
+      /* 미인증/네트워크 오류 — 빈 상태 유지 */
     }
-  }, [isAuthenticated]);
+  }, [enabled]);
 
   const createTag = useCallback(async (name: string, color: string): Promise<number | null> => {
     try {
-      const res = await apiClient.post("/todos/tags/", { content: name, color });
+      const res = await apiClient.post("/tags/", { content: name, color });
       const created = res.data as CalTag;
       setTags((prev) => [...prev, created]);
       return created.tag_id;
@@ -33,7 +35,7 @@ export function useTagManager(isAuthenticated: boolean) {
 
   const deleteTag = useCallback(async (id: number) => {
     try {
-      await apiClient.delete(`/todos/tags/${id}/`);
+      await apiClient.delete(`/tags/${id}/`);
       setTags((prev) => prev.filter((t) => t.tag_id !== id));
     } catch {
       /* ignore */
@@ -42,12 +44,12 @@ export function useTagManager(isAuthenticated: boolean) {
 
   const editTag = useCallback(async (id: number, content: string, color: string) => {
     try {
-      const res = await apiClient.patch(`/todos/tags/${id}/`, { content, color });
+      const res = await apiClient.patch(`/tags/${id}/`, { content, color });
       setTags((prev) => prev.map((t) => (t.tag_id === id ? (res.data as CalTag) : t)));
     } catch {
       /* ignore */
     }
   }, []);
 
-  return { tags, tagItems, fetchTags, createTag, deleteTag, editTag };
+  return { tagItems, fetchTags, createTag, deleteTag, editTag };
 }

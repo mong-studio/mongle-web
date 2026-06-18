@@ -18,6 +18,7 @@ export type CalEvent = {
   title: string;
   short: string;
   done: boolean;
+  failed?: boolean; // 포기(FAILED)된 TODO
   s: number; // UTC day serial
   e: number;
   color: string; // text / border color

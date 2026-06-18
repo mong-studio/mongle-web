@@ -334,7 +334,7 @@ export function App() {
     }
 
     try {
-      const res = await apiClient.get<TodoTagColor[]>("/todos/tags/");
+      const res = await apiClient.get<TodoTagColor[]>("/tags/");
       setTodoTagColors(
         Object.fromEntries(
           res.data.filter((tag) => tag.content && tag.color).map((tag) => [tag.content, tag.color]),

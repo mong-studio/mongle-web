@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { Tag } from "../../shared/ui/Tag/Tag.js";
 import type { CalHook } from "./CalendarCore.js";
 import { Check } from "./CalendarCore.js";
-import { WD } from "./calEngine.js";
+import { serial, WD } from "./calEngine.js";
 
 const todayListVariants = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const todayItemVariants = {
@@ -17,11 +17,10 @@ type TodayCardProps = {
 };
 
 export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
-  const ty = cal.today.getFullYear();
-  const tm = cal.today.getMonth();
-  const td = cal.today.getDate();
-  const twd = cal.today.getDay();
-  const evs = cal.getEvents(ty, tm, td).filter((e) => e.s === e.e);
+  const { y: sy, m: sm, d: sd } = cal.selDate;
+  const swd = new Date(sy, sm, sd).getDay();
+  const isToday = cal.todaySr === serial(sy, sm, sd);
+  const evs = cal.getEvents(sy, sm, sd).filter((e) => e.s === e.e);
 
   return (
     <div
@@ -37,11 +36,11 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 14 }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "var(--ink-1)" }}>
-          {tm + 1}월 {td}일{" "}
+          {sm + 1}월 {sd}일{" "}
           <span
-            style={{ color: twd === 0 ? "var(--sun)" : twd === 6 ? "var(--sat)" : "var(--ink-2)" }}
+            style={{ color: swd === 0 ? "var(--sun)" : swd === 6 ? "var(--sat)" : "var(--ink-2)" }}
           >
-            ({WD[twd]})
+            ({WD[swd]})
           </span>
         </span>
       </div>
@@ -54,7 +53,7 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
             whiteSpace: "nowrap",
           }}
         >
-          오늘의 일정
+          {isToday ? "오늘의 일정" : "이 날의 일정"}
         </span>
         <span
           style={{
@@ -77,7 +76,7 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
         <button
           type="button"
           className="calBtn-accent"
-          onClick={() => !isRefreshing && cal.openAdd({ y: ty, m: tm, d: td })}
+          onClick={() => !isRefreshing && cal.openAdd({ y: sy, m: sm, d: sd })}
           style={{
             width: 34,
             height: 34,
@@ -142,34 +141,78 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
         variants={todayListVariants}
       >
         {evs.map((e, i) => {
-          const on = cal.done.has(e.id);
+          const on = e.done;
+          const failed = !!e.failed;
+          const isTodo = !!e.todoId; // 일정(schedule)은 체크 불가
+          const checkable = isTodo && !failed;
           return (
             <motion.div
               key={e.id}
               variants={todayItemVariants}
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={checkable ? { x: 2 } : undefined}
+              whileTap={checkable ? { scale: 0.98 } : undefined}
               role="button"
               tabIndex={0}
-              onClick={() => onToggle(e.id)}
-              onKeyDown={(ev) => ev.key === "Enter" && onToggle(e.id)}
+              onClick={() => checkable && onToggle(e.id)}
+              onKeyDown={(ev) => ev.key === "Enter" && checkable && onToggle(e.id)}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 7,
                 padding: "12px 2px",
-                cursor: "pointer",
+                cursor: checkable ? "pointer" : "default",
+                opacity: failed ? 0.6 : 1,
                 borderTop: i ? "1px solid var(--line-soft)" : "none",
               }}
             >
-              <Check on={on} onClick={() => onToggle(e.id)} />
+              {failed ? (
+                <span
+                  role="img"
+                  aria-label="포기됨"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    flex: "0 0 auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 9,
+                    border: "2px solid var(--line)",
+                    background: "var(--cream-2)",
+                    color: "var(--ink-3)",
+                    fontFamily: "var(--font-display)",
+                    fontSize: 14,
+                  }}
+                >
+                  ✕
+                </span>
+              ) : isTodo ? (
+                <Check on={on} onClick={() => onToggle(e.id)} />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    flex: "0 0 auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 9,
+                    border: "2px solid var(--line-soft)",
+                    background: "var(--cream-1)",
+                  }}
+                >
+                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: e.color }} />
+                </span>
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
                     fontFamily: "var(--font-display)",
                     fontSize: 17,
-                    color: on ? "var(--ink-3)" : "var(--ink-1)",
-                    textDecoration: on ? "line-through" : "none",
+                    color: on || failed ? "var(--ink-3)" : "var(--ink-1)",
+                    textDecoration: on || failed ? "line-through" : "none",
                     lineHeight: 1.2,
                     marginBottom: 5,
                     whiteSpace: "nowrap",
