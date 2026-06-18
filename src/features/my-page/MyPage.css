@@ -221,8 +221,30 @@
 }
 
 .mpTokenIcon {
-  font-size: 1.45rem;
-  line-height: 1;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpEditIcon {
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpMenuIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.mpBellIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .mpTokenCount {

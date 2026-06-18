@@ -123,22 +123,23 @@ export function MyPageModal({
       <div className="mpPage">
         <header className="mpHeader">
           <div className="mpHeaderBrand">
-            {/* <img src="/assets/icon/rabbit.png" alt="" className="mpBrandLogo" /> */}
             <img src="/assets/auth/main.png" alt="" className="mpBrandLogo" />
-            {/* <span className="mpBrandName">몽글마을</span> */}
             <span className="mpBrandStar">✦</span>
           </div>
 
           <button type="button" className="mpGoVillage" onClick={onClose}>
-            <img src="/assets/myPage/house.png" alt="" />
+            <img src="/assets/icon/house.png" alt="" />
             마을로 가기
           </button>
 
           <div className="mpHeaderRight">
             <div className="mpTokenChip" role="status" aria-label={`보유 사과 ${tokenBalance}개`}>
-              <span className="mpTokenIcon" aria-hidden="true">
-                🍎
-              </span>
+              <img
+                src="/assets/icon/icon-apple.png"
+                alt=""
+                className="mpTokenIcon"
+                aria-hidden="true"
+              />
               <b className="mpTokenCount">{tokenBalance}</b>
               <span className="mpTokenPlus" aria-hidden="true">
                 +
@@ -149,11 +150,6 @@ export function MyPageModal({
         <div className="mpContainer">
           {/* ── 타이틀 ── */}
           <div className="mpTitleRow">
-            <img
-              src="/assets/character/deco-flowers-l.png"
-              alt=""
-              className="mpTitleFlower mpFlowerL"
-            />
             <div className="mpTitleCenter">
               <div className="mpTitleLine">
                 <span className="mpTitleStar mpStarY">✦</span>
@@ -162,11 +158,6 @@ export function MyPageModal({
               </div>
               <p className="mpSubtitle">나의 마을과 나를 소개해요</p>
             </div>
-            <img
-              src="/assets/character/deco-flowers-r.png"
-              alt=""
-              className="mpTitleFlower mpFlowerR"
-            />
           </div>
 
           <div className="mpBody">
@@ -247,7 +238,8 @@ export function MyPageModal({
                       className="mpInfoEditBtn"
                       onClick={() => setEditingInfo(true)}
                     >
-                      ✏️ 수정
+                      <img src="/assets/icon/pencil.png" alt="" className="mpEditIcon" />
+                      수정
                     </button>
                   ) : (
                     <div className="mpInfoEditActions">
@@ -275,12 +267,12 @@ export function MyPageModal({
                 </div>
                 <div className="mpInfoRows">
                   <div className="mpInfoRow">
-                    <img src="/assets/myPage/icon-email.png" alt="" className="mpInfoIcon" />
+                    <img src="/assets/icon/mail.png" alt="" className="mpInfoIcon" />
                     <span className="mpInfoLabel">이메일</span>
                     <span className="mpInfoVal mpInfoVal">{userEmail || "—"}</span>
                   </div>
                   <div className="mpInfoRow">
-                    <img src="/assets/myPage/icon-bear.png" alt="" className="mpInfoIcon" />
+                    <img src="/assets/myPage/yellow-bear.png" alt="" className="mpInfoIcon" />
                     <span className="mpInfoLabel">닉네임</span>
                     {editingInfo ? (
                       <input
@@ -295,7 +287,7 @@ export function MyPageModal({
                     )}
                   </div>
                   <div className="mpInfoRow">
-                    <img src="/assets/myPage/icon-bag.png" alt="" className="mpInfoIcon" />
+                    <img src="/assets/myPage/bag.png" alt="" className="mpInfoIcon" />
                     <span className="mpInfoLabel">직업</span>
                     {editingInfo ? (
                       <select
@@ -352,66 +344,6 @@ export function MyPageModal({
             </div>
           </div>
         </div>
-
-        {/* ── 이름 드롭다운 ── */}
-        {nameMenuOpen && (
-          <>
-            <div className="mpDismiss" onClick={closeAll} aria-hidden="true" />
-            <div className="mpNameMenu">
-              <button
-                type="button"
-                className="mpNameMenuItem"
-                onClick={() => setNameMenuOpen(false)}
-              >
-                👤 내 프로필
-              </button>
-              <button
-                type="button"
-                className="mpNameMenuItem"
-                onClick={() => {
-                  setNameMenuOpen(false);
-                  showToast("설정으로 이동해요");
-                }}
-              >
-                ⚙️ 설정
-              </button>
-              <button
-                type="button"
-                className="mpNameMenuItem"
-                onClick={() => {
-                  setNameMenuOpen(false);
-                  showToast("로그아웃 되었어요");
-                }}
-              >
-                🚪 로그아웃
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* ── 알림 팝오버 ── */}
-        {bellOpen && (
-          <>
-            <div className="mpDismiss" onClick={closeAll} aria-hidden="true" />
-            <div className="mpBellPopover">
-              <div className="mpBellPopTitle">알림</div>
-              <div className="mpBellItem">
-                <span>🌸</span>
-                <div>
-                  <div>봄이가 새 요리 레시피를 공유했어요!</div>
-                  <div className="mpBellTime">10분 전</div>
-                </div>
-              </div>
-              <div className="mpBellItem">
-                <span>🍎</span>
-                <div>
-                  <div>일일 토큰 2개가 지급되었어요.</div>
-                  <div className="mpBellTime">2시간 전</div>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
 
         {/* ── 주민 상세 조회 ── */}
         {activeRes && (

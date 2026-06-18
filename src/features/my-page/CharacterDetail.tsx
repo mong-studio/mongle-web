@@ -83,7 +83,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
       >
         <div className="mpRdHdr">
           <div className="mpRdHdrTitle">
-            <img src="/assets/myPage/icon-bear.png" alt="" className="mpRdHdrIcon" />
+            <img src="/assets/icon/rabbit.png" alt="" className="mpRdHdrIcon" />
             <span>주민 상세 조회</span>
             <span className="mpRdHdrStar">✦</span>
             <span className="mpRdHdrStar">✦</span>
@@ -118,7 +118,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
             <hr className="mpRdDivider" />
 
             <div className="mpRdSecHead">
-              <img src="/assets/myPage/sprout.png" alt="" className="mpRdSecIcon" />
+              <img src="/assets/icon/sprout.png" alt="" className="mpRdSecIcon" />
               주민 소개
             </div>
             <div className="mpRdChips">
@@ -141,7 +141,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
           <div className="mpRdRight">
             <div className="mpRdSec">
               <div className="mpRdSecHead">
-                <img src="/assets/myPage/sprout.png" alt="" className="mpRdSecIcon" />
+                <img src="/assets/icon/sprout.png" alt="" className="mpRdSecIcon" />
                 진행 중인 퀘스트
               </div>
               <div className="mpRdQuestBody">
@@ -153,7 +153,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
                   <div className="mpRdQuestList">
                     {quests.map((q) => (
                       <div key={q.quest_id} className="mpRdQuestItem">
-                        <img src="/assets/myPage/sprout.png" alt="" className="mpRdQuestItemIcon" />
+                        <img src="/assets/icon/sprout.png" alt="" className="mpRdQuestItemIcon" />
                         <span>{q.title}</span>
                       </div>
                     ))}
@@ -164,27 +164,27 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
 
             <div className="mpRdSec">
               <div className="mpRdSecHead">
-                <img src="/assets/myPage/sprout.png" alt="" className="mpRdSecIcon" />
+                <img src="/assets/icon/sprout.png" alt="" className="mpRdSecIcon" />
                 기본 정보
               </div>
               <div className="mpRdInfoRows">
                 <div className="mpRdInfoRow">
                   <span className="mpRdInfoKey">
-                    <img src="/assets/myPage/calendar.png" alt="" className="mpRdInfoIcon" />
+                    <img src="/assets/icon/calendar.png" alt="" className="mpRdInfoIcon" />
                     생성일
                   </span>
                   <span className="mpRdInfoVal">{detail ? fmtDate(detail.created_at) : "—"}</span>
                 </div>
                 <div className="mpRdInfoRow">
                   <span className="mpRdInfoKey">
-                    <img src="/assets/myPage/icon-house.png" alt="" className="mpRdInfoIcon" />
+                    <img src="/assets/icon/house.png" alt="" className="mpRdInfoIcon" />
                     현재 거주지
                   </span>
                   <span className="mpRdInfoVal">—</span>
                 </div>
                 <div className="mpRdInfoRow">
                   <span className="mpRdInfoKey">
-                    <img src="/assets/myPage/icon-phone.png" alt="" className="mpRdInfoIcon" />
+                    <img src="/assets/hud/icon-phone.png" alt="" className="mpRdInfoIcon" />
                     함께한 피드 수
                   </span>
                   <span className="mpRdInfoVal">—</span>
