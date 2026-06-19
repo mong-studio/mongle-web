@@ -3,7 +3,7 @@ import { useTags } from "../../shared/tags/useTags.js";
 import { readableInk } from "../../shared/ui/Tag/Tag.js";
 import { TagPicker } from "../../shared/ui/tags/TagPicker.js";
 import "./todoCreation.css";
-import { confirmTodos, formatTodayIso, generateTodos, previewTodoQuests } from "./todoApi.js";
+import { confirmTodos, createTodo, formatTodayIso, generateTodos } from "./todoApi.js";
 
 export type TodoItem = {
   id: string;
@@ -32,6 +32,9 @@ export type TodoCommitResult = {
   todos: TodoItem[];
 };
 
+// 캐릭터 퀘스트는 당일 TODO에 한해 하루 5개까지만 LLM으로 부여(백엔드 _assign_quests_to_todos가 강제).
+const QUEST_DAILY_LIMIT = 5;
+
 function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -41,7 +44,8 @@ function isImeComposing(event: React.KeyboardEvent<HTMLInputElement>) {
 }
 
 // 항목당 태그 1개(백엔드 Todo.tag FK가 단일). 캘린더와 동일한 유저 태그를 공유한다.
-type LocalTodo = { id: string; name: string; tagId: number | null };
+// quest=true 인 항목만 캐릭터 퀘스트(LLM)를 요청하고, 나머지는 즉시 단일 저장한다.
+type LocalTodo = { id: string; name: string; tagId: number | null; quest: boolean };
 type ResidentPreview = {
   id: string;
   name: string;
@@ -49,7 +53,7 @@ type ResidentPreview = {
   persona?: string;
   avatarUrl?: string;
 };
-// 커밋 완료 화면(2단계)에 보여줄 항목: 확정된 TODO + 애착인형에게 부여된 퀘스트.
+// 저장 결과 화면(2단계)에 보여줄 항목: 확정된 TODO + (있으면) 애착인형 퀘스트.
 type CommittedQuest = {
   id: string;
   title: string;
@@ -58,11 +62,6 @@ type CommittedQuest = {
   characterAvatarUrl: string | null;
   questText: string | null;
 };
-
-function createFallbackQuestText(resident: ResidentPreview) {
-  // TODO: AI 서버 연결 확인 후 프론트 테스트용 fallback 제거하기.
-  return `${resident.name}가 몽글마을 산책하기`;
-}
 
 type TodoCreationProps = {
   residents: ResidentPreview[];
@@ -74,7 +73,7 @@ type TodoCreationProps = {
 
 export function TodoCreation({
   residents,
-  savedTodos: _savedTodos,
+  savedTodos,
   onNotice,
   onTodosSaved,
   onClose,
@@ -86,7 +85,7 @@ export function TodoCreation({
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [todos, setTodos] = useState<LocalTodo[]>([]);
 
-  // page 0: 게시판(작성/정리), page 1: 커밋 결과(확정 TODO + 캐릭터 퀘스트)
+  // page 0: 게시판(작성/정리), page 1: 저장 결과(확정 TODO + 캐릭터 퀘스트)
   const [page, setPage] = useState<0 | 1>(0);
   const [committed, setCommitted] = useState<CommittedQuest[]>([]);
   const [isBusy, setIsBusy] = useState(false);
@@ -104,11 +103,14 @@ export function TodoCreation({
   const tagById = useMemo(() => new Map(tagItems.map((t) => [t.id, t])), [tagItems]);
   const tagByContent = useMemo(() => new Map(tagItems.map((t) => [t.content, t])), [tagItems]);
 
-  // 선택된 태그의 이름을 API용 배열로. 없으면 빈 배열(백엔드가 기본 태그로 처리).
-  const tagNames = (tagId: number | null): string[] => {
-    const t = tagId !== null ? tagById.get(tagId) : undefined;
-    return t ? [t.content] : [];
-  };
+  // 오늘 이미 부여된 퀘스트 수(서버에서 불러온 당일 savedTodos 기준) + 이번에 고른 수 = 남은 한도.
+  const usedQuestsToday = useMemo(
+    () => savedTodos.filter((t) => t.assignedQuest).length,
+    [savedTodos],
+  );
+  const selectedQuestCount = todos.filter((t) => t.quest).length;
+  const questAvailable = Math.max(0, QUEST_DAILY_LIMIT - usedQuestsToday - selectedQuestCount);
+
   // AI가 제안한 태그 문자열을 유저의 실제 태그에 이름으로 매칭. 없으면 null.
   const matchTagId = (names: string[] | undefined): number | null => {
     const first = names?.[0];
@@ -131,7 +133,7 @@ export function TodoCreation({
   function addTodo() {
     const name = manualText.trim();
     if (!name) return;
-    setTodos((prev) => [...prev, { id: createId("td"), name, tagId: selectedTagId }]);
+    setTodos((prev) => [...prev, { id: createId("td"), name, tagId: selectedTagId, quest: false }]);
     setManualText("");
   }
 
@@ -153,6 +155,19 @@ export function TodoCreation({
     );
   }
 
+  // ⭐ 토글: 켤 때 하루 한도를 넘으면 막는다.
+  function toggleQuest(id: string) {
+    setTodos((prev) => {
+      const target = prev.find((t) => t.id === id);
+      if (!target) return prev;
+      if (!target.quest && questAvailable <= 0) {
+        showToast(`캐릭터 퀘스트는 하루 ${QUEST_DAILY_LIMIT}개까지예요.`);
+        return prev;
+      }
+      return prev.map((t) => (t.id === id ? { ...t, quest: !t.quest } : t));
+    });
+  }
+
   function deleteTodo(id: string) {
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }
@@ -172,6 +187,7 @@ export function TodoCreation({
         id: createId("ai"),
         name: t.title,
         tagId: matchTagId(t.tags),
+        quest: false,
       }));
       setTodos((prev) => [...prev, ...items]);
       setSentence("");
@@ -183,8 +199,10 @@ export function TodoCreation({
     }
   }
 
-  // 푸터 "애착인형에게 퀘스트 부여하기": 퀘스트 배정(preview) → 커밋(confirm) → 결과 화면.
-  async function handleAssignAndCommit() {
+  // 푸터 "오늘의 TODO에 저장": ⭐ 항목은 퀘스트 요청(confirm), 나머지는 단일 API로 즉시 저장.
+  // ⭐ 항목은 quest:null로 보내면 백엔드가 "당일 TODO·하루 5개" 한도로 LLM 퀘스트를 자동 배정한다.
+  // 한도를 넘은 항목은 quest 없이 저장되어 그대로 plain 으로만 표시된다(가짜 퀘스트 안 보여줌).
+  async function handleSave() {
     if (isBusy) return;
     if (!todos.length) {
       showToast("할 일을 먼저 추가해주세요!");
@@ -192,116 +210,113 @@ export function TodoCreation({
     }
     setIsBusy(true);
     try {
-      // 1) 애착인형(캐릭터)에게 퀘스트 배정
-      const preview = await previewTodoQuests({
-        todos: todos.map((todo) => ({ content: todo.name, tags: tagNames(todo.tagId) })),
-      });
-      const assigned = preview.todos.map((todo, index) => {
-        const residentByQuest = residents.find(
-          (resident) => resident.id === todo.quest?.character_id,
+      const today = formatTodayIso();
+      const questTodos = todos.filter((t) => t.quest);
+      const plainTodos = todos.filter((t) => !t.quest);
+
+      const committedRows: CommittedQuest[] = [];
+      const savedForApp: TodoItem[] = [];
+      const questPreviewsForApp: NonNullable<TodoCommitResult["questPreviews"]> = [];
+
+      // 1) 퀘스트 없는 항목: 단일 생성 API(POST /todos/)로 즉시 저장 — LLM 미사용.
+      if (plainTodos.length) {
+        const created = await Promise.all(
+          plainTodos.map((t) =>
+            createTodo({
+              content: t.name,
+              todo_date: today,
+              ...(t.tagId != null ? { tag_id: t.tagId } : {}),
+            }),
+          ),
         );
-        const fallbackResident = residents[index % Math.max(1, residents.length)];
-        const fallbackQuest =
-          !todo.quest && fallbackResident
-            ? {
-                character_id: fallbackResident.id,
-                character_name: fallbackResident.name,
-                character_image_url: fallbackResident.avatarUrl ?? null,
-                content: createFallbackQuestText(fallbackResident),
-              }
-            : null;
-        const quest = todo.quest ?? fallbackQuest;
-        return {
-          isTemporary: !todo.quest && Boolean(fallbackQuest),
-          characterId: quest?.character_id ?? null,
-          characterName: quest?.character_name ?? null,
-          characterAvatarUrl:
-            residentByQuest?.avatarUrl ??
-            quest?.character_image_url ??
-            fallbackResident?.avatarUrl ??
-            null,
-          questText: quest?.content ?? null,
-          tagId: todos[index]?.tagId ?? matchTagId(todo.tags),
-          title: todo.content,
-        };
-      });
-
-      // 2) 확정(commit). 임시 퀘스트가 아닌 경우에만 캐릭터 퀘스트를 함께 저장.
-      const result = await confirmTodos({
-        todos: assigned.map((q) => ({
-          content: q.title,
-          todo_date: formatTodayIso(),
-          tags: tagNames(q.tagId),
-          quest:
-            !q.isTemporary && q.characterId && q.questText
-              ? { character_id: q.characterId, content: q.questText }
-              : null,
-        })),
-      });
-
-      // 3) 앱 상태(HUD 등) 갱신용 결과 전달
-      const savedItems: TodoItem[] = result.todos.map((todo, index) => {
-        const a = assigned[index];
-        const tag = a?.tagId != null ? tagById.get(a.tagId) : undefined;
-        const savedQuest = todo.quest
-          ? {
-              characterName: todo.quest.character_name,
-              content: todo.quest.content,
-              isTemporary: false,
-            }
-          : a?.questText
-            ? { characterName: a.characterName, content: a.questText, isTemporary: a.isTemporary }
-            : null;
-        return {
-          id: todo.todo_id,
-          title: todo.content,
-          dueDate: todo.todo_date,
-          tags: tag ? [tag.content] : [],
-          tagColors: tag ? { [tag.content]: tag.color } : {},
-          status: "saved" as const,
-          assignedQuest: savedQuest,
-        };
-      });
-      onTodosSaved({
-        todos: savedItems,
-        questPreviews: result.todos.flatMap((todo) =>
-          todo.quest
-            ? [
-                {
-                  questId: todo.quest.quest_id,
-                  content: todo.quest.content,
-                  characterId: todo.quest.character_id,
-                  characterName: todo.quest.character_name,
-                  todoId: todo.todo_id,
-                  todoTitle: todo.content,
-                },
-              ]
-            : [],
-        ),
-      });
-
-      // 4) 확정 결과 화면(확정 TODO + 캐릭터 퀘스트)
-      setCommitted(
-        result.todos.map((todo, index) => {
-          const a = assigned[index];
-          return {
+        created.forEach((todo, index) => {
+          const localTagId = plainTodos[index]?.tagId ?? null;
+          const tag = localTagId != null ? tagById.get(localTagId) : undefined;
+          committedRows.push({
             id: todo.todo_id,
             title: todo.content,
-            tagId: a?.tagId ?? null,
-            characterName: todo.quest?.character_name ?? a?.characterName ?? null,
-            characterAvatarUrl: a?.characterAvatarUrl ?? null,
-            questText: todo.quest?.content ?? a?.questText ?? null,
-          };
-        }),
-      );
+            tagId: tag?.id ?? null,
+            characterName: null,
+            characterAvatarUrl: null,
+            questText: null,
+          });
+          savedForApp.push({
+            id: todo.todo_id,
+            title: todo.content,
+            dueDate: todo.todo_date,
+            tags: tag ? [tag.content] : [],
+            tagColors: tag ? { [tag.content]: tag.color } : {},
+            status: "saved",
+            assignedQuest: null,
+          });
+        });
+      }
+
+      // 2) 퀘스트 ⭐ 항목: confirm + quest:null → 백엔드가 당일·하루5개 한도로 LLM 퀘스트 배정.
+      if (questTodos.length) {
+        const result = await confirmTodos({
+          todos: questTodos.map((t) => ({
+            content: t.name,
+            todo_date: today,
+            // 스펙 권장: 이름이 아니라 tag_id로 연결. 태그 없으면 빈 tags로 폴백.
+            ...(t.tagId != null ? { tag_id: t.tagId } : { tags: [] }),
+            quest: null,
+          })),
+        });
+        result.todos.forEach((todo, index) => {
+          const localTagId = questTodos[index]?.tagId ?? null;
+          const tag = localTagId != null ? tagById.get(localTagId) : undefined;
+          // 퀘스트 응답에는 아바타 URL이 없어 character_id로 주민 목록에서 매칭.
+          const resident = todo.quest
+            ? residents.find((r) => r.id === todo.quest?.character_id)
+            : undefined;
+          committedRows.push({
+            id: todo.todo_id,
+            title: todo.content,
+            tagId: tag?.id ?? null,
+            characterName: todo.quest?.character_name ?? null,
+            characterAvatarUrl: resident?.avatarUrl ?? null,
+            questText: todo.quest?.content ?? null,
+          });
+          savedForApp.push({
+            id: todo.todo_id,
+            title: todo.content,
+            dueDate: todo.todo_date,
+            tags: tag ? [tag.content] : [],
+            tagColors: tag ? { [tag.content]: tag.color } : {},
+            status: "saved",
+            assignedQuest: todo.quest
+              ? {
+                  characterName: todo.quest.character_name,
+                  content: todo.quest.content,
+                  isTemporary: false,
+                }
+              : null,
+          });
+          if (todo.quest) {
+            questPreviewsForApp.push({
+              questId: todo.quest.quest_id,
+              content: todo.quest.content,
+              characterId: todo.quest.character_id,
+              characterName: todo.quest.character_name,
+              todoId: todo.todo_id,
+              todoTitle: todo.content,
+            });
+          }
+        });
+      }
+
+      onTodosSaved({ todos: savedForApp, questPreviews: questPreviewsForApp });
+      setCommitted(committedRows);
       setPage(1);
+      const questCount = committedRows.filter((r) => r.questText).length;
       showToast(
-        preview.quest_distribution_triggered
-          ? "애착인형들에게 퀘스트를 부여했어요!"
-          : "AI 연결 전이라 임시 퀘스트를 표시했어요.",
+        questCount > 0
+          ? `${savedForApp.length}개 저장 · 퀘스트 ${questCount}개 부여!`
+          : `${savedForApp.length}개의 할 일을 저장했어요!`,
       );
     } catch (error) {
-      onNotice(`퀘스트 부여 실패: ${error instanceof Error ? error.message : "원인 미상"}`);
+      onNotice(`저장 실패: ${error instanceof Error ? error.message : "원인 미상"}`);
     } finally {
       setIsBusy(false);
     }
@@ -427,12 +442,20 @@ export function TodoCreation({
                 <span className="boardDividerLine" />
               </div>
 
+              {todos.length > 0 && (
+                <div className={`boardQuestBudget${questAvailable === 0 ? " is-empty" : ""}`}>
+                  <span aria-hidden="true">⭐</span> 캐릭터 퀘스트 {questAvailable}/
+                  {QUEST_DAILY_LIMIT} 남음
+                </div>
+              )}
+
               {todos.length === 0 ? (
                 <div className="boardEmpty">아직 생성된 TODO가 없어요. 위에서 추가해보세요!</div>
               ) : (
                 <div className="boardTodoList">
                   {todos.map((todo) => {
                     const tag = todo.tagId != null ? tagById.get(todo.tagId) : undefined;
+                    const lockQuest = !todo.quest && questAvailable <= 0;
                     return (
                       <div key={todo.id} className="boardTodoRow">
                         <span className="boardPin" aria-hidden="true">
@@ -475,6 +498,20 @@ export function TodoCreation({
                         </button>
                         <button
                           type="button"
+                          className={`boardQuestToggle${todo.quest ? " is-on" : ""}`}
+                          onClick={() => toggleQuest(todo.id)}
+                          disabled={lockQuest}
+                          aria-pressed={todo.quest}
+                          title={
+                            lockQuest
+                              ? `캐릭터 퀘스트는 하루 ${QUEST_DAILY_LIMIT}개까지예요`
+                              : "이 할 일을 애착인형 퀘스트로"
+                          }
+                        >
+                          {todo.quest ? "⭐" : "☆"} 퀘스트
+                        </button>
+                        <button
+                          type="button"
                           className="boardRemove"
                           onClick={() => deleteTodo(todo.id)}
                           aria-label="삭제"
@@ -494,18 +531,18 @@ export function TodoCreation({
             <button
               type="button"
               className="boardSaveBtn"
-              onClick={() => void handleAssignAndCommit()}
+              onClick={() => void handleSave()}
               disabled={isBusy}
             >
               {isBusy ? <span className="tdSpinner tdSpinner--lg" /> : <span>✨</span>}
-              {isBusy ? "퀘스트 부여 중..." : "애착인형에게 퀘스트 부여하기"}
+              {isBusy ? "저장 중..." : "오늘의 TODO에 저장하기"}
               {!isBusy && <span>💾</span>}
             </button>
           </footer>
         </div>
       )}
 
-      {/* ── PAGE 1: 확정 TODO + 캐릭터 퀘스트 ── */}
+      {/* ── PAGE 1: 저장 결과(확정 TODO + 캐릭터 퀘스트) ── */}
       {page === 1 && (
         <div className="boardPanel tdPageIn">
           {onClose && (
@@ -521,7 +558,7 @@ export function TodoCreation({
             </div>
             <div className="boardResultSub">
               <span className="boardDividerStar">✦</span>
-              애착인형들에게 퀘스트를 부여했어요
+              오늘의 할 일을 저장했어요
               <span className="boardDividerStar">✦</span>
             </div>
           </header>
@@ -533,11 +570,17 @@ export function TodoCreation({
                   const tag = q.tagId != null ? tagById.get(q.tagId) : undefined;
                   return (
                     <div key={q.id} className="boardQuestRow">
-                      <img
-                        src={q.characterAvatarUrl ?? "/assets/character/bear.png"}
-                        alt=""
-                        className="boardQuestAvatar"
-                      />
+                      {q.questText ? (
+                        <img
+                          src={q.characterAvatarUrl ?? "/assets/character/bear.png"}
+                          alt=""
+                          className="boardQuestAvatar"
+                        />
+                      ) : (
+                        <span className="boardPin" aria-hidden="true">
+                          📌
+                        </span>
+                      )}
                       <div className="boardQuestContent">
                         <div className="boardQuestTop">
                           <span className="boardQuestTitle">{q.title}</span>
@@ -554,18 +597,16 @@ export function TodoCreation({
                             </span>
                           )}
                         </div>
-                        <div className="boardQuestDesc">
-                          <span className="boardDividerStar">✦</span>
-                          {q.questText ? (
+                        {q.questText && (
+                          <div className="boardQuestDesc">
+                            <span className="boardDividerStar">✦</span>
                             <span>
                               <b>{q.characterName ?? "애착인형"}</b>
                               <span className="boardQuestLabel">퀘스트</span>
                               {q.questText}
                             </span>
-                          ) : (
-                            <span>아직 이 할 일에 부여된 퀘스트가 없어요.</span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
