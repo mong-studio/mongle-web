@@ -22,7 +22,9 @@ const RETRY_EXEMPT_PATHS = ["/auth/login", "/auth/token/refresh", "/auth/logout"
 type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 
 export const apiClient = axios.create({
-  baseURL: "/api/v1",
+  // 프로덕션: VITE_API_BASE(=https://api.mongle-village.com)가 빌드 때 주입됨.
+  // 로컬: 미설정이라 "/api/v1" 상대경로 → vite dev proxy(/api→localhost:8000).
+  baseURL: `${import.meta.env.VITE_API_BASE ?? ""}/api/v1`,
   withCredentials: true,
   headers: {
     "X-Client-Type": "react",

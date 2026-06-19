@@ -14,6 +14,7 @@ type Props = {
   residents: Resident[];
   onClose: () => void;
   onWithdraw: () => void;
+  onMoveOut: (characterId: string) => void;
   onUpdateProfile: (nickname: string, job: string, birth: string) => Promise<void>;
   onUpdatePassword: (current: string, next: string) => Promise<void>;
 };
@@ -72,6 +73,7 @@ export function MyPageModal({
   residents,
   onClose,
   onWithdraw,
+  onMoveOut,
   onUpdateProfile,
   onUpdatePassword,
 }: Props) {
@@ -342,6 +344,7 @@ export function MyPageModal({
             residentIdx={profileIdx as number}
             onClose={() => setProfileIdx(null)}
             onShowToast={showToast}
+            onMoveOut={onMoveOut}
           />
         )}
 

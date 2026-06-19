@@ -41,6 +41,14 @@ type ResidentPreview = {
   avatarUrl?: string;
 };
 
+type ResidentNpcState = {
+  npc: Phaser.GameObjects.Image;
+  target: Phaser.Math.Vector2 | null;
+  velocity: Phaser.Math.Vector2;
+  worldPosition: Phaser.Math.Vector2;
+  waitUntil: number;
+};
+
 type PhaserVillageProps = {
   residents: ResidentPreview[];
   reloadKey: number;
@@ -196,6 +204,8 @@ class VillageScene extends Phaser.Scene {
   private chiefVelocity = new Phaser.Math.Vector2(0, 0);
   private chiefWorldPosition = new Phaser.Math.Vector2(0, 0);
   private chiefWaitUntil = 0;
+  private residentNpcStates: ResidentNpcState[] = [];
+  private hoveredResidentNpc: { state: ResidentNpcState; label: string } | null = null;
   private lastObjectHintSignature = "";
   private lastMinimapSignature = "";
   private mapBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
@@ -224,8 +234,10 @@ class VillageScene extends Phaser.Scene {
 
   update(time: number, delta: number) {
     this.updateChiefNpc(time, delta);
+    this.updateResidentNpcs(time, delta);
     this.publishMinimapStateIfChanged();
     this.publishActiveObjectHint();
+    this.publishHoveredResidentHint();
   }
 
   private async buildVillage() {
@@ -249,6 +261,10 @@ class VillageScene extends Phaser.Scene {
       this.mapBounds.setTo(0, 0, map.width * map.tilewidth, map.height * map.tileheight);
       this.blockedWorldRects = [];
       this.addDecorationCollisionRects(map, tilesets);
+      await this.loadResidentTextures();
+      if (this.isDisposed()) {
+        return;
+      }
       this.addVillageActors(map);
       await this.createMinimapSnapshot(map, tilesets);
       if (this.isDisposed()) {
@@ -277,6 +293,33 @@ class VillageScene extends Phaser.Scene {
       }
     }
     return tilesets.sort((a, b) => a.firstgid - b.firstgid);
+  }
+
+  private async loadResidentTextures(): Promise<void> {
+    await Promise.all(
+      this.residents
+        .filter((r) => r.avatarUrl)
+        .map(async (resident) => {
+          const key = `resident-npc-${resident.id}`;
+          if (this.textures.exists(key)) {
+            return;
+          }
+          try {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            await new Promise<void>((resolve, reject) => {
+              img.onload = () => resolve();
+              img.onerror = () => reject();
+              img.src = resident.avatarUrl ?? "";
+            });
+            if (!this.textures.exists(key)) {
+              this.textures.addImage(key, img);
+            }
+          } catch {
+            // 로드 실패 시 폴백 이미지 사용
+          }
+        }),
+    );
   }
 
   private loadSpritesheets(tilesets: TilesetMeta[]) {
@@ -454,8 +497,20 @@ class VillageScene extends Phaser.Scene {
     const residentHouseMarkers: MinimapMarker[] = [];
     this.residents.slice(0, residentOffsets.length).forEach((resident, index) => {
       const [offsetX, offsetY] = residentOffsets[index];
-      const hx = Phaser.Math.Clamp(centerX + offsetX, 0, map.width * map.tilewidth);
-      const hy = Phaser.Math.Clamp(centerY + offsetY, 0, map.height * map.tileheight);
+      // 집 크기(84×76)와 origin(0.5, 0.86)을 고려해 맵 안쪽에 여백을 둔다.
+      const houseHalfW = RESIDENT_HOUSE_DISPLAY_WIDTH / 2 + 16;
+      const houseTopH = Math.ceil(RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.86) + 16;
+      const houseBotH = Math.ceil(RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.14) + 16;
+      const hx = Phaser.Math.Clamp(
+        centerX + offsetX,
+        houseHalfW,
+        map.width * map.tilewidth - houseHalfW,
+      );
+      const hy = Phaser.Math.Clamp(
+        centerY + offsetY,
+        houseTopH,
+        map.height * map.tileheight - houseBotH,
+      );
       const color = RESIDENT_HOUSE_COLORS[index % RESIDENT_HOUSE_COLORS.length];
       const houseKey = `resident-house-${color}`;
 
@@ -491,6 +546,42 @@ class VillageScene extends Phaser.Scene {
           this.publishObjectHint({ ...houseHint, visible: false });
         }
       });
+
+      {
+        const residentNpcKey = `resident-npc-${resident.id}`;
+        if (this.textures.exists(residentNpcKey)) {
+          const spawnX = hx + Phaser.Math.Between(-16, 16);
+          const spawnY = hy + Phaser.Math.Between(12, 28);
+          const npc = this.add
+            .image(spawnX, spawnY, residentNpcKey)
+            .setOrigin(0.5, 0.86)
+            .setDisplaySize(44, 44)
+            .setDepth(spawnY)
+            .setInteractive();
+          const npcState: ResidentNpcState = {
+            npc,
+            target: null,
+            velocity: new Phaser.Math.Vector2(0, 0),
+            worldPosition: new Phaser.Math.Vector2(spawnX, spawnY),
+            waitUntil: Phaser.Math.Between(0, 3000),
+          };
+          this.residentNpcStates.push(npcState);
+          npc.on("pointerover", () => {
+            this.hoveredResidentNpc = { state: npcState, label: resident.name };
+          });
+          npc.on("pointerout", () => {
+            if (this.hoveredResidentNpc?.state === npcState) {
+              this.hoveredResidentNpc = null;
+              this.publishObjectHint({
+                label: resident.name,
+                visible: false,
+                worldX: npcState.worldPosition.x,
+                worldY: npcState.worldPosition.y,
+              });
+            }
+          });
+        }
+      }
 
       residentHouseMarkers.push({
         id: resident.id,
@@ -690,6 +781,119 @@ class VillageScene extends Phaser.Scene {
     return false;
   }
 
+  private updateResidentNpcs(time: number, delta: number) {
+    if (this.mapBounds.width <= 0 || this.mapBounds.height <= 0) {
+      return;
+    }
+    for (const state of this.residentNpcStates) {
+      this.updateSingleResidentNpc(state, time, delta);
+    }
+  }
+
+  private updateSingleResidentNpc(state: ResidentNpcState, time: number, delta: number) {
+    if (!state.target && time < state.waitUntil) {
+      return;
+    }
+
+    if (
+      !state.target ||
+      this.isWorldPointCoveredByHud(state.worldPosition.x, state.worldPosition.y)
+    ) {
+      this.chooseResidentTarget(state, time);
+    }
+
+    if (!state.target) {
+      return;
+    }
+
+    const dx = state.target.x - state.worldPosition.x;
+    const dy = state.target.y - state.worldPosition.y;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance <= CHIEF_NPC_TARGET_RADIUS) {
+      state.target = null;
+      state.velocity.scale(0.72);
+      state.waitUntil = time + Phaser.Math.Between(900, 2200);
+      this.applyResidentDisplayMotion(state, time, 0, 0, false);
+      return;
+    }
+
+    const desiredVelocity = new Phaser.Math.Vector2(dx / distance, dy / distance).scale(
+      CHIEF_NPC_SPEED,
+    );
+    state.velocity.lerp(desiredVelocity, Math.min(1, CHIEF_NPC_STEERING * (delta / 16.67)));
+
+    const nextX = state.worldPosition.x + (state.velocity.x * delta) / 1000;
+    const nextY = state.worldPosition.y + (state.velocity.y * delta) / 1000;
+
+    if (this.isChiefPointBlocked(nextX, nextY)) {
+      state.target = null;
+      state.velocity.set(0, 0);
+      state.waitUntil = time + 500;
+      this.applyResidentDisplayMotion(state, time, 0, 0, false);
+      return;
+    }
+
+    state.worldPosition.set(nextX, nextY);
+    this.applyResidentDisplayMotion(state, time, state.velocity.x, state.velocity.y, true);
+  }
+
+  private applyResidentDisplayMotion(
+    state: ResidentNpcState,
+    time: number,
+    dx: number,
+    dy: number,
+    moving: boolean,
+  ) {
+    const bobPhase = Math.sin(time * CHIEF_NPC_BOB_FREQUENCY);
+    const bob = moving ? Math.max(0, bobPhase) : 0;
+    const yOffset = -bob * CHIEF_NPC_BOB_AMPLITUDE;
+
+    state.npc.setPosition(state.worldPosition.x, state.worldPosition.y + yOffset);
+    state.npc.setDepth(state.worldPosition.y);
+
+    if (moving && Math.abs(dx) > Math.abs(dy) * 0.25) {
+      state.npc.setFlipX(dx < 0);
+    }
+  }
+
+  private chooseResidentTarget(state: ResidentNpcState, time: number) {
+    const margin = 56;
+    const fromX = state.worldPosition.x;
+    const fromY = state.worldPosition.y;
+
+    for (let attempt = 0; attempt < CHIEF_NPC_TARGET_RETRIES; attempt += 1) {
+      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+      const distance = Phaser.Math.Between(
+        CHIEF_NPC_MIN_WANDER_DISTANCE,
+        CHIEF_NPC_MAX_WANDER_DISTANCE,
+      );
+      const target = new Phaser.Math.Vector2(
+        Phaser.Math.Clamp(
+          fromX + Math.cos(angle) * distance,
+          margin,
+          this.mapBounds.width - margin,
+        ),
+        Phaser.Math.Clamp(
+          fromY + Math.sin(angle) * distance,
+          margin,
+          this.mapBounds.height - margin,
+        ),
+      );
+      if (
+        !this.isWorldPointCoveredByHud(target.x, target.y) &&
+        this.isChiefPathAllowed(fromX, fromY, target.x, target.y)
+      ) {
+        state.target = target;
+        state.waitUntil = 0;
+        return;
+      }
+    }
+
+    state.target = null;
+    state.waitUntil = time + Phaser.Math.Between(900, 1800);
+  }
+
   private isWorldPointCoveredByHud(worldX: number, worldY: number) {
     const camera = this.cameras.main;
     const screenX = (worldX - camera.worldView.x) * camera.zoom;
@@ -833,6 +1037,20 @@ class VillageScene extends Phaser.Scene {
       return;
     }
     this.publishObjectHint({ ...this.activeObjectHint, visible: true });
+  }
+
+  private publishHoveredResidentHint() {
+    if (!this.hoveredResidentNpc) {
+      return;
+    }
+    const { state, label } = this.hoveredResidentNpc;
+    // NPC origin이 (0.5, 0.86)이므로 머리 위 약 38px 위에 힌트 표시
+    this.publishObjectHint({
+      label,
+      visible: true,
+      worldX: state.worldPosition.x,
+      worldY: state.worldPosition.y - 38,
+    });
   }
 
   private publishObjectHint({

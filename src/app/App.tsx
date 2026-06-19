@@ -761,6 +761,9 @@ export function App() {
           setLoginOpen(true);
         }}
         onLogout={() => void logoutSession()}
+        onMoveOut={(characterId) => {
+          setResidents((current) => current.filter((r) => r.id !== characterId));
+        }}
         onMyPageClose={() => setShowMyPage(false)}
         onNotice={showNotice}
         onReflectionClose={() => setReflectionOpen(false)}

@@ -1,7 +1,9 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
 import { apiClient } from "../../shared/api/client.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
+import { deleteCharacter } from "../character/api.js";
 import "./CharacterDetail.css";
 
 const CHIP_COLORS = [
@@ -50,10 +52,13 @@ type Props = {
   residentIdx: number;
   onClose: () => void;
   onShowToast: (msg: string) => void;
+  onMoveOut: (characterId: string) => void;
 };
 
-export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }: Props) {
+export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, onMoveOut }: Props) {
   const [detail, setDetail] = useState<CharacterDetailData | null>(null);
+  const [isBusy, setIsBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     setDetail(null);
@@ -65,6 +70,25 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
 
   const quests = detail?.active_quests ?? [];
   const backdrop = useBackdropDismiss(onClose);
+
+  async function handleMoveOut() {
+    setIsBusy(true);
+    setConfirmOpen(false);
+    try {
+      await deleteCharacter(resident.id);
+      onShowToast(`${resident.name}이(가) 몽글마을을 떠났어요.`);
+      onMoveOut(resident.id);
+      onClose();
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.error === "LAST_CHARACTER") {
+        onShowToast("마지막 주민은 이사 보낼 수 없어요.");
+      } else {
+        onShowToast("이사에 실패했어요. 잠시 후 다시 시도해 주세요.");
+      }
+    } finally {
+      setIsBusy(false);
+    }
+  }
 
   return (
     <div
@@ -197,7 +221,8 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
               <button
                 type="button"
                 className="mpRdMoveBtn"
-                onClick={() => onShowToast("이사 기능은 준비 중이에요")}
+                disabled={isBusy}
+                onClick={() => setConfirmOpen(true)}
               >
                 <img src="/assets/myPage/icon-truck.png" alt="" className="mpRdMoveBtnIcon" />
                 이사 보내기
@@ -206,6 +231,43 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
           </div>
         </div>
       </div>
+      {confirmOpen && (
+        <div
+          className="mpRdConfirmOverlay"
+          onClick={() => setConfirmOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setConfirmOpen(false);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="이사 확인"
+        >
+          <div
+            className="mpRdConfirmBox"
+            role="document"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <p className="mpRdConfirmMsg">
+              {resident.name}을(를) 이사 보낼까요?
+              <br />
+              <span className="mpRdConfirmSub">캐릭터와 함께한 피드는 그대로 남아요.</span>
+            </p>
+            <div className="mpRdConfirmBtns">
+              <button
+                type="button"
+                className="mpRdConfirmCancel"
+                onClick={() => setConfirmOpen(false)}
+              >
+                취소
+              </button>
+              <button type="button" className="mpRdConfirmOk" onClick={() => void handleMoveOut()}>
+                이사 보내기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

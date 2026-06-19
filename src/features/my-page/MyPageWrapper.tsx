@@ -19,9 +19,17 @@ type Props = {
   onClose: () => void;
   onLogout: () => void | Promise<void>;
   onNotice: (msg: string) => void;
+  onMoveOut: (characterId: string) => void;
 };
 
-export function MyPageWrapper({ fallbackUserName, residents, onClose, onLogout, onNotice }: Props) {
+export function MyPageWrapper({
+  fallbackUserName,
+  residents,
+  onClose,
+  onLogout,
+  onNotice,
+  onMoveOut,
+}: Props) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
@@ -90,6 +98,7 @@ export function MyPageWrapper({ fallbackUserName, residents, onClose, onLogout, 
       residents={residents}
       onClose={onClose}
       onWithdraw={handleWithdraw}
+      onMoveOut={onMoveOut}
       onUpdateProfile={handleUpdateProfile}
       onUpdatePassword={handleUpdatePassword}
     />

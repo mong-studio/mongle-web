@@ -82,10 +82,12 @@
     overflow-y: auto;
   }
   .calBodyMain {
+    /* biome-ignore lint/complexity/noImportantStyles: overrides inline flex set by React state */
     flex: 0 0 auto !important;
     height: 56vh;
   }
   .calBodySide {
+    /* biome-ignore lint/complexity/noImportantStyles: overrides inline flex set by React state */
     flex: 0 0 auto !important;
   }
   /* 헤더: 줄바꿈 허용, 가운데 정렬용 spacer 제거 */
