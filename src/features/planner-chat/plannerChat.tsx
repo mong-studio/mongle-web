@@ -5,9 +5,9 @@ import "./plannerChat.css";
 import type { TodoCommitResult } from "../todo/todoCreation.js";
 import {
   chatTodos,
-  commitPlannerTodos,
   groupPlannerDays,
   type PlannerDay,
+  savePlannerTodos,
   type TodoGenerateResult,
 } from "./plannerApi.js";
 
@@ -158,7 +158,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
 
     setIsBusy(true);
     try {
-      const result = await commitPlannerTodos({
+      const result = await savePlannerTodos({
         todos: generatedPlan.todos,
         calendar_events: generatedPlan.calendar_events,
       });

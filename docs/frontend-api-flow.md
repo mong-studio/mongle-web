@@ -71,7 +71,9 @@ export const apiClient = axios.create({
 | 동작 | 메서드 | 프론트 경로 | 실제 URL |
 | --- | --- | --- | --- |
 | 멀티턴 대화 | POST | `/todos/chat/` | `/api/v1/todos/chat/` |
-| 생성 플랜 확정 저장 | POST | `/todos/commit/` | `/api/v1/todos/commit/` |
+| 생성 플랜 확정 저장 | POST | `/todos/planner-confirm/` | `/api/v1/todos/planner-confirm/` |
+
+`/todos/planner-confirm/`은 플래너 챗봇에서 사용자가 `계획 저장`을 눌렀을 때 호출하는 로그인 사용자용 저장 API다. 요청에는 일반 인증 헤더만 사용하고, 백엔드는 현재 로그인 사용자를 기준으로 TODO와 일정을 저장한다. `/todos/commit/`은 AI 내부 commit 계약을 위해 남겨두며 브라우저에서 직접 호출하지 않는다.
 
 플래너 흐름:
 
@@ -79,13 +81,13 @@ export const apiClient = axios.create({
 2. 프론트가 `/todos/chat/`에 `{ message, thread_id }`를 보낸다.
 3. 응답이 `follow_up`이면 질문 말풍선을 추가하고 같은 `thread_id`로 대화를 이어간다.
 4. 응답이 `candidates`이면 `todos`와 `calendar_events`를 좌측 생성된 플랜 영역에 표시한다.
-5. 사용자가 `계획 저장`을 누르면 생성 결과 전체를 `/todos/commit/`으로 보낸다.
-6. commit 응답의 `todos`만 오늘의 할일 HUD에 반영하고, `calendar_events.length`는 일정 저장 개수로 전달한다.
+5. 사용자가 `계획 저장`을 누르면 생성 결과 전체를 `/todos/planner-confirm/`으로 보낸다.
+6. 저장 응답의 `todos`만 오늘의 할일 HUD에 반영하고, `calendar_events.length`는 일정 저장 개수로 전달한다.
 
 현재 payload 형태:
 
 ```ts
-type PlannerCommitPayload = {
+type PlannerSavePayload = {
   todos: { title: string; due_date: string; tags?: string[] }[];
   calendar_events: { title: string; due_date: string; tags?: string[] }[];
 };
@@ -106,7 +108,7 @@ type PlannerCommitPayload = {
 현재 구분:
 
 - 일반 TODO 생성 UI는 `/todos/generate/` 후 `/todos/confirm/`을 사용한다.
-- 플래너 챗봇 멀티턴 결과는 `/todos/chat/` 후 `/todos/commit/`을 사용한다.
+- 플래너 챗봇 멀티턴 결과는 `/todos/chat/` 후 로그인 사용자용 저장 API인 `/todos/planner-confirm/`을 사용한다.
 - LLM/퀘스트 없이 바로 저장하는 경우는 `/todos/`를 사용한다.
 
 ### Character
@@ -202,7 +204,8 @@ type PlannerCommitPayload = {
 
 ## 현재 플래너 관련 주의점
 
-- 프론트의 플래너 챗봇은 `/todos/chat/`과 `/todos/commit/`만 사용한다.
+- 프론트의 플래너 챗봇은 `/todos/chat/`과 `/todos/planner-confirm/`만 사용한다.
+- `/todos/commit/`은 AI 내부 commit API와 이름이 겹치므로 프론트에서 직접 호출하지 않는다.
 - 프론트 코드에 적힌 경로는 `/api/v1`을 제외한 상대 경로다.
-- 실제 호출 URL은 `apiClient.baseURL` 때문에 `/api/v1/todos/chat/`, `/api/v1/todos/commit/`이 된다.
+- 실제 호출 URL은 `apiClient.baseURL` 때문에 `/api/v1/todos/chat/`, `/api/v1/todos/planner-confirm/`이 된다.
 - `/todos/confirm/`은 아직 일반 TODO 싱글턴 확정 저장에서 사용 중이므로 바로 제거하면 안 된다.

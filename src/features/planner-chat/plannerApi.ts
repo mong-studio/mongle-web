@@ -42,12 +42,12 @@ export type PlannerDay = {
   }[];
 };
 
-type PlannerCommitPayload = {
+type PlannerSavePayload = {
   todos: PlannerTask[];
   calendar_events: PlannerTask[];
 };
 
-type PlannerCommitResponse = {
+type PlannerSaveResponse = {
   todos: {
     todo_id: string;
     content: string;
@@ -115,10 +115,8 @@ export async function chatTodos(payload: {
   return unwrapApiResult(data);
 }
 
-export async function commitPlannerTodos(
-  payload: PlannerCommitPayload,
-): Promise<PlannerCommitResponse> {
-  const { data } = await apiClient.post<PlannerCommitResponse>("/todos/commit/", payload);
+export async function savePlannerTodos(payload: PlannerSavePayload): Promise<PlannerSaveResponse> {
+  const { data } = await apiClient.post<PlannerSaveResponse>("/todos/planner-confirm/", payload);
   return data;
 }
 
