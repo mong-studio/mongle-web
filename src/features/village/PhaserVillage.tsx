@@ -259,6 +259,10 @@ class VillageScene extends Phaser.Scene {
       this.mapBounds.setTo(0, 0, map.width * map.tilewidth, map.height * map.tileheight);
       this.blockedWorldRects = [];
       this.addDecorationCollisionRects(map, tilesets);
+      await this.loadResidentTextures();
+      if (this.isDisposed()) {
+        return;
+      }
       this.addVillageActors(map);
       await this.createMinimapSnapshot(map, tilesets);
       if (this.isDisposed()) {
@@ -289,6 +293,33 @@ class VillageScene extends Phaser.Scene {
     return tilesets.sort((a, b) => a.firstgid - b.firstgid);
   }
 
+  private async loadResidentTextures(): Promise<void> {
+    await Promise.all(
+      this.residents
+        .filter((r) => r.avatarUrl)
+        .map(async (resident) => {
+          const key = `resident-npc-${resident.id}`;
+          if (this.textures.exists(key)) {
+            return;
+          }
+          try {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            await new Promise<void>((resolve, reject) => {
+              img.onload = () => resolve();
+              img.onerror = () => reject();
+              img.src = resident.avatarUrl ?? "";
+            });
+            if (!this.textures.exists(key)) {
+              this.textures.addImage(key, img);
+            }
+          } catch {
+            // 로드 실패 시 폴백 이미지 사용
+          }
+        }),
+    );
+  }
+
   private loadSpritesheets(tilesets: TilesetMeta[]) {
     return new Promise<void>((resolve) => {
       for (const tileset of tilesets) {
@@ -317,15 +348,6 @@ class VillageScene extends Phaser.Scene {
         const key = `resident-house-${color}`;
         if (!this.textures.exists(key)) {
           this.load.image(key, `/assets/objects/house_${color}.png`);
-        }
-      }
-
-      for (const resident of this.residents) {
-        if (resident.avatarUrl) {
-          const key = `resident-npc-${resident.id}`;
-          if (!this.textures.exists(key)) {
-            this.load.image(key, resident.avatarUrl);
-          }
         }
       }
 
@@ -513,21 +535,22 @@ class VillageScene extends Phaser.Scene {
 
       {
         const residentNpcKey = `resident-npc-${resident.id}`;
-        const npcKey = this.textures.exists(residentNpcKey) ? residentNpcKey : CHIEF_NPC_KEY;
-        const spawnX = hx + Phaser.Math.Between(-16, 16);
-        const spawnY = hy + Phaser.Math.Between(12, 28);
-        const npc = this.add
-          .image(spawnX, spawnY, npcKey)
-          .setOrigin(0.5, 0.86)
-          .setDisplaySize(44, 44)
-          .setDepth(spawnY);
-        this.residentNpcStates.push({
-          npc,
-          target: null,
-          velocity: new Phaser.Math.Vector2(0, 0),
-          worldPosition: new Phaser.Math.Vector2(spawnX, spawnY),
-          waitUntil: Phaser.Math.Between(0, 3000),
-        });
+        if (this.textures.exists(residentNpcKey)) {
+          const spawnX = hx + Phaser.Math.Between(-16, 16);
+          const spawnY = hy + Phaser.Math.Between(12, 28);
+          const npc = this.add
+            .image(spawnX, spawnY, residentNpcKey)
+            .setOrigin(0.5, 0.86)
+            .setDisplaySize(44, 44)
+            .setDepth(spawnY);
+          this.residentNpcStates.push({
+            npc,
+            target: null,
+            velocity: new Phaser.Math.Vector2(0, 0),
+            worldPosition: new Phaser.Math.Vector2(spawnX, spawnY),
+            waitUntil: Phaser.Math.Between(0, 3000),
+          });
+        }
       }
 
       residentHouseMarkers.push({
