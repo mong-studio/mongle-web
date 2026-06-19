@@ -720,12 +720,10 @@ export function App() {
         onReflectionClose={() => setReflectionOpen(false)}
         onResetPwClose={() => {
           setResetPwOpen(false);
-          setLoginOpen(true);
         }}
         onResetPwComplete={(notice) => {
           setResetPwOpen(false);
           showNotice(notice);
-          setLoginOpen(true);
         }}
         onResetPwOpen={() => {
           setLoginOpen(false);
@@ -734,7 +732,6 @@ export function App() {
         onRewardApples={rewardReflectionApples}
         onSignupClose={() => {
           setSignupOpen(false);
-          setLoginOpen(true);
         }}
         onSignupComplete={(notice) => {
           setSignupOpen(false);
