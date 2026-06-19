@@ -389,6 +389,48 @@ export function App() {
     void fetchResidents();
   }, [fetchResidents]);
 
+  // 로그인 직후 캐릭터가 하나도 없으면 캐릭터 생성 모달을 자동으로 띄운다.
+  const autoCharacterPromptRef = useRef(false);
+  useEffect(() => {
+    if (authStatus !== "authenticated") {
+      autoCharacterPromptRef.current = false;
+      return;
+    }
+    const otherOverlayOpen =
+      loginOpen ||
+      signupOpen ||
+      resetPwOpen ||
+      showMyPage ||
+      characterSetupOpen ||
+      calendarOpen ||
+      feedOpen ||
+      activeFeature !== null;
+    if (autoCharacterPromptRef.current || otherOverlayOpen) {
+      return;
+    }
+    autoCharacterPromptRef.current = true;
+    void (async () => {
+      try {
+        const items = await fetchCharacters();
+        if (!hasUserCreatedCharacter(items)) {
+          setActiveFeature("character");
+        }
+      } catch {
+        autoCharacterPromptRef.current = false;
+      }
+    })();
+  }, [
+    authStatus,
+    loginOpen,
+    signupOpen,
+    resetPwOpen,
+    showMyPage,
+    characterSetupOpen,
+    calendarOpen,
+    feedOpen,
+    activeFeature,
+  ]);
+
   const openFeature = useCallback(
     async (feature: FeatureId) => {
       if (feature === "character") {
