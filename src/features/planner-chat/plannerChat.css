@@ -1,121 +1,265 @@
 .plannerReplica {
-  width: min(780px, calc(100vw - 40px));
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  color: #5a371f;
+  color: var(--ui-brown);
   font-family: var(--font-tmoney-dungunbaram);
 }
 
+.plannerCloseButton {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: rgba(90, 50, 29, 0.55);
+  line-height: 1;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    transform 0.12s ease;
+}
+
+.plannerCloseButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.plannerCloseButton:hover {
+  background: #f0e4c4;
+  color: var(--ui-brown);
+}
+
+.plannerCloseButton:active {
+  transform: translateY(1px);
+}
+
 .plannerOuterFrame {
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-  border: 7px solid #8a6018;
-  outline: 3px solid #d4a840;
-  outline-offset: -11px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #edd8ab 0%, #e3c07b 100%);
-  box-shadow:
-    0 24px 64px rgba(50, 30, 5, 0.32),
-    0 6px 16px rgba(50, 30, 5, 0.18),
-    inset 0 0 0 2px rgba(255, 235, 150, 0.2);
-}
-
-.plannerHeroCard,
-.plannerChatCard,
-.plannerLedgerCard {
   position: relative;
-  border: 2px solid #e3b96c;
-  border-radius: 14px;
+  width: 100%;
+  min-width: 0;
+  height: 720px;
+  min-height: 0;
+  padding: 78px 20px 22px;
+  border: 3px solid #c99d5d;
+  border-radius: 34px;
   background:
-    radial-gradient(
-      circle at top,
-      rgba(255, 255, 255, 0.94),
-      rgba(255, 248, 228, 0.92) 54%,
-      rgba(252, 241, 210, 0.98)
-    ),
-    #fff8ea;
+    radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(135deg, #fffdf7 0%, var(--ui-paper) 52%, var(--ui-cream) 100%);
   box-shadow:
-    inset 0 0 18px rgba(219, 171, 84, 0.1),
-    0 4px 12px rgba(114, 76, 32, 0.05);
+    0 5px 0 rgba(159, 112, 53, 0.2),
+    0 16px 34px rgba(92, 58, 27, 0.24),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.86),
+    inset 0 0 0 10px rgba(255, 248, 232, 0.66),
+    inset 0 0 0 13px rgba(234, 209, 163, 0.34);
 }
 
-.plannerHeroCard {
-  min-height: 132px;
-  padding: 20px 84px 18px 24px;
+.plannerWoodTitle {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: min(520px, 56vw);
+  min-height: 48px;
+  padding: 0 72px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: translateX(-50%);
 }
 
-.plannerHeroCopy {
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-.plannerHeroKicker {
-  margin: 0 0 8px;
-  color: #a77733;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-align: center;
-}
-
-.plannerHeroCard h3 {
+.plannerWoodTitle h3 {
   margin: 0;
-  color: #52311c;
-  font-size: clamp(1.4rem, 2vw, 1.95rem);
-  line-height: 1.26;
+  color: var(--ui-brown);
+  font-size: 1.76rem;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.9),
+    0 3px 5px rgba(97, 63, 27, 0.2);
+  word-break: keep-all;
+}
+
+.plannerTitleFlower {
+  position: absolute;
+  width: 62px;
+  height: 56px;
+  background: url("/assets/icon/flower3.png") center / contain no-repeat;
+}
+
+.plannerTitleFlower.left {
+  left: 10px;
+}
+
+.plannerTitleFlower.right {
+  right: 10px;
+}
+
+.plannerBookGrid {
+  display: grid;
+  grid-template-columns: minmax(284px, 318px) minmax(0, 1fr);
+  gap: 12px;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.plannerProfileCard,
+.plannerChatCard {
+  min-width: 0;
+  border: 2px solid #e6c894;
+  border-radius: 24px;
+  background: rgba(255, 252, 244, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    inset 0 0 24px rgba(230, 193, 136, 0.08),
+    0 8px 18px rgba(92, 58, 27, 0.08);
+}
+
+.plannerProfileCard {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  align-content: start;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  padding: 12px 14px 14px;
+  overflow: hidden;
+}
+
+.plannerPortraitFrame {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  min-height: 230px;
+  overflow: hidden;
+  border: 2px solid var(--ui-line);
+  border-radius: 24px;
+  background: var(--ui-cream-2);
+}
+
+.plannerPortraitFrame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 52%, rgba(255, 235, 194, 0.54));
+}
+
+.plannerPortraitBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.72;
+}
+
+.plannerPortraitChief {
+  position: relative;
+  z-index: 1;
+  width: min(82%, 240px);
+  max-height: 210px;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 14px rgba(88, 59, 33, 0.2));
+}
+
+.plannerNamePlate {
+  position: absolute;
+  right: 50%;
+  bottom: -1px;
+  z-index: 2;
+  min-width: 164px;
+  padding: 10px 20px 9px;
+  border: 2px solid var(--ui-line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--ui-paper), var(--ui-cream-2));
+  color: var(--ui-brown);
+  font-size: 1.18rem;
+  text-align: center;
+  transform: translateX(50%);
+  box-shadow: 0 5px 10px rgba(115, 73, 31, 0.12);
+}
+
+.plannerProfileText {
+  margin: 0;
+  color: var(--ui-brown);
+  font-size: 0.9rem;
+  line-height: 1.55;
   text-align: center;
   word-break: keep-all;
-  font-weight: 800;
 }
 
-.plannerHeroLead {
-  margin: 12px 0 0;
-  color: #6a472d;
-  font-size: 0.76rem;
-  line-height: 1.6;
+.plannerProfilePlan {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  align-content: start;
+  height: auto;
+  min-height: 0;
+  margin-top: 0;
+  padding: 14px;
+  overflow: hidden;
+  border: 2px solid var(--ui-line-soft);
+  border-radius: 16px;
+  background: rgba(255, 250, 240, 0.72);
+}
+
+.plannerProfilePlan > strong {
+  color: var(--ui-brown);
+  font-size: 0.98rem;
   text-align: center;
 }
 
-.bookmarkFlag {
-  position: absolute;
-  top: 0;
-  right: 44px;
-  width: 30px;
-  height: 90px;
-  background: linear-gradient(180deg, #d63c22, #b72217);
-  clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 58%, 0 75%);
-  box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.18);
-}
-
-.bookmarkFlag::after {
-  display: none;
+.plannerProfilePlan > p {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  margin: 0;
+  color: var(--ui-brown-soft);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  text-align: center;
+  word-break: keep-all;
 }
 
 .plannerChatCard {
-  padding: 16px 18px 14px;
-}
-
-.plannerSectionHeading {
-  margin-bottom: 10px;
-  color: #7a5028;
-  font-size: 0.84rem;
-  font-weight: 800;
-  text-align: center;
+  display: grid;
+  grid-template-rows: minmax(320px, 1fr) auto auto;
+  gap: 14px;
+  overflow: visible;
+  min-height: 614px;
+  padding: 22px 18px 18px;
 }
 
 .plannerConversation {
   display: grid;
-  gap: 12px;
-  min-height: 212px;
-  max-height: 250px;
-  padding: 2px 0 8px;
-  overflow: auto;
+  align-content: start;
+  gap: 24px;
+  min-width: 0;
+  min-height: 430px;
+  max-height: 430px;
+  padding: 0 12px 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .plannerMessageRow {
   display: flex;
-  align-items: flex-end;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .plannerMessageRow.isUser {
@@ -123,168 +267,179 @@
 }
 
 .plannerChiefAvatarWrap {
-  flex: 0 0 54px;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border: 2px solid var(--ui-line);
+  border-radius: 999px;
+  background: var(--ui-cream-2);
+  box-shadow: 0 4px 10px var(--ui-shadow-soft);
 }
 
 .plannerChiefAvatar {
   display: block;
-  width: 54px;
-  height: 54px;
   object-fit: cover;
-  border: 2px solid #e2b76b;
-  border-radius: 999px;
-  background: #fff6df;
-  box-shadow: 0 4px 12px rgba(143, 100, 53, 0.1);
+}
+
+.plannerChiefAvatar {
+  width: 100%;
+  height: 100%;
+  transform: scale(1.42) translateY(12px);
+}
+
+.plannerMessageStack {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  max-width: min(68%, 480px);
+}
+
+.plannerMessageRow.isChief .plannerMessageStack {
+  max-width: min(78%, 680px);
+}
+
+.plannerMessageStack > strong {
+  color: var(--ui-brown);
+  font-size: 0.96rem;
+}
+
+.plannerMessageStack time {
+  color: rgba(90, 50, 29, 0.48);
+  font-size: 0.75rem;
+}
+
+.plannerMessageRow.isUser .plannerMessageStack {
+  justify-items: end;
+  max-width: min(72%, 560px);
 }
 
 .plannerSpeech {
   position: relative;
-  max-width: 70%;
-  padding: 11px 14px;
-  border: 1.5px solid rgba(216, 192, 136, 0.92);
-  border-radius: 16px;
-  box-shadow: 0 3px 10px rgba(150, 104, 48, 0.06);
+  max-width: 100%;
+  padding: 12px 18px;
+  border: 2px solid #e7c995;
+  border-radius: 18px;
+  box-shadow: 0 4px 10px rgba(92, 58, 27, 0.08);
 }
 
 .plannerSpeech p {
   margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.6;
+  color: var(--ui-brown);
+  font-size: 0.92rem;
+  line-height: 1.58;
+  overflow-wrap: anywhere;
   word-break: keep-all;
 }
 
 .plannerSpeech.fromChief {
-  background: linear-gradient(180deg, #fffef9, #fff8ea);
+  background: rgba(255, 250, 240, 0.96);
 }
 
-.plannerSpeech.fromChief::before {
-  content: "";
-  position: absolute;
-  left: -10px;
-  bottom: 16px;
-  width: 12px;
-  height: 14px;
-  border-left: 1.5px solid rgba(216, 192, 136, 0.92);
-  border-bottom: 1.5px solid rgba(216, 192, 136, 0.92);
-  border-bottom-left-radius: 10px;
-  background: #fffdf5;
-  transform: skewX(-26deg);
+.plannerSpeech.isLoading {
+  min-width: 78px;
+  padding-block: 14px;
 }
 
 .plannerSpeech.fromUser {
-  background: linear-gradient(180deg, #fff6da, #ffefbe);
-}
-
-.plannerSpeech.fromUser::after {
-  content: "";
-  position: absolute;
-  right: -10px;
-  bottom: 16px;
-  width: 12px;
-  height: 14px;
-  border-right: 1.5px solid rgba(216, 192, 136, 0.92);
-  border-bottom: 1.5px solid rgba(216, 192, 136, 0.92);
-  border-bottom-right-radius: 10px;
-  background: #fff0c3;
-  transform: skewX(26deg);
-}
-
-.plannerReplicaComposer {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 108px;
-  gap: 10px;
-  align-items: center;
-  margin-top: 8px;
-}
-
-.plannerReplicaComposer input {
-  min-height: 48px;
-  padding: 0 16px;
-  border: 1.5px solid #d8c088;
-  border-radius: 14px;
-  background: rgba(255, 255, 253, 0.95);
-  color: #5e3b22;
-  font-size: 0.82rem;
+  border-color: #7d9348;
+  background: linear-gradient(180deg, #a8bf68, #94ad55);
   box-shadow:
-    inset 0 0 0 2px rgba(255, 244, 220, 0.42),
-    0 3px 10px rgba(148, 102, 43, 0.05);
+    inset 0 2px 0 rgba(255, 255, 255, 0.18),
+    0 4px 8px rgba(92, 58, 27, 0.08);
 }
 
-.plannerReplicaComposer input::placeholder {
-  color: #a17a55;
+.plannerSpeech.fromUser p {
+  color: #fffef7;
 }
 
-.plannerSendButton,
+.plannerTypingDots {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 18px;
+}
+
+.plannerTypingDots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(90, 50, 29, 0.42);
+  animation: plannerTypingDot 1s ease-in-out infinite;
+}
+
+.plannerTypingDots span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.plannerTypingDots span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+.plannerLedgerActions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
 .plannerPrimaryAction,
-.plannerSecondaryAction {
-  min-height: 46px;
-  border-radius: 14px;
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.plannerSendButton,
-.plannerPrimaryAction {
-  border: 2px solid #7d4c1f;
-  background: linear-gradient(180deg, #ae7741, #88541f);
-  color: #fff6df;
-  box-shadow: 0 4px 10px rgba(127, 78, 32, 0.12);
-}
-
-.plannerSecondaryAction {
-  border: 1.5px solid #d6b367;
-  background: linear-gradient(180deg, #fff8e5, #fff0ca);
-  color: #8a5b24;
-}
-
-.plannerSendButton:disabled,
-.plannerPrimaryAction:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.plannerLedgerCard {
-  padding: 16px 18px 14px;
-}
-
-.plannerLedgerMeta {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.plannerSecondaryAction,
+.plannerSendButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 12px;
-  border: 1.5px solid rgba(216, 192, 136, 0.9);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255, 249, 232, 0.96), rgba(255, 241, 204, 0.96));
+  min-height: 48px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 900;
+  white-space: nowrap;
+  transition:
+    background 0.14s ease,
+    border-color 0.14s ease,
+    box-shadow 0.14s ease,
+    color 0.14s ease,
+    transform 0.14s ease;
 }
 
-.plannerLedgerMeta span {
-  color: #7e552d;
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-align: center;
+.plannerLedgerActions svg,
+.plannerSendButton svg {
+  width: 21px;
+  height: 21px;
 }
 
 .plannerLedgerDays {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+}
+
+.plannerProfilePlan .plannerLedgerDays {
+  grid-template-columns: 1fr;
+  min-height: 0;
+  max-height: 100%;
+  padding-right: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(117, 143, 62, 0.45) transparent;
 }
 
 .plannerLedgerDayCard {
-  min-height: 132px;
-  padding: 12px 12px 10px;
-  border: 1.5px solid rgba(216, 192, 136, 0.92);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255, 254, 249, 0.98), rgba(255, 245, 220, 0.96));
+  min-height: 118px;
+  padding: 12px;
+  border: 2px solid var(--ui-line-soft);
+  border-radius: 16px;
+  background: rgba(255, 250, 240, 0.74);
 }
 
 .plannerLedgerDayCard strong {
   display: block;
-  margin-bottom: 10px;
-  color: #6b4424;
-  font-size: 0.74rem;
-  text-align: center;
+  margin-bottom: 9px;
+  color: var(--ui-brown);
+  font-size: 0.76rem;
 }
 
 .plannerLedgerDayCard ul {
@@ -297,171 +452,294 @@
 
 .plannerLedgerDayCard li {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #57341c;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
 }
 
 .plannerLedgerDayCard li b {
-  font-size: 0.74rem;
+  overflow: hidden;
+  color: var(--ui-brown);
+  font-size: 0.72rem;
   line-height: 1.35;
-  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .plannerTodoDot {
-  flex: 0 0 16px;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid #d9ab54;
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
   border-radius: 999px;
-  background: #fffef9;
+  background: var(--ui-green);
 }
 
-.plannerMoreTasks {
-  margin: 10px 0 0;
-  color: #ab7d49;
-  font-size: 0.66rem;
-  text-align: right;
-}
-
-.plannerLedgerEmpty {
-  min-height: 110px;
-  margin-top: 12px;
+.plannerReplicaComposer {
   display: grid;
-  place-items: center;
-  border: 1.5px dashed rgba(168, 136, 64, 0.86);
-  border-radius: 14px;
-  background: rgba(255, 250, 238, 0.78);
-  color: #8f673b;
-  text-align: center;
-}
-
-.plannerLedgerEmpty p {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.55;
-}
-
-.plannerLedgerFooter {
-  display: grid;
+  grid-template-columns: minmax(0, 1fr) 136px;
   gap: 12px;
-  margin-top: 14px;
+  align-items: end;
 }
 
-.plannerLedgerFooter p {
-  margin: 0;
-  padding: 10px 12px;
-  border: 1.5px solid rgba(216, 192, 136, 0.9);
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255, 250, 234, 0.96), rgba(255, 244, 211, 0.96));
-  color: #866033;
-  font-size: 0.72rem;
-  text-align: center;
+.plannerReplicaComposer textarea {
+  display: block;
+  width: 100%;
+  min-height: 54px;
+  max-height: 92px;
+  padding: 13px 22px;
+  border: 2px solid #8fa64f;
+  border-radius: 27px;
+  background: rgba(255, 252, 246, 0.96);
+  color: var(--ui-brown);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.45;
+  outline: none;
+  resize: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(117, 143, 62, 0.45) transparent;
 }
 
-.plannerLedgerActions {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
+.plannerReplicaComposer textarea::placeholder {
+  color: rgba(90, 50, 29, 0.48);
 }
 
-@media (max-width: 900px) {
-  .plannerReplica {
-    width: min(100%, calc(100vw - 24px));
+.plannerReplicaComposer textarea:focus {
+  border-color: var(--ui-green);
+  box-shadow: 0 0 0 4px rgba(148, 173, 85, 0.18);
+}
+
+.plannerSendButton,
+.plannerPrimaryAction {
+  border: 2px solid var(--ui-green-dark);
+  background: linear-gradient(180deg, #a6bb63, var(--ui-green-dark));
+  color: #fffdf4;
+  box-shadow: 0 9px 16px rgba(74, 92, 36, 0.18);
+}
+
+.plannerReplicaComposer .plannerSendButton {
+  align-self: end;
+  min-height: 54px;
+  height: 54px;
+  padding: 0 20px;
+  border: 3px solid #6f8f33;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #a8bf68 0%, #93ab50 100%);
+  color: #fffdf4;
+  font-size: 1rem;
+  text-shadow: 0 2px 0 rgba(70, 86, 35, 0.28);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.18),
+    0 3px 0 #6f8f33,
+    0 5px 8px rgba(92, 58, 27, 0.16);
+}
+
+.plannerSendButton:hover:not(:disabled),
+.plannerPrimaryAction:hover:not(:disabled) {
+  background: linear-gradient(180deg, #b3c976, #86a045);
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 0 #657c33,
+    0 11px 18px rgba(74, 92, 36, 0.2);
+}
+
+.plannerReplicaComposer .plannerSendButton:hover:not(:disabled) {
+  border-color: #5f7f28;
+  background: linear-gradient(180deg, #b3c976 0%, #87a147 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.22),
+    0 4px 0 #5f7f28,
+    0 7px 10px rgba(92, 58, 27, 0.18);
+}
+
+.plannerSendButton:active:not(:disabled),
+.plannerPrimaryAction:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 #657c33,
+    0 5px 8px rgba(74, 92, 36, 0.16);
+}
+
+.plannerReplicaComposer .plannerSendButton:active:not(:disabled) {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.14),
+    0 2px 0 #5f7f28,
+    0 4px 6px rgba(92, 58, 27, 0.16);
+}
+
+.plannerReplicaComposer .plannerSendButton svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 1px 0 rgba(70, 86, 35, 0.3));
+}
+
+.plannerSecondaryAction {
+  border: 2px solid var(--ui-line-soft);
+  background: rgba(255, 250, 240, 0.88);
+  color: var(--ui-brown);
+}
+
+.plannerSecondaryAction:hover:not(:disabled) {
+  border-color: #d8ae72;
+  background: #fff3cf;
+  color: #5a321d;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 10px rgba(92, 58, 27, 0.1);
+}
+
+.plannerSecondaryAction:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(92, 58, 27, 0.08);
+}
+
+.plannerSendButton:disabled,
+.plannerPrimaryAction:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@keyframes plannerTypingDot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
   }
 
+  40% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 980px) {
   .plannerOuterFrame {
-    padding: 10px;
-    outline-offset: -9px;
+    min-height: 0;
+    padding: 82px 20px 24px;
   }
 
-  .plannerHeroCard {
-    padding: 18px 64px 16px 18px;
-  }
-
-  .plannerLedgerMeta,
-  .plannerLedgerDays {
+  .plannerBookGrid {
     grid-template-columns: 1fr;
   }
+
+  .plannerProfileCard {
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .plannerPortraitFrame {
+    min-height: 300px;
+  }
+
+  .plannerProfilePlan {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .plannerReplica {
-    width: min(100%, calc(100vw - 14px));
+    width: min(100%, calc(100vw - 16px));
   }
 
   .plannerOuterFrame {
-    gap: 10px;
-    padding: 8px;
-    border-radius: 14px;
-    outline: 2px solid #d4a840;
-    outline-offset: -8px;
+    padding: 78px 12px 16px;
+    border-radius: 24px;
   }
 
-  .plannerHeroCard,
-  .plannerChatCard,
-  .plannerLedgerCard {
-    border-radius: 12px;
+  .plannerWoodTitle {
+    width: min(320px, 82vw);
+    min-height: 46px;
+    padding: 0 52px;
   }
 
-  .plannerHeroCard {
-    min-height: auto;
-    padding: 24px 18px 22px;
+  .plannerWoodTitle h3 {
+    font-size: 1.18rem;
   }
 
-  .bookmarkFlag {
-    display: none;
+  .plannerTitleFlower {
+    width: 58px;
+    height: 54px;
   }
 
-  .plannerHeroKicker {
-    font-size: 0.82rem;
+  .plannerTitleFlower.left {
+    left: 2px;
   }
 
-  .plannerHeroCard h3 {
-    font-size: 1.34rem;
+  .plannerTitleFlower.right {
+    right: 2px;
   }
 
-  .plannerHeroLead {
-    font-size: 0.74rem;
+  .plannerProfileCard,
+  .plannerChatCard {
+    border-radius: 22px;
   }
 
-  .plannerChatCard,
-  .plannerLedgerCard {
-    padding: 18px;
+  .plannerProfileCard {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .plannerPortraitFrame {
+    min-height: 260px;
+    border-radius: 30px;
+  }
+
+  .plannerProfileText {
+    font-size: 0.88rem;
+  }
+
+  .plannerProfilePlan {
+    height: 280px;
+  }
+
+  .plannerChatCard {
+    padding: 16px 12px;
   }
 
   .plannerConversation {
-    min-height: 180px;
-    max-height: 220px;
+    max-height: 320px;
+    padding-inline: 12px;
   }
 
   .plannerChiefAvatarWrap {
     flex-basis: 46px;
-  }
-
-  .plannerChiefAvatar {
     width: 46px;
     height: 46px;
   }
 
+  .plannerMessageStack {
+    max-width: calc(100% - 58px);
+  }
+
+  .plannerMessageRow.isUser .plannerMessageStack {
+    max-width: calc(100% - 22px);
+  }
+
   .plannerSpeech {
-    max-width: calc(100% - 24px);
-    padding: 10px 12px;
+    padding: 12px 14px;
   }
 
   .plannerSpeech p {
-    font-size: 0.76rem;
+    font-size: 0.84rem;
   }
 
-  .plannerReplicaComposer,
-  .plannerLedgerActions {
+  .plannerLedgerDays,
+  .plannerReplicaComposer {
     grid-template-columns: 1fr;
   }
 
-  .plannerReplicaComposer input,
-  .plannerSendButton,
+  .plannerLedgerActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .plannerPrimaryAction,
-  .plannerSecondaryAction {
-    min-height: 44px;
+  .plannerSecondaryAction,
+  .plannerSendButton {
+    min-height: 46px;
   }
 }
