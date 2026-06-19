@@ -5,6 +5,7 @@ import {
   TodoCreation,
   type TodoItem,
 } from "../../features/todo/todoCreation.js";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { FEATURES, type FeatureId } from "../featureRegistry.js";
 import type { Resident } from "../model/appTypes.js";
 
@@ -58,22 +59,14 @@ export function FeatureModalHost({
   onToggleKeyword,
 }: FeatureModalHostProps) {
   const active = activeFeature ? FEATURES[activeFeature] : null;
+  const backdrop = useBackdropDismiss(onClose);
 
   if (!activeFeature || !active) {
     return null;
   }
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-    <div
-      className="modalBackdrop"
-      role="presentation"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
+    <div className="modalBackdrop" role="presentation" {...backdrop}>
       <section
         className={`featureModal${activeFeature === "character" ? " characterModal" : ""}${activeFeature === "planner" ? " plannerModalShell" : ""}${activeFeature === "todo" ? " todoModalShell" : ""}`}
         role="dialog"

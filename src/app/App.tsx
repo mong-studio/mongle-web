@@ -319,10 +319,16 @@ export function App() {
   );
 
   const openVillageDialogue = useCallback(() => {
-    if (!overlayOpenRef.current) {
-      void guardFeatureAccess(() => setDialogueOpen(true));
+    if (overlayOpenRef.current) {
+      return;
     }
-  }, [guardFeatureAccess]);
+    if (authStatus !== "authenticated") {
+      showNotice("로그인이 필요해요.");
+      setLoginOpen(true);
+      return;
+    }
+    setDialogueOpen(true);
+  }, [authStatus, showNotice]);
 
   const openVillageBoard = useCallback(() => {
     if (!overlayOpenRef.current) {
@@ -480,9 +486,7 @@ export function App() {
         event.data?.type === "MONGLE_CHIEF_CLICKED" ||
         event.data?.type === "MONGLE_CHIEF_HOUSE_CLICKED"
       ) {
-        if (!overlayOpenRef.current) {
-          void guardFeatureAccess(() => setDialogueOpen(true));
-        }
+        openVillageDialogue();
       }
 
       if (event.data?.type === "MONGLE_FEATURE_SELECTED") {
@@ -495,7 +499,7 @@ export function App() {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [guardFeatureAccess, openFeature]);
+  }, [openVillageDialogue, openFeature]);
 
   function toggleKeywordCategory(keyword: string) {
     setSelectedKeywordCategories((current) => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
 import { apiClient } from "../../shared/api/client.js";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import "./CharacterDetail.css";
 
 const CHIP_COLORS = [
@@ -63,11 +64,12 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast }:
   }, [resident.id]);
 
   const quests = detail?.active_quests ?? [];
+  const backdrop = useBackdropDismiss(onClose);
 
   return (
     <div
       className="mpRdBg"
-      onClick={onClose}
+      {...backdrop}
       onKeyDown={(e) => {
         if (e.key === "Escape") onClose();
       }}

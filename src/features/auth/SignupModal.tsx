@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import {
   confirmEmailVerification,
   requestEmailVerification,
@@ -235,19 +236,14 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
     }
   }
 
+  const backdrop = useBackdropDismiss(onClose);
+
   if (!open) return null;
 
   return (
     <>
       {
-        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-        <div
-          className="modalBackdrop suBackdrop"
-          role="presentation"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) onClose();
-          }}
-        >
+        <div className="modalBackdrop suBackdrop" role="presentation" {...backdrop}>
           <section
             className="suModal"
             role="dialog"

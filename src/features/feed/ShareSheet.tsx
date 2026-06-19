@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState } from "react";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import type { ThemeTokens } from "./feedData.js";
 import {
   type SharePayload,
@@ -107,10 +108,10 @@ export function ShareSheet({ th, share, onClose }: ShareSheetProps) {
     }
   }
 
+  const backdrop = useBackdropDismiss(onClose);
+
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: sheet backdrop click-to-dismiss
-    // biome-ignore lint/a11y/useKeyWithClickEvents: sheet backdrop click-to-dismiss
-    <div className="share-backdrop" onClick={onClose}>
+    <div className="share-backdrop" {...backdrop}>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation only */}
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation only */}
       <div

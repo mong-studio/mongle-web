@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import "./LoginModal.css";
 import { toUserMessage } from "./api.js";
 import { type AuthState, useAuthStore } from "./store.js";
@@ -29,6 +30,8 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
   }, [open]);
 
   useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  const backdrop = useBackdropDismiss(onClose);
 
   if (!open) return null;
 
@@ -96,8 +99,7 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
   );
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-    <div className="lgBackdrop" role="presentation" onClick={onClose}>
+    <div className="lgBackdrop" role="presentation" {...backdrop}>
       <div
         className="lgCard"
         role="dialog"

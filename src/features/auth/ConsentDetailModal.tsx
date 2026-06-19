@@ -1,3 +1,4 @@
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import "./ConsentDetailModal.css";
 import "./SignupModal.css";
 
@@ -60,11 +61,12 @@ type Props = {
 };
 
 export function ConsentDetailModal({ open, onClose, detail }: Props) {
+  const backdrop = useBackdropDismiss(onClose);
+
   if (!open) return null;
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss
-    <div className="cdmBackdrop" role="presentation" onClick={onClose}>
+    <div className="cdmBackdrop" role="presentation" {...backdrop}>
       <section
         className="cdmModal"
         role="dialog"

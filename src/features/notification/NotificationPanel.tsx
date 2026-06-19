@@ -19,6 +19,7 @@
  *   <NotificationPanel open={notificationOpen} onClose={() => setNotificationOpen(false)} />
  */
 
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { useNotificationStore } from "./store.js";
 import type { NotificationToastItem } from "./types.js";
 import "./notification.css";
@@ -49,6 +50,8 @@ function relativeTime(createdAt: number) {
 
 /** 알림 패널 루트 컴포넌트 */
 export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
+  const backdrop = useBackdropDismiss(onClose);
+
   // open=false 면 렌더링 자체를 하지 않음
   if (!open) return null;
 
@@ -58,7 +61,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
     // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss
     <div
       style={{ position: "fixed", inset: 0, zIndex: 39 }}
-      onClick={onClose}
+      {...backdrop}
       onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
       {/* 패널 카드 — 클릭이 배경 딤으로 전파되지 않게 stopPropagation */}
