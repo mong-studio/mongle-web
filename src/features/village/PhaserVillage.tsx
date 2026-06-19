@@ -205,6 +205,7 @@ class VillageScene extends Phaser.Scene {
   private chiefWorldPosition = new Phaser.Math.Vector2(0, 0);
   private chiefWaitUntil = 0;
   private residentNpcStates: ResidentNpcState[] = [];
+  private hoveredResidentNpc: { state: ResidentNpcState; label: string } | null = null;
   private lastObjectHintSignature = "";
   private lastMinimapSignature = "";
   private mapBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
@@ -236,6 +237,7 @@ class VillageScene extends Phaser.Scene {
     this.updateResidentNpcs(time, delta);
     this.publishMinimapStateIfChanged();
     this.publishActiveObjectHint();
+    this.publishHoveredResidentHint();
   }
 
   private async buildVillage() {
@@ -542,13 +544,29 @@ class VillageScene extends Phaser.Scene {
             .image(spawnX, spawnY, residentNpcKey)
             .setOrigin(0.5, 0.86)
             .setDisplaySize(44, 44)
-            .setDepth(spawnY);
-          this.residentNpcStates.push({
+            .setDepth(spawnY)
+            .setInteractive();
+          const npcState: ResidentNpcState = {
             npc,
             target: null,
             velocity: new Phaser.Math.Vector2(0, 0),
             worldPosition: new Phaser.Math.Vector2(spawnX, spawnY),
             waitUntil: Phaser.Math.Between(0, 3000),
+          };
+          this.residentNpcStates.push(npcState);
+          npc.on("pointerover", () => {
+            this.hoveredResidentNpc = { state: npcState, label: resident.name };
+          });
+          npc.on("pointerout", () => {
+            if (this.hoveredResidentNpc?.state === npcState) {
+              this.hoveredResidentNpc = null;
+              this.publishObjectHint({
+                label: resident.name,
+                visible: false,
+                worldX: npcState.worldPosition.x,
+                worldY: npcState.worldPosition.y,
+              });
+            }
           });
         }
       }
@@ -1007,6 +1025,20 @@ class VillageScene extends Phaser.Scene {
       return;
     }
     this.publishObjectHint({ ...this.activeObjectHint, visible: true });
+  }
+
+  private publishHoveredResidentHint() {
+    if (!this.hoveredResidentNpc) {
+      return;
+    }
+    const { state, label } = this.hoveredResidentNpc;
+    // NPC origin이 (0.5, 0.86)이므로 머리 위 약 38px 위에 힌트 표시
+    this.publishObjectHint({
+      label,
+      visible: true,
+      worldX: state.worldPosition.x,
+      worldY: state.worldPosition.y - 38,
+    });
   }
 
   private publishObjectHint({

@@ -50,11 +50,9 @@
 @keyframes mpPageIn {
   from {
     opacity: 0;
-    transform: translateY(18px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
@@ -96,7 +94,6 @@
   flex-direction: column;
   font-family: var(--font-tmoney-dungunbaram);
   background: linear-gradient(160deg, #ead8a8 0%, #f5e8c8 45%, #faf1d8 100%);
-  background-attachment: fixed;
   color: var(--mp-ink);
   animation: mpPageIn 0.32s ease-out both;
 }
@@ -202,9 +199,10 @@
 }
 
 .mpTokenChip {
-  min-height: 48px;
-  min-width: 160px;
-  padding: 0 10px 0 18px;
+  height: 58px;
+  min-height: 58px;
+  min-width: 100px;
+  padding: 0 12px 0 10px;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -218,11 +216,12 @@
     0 8px 8px rgba(23, 22, 16, 0.22);
   color: #633b23;
   font-weight: 950;
+  text-shadow: none;
 }
 
 .mpTokenIcon {
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -249,7 +248,7 @@
 
 .mpTokenCount {
   min-width: 32px;
-  font-size: 1.08rem;
+  font-size: 1.18rem;
   text-align: center;
 }
 
