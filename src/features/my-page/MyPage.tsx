@@ -134,9 +134,6 @@ export function MyPageModal({
                 aria-hidden="true"
               />
               <b className="mpTokenCount">{tokenBalance}</b>
-              <span className="mpTokenPlus" aria-hidden="true">
-                +
-              </span>
             </div>
           </div>
         </header>

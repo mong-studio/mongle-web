@@ -192,6 +192,19 @@ export function App() {
   }, [notice]);
 
   useEffect(() => {
+    if (authStatus !== "authenticated") {
+      setApples(0);
+      return;
+    }
+    apiClient
+      .get<{ token_balance: number }>("/auth/me/")
+      .then((res) => {
+        setApples(res.data.token_balance);
+      })
+      .catch(() => {});
+  }, [authStatus]);
+
+  useEffect(() => {
     if (authStatus !== "authenticated" || !authUserId) {
       setTodos([]);
       return;
