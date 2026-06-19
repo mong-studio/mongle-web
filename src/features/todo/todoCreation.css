@@ -1,49 +1,47 @@
 /* ============================================================
-   TODO 만들기 — Design v1
+   오늘의 마을 게시판 — TODO 만들기 (board design)
+   몽글마을 공용 토큰(cream / honey-primary / go-green / accent)에 맞춤.
    ============================================================ */
 
 .tdRoot {
-  --td-modal: #fcf4df;
-  --td-panel: #fffdf6;
-  --td-field: #fbf4e0;
-  --td-field-br: #e7d7ac;
-  --td-border: #ead8ac;
-  --td-border-strong: #d9be84;
-  --td-ink: #6e5c44;
-  --td-ink-soft: #9a876a;
-  --td-ink-faint: #bcaa88;
-  --td-num: #7a5a38;
-  --td-divider: #ecddb8;
-  --td-accent: #e89a6c;
-  --td-green: #93c56a;
-  --td-green-dk: #6fa347;
+  /* 공용 팔레트(캐릭터 모달과 동일 계열). 다른 feature 토큰을 직접 참조하지 않고 같은 값으로 복제. */
+  --bd-bg: #fbf3de;
+  --bd-panel: #fffdf6;
+  --bd-card: #fbefcf;
+  --bd-field: #fffdf7;
+  --bd-border: #ead8ac;
+  --bd-border-strong: #d9be84;
+  --bd-ink: #6e5c44;
+  --bd-ink-soft: #9a876a;
+  --bd-ink-faint: #bcaa88;
+  --bd-divider: #ecddb8;
+
+  --bd-primary: #f6c84c;
+  --bd-primary-dk: #e0a52a;
+  --bd-primary-ink: #7a5a18;
+  --bd-go: #93cd6e;
+  --bd-go-dk: #6fa84e;
+  --bd-go-ink: #3f6b2c;
+  --bd-accent: #ee9b36;
+  --bd-accent-deep: #ce7c1e;
+  --bd-accent-soft: #fbe6c7;
+  --bd-accent-tint: #fdf1dc;
 
   display: flex;
-  gap: 22px;
   align-items: flex-start;
   justify-content: center;
-  padding: 24px 20px;
+  padding: 20px 16px;
   min-height: 100%;
   box-sizing: border-box;
   font-family: var(--font-tmoney-dungunbaram);
-  color: var(--td-ink);
+  color: var(--bd-ink);
 }
 
 /* ── Animations ── */
-@keyframes tdFloaty {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
 @keyframes tdTwinkle {
   0%,
   100% {
-    opacity: 0.4;
+    opacity: 0.45;
     transform: scale(0.85);
   }
   50% {
@@ -54,7 +52,18 @@
 
 @keyframes tdModalIn {
   0% {
-    transform: scale(0.96) translateY(12px);
+    transform: scale(0.96) translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes tdPageIn {
+  0% {
+    transform: translateX(36px) scale(0.98);
     opacity: 0;
   }
   100% {
@@ -94,463 +103,647 @@
   }
 }
 
-/* ── Panels ── */
-.tdPanel {
-  background: var(--td-modal);
-  border: 3px solid var(--td-border-strong);
-  border-radius: 28px;
-  box-shadow: 0 28px 64px -24px rgba(80, 58, 26, 0.6);
-  animation: tdModalIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
-  padding: 24px 26px 26px;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-.tdSingle {
+/* ── Panel ── */
+.boardPanel {
   position: relative;
-  width: 600px;
-  max-width: min(600px, 90vw);
-  max-height: calc(100dvh - 72px);
-  overflow: hidden;
-}
-
-.tdCloseBtn {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  width: 30px;
-  height: 30px;
-  border: none;
-  background: transparent;
-  color: var(--td-ink-faint);
-  font-size: 17px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition:
-    color 0.12s,
-    background 0.12s;
-  padding: 0;
-  z-index: 1;
-}
-
-.tdCloseBtn:hover {
-  color: var(--td-ink);
-  background: var(--td-field);
-}
-
-.tdSection--grow {
-  flex: 1;
-  min-height: 0;
+  width: min(960px, 100%);
+  max-height: calc(100dvh - 36px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-
-@keyframes tdPageIn {
-  0% {
-    transform: translateX(40px) scale(0.98);
-    opacity: 0;
-  }
-  100% {
-    transform: none;
-    opacity: 1;
-  }
+  background: linear-gradient(180deg, var(--bd-panel), var(--bd-bg));
+  border: 3px solid var(--bd-border-strong);
+  border-radius: 30px;
+  padding: 24px 26px 26px;
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 0 0 2px #fffdf7,
+    0 30px 70px -20px rgba(80, 52, 20, 0.55);
+  animation: tdModalIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
 .tdPageIn {
   animation: tdPageIn 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
 }
 
-/* ── Left header ── */
-.tdHeader {
+.boardClose {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--bd-ink-soft);
+  font-size: 19px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 2;
+  transition: color 0.12s;
+}
+
+.boardClose:hover {
+  color: var(--bd-ink);
+}
+
+/* ── Header ── */
+.boardHeader {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
+  min-height: 92px;
+  margin-bottom: 10px;
+  padding: 0 40px;
 }
 
-.tdTitle {
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 30px;
-  color: var(--td-ink);
+.boardMayor {
+  height: 88px;
+  width: auto;
+  flex: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.12));
+}
+
+.boardPlaque {
+  position: relative;
+  flex: none;
+  padding: 13px 48px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bd-primary), #eeb83e);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.08),
+    0 4px 0 var(--bd-primary-dk),
+    0 9px 14px -6px rgba(190, 140, 40, 0.45);
+}
+
+.boardPlaqueStar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff3cf;
+  font-size: 17px;
+  text-shadow: 0 1px 1px rgba(150, 110, 30, 0.5);
+  animation: tdTwinkle 1.8s infinite;
+}
+
+.boardPlaqueStar--l {
+  left: 20px;
+}
+
+.boardPlaqueStar--r {
+  right: 20px;
+}
+
+.boardTitle {
   margin: 0;
-  white-space: nowrap;
+  font-size: 33px;
+  line-height: 1;
+  color: var(--bd-primary-ink);
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-.tdFlower {
-  height: 38px;
+.boardHeaderDeco {
+  font-size: 40px;
+  flex: none;
 }
 
-/* ── Sections ── */
-.tdSection {
-  margin-top: 20px;
+/* ── Body ── */
+.boardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
-.tdSectionHead {
+.boardRow {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.boardCard {
+  flex: 1;
+  min-width: 0;
+  background: var(--bd-panel);
+  border: 2px solid var(--bd-border);
+  border-radius: 22px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.boardCardHead {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 14px;
 }
 
-.tdNumBadge {
-  width: 56px;
-  height: 26px;
-  border-radius: 2.5rem;
-  background: var(--td-num);
-  color: #fff6e6;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 15px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.boardCardIcon {
+  font-size: 24px;
 }
 
-.tdSectionTitle {
-  font-family: var(--font-tmoney-dungunbaram);
-  font-weight: 800;
+.boardCardTitle {
+  font-size: 21px;
+  color: var(--bd-ink);
+  white-space: nowrap;
+}
+
+.boardCardDeco {
   font-size: 18px;
-  color: var(--td-ink);
 }
 
-/* ── Textarea ── */
-.tdTextareaWrap {
-  position: relative;
-  margin-top: 11px;
-}
-
-.tdTextarea {
-  width: 100%;
-  padding: 14px 15px 36px;
+/* ── Left: 이장님에게 말하기 ── */
+.boardField {
+  background: var(--bd-card);
+  border: 2px solid var(--bd-border);
   border-radius: 16px;
-  border: 2px solid var(--td-field-br);
-  background: var(--td-field);
-  color: var(--td-ink);
-  font-size: 15px;
-  line-height: 1.7;
-  outline: none;
-  min-height: 108px;
+  padding: 15px 17px;
+  margin-bottom: 18px;
+}
+
+.boardFieldHint {
+  font-size: 14px;
+  color: var(--bd-ink-soft);
+  margin-bottom: 11px;
+}
+
+.boardTextarea {
+  width: 100%;
+  min-height: 76px;
   resize: none;
+  border: 2px solid var(--bd-border);
+  border-radius: 12px;
+  background: var(--bd-field);
+  padding: 13px 15px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--bd-ink);
+  outline: none;
   box-sizing: border-box;
   font-family: var(--font-tmoney-dungunbaram);
   transition: border-color 0.15s;
 }
 
-.tdTextarea:focus {
-  border-color: var(--td-accent);
+.boardTextarea:focus {
+  border-color: var(--bd-accent);
 }
 
-.tdTextarea::placeholder {
-  color: #c4b493;
+.boardTextarea::placeholder {
+  color: var(--bd-ink-faint);
   opacity: 1;
 }
 
-.tdConfirmedBadge {
-  position: absolute;
-  right: 13px;
-  bottom: 11px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 13px;
-  color: var(--td-green-dk);
-}
-
-.tdConfirmedCheck {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--td-green);
+/* AI 정리 = 생성형 보조 액션(go-green) */
+.boardOrganizeBtn {
+  align-self: center;
+  margin-top: auto;
+  border: none;
+  cursor: pointer;
+  padding: 13px 30px;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #a6dd86, var(--bd-go));
   color: #fff;
+  font-size: 18px;
+  letter-spacing: 0.3px;
+  font-family: var(--font-tmoney-dungunbaram);
+  text-shadow: 0 1px 1px rgba(50, 90, 30, 0.35);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-size: 11px;
+  gap: 9px;
+  box-shadow:
+    0 5px 0 var(--bd-go-dk),
+    0 12px 18px -8px rgba(90, 150, 60, 0.5);
+  transition:
+    transform 0.08s ease,
+    filter 0.08s;
 }
 
-/* ── Confirm row ── */
-.tdConfirmRow {
+.boardOrganizeBtn:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+.boardOrganizeBtn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--bd-go-dk),
+    0 6px 10px -6px rgba(90, 150, 60, 0.5);
+}
+
+.boardOrganizeBtn:disabled {
+  cursor: wait;
+  opacity: 0.82;
+}
+
+/* ── Right: 직접 적기 ── */
+.boardAddRow {
+  display: flex;
+  gap: 11px;
+  margin-bottom: 16px;
+}
+
+.boardInput {
+  flex: 1;
+  min-width: 0;
+  border: 2px solid var(--bd-border);
+  border-radius: 14px;
+  padding: 12px 15px;
+  font-size: 17px;
+  color: var(--bd-ink);
+  background: var(--bd-field);
+  outline: none;
+  box-sizing: border-box;
+  font-family: var(--font-tmoney-dungunbaram);
+  transition: border-color 0.15s;
+}
+
+.boardInput:focus {
+  border-color: var(--bd-accent);
+}
+
+.boardInput::placeholder {
+  color: var(--bd-ink-faint);
+  opacity: 1;
+}
+
+/* 직접 추가 = 보조(테르티어리) 액션: accent 아웃라인 */
+.boardAddBtn {
+  flex: none;
+  cursor: pointer;
+  padding: 0 26px;
+  border-radius: 14px;
+  border: 2px solid var(--bd-accent);
+  background: var(--bd-accent-tint);
+  color: var(--bd-accent-deep);
+  font-size: 18px;
+  white-space: nowrap;
+  font-family: var(--font-tmoney-dungunbaram);
+  transition:
+    background 0.12s,
+    filter 0.08s;
+}
+
+.boardAddBtn:hover {
+  background: var(--bd-accent-soft);
+}
+
+.boardAddBtn:active {
+  filter: brightness(0.97);
+}
+
+.boardTagBox {
+  background: var(--bd-card);
+  border: 2px solid var(--bd-border);
+  border-radius: 16px;
+  padding: 14px 16px 16px;
+  margin-top: auto;
+}
+
+.boardTagBoxTitle {
+  text-align: center;
+  font-size: 15px;
+  color: var(--bd-accent-deep);
+  margin-bottom: 12px;
+}
+
+.boardTagBoxTitle span {
+  font-size: 12px;
+}
+
+/* ── Bottom: 생성된 TODO ── */
+.boardGenerated {
+  padding-top: 18px;
+}
+
+.boardSectionDivider {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-top: 10px;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
-.tdHintIcon {
+.boardDividerLine {
+  flex: 1;
+  border-top: 2px dashed var(--bd-divider);
+}
+
+.boardDividerLabel {
+  font-size: 20px;
+  color: var(--bd-ink-soft);
+  white-space: nowrap;
+}
+
+.boardDividerStar {
+  color: var(--bd-accent);
+  font-size: 0.85em;
+}
+
+.boardQuestBudget {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  margin: -6px 0 14px;
+  font-size: 14px;
+  color: var(--bd-accent-deep);
+}
+
+.boardQuestBudget.is-empty {
+  color: var(--bd-ink-faint);
+}
+
+.boardEmpty {
+  text-align: center;
+  color: var(--bd-ink-faint);
+  font-size: 17px;
+  padding: 24px 0 12px;
+}
+
+.boardTodoList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.boardTodoRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: var(--bd-field);
+  border: 2px solid var(--bd-border);
+  border-radius: 14px;
+  padding: 11px 16px;
+  animation: tdRowIn 0.28s ease both;
+}
+
+.boardPin {
+  font-size: 20px;
+  flex: none;
+}
+
+.boardTodoName {
+  flex: 1;
+  min-width: 80px;
+  border: 1.5px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  padding: 6px 8px;
+  font-size: 18px;
+  color: var(--bd-ink);
+  outline: none;
+  font-family: var(--font-tmoney-dungunbaram);
+}
+
+.boardTodoName:focus {
+  border-color: var(--bd-accent);
+  background: var(--bd-field);
+}
+
+.boardTodoChips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: none;
+}
+
+.boardChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 9px;
+  border: 1.5px solid currentColor;
+  font-size: 14px;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.boardChipRemove {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.boardApplyTag {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1.5px solid var(--bd-go);
+  background: #f3faec;
+  color: var(--bd-go-dk);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font-tmoney-dungunbaram);
+}
+
+/* ⭐ 퀘스트 옵트인 토글 (켜면 honey, 꺼지면 중립 아웃라인) */
+.boardQuestToggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1.5px solid var(--bd-border-strong);
+  background: var(--bd-field);
+  color: var(--bd-ink-soft);
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  font-family: var(--font-tmoney-dungunbaram);
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
+}
+
+.boardQuestToggle.is-on {
+  border-color: var(--bd-primary-dk);
+  background: var(--bd-primary);
+  color: var(--bd-primary-ink);
+}
+
+.boardQuestToggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.boardRemove {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--bd-ink-faint);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.12s;
+}
+
+.boardRemove:hover {
+  color: var(--c-danger, #e06060);
+}
+
+/* ── Footer ── */
+.boardFooter {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* 메인 CTA = honey primary (앱 전역 1차 액션 색) */
+.boardSaveBtn {
+  width: 620px;
+  max-width: 100%;
+  border: none;
+  cursor: pointer;
+  padding: 17px 0;
+  border-radius: 18px;
+  background: var(--bd-primary);
+  color: var(--bd-primary-ink);
+  font-size: 24px;
+  letter-spacing: 0.5px;
+  font-family: var(--font-tmoney-dungunbaram);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow:
+    0 5px 0 var(--bd-primary-dk),
+    0 12px 18px -8px rgba(190, 140, 40, 0.5);
+  transition:
+    transform 0.08s ease,
+    filter 0.08s;
+}
+
+.boardSaveBtn:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+.boardSaveBtn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--bd-primary-dk),
+    0 6px 10px -6px rgba(190, 140, 40, 0.5);
+}
+
+.boardSaveBtn:disabled {
+  cursor: wait;
+  background: #e7decb;
+  color: #b8a888;
+  box-shadow: 0 3px 0 #d3c7ad;
+}
+
+/* ── Result page (확정 TODO + 캐릭터 퀘스트) ── */
+.boardResultHeader {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.boardResultSub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--bd-ink-soft);
   font-size: 15px;
 }
 
-.tdHintText {
-  font-size: 13px;
-  color: var(--td-ink-soft);
+.boardQuestRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bd-field);
+  border: 2px solid var(--bd-border);
+  border-radius: 16px;
+  padding: 13px 17px;
+  animation: tdRowIn 0.3s ease both;
+}
+
+.boardQuestAvatar {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bd-card);
+  border: 2px solid var(--bd-border);
+}
+
+.boardQuestContent {
   flex: 1;
   min-width: 0;
 }
 
-.tdConfirmBtn {
-  margin-left: auto;
-  padding: 9px 22px;
-  border-radius: 12px;
-  border: 2px solid var(--td-border-strong);
-  background: var(--td-panel);
-  color: var(--td-ink);
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 15px;
-  cursor: pointer;
-  display: inline-flex;
+.boardQuestTop {
+  display: flex;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.boardQuestTitle {
+  font-size: 19px;
+  color: var(--bd-ink);
+}
+
+.boardQuestDesc {
+  display: flex;
+  align-items: flex-start;
   gap: 7px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.12s;
+  margin-top: 6px;
+  color: var(--bd-ink-soft);
+  font-size: 15px;
+  line-height: 1.45;
 }
 
-.tdConfirmBtn:hover {
-  background: var(--td-field);
+.boardQuestDesc b {
+  color: var(--bd-ink);
 }
 
+.boardQuestLabel {
+  display: inline-flex;
+  margin: 0 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #edf7df;
+  color: var(--bd-go-dk);
+  font-size: 12px;
+  vertical-align: 1px;
+}
+
+/* ── Shared: spinner + twinkle + toast ── */
+/* 스피너는 버튼 글자색(currentColor)을 따라가 honey/green 버튼 모두에서 잘 보이게. */
 .tdSpinner {
-  width: 13px;
-  height: 13px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  border: 2px solid var(--td-border);
-  border-top-color: var(--td-accent);
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-top-color: currentColor;
   animation: tdSpin 0.7s linear infinite;
   display: inline-block;
 }
 
-/* ── Divider ── */
-.tdDivider {
-  border: none;
-  border-top: 2px dashed var(--td-divider);
-  margin: 20px 0 0;
-}
-
-/* ── Input row ── */
-.tdInputRow {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.tdInput {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 15px;
-  border-radius: 13px;
-  border: 2px solid var(--td-field-br);
-  background: var(--td-panel);
-  color: var(--td-ink);
-  font-size: 15px;
-  outline: none;
-  font-family: var(--font-tmoney-dungunbaram);
-  transition: border-color 0.15s;
-  box-sizing: border-box;
-}
-
-.tdInput:focus {
-  border-color: var(--td-accent);
-}
-
-.tdInput::placeholder {
-  color: #c4b493;
-  opacity: 1;
-}
-
-.tdAddBtn {
-  padding: 0 22px;
-  border-radius: 13px;
-  border: 2px solid var(--td-green-dk);
-  background: var(--td-panel);
-  color: var(--td-green-dk);
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 16px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.12s;
-}
-
-.tdAddBtn:hover {
-  background: #f1f7e8;
-}
-
-/* ── Todo list ── */
-.tdTodoList {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 14px;
-  padding-right: 2px;
-}
-
-.tdTodoRow {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  background: var(--td-panel);
-  border: 2px solid var(--td-border);
-  border-radius: 14px;
-  padding: 11px 14px;
-  animation: tdRowIn 0.28s ease both;
-}
-
-.tdDragDots {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.tdDotRow {
-  display: flex;
-  gap: 3px;
-}
-
-.tdDot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--td-ink-faint);
-  display: block;
-}
-
-.tdTodoName {
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 15px;
-  color: var(--td-ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-  flex: 1;
-}
-
-.tdTodoNameInput {
-  flex: 1;
-  min-width: 120px;
-  padding: 6px 8px;
-  border: 1.5px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--td-ink);
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 15px;
-  outline: none;
-}
-
-.tdTodoNameInput:focus {
-  border-color: var(--td-accent);
-  background: var(--td-field);
-}
-
-.tdTodoChips {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-}
-
-.tdHashChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.tdHashRemove {
-  width: 15px;
-  height: 15px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
-  color: inherit;
-  cursor: pointer;
-  font-size: 11px;
-  line-height: 1;
-}
-
-.tdApplyTagBtn {
-  flex-shrink: 0;
-  padding: 4px 9px;
-  border-radius: 8px;
-  border: 1.5px solid #9ac36f;
-  background: #f6fbef;
-  color: var(--td-green-dk);
-  cursor: pointer;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 13px;
-}
-
-.tdDeleteBtn {
-  flex-shrink: 0;
-  padding: 4px 10px;
-  border-radius: 8px;
-  border: 1.5px solid var(--td-border-strong);
-  background: transparent;
-  color: var(--td-ink-soft);
-  cursor: pointer;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 13px;
-  transition:
-    background 0.12s,
-    color 0.12s;
-}
-
-.tdDeleteBtn:hover {
-  background: #fde8e8;
-  border-color: #d9836a;
-  color: #c04a3a;
-}
-
-/* ── Generate button ── */
-.tdGenerateBtn {
-  width: 100%;
-  margin-top: 20px;
-  padding: 15px;
-  border: none;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #a6d279, var(--td-green));
-  color: #fff;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 20px;
-  cursor: pointer;
-  box-shadow:
-    0 5px 0 var(--td-green-dk),
-    0 12px 18px -8px rgba(90, 150, 60, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.12s ease;
-}
-
-.tdGenerateBtn:active {
-  transform: translateY(3px);
-  box-shadow:
-    0 2px 0 var(--td-green-dk),
-    0 6px 10px -6px rgba(90, 150, 60, 0.5);
-}
-
-.tdGenerateBtn:disabled {
-  cursor: wait;
-  opacity: 0.78;
-  transform: none;
+.tdSpinner--lg {
+  width: 22px;
+  height: 22px;
+  border-width: 3px;
 }
 
 .tdGenStar {
@@ -558,197 +751,6 @@
   animation: tdTwinkle 1.5s infinite;
 }
 
-/* ── Right panel header ── */
-.tdRightHeader {
-  text-align: center;
-}
-
-.tdRightTitle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-}
-
-.tdRightTitleText {
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 24px;
-  color: var(--td-ink);
-  margin: 0;
-  white-space: nowrap;
-}
-
-.tdFlowerSm {
-  height: 28px;
-}
-
-.tdRightSub {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  margin-top: 6px;
-  color: var(--td-ink-soft);
-  font-size: 13px;
-}
-
-.tdStar {
-  color: var(--td-accent);
-  font-size: 11px;
-  display: inline-block;
-  animation: tdTwinkle 1.6s infinite;
-}
-
-.tdStar--delay {
-  animation-delay: 0.4s;
-}
-
-/* ── Quest list ── */
-.tdQuestList {
-  flex: 1;
-  overflow: auto;
-  margin-top: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  padding-right: 2px;
-}
-
-.tdQuestRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--td-panel);
-  border: 2px solid var(--td-border);
-  border-radius: 18px;
-  padding: 13px 15px;
-  animation: tdRowIn 0.3s ease both;
-}
-
-.tdAnimalAvatar {
-  width: 50px;
-  height: 50px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.tdQuestContent {
-  flex: 1;
-  min-width: 0;
-}
-
-.tdQuestTitleText {
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 17px;
-  color: var(--td-ink);
-  display: block;
-  padding: 2px 0;
-}
-
-.tdQuestTagRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
-
-.tdQuestChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px 3px 10px;
-  border-radius: 999px;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.tdQuestDesc {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin-top: 4px;
-  color: var(--td-ink-soft);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.tdQuestDesc b {
-  color: var(--td-ink);
-  font-weight: 800;
-}
-
-.tdQuestLabel {
-  display: inline-flex;
-  margin: 0 6px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: #edf7df;
-  color: var(--td-green-dk);
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 11px;
-  vertical-align: 1px;
-}
-
-.tdAccentStar {
-  color: var(--td-accent);
-  font-size: 11px;
-  flex-shrink: 0;
-}
-
-.tdQuestEmpty {
-  text-align: center;
-  color: var(--td-ink-soft);
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 15px;
-  padding: 48px 0;
-}
-
-/* ── Right footer ── */
-.tdRightFooter {
-  display: flex;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.tdAddTodayBtn {
-  flex: 1;
-  padding: 13px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #a6d279, var(--td-green));
-  color: #fff;
-  font-family: var(--font-tmoney-dungunbaram);
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow:
-    0 5px 0 var(--td-green-dk),
-    0 12px 18px -8px rgba(90, 150, 60, 0.5);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.12s ease,
-    opacity 0.12s;
-}
-
-.tdAddTodayBtn:active {
-  transform: translateY(3px);
-  box-shadow:
-    0 2px 0 var(--td-green-dk),
-    0 6px 10px -6px rgba(90, 150, 60, 0.5);
-}
-
-.tdAddTodayBtn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-/* ── Toast ── */
 .tdToast {
   position: fixed;
   left: 50%;
@@ -757,8 +759,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--td-panel);
-  border: 2.5px solid var(--td-border-strong);
+  background: var(--bd-panel);
+  border: 2.5px solid var(--bd-border-strong);
   border-radius: 16px;
   padding: 13px 22px;
   box-shadow: 0 18px 42px -14px rgba(60, 42, 18, 0.55);
@@ -767,28 +769,48 @@
 }
 
 .tdToastText {
-  font-family: var(--font-tmoney-dungunbaram);
   font-size: 15px;
-  color: var(--td-ink);
+  color: var(--bd-ink);
   white-space: nowrap;
 }
 
-/* 동작 최소화 선호 시 진입/장식 애니메이션을 끄고, 무한 반짝임(tdTwinkle/tdFloaty)을 정지한다.
-   로딩 스피너만 느린 회전으로 유지해 '멈춤'으로 오해되지 않게 한다. */
+/* ── Responsive: 좁은 화면에서 두 칼럼을 세로로 ── */
+@media (max-width: 760px) {
+  .boardRow {
+    flex-direction: column;
+  }
+  .boardHeader {
+    padding: 0;
+    gap: 10px;
+  }
+  .boardMayor {
+    height: 60px;
+  }
+  .boardTitle {
+    font-size: 24px;
+  }
+  .boardPlaque {
+    padding: 11px 30px;
+  }
+  .boardHeaderDeco {
+    display: none;
+  }
+}
+
+/* 동작 최소화 선호 시 진입/반짝임 애니메이션 정지. 스피너만 느린 회전 유지. */
 @media (prefers-reduced-motion: reduce) {
-  .tdFlower,
-  .tdFlowerSm,
-  .tdStar,
-  .tdAccentStar,
-  .tdPanel,
+  .boardPanel,
   .tdPageIn,
-  .tdTodoRow,
-  .tdQuestRow,
+  .boardTodoRow,
+  .boardQuestRow,
+  .boardPlaqueStar,
+  .tdGenStar,
   .tdToast {
     animation: none;
   }
-  .tdGenerateBtn,
-  .tdAddTodayBtn {
+  .boardOrganizeBtn,
+  .boardAddBtn,
+  .boardSaveBtn {
     transition: none;
   }
   .tdSpinner {

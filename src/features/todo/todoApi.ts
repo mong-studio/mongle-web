@@ -126,6 +126,33 @@ export async function confirmTodos(payload: TodoConfirmPayload): Promise<TodoCom
   return data;
 }
 
+// 단일 TODO 생성(POST /todos/). LLM/퀘스트 없이 즉시 저장하는 경로.
+export type TodoResource = {
+  todo_id: string;
+  content: string;
+  status: string;
+  todo_date: string;
+  tag_id: number | null;
+  tag_color?: string | null;
+  tag_content?: string | null;
+  quest: {
+    quest_id: string;
+    content: string;
+    character_id: string;
+    character_name: string;
+  } | null;
+  created_at: string;
+};
+
+export async function createTodo(payload: {
+  content: string;
+  todo_date: string;
+  tag_id?: number;
+}): Promise<TodoResource> {
+  const { data } = await apiClient.post<TodoResource>("/todos/", payload);
+  return data;
+}
+
 export async function previewTodoQuests(
   payload: TodoQuestPreviewPayload,
 ): Promise<TodoQuestPreviewResponse> {
