@@ -8,6 +8,7 @@ import { FeedModal } from "../../features/feed/FeedModal.js";
 import { MyPageWrapper } from "../../features/my-page/MyPageWrapper.js";
 import { ReflectionModal } from "../../features/reflection/ReflectionModal.js";
 import type { TodoItem } from "../../features/todo/todoCreation.js";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import type { Resident } from "../model/appTypes.js";
 
 type AppModalLayerProps = {
@@ -99,19 +100,14 @@ export function AppModalLayer({
   onSwitchLoginToSignup,
   onToggleKeyword,
 }: AppModalLayerProps) {
+  const reflectionBackdrop = useBackdropDismiss(onReflectionClose);
+  const characterSetupBackdrop = useBackdropDismiss(onCharacterSetupClose);
+  const feedBackdrop = useBackdropDismiss(onFeedClose);
+
   return (
     <>
       {reflectionOpen ? (
-        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-        <div
-          className="modalBackdrop"
-          role="presentation"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) {
-              onReflectionClose();
-            }
-          }}
-        >
+        <div className="modalBackdrop" role="presentation" {...reflectionBackdrop}>
           <section
             className="featureModal reflectionModalShell"
             role="dialog"
@@ -158,16 +154,7 @@ export function AppModalLayer({
       />
 
       {characterSetupOpen ? (
-        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-        <div
-          className="modalBackdrop"
-          role="presentation"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) {
-              onCharacterSetupClose();
-            }
-          }}
-        >
+        <div className="modalBackdrop" role="presentation" {...characterSetupBackdrop}>
           <section
             className="featureModal characterModal"
             role="dialog"
@@ -204,14 +191,7 @@ export function AppModalLayer({
       />
 
       {feedOpen ? (
-        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-        <div
-          className="modalBackdrop"
-          role="presentation"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) onFeedClose();
-          }}
-        >
+        <div className="modalBackdrop" role="presentation" {...feedBackdrop}>
           <FeedModal onClose={onFeedClose} />
         </div>
       ) : null}

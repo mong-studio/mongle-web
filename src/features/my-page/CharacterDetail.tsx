@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
 import { apiClient } from "../../shared/api/client.js";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { deleteCharacter } from "../character/api.js";
 import "./CharacterDetail.css";
 
@@ -68,6 +69,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
   }, [resident.id]);
 
   const quests = detail?.active_quests ?? [];
+  const backdrop = useBackdropDismiss(onClose);
 
   async function handleMoveOut() {
     setIsBusy(true);
@@ -91,7 +93,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
   return (
     <div
       className="mpRdBg"
-      onClick={onClose}
+      {...backdrop}
       onKeyDown={(e) => {
         if (e.key === "Escape") onClose();
       }}

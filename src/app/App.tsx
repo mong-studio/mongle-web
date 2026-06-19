@@ -319,10 +319,16 @@ export function App() {
   );
 
   const openVillageDialogue = useCallback(() => {
-    if (!overlayOpenRef.current) {
-      void guardFeatureAccess(() => setDialogueOpen(true));
+    if (overlayOpenRef.current) {
+      return;
     }
-  }, [guardFeatureAccess]);
+    if (authStatus !== "authenticated") {
+      showNotice("로그인이 필요해요.");
+      setLoginOpen(true);
+      return;
+    }
+    setDialogueOpen(true);
+  }, [authStatus, showNotice]);
 
   const openVillageBoard = useCallback(() => {
     if (!overlayOpenRef.current) {
@@ -382,6 +388,48 @@ export function App() {
   useEffect(() => {
     void fetchResidents();
   }, [fetchResidents]);
+
+  // 로그인 직후 캐릭터가 하나도 없으면 캐릭터 생성 모달을 자동으로 띄운다.
+  const autoCharacterPromptRef = useRef(false);
+  useEffect(() => {
+    if (authStatus !== "authenticated") {
+      autoCharacterPromptRef.current = false;
+      return;
+    }
+    const otherOverlayOpen =
+      loginOpen ||
+      signupOpen ||
+      resetPwOpen ||
+      showMyPage ||
+      characterSetupOpen ||
+      calendarOpen ||
+      feedOpen ||
+      activeFeature !== null;
+    if (autoCharacterPromptRef.current || otherOverlayOpen) {
+      return;
+    }
+    autoCharacterPromptRef.current = true;
+    void (async () => {
+      try {
+        const items = await fetchCharacters();
+        if (!hasUserCreatedCharacter(items)) {
+          setActiveFeature("character");
+        }
+      } catch {
+        autoCharacterPromptRef.current = false;
+      }
+    })();
+  }, [
+    authStatus,
+    loginOpen,
+    signupOpen,
+    resetPwOpen,
+    showMyPage,
+    characterSetupOpen,
+    calendarOpen,
+    feedOpen,
+    activeFeature,
+  ]);
 
   const openFeature = useCallback(
     async (feature: FeatureId) => {
@@ -480,9 +528,7 @@ export function App() {
         event.data?.type === "MONGLE_CHIEF_CLICKED" ||
         event.data?.type === "MONGLE_CHIEF_HOUSE_CLICKED"
       ) {
-        if (!overlayOpenRef.current) {
-          void guardFeatureAccess(() => setDialogueOpen(true));
-        }
+        openVillageDialogue();
       }
 
       if (event.data?.type === "MONGLE_FEATURE_SELECTED") {
@@ -495,7 +541,7 @@ export function App() {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [guardFeatureAccess, openFeature]);
+  }, [openVillageDialogue, openFeature]);
 
   function toggleKeywordCategory(keyword: string) {
     setSelectedKeywordCategories((current) => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiClient } from "../../shared/api/client.js";
 import { useTags } from "../../shared/tags/useTags.js";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { useCalendar } from "./CalendarCore.js";
 import { CalendarWindow } from "./CalendarWindow.js";
 import type { CalEvent } from "./calEngine.js";
@@ -183,17 +184,12 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
     [],
   );
 
+  const backdrop = useBackdropDismiss(onClose);
+
   if (!isOpen) return null;
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-dismiss is intentional UX
-    <div
-      className="modalBackdrop"
-      role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
+    <div className="modalBackdrop" role="presentation" {...backdrop}>
       <div className="calWindow" role="dialog" aria-modal="true" aria-label="마을 게시판 캘린더">
         {!isAuthenticated ? (
           <div
