@@ -41,6 +41,14 @@ type ResidentPreview = {
   avatarUrl?: string;
 };
 
+type ResidentNpcState = {
+  npc: Phaser.GameObjects.Image;
+  target: Phaser.Math.Vector2 | null;
+  velocity: Phaser.Math.Vector2;
+  worldPosition: Phaser.Math.Vector2;
+  waitUntil: number;
+};
+
 type PhaserVillageProps = {
   residents: ResidentPreview[];
   reloadKey: number;
@@ -196,6 +204,7 @@ class VillageScene extends Phaser.Scene {
   private chiefVelocity = new Phaser.Math.Vector2(0, 0);
   private chiefWorldPosition = new Phaser.Math.Vector2(0, 0);
   private chiefWaitUntil = 0;
+  private residentNpcStates: ResidentNpcState[] = [];
   private lastObjectHintSignature = "";
   private lastMinimapSignature = "";
   private mapBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
@@ -224,6 +233,7 @@ class VillageScene extends Phaser.Scene {
 
   update(time: number, delta: number) {
     this.updateChiefNpc(time, delta);
+    this.updateResidentNpcs(time, delta);
     this.publishMinimapStateIfChanged();
     this.publishActiveObjectHint();
   }
@@ -307,6 +317,15 @@ class VillageScene extends Phaser.Scene {
         const key = `resident-house-${color}`;
         if (!this.textures.exists(key)) {
           this.load.image(key, `/assets/objects/house_${color}.png`);
+        }
+      }
+
+      for (const resident of this.residents) {
+        if (resident.avatarUrl) {
+          const key = `resident-npc-${resident.id}`;
+          if (!this.textures.exists(key)) {
+            this.load.image(key, resident.avatarUrl);
+          }
         }
       }
 
@@ -491,6 +510,25 @@ class VillageScene extends Phaser.Scene {
           this.publishObjectHint({ ...houseHint, visible: false });
         }
       });
+
+      {
+        const residentNpcKey = `resident-npc-${resident.id}`;
+        const npcKey = this.textures.exists(residentNpcKey) ? residentNpcKey : CHIEF_NPC_KEY;
+        const spawnX = hx + Phaser.Math.Between(-16, 16);
+        const spawnY = hy + Phaser.Math.Between(12, 28);
+        const npc = this.add
+          .image(spawnX, spawnY, npcKey)
+          .setOrigin(0.5, 0.86)
+          .setDisplaySize(44, 44)
+          .setDepth(spawnY);
+        this.residentNpcStates.push({
+          npc,
+          target: null,
+          velocity: new Phaser.Math.Vector2(0, 0),
+          worldPosition: new Phaser.Math.Vector2(spawnX, spawnY),
+          waitUntil: Phaser.Math.Between(0, 3000),
+        });
+      }
 
       residentHouseMarkers.push({
         id: resident.id,
@@ -688,6 +726,119 @@ class VillageScene extends Phaser.Scene {
       return true;
     }
     return false;
+  }
+
+  private updateResidentNpcs(time: number, delta: number) {
+    if (this.mapBounds.width <= 0 || this.mapBounds.height <= 0) {
+      return;
+    }
+    for (const state of this.residentNpcStates) {
+      this.updateSingleResidentNpc(state, time, delta);
+    }
+  }
+
+  private updateSingleResidentNpc(state: ResidentNpcState, time: number, delta: number) {
+    if (!state.target && time < state.waitUntil) {
+      return;
+    }
+
+    if (
+      !state.target ||
+      this.isWorldPointCoveredByHud(state.worldPosition.x, state.worldPosition.y)
+    ) {
+      this.chooseResidentTarget(state, time);
+    }
+
+    if (!state.target) {
+      return;
+    }
+
+    const dx = state.target.x - state.worldPosition.x;
+    const dy = state.target.y - state.worldPosition.y;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance <= CHIEF_NPC_TARGET_RADIUS) {
+      state.target = null;
+      state.velocity.scale(0.72);
+      state.waitUntil = time + Phaser.Math.Between(900, 2200);
+      this.applyResidentDisplayMotion(state, time, 0, 0, false);
+      return;
+    }
+
+    const desiredVelocity = new Phaser.Math.Vector2(dx / distance, dy / distance).scale(
+      CHIEF_NPC_SPEED,
+    );
+    state.velocity.lerp(desiredVelocity, Math.min(1, CHIEF_NPC_STEERING * (delta / 16.67)));
+
+    const nextX = state.worldPosition.x + (state.velocity.x * delta) / 1000;
+    const nextY = state.worldPosition.y + (state.velocity.y * delta) / 1000;
+
+    if (this.isChiefPointBlocked(nextX, nextY)) {
+      state.target = null;
+      state.velocity.set(0, 0);
+      state.waitUntil = time + 500;
+      this.applyResidentDisplayMotion(state, time, 0, 0, false);
+      return;
+    }
+
+    state.worldPosition.set(nextX, nextY);
+    this.applyResidentDisplayMotion(state, time, state.velocity.x, state.velocity.y, true);
+  }
+
+  private applyResidentDisplayMotion(
+    state: ResidentNpcState,
+    time: number,
+    dx: number,
+    dy: number,
+    moving: boolean,
+  ) {
+    const bobPhase = Math.sin(time * CHIEF_NPC_BOB_FREQUENCY);
+    const bob = moving ? Math.max(0, bobPhase) : 0;
+    const yOffset = -bob * CHIEF_NPC_BOB_AMPLITUDE;
+
+    state.npc.setPosition(state.worldPosition.x, state.worldPosition.y + yOffset);
+    state.npc.setDepth(state.worldPosition.y);
+
+    if (moving && Math.abs(dx) > Math.abs(dy) * 0.25) {
+      state.npc.setFlipX(dx < 0);
+    }
+  }
+
+  private chooseResidentTarget(state: ResidentNpcState, time: number) {
+    const margin = 56;
+    const fromX = state.worldPosition.x;
+    const fromY = state.worldPosition.y;
+
+    for (let attempt = 0; attempt < CHIEF_NPC_TARGET_RETRIES; attempt += 1) {
+      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
+      const distance = Phaser.Math.Between(
+        CHIEF_NPC_MIN_WANDER_DISTANCE,
+        CHIEF_NPC_MAX_WANDER_DISTANCE,
+      );
+      const target = new Phaser.Math.Vector2(
+        Phaser.Math.Clamp(
+          fromX + Math.cos(angle) * distance,
+          margin,
+          this.mapBounds.width - margin,
+        ),
+        Phaser.Math.Clamp(
+          fromY + Math.sin(angle) * distance,
+          margin,
+          this.mapBounds.height - margin,
+        ),
+      );
+      if (
+        !this.isWorldPointCoveredByHud(target.x, target.y) &&
+        this.isChiefPathAllowed(fromX, fromY, target.x, target.y)
+      ) {
+        state.target = target;
+        state.waitUntil = 0;
+        return;
+      }
+    }
+
+    state.target = null;
+    state.waitUntil = time + Phaser.Math.Between(900, 1800);
   }
 
   private isWorldPointCoveredByHud(worldX: number, worldY: number) {
