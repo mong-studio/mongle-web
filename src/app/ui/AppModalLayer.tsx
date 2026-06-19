@@ -41,6 +41,7 @@ type AppModalLayerProps = {
   onLoginClose: () => void;
   onLoginOpen: () => void;
   onLogout: () => void | Promise<void>;
+  onMoveOut: (characterId: string) => void;
   onMyPageClose: () => void;
   onNotice: (message: string) => void;
   onReflectionClose: () => void;
@@ -85,6 +86,7 @@ export function AppModalLayer({
   onLoginClose,
   onLoginOpen,
   onLogout,
+  onMoveOut,
   onMyPageClose,
   onNotice,
   onReflectionClose,
@@ -137,6 +139,7 @@ export function AppModalLayer({
           residents={residents}
           onClose={onMyPageClose}
           onLogout={onLogout}
+          onMoveOut={onMoveOut}
           onNotice={onNotice}
         />
       ) : null}

@@ -497,8 +497,20 @@ class VillageScene extends Phaser.Scene {
     const residentHouseMarkers: MinimapMarker[] = [];
     this.residents.slice(0, residentOffsets.length).forEach((resident, index) => {
       const [offsetX, offsetY] = residentOffsets[index];
-      const hx = Phaser.Math.Clamp(centerX + offsetX, 0, map.width * map.tilewidth);
-      const hy = Phaser.Math.Clamp(centerY + offsetY, 0, map.height * map.tileheight);
+      // 집 크기(84×76)와 origin(0.5, 0.86)을 고려해 맵 안쪽에 여백을 둔다.
+      const houseHalfW = RESIDENT_HOUSE_DISPLAY_WIDTH / 2 + 16;
+      const houseTopH = Math.ceil(RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.86) + 16;
+      const houseBotH = Math.ceil(RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.14) + 16;
+      const hx = Phaser.Math.Clamp(
+        centerX + offsetX,
+        houseHalfW,
+        map.width * map.tilewidth - houseHalfW,
+      );
+      const hy = Phaser.Math.Clamp(
+        centerY + offsetY,
+        houseTopH,
+        map.height * map.tileheight - houseBotH,
+      );
       const color = RESIDENT_HOUSE_COLORS[index % RESIDENT_HOUSE_COLORS.length];
       const houseKey = `resident-house-${color}`;
 

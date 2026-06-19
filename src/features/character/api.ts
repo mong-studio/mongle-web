@@ -273,3 +273,8 @@ export async function fetchCharacters(): Promise<CharacterListItem[]> {
     activeQuestCount: item.active_quest_count,
   }));
 }
+
+/** 캐릭터를 soft delete(is_active=false)한다. 마지막 캐릭터면 409를 던진다. */
+export async function deleteCharacter(characterId: string): Promise<void> {
+  await apiClient.delete(`/characters/${characterId}/`);
+}
