@@ -21,6 +21,17 @@
   --mongle-hud-fill: #c98838;
   --mongle-hud-pop: mongleHudIn 0.46s cubic-bezier(0.2, 0.9, 0.24, 1.24) both;
   --mongle-talk-pop: mongleTalkButtonIn 0.46s cubic-bezier(0.2, 0.9, 0.24, 1.24) both;
+  --ui-cream: #fff8e8;
+  --ui-cream-2: #fff3cf;
+  --ui-paper: #fffaf0;
+  --ui-line: #d8ae72;
+  --ui-line-soft: #ead1a3;
+  --ui-brown: #5a321d;
+  --ui-brown-soft: #8a5a32;
+  --ui-green: #94ad55;
+  --ui-green-dark: #758f3e;
+  --ui-shadow: rgba(92, 58, 27, 0.22);
+  --ui-shadow-soft: rgba(92, 58, 27, 0.12);
   font-family: var(--font-tmoney-dungunbaram);
   color: #382719;
   background: #1d2a20;
@@ -557,8 +568,8 @@ button {
 }
 
 .plannerModalShell {
-  width: min(1120px, 100%);
-  max-height: min(860px, calc(100vh - 40px));
+  width: min(1100px, calc(100vw - 28px));
+  max-height: min(820px, calc(100vh - 28px));
   padding: 0;
   border: 0;
   box-shadow: none;
@@ -584,24 +595,6 @@ button {
   box-shadow: none;
   background: transparent;
   overflow: visible;
-}
-
-.plannerCloseButton {
-  top: 16px;
-  right: 16px;
-  z-index: 5;
-}
-
-.closeButton {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 34px;
-  height: 34px;
-  border: 3px solid #4b2f1f;
-  background: #8a5b38;
-  color: #fff5d1;
-  font-weight: 950;
 }
 
 .modalKicker,

@@ -30,14 +30,6 @@ type FeatureModalHostProps = {
   onToggleKeyword: (keyword: string) => void;
 };
 
-function CloseIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-    </svg>
-  );
-}
-
 export function FeatureModalHost({
   activeFeature,
   characterName,
@@ -75,30 +67,6 @@ export function FeatureModalHost({
         onClick={(event) => event.stopPropagation()}
         onKeyDown={(event) => event.stopPropagation()}
       >
-        {activeFeature === "planner" ? (
-          <button
-            type="button"
-            className="closeButton plannerCloseButton"
-            onClick={onClose}
-            aria-label="닫기"
-          >
-            <CloseIcon />
-          </button>
-        ) : null}
-        {activeFeature !== "character" &&
-        activeFeature !== "planner" &&
-        activeFeature !== "todo" ? (
-          <>
-            <button type="button" className="closeButton" onClick={onClose} aria-label="닫기">
-              <CloseIcon />
-            </button>
-            <p className="modalKicker">MONGLE VILLAGE</p>
-            <h2 id="feature-title">{active.title}</h2>
-            <p className="modalLine">{active.npcLine}</p>
-            <span className="featureMeta">{active.meta}</span>
-          </>
-        ) : null}
-
         {activeFeature === "character" ? (
           <CharacterModal
             residents={residents}
@@ -130,7 +98,7 @@ export function FeatureModalHost({
         ) : null}
 
         {activeFeature === "planner" ? (
-          <PlannerChat onNotice={onNotice} onTodosSaved={onTodosSaved} />
+          <PlannerChat onNotice={onNotice} onTodosSaved={onTodosSaved} onClose={onClose} />
         ) : null}
       </section>
     </div>

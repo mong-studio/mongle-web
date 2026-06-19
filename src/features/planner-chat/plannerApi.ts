@@ -27,6 +27,12 @@ export type TodoChatFollowUpResult = {
   missing_aspects: string[];
 };
 
+export type PlannerTask = {
+  title: string;
+  due_date: string;
+  tags?: string[];
+};
+
 export type PlannerDay = {
   date: string;
   tasks: {
@@ -36,15 +42,12 @@ export type PlannerDay = {
   }[];
 };
 
-type PlannerConfirmPayload = {
-  todos: {
-    content: string;
-    todo_date: string;
-    tags?: string[];
-  }[];
+type PlannerCommitPayload = {
+  todos: PlannerTask[];
+  calendar_events: PlannerTask[];
 };
 
-type PlannerConfirmResponse = {
+type PlannerCommitResponse = {
   todos: {
     todo_id: string;
     content: string;
@@ -56,6 +59,13 @@ type PlannerConfirmResponse = {
       character_id: string;
       character_name: string;
     } | null;
+  }[];
+  calendar_events: {
+    schedule_id: string;
+    title: string;
+    start_date: string;
+    end_date: string | null;
+    tags: string[];
   }[];
   quest_distribution_triggered?: boolean;
 };
@@ -105,10 +115,10 @@ export async function chatTodos(payload: {
   return unwrapApiResult(data);
 }
 
-export async function confirmPlannerTodos(
-  payload: PlannerConfirmPayload,
-): Promise<PlannerConfirmResponse> {
-  const { data } = await apiClient.post<PlannerConfirmResponse>("/todos/confirm/", payload);
+export async function commitPlannerTodos(
+  payload: PlannerCommitPayload,
+): Promise<PlannerCommitResponse> {
+  const { data } = await apiClient.post<PlannerCommitResponse>("/todos/commit/", payload);
   return data;
 }
 
