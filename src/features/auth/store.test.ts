@@ -82,6 +82,7 @@ describe("useAuthStore", () => {
       email: "test@test.com",
       user_name: "테스터",
       token_balance: 5,
+      login_type: "email",
     });
 
     await useAuthStore.getState().restoreSession();

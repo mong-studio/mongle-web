@@ -25,6 +25,7 @@ export type MeResponse = {
   email: string;
   user_name: string;
   token_balance: number;
+  login_type: string;
 };
 
 export type SignupPayload = {
@@ -118,6 +119,54 @@ export async function resetPassword(
   });
 }
 
+export const KAKAO_STATE_KEY = "mongle_kakao_state";
+
+export type KakaoAuthenticated = LoginResponse & { status: "authenticated" };
+export type KakaoProfileRequired = {
+  status: "profile_required";
+  signup_token: string;
+  email: string;
+};
+export type KakaoLoginResult = KakaoAuthenticated | KakaoProfileRequired;
+
+export type KakaoCompletePayload = {
+  signup_token: string;
+  user_name: string;
+  job: string;
+  birth: string;
+  is_aiconsent: boolean;
+};
+
+export function startKakaoLogin(): void {
+  const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
+  const redirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+  if (!clientId || !redirectUri) {
+    throw new Error("카카오 로그인 설정이 없어요.");
+  }
+  const state = crypto.randomUUID();
+  sessionStorage.setItem(KAKAO_STATE_KEY, state);
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: "account_email",
+    state,
+  });
+  window.location.assign(`https://kauth.kakao.com/oauth/authorize?${params}`);
+}
+
+export async function exchangeKakaoCode(code: string): Promise<KakaoLoginResult> {
+  const { data } = await apiClient.post<KakaoLoginResult>("/auth/social/kakao", { code });
+  return data;
+}
+
+export async function completeKakaoSignup(
+  payload: KakaoCompletePayload,
+): Promise<KakaoAuthenticated> {
+  const { data } = await apiClient.post<KakaoAuthenticated>("/auth/social/kakao/complete", payload);
+  return data;
+}
+
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 올바르지 않아요.",
   INVALID_CURRENT_PASSWORD: "현재 비밀번호가 올바르지 않아요.",
@@ -130,6 +179,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   LOGIN_RATE_LIMITED: "로그인 시도가 너무 많아요. 잠시 후 다시 시도해 주세요.",
   INVALID_REFRESH_TOKEN: "세션이 만료됐어요. 다시 로그인해 주세요.",
   REFRESH_TOKEN_EXPIRED: "세션이 만료됐어요. 다시 로그인해 주세요.",
+  EMAIL_REQUIRED: "카카오 계정의 이메일 제공에 동의해 주세요.",
+  SOCIAL_LOGIN_FAILED: "카카오 로그인에 실패했어요. 잠시 후 다시 시도해 주세요.",
+  SOCIAL_SIGNUP_EXPIRED: "가입 시간이 만료됐어요. 다시 시도해 주세요.",
+  SOCIAL_ACCOUNT_NO_PASSWORD: "카카오 계정은 비밀번호를 사용하지 않아요.",
 };
 
 /** 서버 공통 에러 형식 {error:{code,message,details}}를 사용자 메시지로 변환. */
