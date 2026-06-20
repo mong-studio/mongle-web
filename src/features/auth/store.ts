@@ -18,6 +18,7 @@ export type AuthState = {
   login: (email: string, password: string, rememberMe: boolean) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
+  setSocialSession: (data: import("./api.js").KakaoAuthenticated) => void;
 };
 
 const REFRESH_MARGIN_SECONDS = 60;
@@ -76,6 +77,21 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     login: async (email, password, rememberMe) => {
       const data = await authApi.login(email, password, rememberMe);
+      sessionStorage.setItem(SESSION_KEY, data.access_token);
+      set({
+        user: {
+          userId: data.users.user_id,
+          email: data.users.email,
+          userName: data.users.user_name,
+          hasCharacter: data.users.has_character,
+        },
+        accessToken: data.access_token,
+        status: "authenticated",
+      });
+      scheduleRefresh(data.expires_in_seconds);
+    },
+
+    setSocialSession: (data) => {
       sessionStorage.setItem(SESSION_KEY, data.access_token);
       set({
         user: {
