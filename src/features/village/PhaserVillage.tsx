@@ -1332,6 +1332,19 @@ export function PhaserVillage({
   const [minimapState, setMinimapState] = useState<MinimapState | null>(null);
   const [objectHint, setObjectHint] = useState<ObjectHintState | null>(null);
 
+  // 최신 콜백·주민을 ref로 유지해서, 이 값들이 바뀌어도 Phaser 게임을 재생성하지 않는다.
+  // (게임 전체 destroy/재생성 = 배경 깜빡임. 모달을 열 때마다 일어나던 현상의 원인)
+  const onOpenBoardRef = useRef(onOpenBoard);
+  const onOpenDialogueRef = useRef(onOpenDialogue);
+  const residentsRef = useRef(residents);
+  onOpenBoardRef.current = onOpenBoard;
+  onOpenDialogueRef.current = onOpenDialogue;
+  residentsRef.current = residents;
+
+  // ponytail: 주민 명단은 id 집합으로만 비교한다. 아바타 URL이 매 fetch마다 달라져도(프리사인 등)
+  // 재생성을 트리거하지 않게 하기 위함. 아바타 갱신은 reloadKey 증가 시 반영된다.
+  const residentSignature = residents.map((r) => r.id).join("|");
+
   useEffect(() => {
     if (!containerRef.current) {
       return undefined;
@@ -1352,11 +1365,11 @@ export function PhaserVillage({
         width: containerRef.current.clientWidth,
       },
       scene: new VillageScene(
-        `VillageScene-${reloadKey}`,
-        onOpenDialogue,
-        onOpenBoard,
+        `VillageScene-${reloadKey}-${residentSignature}`,
+        () => onOpenDialogueRef.current(),
+        () => onOpenBoardRef.current(),
         () => disposed,
-        residents,
+        residentsRef.current,
       ),
       type: Phaser.AUTO,
     });
@@ -1365,7 +1378,8 @@ export function PhaserVillage({
       disposed = true;
       game.destroy(true);
     };
-  }, [reloadKey, onOpenBoard, onOpenDialogue, residents]);
+    // residentSignature: 실제 주민 명단(id)이 바뀔 때만 재생성. reloadKey: 명시적 새로고침.
+  }, [reloadKey, residentSignature]);
 
   useEffect(() => {
     function handleMinimapUpdate(event: Event) {
