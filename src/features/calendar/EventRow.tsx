@@ -15,7 +15,7 @@ type Props = {
   isToday: boolean;
   onToggle: () => void;
   onDelete: () => Promise<void>;
-  onAbandon: () => Promise<void>;
+  onFail: () => Promise<void>;
   onEdit: (
     title: string,
     tagId: number | null,
@@ -55,7 +55,7 @@ export function EventRow({
   isToday,
   onToggle,
   onDelete,
-  onAbandon,
+  onFail,
   onEdit,
   onCreateTag,
   onDeleteTag,
@@ -81,10 +81,10 @@ export function EventRow({
     }
   };
 
-  const handleAbandon = async () => {
+  const handleFail = async () => {
     setDeleteError("");
     try {
-      await onAbandon();
+      await onFail();
     } catch {
       setDeleteError("포기에 실패했어요.");
     }
@@ -205,7 +205,7 @@ export function EventRow({
                   : "삭제하면 되돌릴 수 없어요."
               }
               confirmLabel={locked ? "포기하기" : undefined}
-              onConfirm={() => void (locked ? handleAbandon() : handleDelete())}
+              onConfirm={() => void (locked ? handleFail() : handleDelete())}
             />
           </div>
         )}

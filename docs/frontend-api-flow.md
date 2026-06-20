@@ -145,7 +145,7 @@ type PlannerSavePayload = {
 | 일정 수정 | PATCH | `/schedules/{scheduleId}/` |
 | TODO 삭제 | DELETE | `/todos/{todoId}/` |
 | 일정 삭제 | DELETE | `/schedules/{scheduleId}/` |
-| TODO 포기 | PATCH | `/todos/{todoId}/abandon/` |
+| TODO 실패 처리 | PATCH | `/todos/{todoId}/fail/` |
 
 캘린더는 조회 결과의 `todos`, `schedules`를 화면 이벤트로 합쳐서 표시한다.
 

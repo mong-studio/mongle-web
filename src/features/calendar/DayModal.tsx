@@ -38,7 +38,7 @@ type DayModalProps = {
     description: string,
   ) => Promise<void>;
   onDeleteEvent: (id: string) => Promise<void>;
-  onAbandonEvent: (id: string) => Promise<void>;
+  onFailEvent: (id: string) => Promise<void>;
   onEditEvent: (
     id: string,
     title: string,
@@ -79,7 +79,7 @@ function DayModalPanel({
   tags,
   onAddEvent,
   onDeleteEvent,
-  onAbandonEvent,
+  onFailEvent,
   onEditEvent,
   onCreateTag,
   onDeleteTag,
@@ -152,7 +152,7 @@ function DayModalPanel({
                       isToday={isToday}
                       onToggle={() => onToggle(e.id)}
                       onDelete={() => onDeleteEvent(e.id)}
-                      onAbandon={() => onAbandonEvent(e.id)}
+                      onFail={() => onFailEvent(e.id)}
                       onEdit={(title, tagId, startStr, endStr, description) =>
                         onEditEvent(e.id, title, tagId, startStr, endStr, description)
                       }
