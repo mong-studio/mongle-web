@@ -482,7 +482,7 @@ export function CharacterModal({
                       <span>↻</span> 다시 생성
                     </button>
                     <button type="button" className="ccCompleteBtn" onClick={onClose}>
-                      ✓ 완료
+                      ✓ 입주하기
                     </button>
                   </div>
                 </div>
