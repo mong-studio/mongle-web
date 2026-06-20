@@ -140,10 +140,10 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
     }
   }, []);
 
-  const handleAbandonEvent = useCallback(async (id: string) => {
+  const handleFailEvent = useCallback(async (id: string) => {
     if (!id.startsWith("todo-")) return;
     const todoId = id.slice(5);
-    await apiClient.patch(`/todos/${todoId}/abandon/`);
+    await apiClient.patch(`/todos/${todoId}/fail/`);
     setTodos((prev) => prev.map((t) => (t.todo_id === todoId ? { ...t, status: "FAILED" } : t)));
   }, []);
 
@@ -239,7 +239,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
             onToggle={handleToggle}
             onAddEvent={handleAddEvent}
             onDeleteEvent={handleDeleteEvent}
-            onAbandonEvent={handleAbandonEvent}
+            onFailEvent={handleFailEvent}
             onEditEvent={handleEditEvent}
             onCreateTag={createTag}
             onDeleteTag={deleteTag}
