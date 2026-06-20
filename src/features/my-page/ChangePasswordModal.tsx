@@ -72,7 +72,7 @@ export function ChangePasswordModal({ open, onClose, onSubmit }: Props) {
   if (!open) return null;
 
   return (
-    <div className="suBackdrop" role="presentation" style={{ zIndex: 220 }}>
+    <div className="modalBackdrop suBackdrop" role="presentation" style={{ zIndex: 220 }}>
       <section className="suModal" role="dialog" aria-modal="true" aria-labelledby="cp-title">
         <button type="button" className="suClose" onClick={onClose} aria-label="닫기">
           ✕
