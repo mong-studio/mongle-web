@@ -2,6 +2,7 @@
 import Phaser from "phaser";
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
+import { FullScreenLoader } from "../../shared/ui/FullScreenLoader.js";
 import "./PhaserVillage.css";
 
 const MAP_BASE_PATH = "/assets/map";
@@ -276,9 +277,19 @@ class VillageScene extends Phaser.Scene {
       if (this.missingAssets.length > 0) {
         console.warn("Mongle map loaded with missing assets", this.missingAssets);
       }
+      this.signalReady();
     } catch (error) {
       console.error("Mongle map failed to load", error);
+      this.signalReady(); // 실패해도 로딩 화면이 영원히 남지 않게 한다
     }
+  }
+
+  // 맵 배치(fitCamera)까지 끝난 뒤 React에 알려 전체 화면 로딩을 해제한다.
+  private signalReady() {
+    if (this.isDisposed()) {
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("mongle-village-ready"));
   }
 
   private async loadTilesets(map: TiledMap) {
@@ -1331,6 +1342,7 @@ export function PhaserVillage({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [minimapState, setMinimapState] = useState<MinimapState | null>(null);
   const [objectHint, setObjectHint] = useState<ObjectHintState | null>(null);
+  const [villageReady, setVillageReady] = useState(false);
 
   // 최신 콜백·주민을 ref로 유지해서, 이 값들이 바뀌어도 Phaser 게임을 재생성하지 않는다.
   // (게임 전체 destroy/재생성 = 배경 깜빡임. 모달을 열 때마다 일어나던 현상의 원인)
@@ -1350,6 +1362,7 @@ export function PhaserVillage({
       return undefined;
     }
 
+    setVillageReady(false);
     let disposed = false;
     const game = new Phaser.Game({
       backgroundColor: "#47783d",
@@ -1400,6 +1413,15 @@ export function PhaserVillage({
     return () => window.removeEventListener("mongle-object-hint-update", handleObjectHintUpdate);
   }, []);
 
+  useEffect(() => {
+    function handleVillageReady() {
+      setVillageReady(true);
+    }
+
+    window.addEventListener("mongle-village-ready", handleVillageReady);
+    return () => window.removeEventListener("mongle-village-ready", handleVillageReady);
+  }, []);
+
   const viewportStyle = getMinimapViewportStyle(minimapState);
   const markers = minimapState?.markers ?? [];
 
@@ -1411,6 +1433,7 @@ export function PhaserVillage({
         role="img"
         aria-label="몽글마을 Phaser 배경"
       />
+      <FullScreenLoader show={!villageReady} />
       {objectHint ? (
         <span
           className="villageObjectHint"

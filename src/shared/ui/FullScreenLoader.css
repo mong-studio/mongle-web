@@ -1,0 +1,101 @@
+/* 전체 화면 사과 로딩 오버레이 */
+.fsLoader {
+  position: fixed;
+  inset: 0;
+  z-index: 50; /* 알림(z:46) 포함 모든 UI 위 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  background: #f7eecb;
+  font-family: var(--font-tmoney-dungunbaram);
+  color: #6e5c44;
+  animation: fsLoaderFade 0.2s ease-out both;
+}
+
+@keyframes fsLoaderFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fsLoaderTitle {
+  margin: 0;
+  font-size: clamp(40px, 8vw, 64px);
+  font-weight: 800; /* TMoneyDungunbaram ExtraBold */
+  letter-spacing: 2px;
+  text-wrap: balance;
+}
+
+.fsLoaderRow {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 4vw, 32px);
+}
+
+.fsLoaderApple {
+  height: clamp(56px, 10vw, 84px);
+  object-fit: contain;
+  image-rendering: pixelated;
+  opacity: 0;
+  /* 등장(1초 간격, 한 번) + 등장 후 살짝 튀어오르는 hop(반복) */
+  animation:
+    fsAppleReveal 0.4s ease-out forwards,
+    fsAppleHop 2s ease-out infinite;
+}
+
+@keyframes fsAppleReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 2s 사이클 = 사과 4개 × 0.5s. hop은 앞 0.5초(0~25%)에만 일어나고
+   이후엔 멈춰서, 다음 사과가 0.5s 뒤 차례로 튀어오르는 파도가 된다. */
+@keyframes fsAppleHop {
+  0% {
+    transform: translateY(0);
+  }
+  12.5% {
+    transform: translateY(-18px);
+  }
+  25%,
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.fsLoaderCaption {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(18px, 3.4vw, 26px);
+  font-weight: 800; /* TMoneyDungunbaram ExtraBold (최대 실제 굵기) */
+  /* 더 굵은 face가 없어 stroke로 한 단계 더 두껍게 */
+  -webkit-text-stroke: 0.6px currentColor;
+  color: #9a876a;
+  letter-spacing: 1px;
+}
+
+.fsLoaderSprout {
+  font-size: 0.7em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fsLoader {
+    animation: none;
+  }
+  .fsLoaderApple {
+    animation: none;
+    opacity: 1; /* 애니메이션을 끄면 base opacity:0에 가려지므로 강제로 노출 */
+  }
+}
