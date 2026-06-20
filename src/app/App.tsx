@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { exchangeKakaoCode, toUserMessage } from "../features/auth/api.js";
+import { KakaoOnboardingModal } from "../features/auth/KakaoOnboardingModal.js";
 import { consumeKakaoCallback } from "../features/auth/kakaoCallback.js";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import {
@@ -133,7 +134,6 @@ export function App() {
   const authUserId = authUser?.userId;
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
-  // biome-ignore lint/correctness/noUnusedVariables: consumed by Task 9 (KakaoSignupModal)
   const [kakaoSignupToken, setKakaoSignupToken] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [feedOpen, setFeedOpen] = useState(false);
@@ -832,6 +832,16 @@ export function App() {
       />
 
       <NotificationPanel open={notificationOpen} onClose={() => setNotificationOpen(false)} />
+
+      <KakaoOnboardingModal
+        open={kakaoSignupToken !== null}
+        signupToken={kakaoSignupToken ?? ""}
+        onClose={() => setKakaoSignupToken(null)}
+        onComplete={() => {
+          setKakaoSignupToken(null);
+          showNotice("환영해요! 몽글마을에 오신 걸 축하해요.");
+        }}
+      />
 
       <NotificationToastLayer />
 
