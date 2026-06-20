@@ -27,6 +27,12 @@ export type TodoChatFollowUpResult = {
   missing_aspects: string[];
 };
 
+export type TodoChatOutOfScopeResult = {
+  kind: "out_of_scope";
+  thread_id: string;
+  message: string;
+};
+
 export type PlannerTask = {
   title: string;
   due_date: string;
@@ -106,11 +112,12 @@ function unwrapApiResult<T>(body: T | ApiEnvelope<T>): T {
 export async function chatTodos(payload: {
   message: string;
   thread_id?: string | null;
-}): Promise<TodoChatFollowUpResult | TodoGenerateResult> {
+}): Promise<TodoChatFollowUpResult | TodoChatOutOfScopeResult | TodoGenerateResult> {
   const { data } = await apiClient.post<
     | TodoChatFollowUpResult
+    | TodoChatOutOfScopeResult
     | TodoGenerateResult
-    | ApiEnvelope<TodoChatFollowUpResult | TodoGenerateResult>
+    | ApiEnvelope<TodoChatFollowUpResult | TodoChatOutOfScopeResult | TodoGenerateResult>
   >("/todos/chat/", payload);
   return unwrapApiResult(data);
 }

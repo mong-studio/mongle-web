@@ -122,6 +122,15 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
           },
         ]);
         onNotice("플래너가 일자별 실행안을 만들었어요.");
+      } else if (result.kind === "out_of_scope") {
+        setMessages((current) => [
+          ...current,
+          {
+            id: createId("msg"),
+            role: "chief",
+            text: result.message || "플래너로 도와드릴 수 있는 범위를 벗어났어요.",
+          },
+        ]);
       } else {
         setMessages((current) => [
           ...current,
