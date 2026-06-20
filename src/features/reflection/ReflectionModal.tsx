@@ -42,12 +42,6 @@ const REFLECTION_REWARD_MIN_LENGTH = 30;
 const MAX_REFLECTION_LENGTH = 400;
 const HISTORY_LOOKBACK_DAYS = 30;
 const EMPTY_SERVER_FIELD_TEXT = "기록하지 않았어요.";
-const DUMMY_HISTORY_ENTRY: ReflectionEntry = {
-  id: "dummy-reflection-2026-05-15",
-  date: "2026-05-15",
-  good: "기획서 초안을 잘 정리해서 뿌듯했어요.\n헬스도 꾸준히 해서 몸이 가벼워졌어요.\n독서 시간을 챙겨서 마음이 여유로웠어요.",
-  regret: "산책을 못 나가서 조금 아쉬웠어요.\n내일은 틈틈이 휴식도 챙겨야겠어요.",
-};
 const DIARY_ICONS = {
   apple: "/assets/icon/icon-apple.png",
   bear: "/assets/icon/bear.png",
@@ -241,14 +235,11 @@ export function ReflectionModal({
         const loadedHistoryEntries = historyResults.filter(
           (entry): entry is ReflectionEntry => entry !== null,
         );
-        setEntries([
-          ...loadedEntries,
-          ...(loadedHistoryEntries.length > 0 ? loadedHistoryEntries : [DUMMY_HISTORY_ENTRY]),
-        ]);
+        setEntries([...loadedEntries, ...loadedHistoryEntries]);
       } catch (error) {
         if (!ignore) {
           const code = getApiErrorCode(error);
-          setEntries([DUMMY_HISTORY_ENTRY]);
+          setEntries([]);
           onNotice(
             code === "INVALID_TOKEN" || code === "AUTHENTICATION_FAILED"
               ? "로그인 후 회고를 불러올 수 있어요."
@@ -652,7 +643,8 @@ export function ReflectionModal({
                     사과 15개를 지불해야 수정할 수 있어요.
                   </p>
                   <b>
-                    <DiaryIcon name="apple" />- 15
+                    <DiaryIcon name="apple" />
+                    -15
                   </b>
                 </div>
                 <small>보유 사과 {tokenBalance}개</small>
@@ -727,14 +719,16 @@ export function ReflectionModal({
         )}
 
         {todayEntry && !isEditingExistingEntry && isTodayPage ? (
-          <button
-            type="button"
-            className="reflectionEditButton"
-            onClick={() => requestEditReflection(todayEntry)}
-          >
-            <DiaryIcon name="pencil" />
-            수정하기
-          </button>
+          <div className="reflectionActions">
+            <button
+              type="button"
+              className="reflectionEditButton"
+              onClick={() => requestEditReflection(todayEntry)}
+            >
+              <DiaryIcon name="pencil" />
+              수정하기
+            </button>
+          </div>
         ) : null}
 
         {isEditingExistingEntry ? (
@@ -757,7 +751,7 @@ export function ReflectionModal({
               {isSaving ? "저장 중" : "수정 완료"}
             </button>
           </div>
-        ) : isTodayPage ? (
+        ) : isTodayPage && !todayEntry ? (
           <div className="reflectionActions">
             <button
               type="button"
@@ -805,15 +799,16 @@ export function ReflectionModal({
 
       {!isEditingExistingEntry ? (
         <>
-          <button
-            type="button"
-            className="reflectionArrow reflectionArrowPrev"
-            onClick={() => movePage("prev")}
-            disabled={pageIndex === 0}
-            aria-label="이전 회고 보기"
-          >
-            <WestRoundedIcon aria-hidden="true" />
-          </button>
+          {!isTodayPage ? (
+            <button
+              type="button"
+              className="reflectionArrow reflectionArrowPrev"
+              onClick={() => movePage("prev")}
+              aria-label="이전 회고 보기"
+            >
+              <WestRoundedIcon aria-hidden="true" />
+            </button>
+          ) : null}
           <button
             type="button"
             className="reflectionArrow reflectionArrowNext"
