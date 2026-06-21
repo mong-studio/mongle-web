@@ -17,6 +17,7 @@ type Props = {
   onMoveOut: (characterId: string) => void;
   onUpdateProfile: (nickname: string, job: string, birth: string) => Promise<void>;
   onUpdatePassword: (current: string, next: string) => Promise<void>;
+  loginType: string;
 };
 
 const JOB_OPTIONS = [
@@ -76,6 +77,7 @@ export function MyPageModal({
   onMoveOut,
   onUpdateProfile,
   onUpdatePassword,
+  loginType,
 }: Props) {
   const [changePwOpen, setChangePwOpen] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
@@ -321,14 +323,16 @@ export function MyPageModal({
                   <span>계정 설정</span>
                   <span className="mpSecFleur">✿</span>
                 </div>
-                <button
-                  type="button"
-                  className="mpSettingsRow"
-                  onClick={() => setChangePwOpen(true)}
-                >
-                  <img src="/assets/myPage/lock-flower.png" alt="" />
-                  비밀번호 변경
-                </button>
+                {loginType !== "kakao" && (
+                  <button
+                    type="button"
+                    className="mpSettingsRow"
+                    onClick={() => setChangePwOpen(true)}
+                  >
+                    <img src="/assets/myPage/lock-flower.png" alt="" />
+                    비밀번호 변경
+                  </button>
+                )}
                 <button type="button" className="mpWithdrawBtn" onClick={onWithdraw}>
                   회원 탈퇴
                 </button>
@@ -356,15 +360,17 @@ export function MyPageModal({
           </div>
         )}
       </div>
-      <ChangePasswordModal
-        open={changePwOpen}
-        onClose={() => setChangePwOpen(false)}
-        onSubmit={async (current, next) => {
-          await onUpdatePassword(current, next);
-          setChangePwOpen(false);
-          showToast("비밀번호가 변경되었어요!");
-        }}
-      />
+      {loginType !== "kakao" && (
+        <ChangePasswordModal
+          open={changePwOpen}
+          onClose={() => setChangePwOpen(false)}
+          onSubmit={async (current, next) => {
+            await onUpdatePassword(current, next);
+            setChangePwOpen(false);
+            showToast("비밀번호가 변경되었어요!");
+          }}
+        />
+      )}
     </>
   );
 }

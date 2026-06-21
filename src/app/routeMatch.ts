@@ -9,11 +9,18 @@ export function normalize(pathname: string): string {
   return pathname.length > 1 ? pathname.replace(/\/$/, "") : pathname;
 }
 
+/**
+ * The OAuth callback path the app must accept so the Kakao `code`/`state` can be
+ * consumed on load (the handler then `replaceState`s back to a clean URL).
+ * Kept as a fixed root-level path to match `VITE_KAKAO_REDIRECT_URI`.
+ */
+export const KAKAO_CALLBACK_PATH = "/oauth/kakao/callback";
+
 /** The set of pathnames that count as the app's home, derived from `base`. */
 export function knownPaths(base: string): ReadonlySet<string> {
   const normalizedBase = normalize(base || "/");
   const root = normalizedBase === "" ? "/" : normalizedBase;
-  return new Set([root, "/", `${root === "/" ? "" : root}/index.html`]);
+  return new Set([root, "/", `${root === "/" ? "" : root}/index.html`, KAKAO_CALLBACK_PATH]);
 }
 
 /** True when `pathname` is one of the app's known home paths for `base`. */

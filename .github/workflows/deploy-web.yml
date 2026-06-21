@@ -34,7 +34,10 @@ jobs:
 
       - name: Build
         env:
-          VITE_API_BASE: https://api.mongle-village.com
+          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+          VITE_KAKAO_JS_KEY: ${{ vars.VITE_KAKAO_JS_KEY }}
+          VITE_KAKAO_CLIENT_ID: ${{ vars.VITE_KAKAO_CLIENT_ID }}
+          VITE_KAKAO_REDIRECT_URI: ${{ vars.VITE_KAKAO_REDIRECT_URI }}
         run: npm run build
 
       - name: Configure AWS credentials

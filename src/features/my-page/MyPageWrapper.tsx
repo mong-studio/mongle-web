@@ -11,6 +11,7 @@ type UserProfile = {
   birth: string | null;
   token_balance: number;
   created_at?: string;
+  login_type: string;
 };
 
 type Props = {
@@ -101,6 +102,7 @@ export function MyPageWrapper({
       onMoveOut={onMoveOut}
       onUpdateProfile={handleUpdateProfile}
       onUpdatePassword={handleUpdatePassword}
+      loginType={userProfile?.login_type ?? ""}
     />
   );
 }

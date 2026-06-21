@@ -60,6 +60,10 @@ describe("isKnownPath", () => {
     expect(isKnownPath("/village/lost/page", base)).toBe(false);
   });
 
+  it("accepts the Kakao OAuth callback path so the code can be consumed", () => {
+    expect(isKnownPath("/oauth/kakao/callback", base)).toBe(true);
+  });
+
   it("matches the home path regardless of trailing slash", () => {
     expect(isKnownPath("/app/", "/app/")).toBe(true);
     expect(isKnownPath("/app", "/app/")).toBe(true);

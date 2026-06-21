@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { exchangeKakaoCode, toUserMessage } from "../features/auth/api.js";
+import { KakaoOnboardingModal } from "../features/auth/KakaoOnboardingModal.js";
+import { consumeKakaoCallback } from "../features/auth/kakaoCallback.js";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import {
   type CharacterListItem,
@@ -127,6 +130,7 @@ export function App() {
   const authUserId = authUser?.userId;
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [kakaoSignupToken, setKakaoSignupToken] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [feedOpen, setFeedOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
@@ -185,6 +189,25 @@ export function App() {
   }, [clearNoticeTimer, hideNoticeSoon]);
 
   useEffect(() => {
+    const code = consumeKakaoCallback();
+    if (!code) {
+      return;
+    }
+    void (async () => {
+      try {
+        const result = await exchangeKakaoCode(code);
+        if (result.status === "authenticated") {
+          useAuthStore.getState().setSocialSession(result);
+        } else {
+          setKakaoSignupToken(result.signup_token);
+        }
+      } catch (error) {
+        showNotice(toUserMessage(error));
+      }
+    })();
+  }, [showNotice]);
+
+  useEffect(() => {
     if (notice) {
       return;
     }
@@ -212,9 +235,11 @@ export function App() {
 
     let cancelled = false;
     const today = formatTodayIso();
-    apiClient
-      .get<ApiTodo[]>("/todos/", { params: { todo_date: today } })
-      .then((res) => {
+    const loadTodos = async () => {
+      try {
+        const res = await apiClient.get<ApiTodo[]>("/todos/", {
+          params: { todo_date: today },
+        });
         if (cancelled) {
           return;
         }
@@ -235,12 +260,13 @@ export function App() {
                 : null,
             })),
         );
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) {
           setTodos([]);
         }
-      });
+      }
+    };
+    void loadTodos();
 
     return () => {
       cancelled = true;
@@ -795,6 +821,16 @@ export function App() {
       />
 
       <NotificationPanel open={notificationOpen} onClose={() => setNotificationOpen(false)} />
+
+      <KakaoOnboardingModal
+        open={kakaoSignupToken !== null}
+        signupToken={kakaoSignupToken ?? ""}
+        onClose={() => setKakaoSignupToken(null)}
+        onComplete={() => {
+          setKakaoSignupToken(null);
+          showNotice("환영해요! 몽글마을에 오신 걸 축하해요.");
+        }}
+      />
 
       <NotificationToastLayer />
 

@@ -82,6 +82,7 @@ describe("useAuthStore", () => {
       email: "test@test.com",
       user_name: "테스터",
       token_balance: 5,
+      login_type: "email",
     });
 
     await useAuthStore.getState().restoreSession();
@@ -111,5 +112,24 @@ describe("useAuthStore", () => {
     expect(state.status).toBe("anonymous");
     expect(state.accessToken).toBeNull();
     expect(state.user).toBeNull();
+  });
+
+  it("setSocialSession sets authenticated user and token", () => {
+    useAuthStore.getState().setSocialSession({
+      status: "authenticated",
+      access_token: "atk",
+      token_type: "Bearer",
+      expires_in_seconds: 3600,
+      users: {
+        user_id: "u1",
+        email: "s@example.com",
+        user_name: "소셜",
+        has_character: false,
+      },
+    });
+    const state = useAuthStore.getState();
+    expect(state.status).toBe("authenticated");
+    expect(state.accessToken).toBe("atk");
+    expect(state.user?.email).toBe("s@example.com");
   });
 });

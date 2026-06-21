@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import "./LoginModal.css";
-import { toUserMessage } from "./api.js";
+import { startKakaoLogin, toUserMessage } from "./api.js";
 import { type AuthState, useAuthStore } from "./store.js";
 
 type LoginModalProps = {
@@ -230,7 +230,13 @@ export function LoginModal({ open, onClose, onSwitchToSignup, onResetPw }: Login
           <button
             type="button"
             className="lgSocialBtn"
-            onClick={() => showToast("Kakao(으)로 시작하기")}
+            onClick={() => {
+              try {
+                startKakaoLogin();
+              } catch {
+                showToast("카카오 로그인 설정이 없어요.");
+              }
+            }}
           >
             <span className="lgSocialBadge--k">
               <span />
