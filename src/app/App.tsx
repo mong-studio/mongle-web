@@ -15,11 +15,7 @@ import { NotificationToastLayer } from "../features/notification/NotificationToa
 import { useNotificationStore } from "../features/notification/store.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
-import {
-  completeTodo as completeTodoRequest,
-  formatTodayIso,
-  syncTodoQuests,
-} from "../features/todo/todoApi.js";
+import { completeTodo as completeTodoRequest, formatTodayIso } from "../features/todo/todoApi.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
 import { PhaserVillage } from "../features/village/PhaserVillage.js";
 import { apiClient } from "../shared/api/client.js";
@@ -240,13 +236,6 @@ export function App() {
     let cancelled = false;
     const today = formatTodayIso();
     const loadTodos = async () => {
-      // 날짜가 바뀌어 오늘이 된 미래 TODO에 퀘스트를 먼저 채운다(best effort). 서버가 기존
-      // 배정 로직으로 당일·하루 5개 한도 내에서 생성하므로, 이후 목록 fetch에 새 퀘스트가 반영된다.
-      try {
-        await syncTodoQuests();
-      } catch {
-        /* 퀘스트 동기화 실패는 치명적이지 않다 — 목록 로드는 계속 진행 */
-      }
       try {
         const res = await apiClient.get<ApiTodo[]>("/todos/", {
           params: { todo_date: today },
