@@ -41,7 +41,7 @@ function getHudTagStyle(todo: TodoItem, tag: string): CSSProperties {
 export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: HudTodoListProps) {
   const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
   const [dismissedTooltipId, setDismissedTooltipId] = useState<string | null>(null);
-  const visibleTodos = todos.filter((todo) => todo.status !== "candidate").slice(0, 4);
+  const visibleTodos = todos.filter((todo) => todo.status !== "candidate");
 
   return (
     <aside className="hudTodoList" aria-label="오늘의 할 일">

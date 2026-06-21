@@ -180,6 +180,7 @@ type PlannerSavePayload = {
 
 | 동작 | 메서드 | 프론트 경로 |
 | --- | --- | --- |
+| 이전 회고 목록 | GET | `/reflections/?before={date}` |
 | 회고 컨텍스트 조회 | GET | `/reflections/context/{date}/` |
 | 날짜별 회고 조회 | GET | `/reflections/{date}/` |
 | 회고 생성 | POST | `/reflections/` |

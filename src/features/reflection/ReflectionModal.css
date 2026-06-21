@@ -293,15 +293,34 @@ body ::-webkit-scrollbar {
 
 .reflectionTodoList {
   display: grid;
-  height: 36%;
+  height: calc(80% - 5px);
+  min-height: 0;
+  align-content: start;
+  grid-auto-rows: 20%;
   margin-top: 5px;
-  padding: 0 3.7%;
+  padding: 0 2.2% 0 3.7%;
   list-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(190, 132, 68, 0.62) transparent;
+  scrollbar-width: thin;
+  touch-action: pan-y;
+}
+
+.reflectionTodoList::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+
+.reflectionTodoList::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(190, 132, 68, 0.62);
 }
 
 .reflectionTodoList li {
   display: grid;
-  grid-template-columns: 7% minmax(0, 1fr) 15%;
+  grid-template-columns: clamp(20px, 2vw, 30px) minmax(0, 1fr) 15%;
   align-items: center;
   border-bottom: 1px dashed rgba(219, 174, 111, 0.52);
   column-gap: 3%;
@@ -313,9 +332,10 @@ body ::-webkit-scrollbar {
 }
 
 .reflectionCheck {
-  width: 70%;
-  aspect-ratio: 1;
+  width: clamp(20px, 2vw, 30px);
+  height: clamp(20px, 2vw, 30px);
   display: grid;
+  justify-self: center;
   place-items: center;
   border: 2px solid #d79d79;
   border-radius: 5px;

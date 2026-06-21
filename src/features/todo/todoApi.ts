@@ -160,9 +160,14 @@ export async function previewTodoQuests(
   return data;
 }
 
-export async function completeTodo(todoId: string): Promise<{ todo_id: string; status: string }> {
-  const { data } = await apiClient.patch<{ todo_id: string; status: string }>(
-    `/todos/${todoId}/complete/`,
-  );
+export type TodoCompleteResponse = {
+  todo_id: string;
+  status: string;
+  reward: number;
+  token_balance: number;
+};
+
+export async function completeTodo(todoId: string): Promise<TodoCompleteResponse> {
+  const { data } = await apiClient.patch<TodoCompleteResponse>(`/todos/${todoId}/complete/`);
   return data;
 }

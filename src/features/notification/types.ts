@@ -3,7 +3,7 @@
  *   "resident" — 새 주민이 마을에 입주했을 때  (캐릭터 생성 완료)
  *   "reward"   — 할일 완료 보상을 받았을 때     (사과 +N)
  */
-export type NotificationToastType = "resident" | "reward";
+export type NotificationToastType = "resident" | "reward" | "reflection";
 
 /**
  * 토스트 / 알림 패널 양쪽에서 공통으로 쓰는 알림 데이터 구조.
@@ -17,4 +17,8 @@ export type NotificationToastItem = {
   avatarUrl?: string; // 캐릭터 이미지 URL (없으면 기본 아바타 사용)
   rewardApples?: number; // type:"reward" 일 때 지급되는 사과 개수
   createdAt: number; // Date.now() 타임스탬프 — 경과 시간 표시용
+  isRead: boolean;
+  source: "local" | "server";
+  serverId?: number;
+  reflectionDate?: string;
 };

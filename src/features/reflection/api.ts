@@ -43,6 +43,9 @@ export type ReflectionUpdateResponse = {
   good_points: string;
   improvement_points: string;
   reward: number;
+  update_cost?: number;
+  new_reward?: number;
+  token_delta?: number;
   updated_at: string;
 };
 
@@ -51,8 +54,10 @@ export async function fetchReflectionContext(date: string) {
   return data;
 }
 
-export async function fetchReflectionByDate(date: string) {
-  const { data } = await apiClient.get<ReflectionRecord>(`/reflections/${date}/`);
+export async function fetchPastReflections(before: string) {
+  const { data } = await apiClient.get<ReflectionRecord[]>("/reflections/", {
+    params: { before },
+  });
   return data;
 }
 

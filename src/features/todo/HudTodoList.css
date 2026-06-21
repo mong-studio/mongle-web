@@ -63,12 +63,22 @@
   list-style: none;
   margin: 0;
   padding: 9px 0 0;
+  overflow-x: hidden;
   overflow-y: auto;
-  scrollbar-width: none;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(151, 99, 46, 0.62) transparent;
+  scrollbar-width: thin;
+  touch-action: pan-y;
 }
 
 .hudTodoList ul::-webkit-scrollbar {
-  display: none;
+  display: block;
+  width: 6px;
+}
+
+.hudTodoList ul::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(151, 99, 46, 0.62);
 }
 
 .hudTodoList li {

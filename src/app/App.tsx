@@ -10,9 +10,11 @@ import {
   resumePendingCharacter,
 } from "../features/character/api.js";
 import { hasPendingJob } from "../features/character/pendingJob.js";
+import { fetchNotifications, markNotificationRead } from "../features/notification/api.js";
 import { NotificationPanel } from "../features/notification/NotificationPanel.js";
 import { NotificationToastLayer } from "../features/notification/NotificationToast.js";
 import { useNotificationStore } from "../features/notification/store.js";
+import type { NotificationToastItem } from "../features/notification/types.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
 import { completeTodo as completeTodoRequest, formatTodayIso } from "../features/todo/todoApi.js";
@@ -20,6 +22,7 @@ import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.j
 import { PhaserVillage } from "../features/village/PhaserVillage.js";
 import { apiClient } from "../shared/api/client.js";
 import { FEATURES, type FeatureId } from "./featureRegistry.js";
+import { applyAppleDelta } from "./model/appleBalance.js";
 import type { Resident, TodoTagColor } from "./model/appTypes.js";
 import { AppHeader } from "./ui/AppHeader.js";
 import { AppModalLayer } from "./ui/AppModalLayer.js";
@@ -28,7 +31,6 @@ import { NoticeToast } from "./ui/NoticeToast.js";
 import { VillageDialogue } from "./ui/VillageDialogue.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
-const MAX_DAILY_APPLES = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 type ApiTodo = {
@@ -117,9 +119,10 @@ export function App() {
   const [sourceImageName, setSourceImageName] = useState("");
   const [sourceImagePreview, setSourceImagePreview] = useState("");
   const [sourceImageFile, setSourceImageFile] = useState<File | null>(null);
-  const [notice, setNotice] = useState("오늘의 사과 보상은 20개까지 받을 수 있어요.");
+  const [notice, setNotice] = useState("오늘의 사과 보상은 10개까지 받을 수 있어요.");
   const [noticeVisible, setNoticeVisible] = useState(true);
   const noticeTimerRef = useRef<number | null>(null);
+  const notificationSyncRequestRef = useRef(0);
   const [isBusy, setIsBusy] = useState(false);
   const [villageVersion, setVillageVersion] = useState(0);
   const [signupOpen, setSignupOpen] = useState(false);
@@ -135,10 +138,15 @@ export function App() {
   const [feedOpen, setFeedOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
   const [reflectionOpen, setReflectionOpen] = useState(false);
+  const [reflectionDate, setReflectionDate] = useState<string>();
   const [lastCreatedResident, setLastCreatedResident] = useState<Resident | null>(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const pushToast = useNotificationStore((s) => s.pushToast);
   const notifHistory = useNotificationStore((s) => s.history);
+  const replaceServerNotifications = useNotificationStore((s) => s.replaceServerNotifications);
+  const markNotificationReadLocally = useNotificationStore((s) => s.markRead);
+  const markAllNotificationsReadLocally = useNotificationStore((s) => s.clearHistory);
+  const resetNotifications = useNotificationStore((s) => s.reset);
 
   const overlayOpenRef = useRef(false);
   overlayOpenRef.current =
@@ -226,6 +234,52 @@ export function App() {
       })
       .catch(() => {});
   }, [authStatus]);
+
+  const syncNotifications = useCallback(
+    async (announceReflectionDate?: string) => {
+      if (authStatus !== "authenticated") {
+        return;
+      }
+      const requestId = notificationSyncRequestRef.current + 1;
+      notificationSyncRequestRef.current = requestId;
+      try {
+        const notifications = await fetchNotifications();
+        if (requestId !== notificationSyncRequestRef.current) {
+          return;
+        }
+        replaceServerNotifications(notifications, announceReflectionDate);
+      } catch {
+        // 다음 주기나 패널 재오픈 때 다시 동기화한다.
+      }
+    },
+    [authStatus, replaceServerNotifications],
+  );
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") {
+      resetNotifications();
+      return;
+    }
+
+    void syncNotifications();
+    const interval = window.setInterval(() => void syncNotifications(), 60_000);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void syncNotifications();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [authStatus, resetNotifications, syncNotifications]);
+
+  useEffect(() => {
+    if (notificationOpen) {
+      void syncNotifications();
+    }
+  }, [notificationOpen, syncNotifications]);
 
   useEffect(() => {
     if (authStatus !== "authenticated" || !authUserId) {
@@ -478,6 +532,13 @@ export function App() {
     [authStatus, guardFeatureAccess, showNotice],
   );
 
+  const openTodoFromHud = useCallback(() => {
+    void guardFeatureAccess(() => {
+      setDialogueOpen(false);
+      setActiveFeature("todo");
+    });
+  }, [guardFeatureAccess]);
+
   // 새로고침/이탈로 중단됐던 생성 잡을 로그인 후 한 번 이어서 마무리한다.
   const resumedRef = useRef(false);
   useEffect(() => {
@@ -663,18 +724,23 @@ export function App() {
       setTodos((current) =>
         current.map((todo) => (todo.id === todoId ? { ...todo, status: "done" } : todo)),
       );
-      setApples((current) => Math.min(MAX_DAILY_APPLES, current + 1));
+      setApples((current) => applyAppleDelta(current, 1));
       showNotice(`${targetTodo.title} 완료! 사과 1개를 받았어요.`);
       return;
     }
 
     try {
-      await completeTodoRequest(todoId);
+      const completed = await completeTodoRequest(todoId);
       setTodos((current) =>
         current.map((todo) => (todo.id === todoId ? { ...todo, status: "done" } : todo)),
       );
-      setApples((current) => Math.min(MAX_DAILY_APPLES, current + 1));
-      showNotice(`${targetTodo.title} 완료! 사과 1개를 받았어요.`);
+      setApples(completed.token_balance);
+      showNotice(
+        completed.reward > 0
+          ? `${targetTodo.title} 완료! 사과 ${completed.reward}개를 받았어요.`
+          : `${targetTodo.title} 완료! 오늘의 사과 보상 한도에 도달했어요.`,
+      );
+      await syncNotifications(targetTodo.dueDate);
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
       showNotice(`TODO 완료 처리에 실패했어요. ${message}`);
@@ -682,7 +748,37 @@ export function App() {
   }
 
   function rewardReflectionApples(amount: number) {
-    setApples((current) => Math.max(0, Math.min(MAX_DAILY_APPLES, current + amount)));
+    setApples((current) => applyAppleDelta(current, amount));
+  }
+
+  async function handleNotificationItemClick(item: NotificationToastItem) {
+    if (!item.isRead) {
+      markNotificationReadLocally(item.id);
+      if (item.serverId !== undefined) {
+        try {
+          await markNotificationRead(item.serverId);
+        } catch {
+          void syncNotifications();
+        }
+      }
+    }
+
+    if (item.type === "reflection" && item.reflectionDate) {
+      setNotificationOpen(false);
+      setReflectionDate(item.reflectionDate);
+      setReflectionOpen(true);
+    }
+  }
+
+  async function handleMarkAllNotificationsRead() {
+    const unreadServerIds = notifHistory.flatMap((item) =>
+      !item.isRead && item.serverId !== undefined ? [item.serverId] : [],
+    );
+    markAllNotificationsReadLocally();
+    const results = await Promise.allSettled(unreadServerIds.map(markNotificationRead));
+    if (results.some((result) => result.status === "rejected")) {
+      void syncNotifications();
+    }
   }
 
   return (
@@ -699,7 +795,12 @@ export function App() {
         apples={apples}
         authStatus={authStatus}
         authUser={authUser}
-        onOpenDiary={() => void guardFeatureAccess(() => setReflectionOpen(true))}
+        onOpenDiary={() =>
+          void guardFeatureAccess(() => {
+            setReflectionDate(formatTodayIso());
+            setReflectionOpen(true);
+          })
+        }
         onOpenNotifications={() =>
           void guardFeatureAccess(() => setNotificationOpen((prev) => !prev))
         }
@@ -719,7 +820,7 @@ export function App() {
         todos={todos}
         tagColors={todoTagColors}
         onCompleteTodo={completeHudTodo}
-        onAddTodo={() => openFeature("todo")}
+        onAddTodo={openTodoFromHud}
       />
 
       <VillageDialogue
@@ -765,6 +866,7 @@ export function App() {
         isBusy={isBusy}
         loginOpen={loginOpen}
         reflectionOpen={reflectionOpen}
+        reflectionDate={reflectionDate}
         resetPwOpen={resetPwOpen}
         residents={residents}
         selectedKeywordCategories={selectedKeywordCategories}
@@ -792,7 +894,10 @@ export function App() {
         }}
         onMyPageClose={() => setShowMyPage(false)}
         onNotice={showNotice}
-        onReflectionClose={() => setReflectionOpen(false)}
+        onReflectionClose={() => {
+          setReflectionOpen(false);
+          setReflectionDate(undefined);
+        }}
         onResetPwClose={() => {
           setResetPwOpen(false);
         }}
@@ -820,7 +925,12 @@ export function App() {
         onToggleKeyword={toggleKeywordCategory}
       />
 
-      <NotificationPanel open={notificationOpen} onClose={() => setNotificationOpen(false)} />
+      <NotificationPanel
+        open={notificationOpen}
+        onClose={() => setNotificationOpen(false)}
+        onItemClick={(item) => void handleNotificationItemClick(item)}
+        onMarkAllRead={() => void handleMarkAllNotificationsRead()}
+      />
 
       <KakaoOnboardingModal
         open={kakaoSignupToken !== null}

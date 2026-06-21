@@ -6,20 +6,20 @@
  *
  * ┌─ state ─────────────────────────────────────────────────────┐
  * │  toasts   현재 화면에 떠 있는 토스트 목록 (최대 동시 N개)      │
- * │  history  이번 세션 동안 받은 알림 전체 목록 (패널에서 표시)    │
+ * │  history  서버 알림과 이번 세션 로컬 알림 목록                 │
  * └─────────────────────────────────────────────────────────────┘
  *
  * ┌─ actions ───────────────────────────────────────────────────┐
  * │  pushToast(payload)       토스트 발행 — toasts + history 추가 │
  * │  dismissToast(id)         토스트 닫기 — toasts 에서만 제거    │
- * │  dismissFromHistory(id)   패널에서 개별 알림 삭제             │
- * │  clearHistory()           "모두 읽기" — history 전체 비우기   │
+ * │  clearHistory()           "모두 읽기" — 목록에서 제거         │
  * └─────────────────────────────────────────────────────────────┘
  *
- * ※ 페이지 새로고침 시 초기화됨 (서버 저장 없음, 세션 메모리만 유지)
+ * 서버 알림은 재조회하며 주민 생성 등 로컬 알림만 새로고침 시 초기화된다.
  */
 
 import { create } from "zustand";
+import type { ServerNotification } from "./api.js";
 import type { NotificationToastItem, NotificationToastType } from "./types.js";
 
 /** pushToast 호출 시 넘기는 인자 타입 (id·createdAt 은 store 내부에서 자동 생성) */
@@ -34,15 +34,22 @@ type PushPayload = {
 type NotificationStore = {
   toasts: NotificationToastItem[];
   history: NotificationToastItem[];
+  serverHydrated: boolean;
   pushToast: (payload: PushPayload) => void;
   dismissToast: (id: string) => void;
-  dismissFromHistory: (id: string) => void;
   clearHistory: () => void;
+  replaceServerNotifications: (
+    notifications: ServerNotification[],
+    announceReflectionDate?: string,
+  ) => void;
+  markRead: (id: string) => void;
+  reset: () => void;
 };
 
 export const useNotificationStore = create<NotificationStore>((set) => ({
   toasts: [],
   history: [],
+  serverHydrated: false,
 
   /**
    * 새 알림 발행.
@@ -54,6 +61,8 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
       ...payload,
       id: crypto.randomUUID(),
       createdAt: Date.now(),
+      isRead: false,
+      source: "local",
     };
     set((state) => ({
       toasts: [...state.toasts, item],
@@ -67,12 +76,46 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
       toasts: state.toasts.filter((t) => t.id !== id),
     })),
 
-  /** 패널에서 개별 알림 ✕ 클릭 — history 에서만 제거 */
-  dismissFromHistory: (id) =>
+  /** "모두 읽기" 버튼 — 읽은 알림은 목록에서 제거 */
+  clearHistory: () => set({ history: [] }),
+
+  replaceServerNotifications: (notifications, announceReflectionDate) =>
+    set((state) => {
+      const existingServerIds = new Set(
+        state.history.flatMap((item) => (item.serverId === undefined ? [] : [item.serverId])),
+      );
+      const serverItems: NotificationToastItem[] = notifications
+        .filter((notification) => !notification.is_read)
+        .map((notification) => ({
+          id: `server-${notification.notification_id}`,
+          type: notification.type === "reflection" ? "reflection" : "resident",
+          title: notification.title,
+          body: notification.content,
+          createdAt: new Date(notification.created_at).getTime(),
+          isRead: false,
+          source: "server",
+          serverId: notification.notification_id,
+          reflectionDate: notification.data.reflection_date,
+        }));
+      const newToasts = serverItems.filter(
+        (item) =>
+          !item.isRead &&
+          item.serverId !== undefined &&
+          !existingServerIds.has(item.serverId) &&
+          (state.serverHydrated || item.reflectionDate === announceReflectionDate),
+      );
+      const localItems = state.history.filter((item) => item.source === "local");
+      return {
+        history: [...serverItems, ...localItems].sort((a, b) => b.createdAt - a.createdAt),
+        toasts: [...state.toasts, ...newToasts],
+        serverHydrated: true,
+      };
+    }),
+
+  markRead: (id) =>
     set((state) => ({
-      history: state.history.filter((t) => t.id !== id),
+      history: state.history.filter((item) => item.id !== id),
     })),
 
-  /** "모두 읽기" 버튼 — history 전체 삭제 */
-  clearHistory: () => set(() => ({ history: [] })),
+  reset: () => set({ toasts: [], history: [], serverHydrated: false }),
 }));

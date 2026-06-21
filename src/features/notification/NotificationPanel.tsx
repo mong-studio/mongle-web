@@ -11,8 +11,8 @@
  *   - open=false 이면 null 반환 → DOM 에서 완전히 제거됨
  *   - 패널 바깥(배경 딤) 클릭 or Esc 키 → onClose() 호출
  *   - 패널 안쪽 클릭 → stopPropagation() 으로 닫힘 차단
- *   - "모두 읽기" 버튼 → store.clearHistory() → 목록이 빈 상태로 전환
- *   - 개별 ✕ 버튼 → store.dismissFromHistory(id)
+ *   - "모두 읽기" 버튼 → 서버와 로컬 알림을 읽음 처리하고 목록에서 제거
+ *   - 회고 알림 클릭 → 읽음 처리 후 해당 날짜 회고 열기
  *
  * App.tsx 에서 사용
  *   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -27,6 +27,8 @@ import "./notification.css";
 type NotificationPanelProps = {
   open: boolean;
   onClose: () => void;
+  onItemClick: (item: NotificationToastItem) => void;
+  onMarkAllRead: () => void;
 };
 
 /**
@@ -37,6 +39,7 @@ type NotificationPanelProps = {
 function iconForItem(item: NotificationToastItem): string {
   if (item.avatarUrl) return item.avatarUrl;
   if (item.type === "reward") return "/assets/notification/icon-apple.png";
+  if (item.type === "reflection") return "/assets/icon/calendar.png";
   return "/assets/character/avatar.png";
 }
 
@@ -49,7 +52,12 @@ function relativeTime(createdAt: number) {
 }
 
 /** 알림 패널 루트 컴포넌트 */
-export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
+export function NotificationPanel({
+  open,
+  onClose,
+  onItemClick,
+  onMarkAllRead,
+}: NotificationPanelProps) {
   const backdrop = useBackdropDismiss(onClose);
 
   // open=false 면 렌더링 자체를 하지 않음
@@ -73,17 +81,22 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
       >
         {/* 말풍선 꼬리 (▲) — CSS로 사각형을 45° 회전해 삼각형처럼 표현 */}
         <div className="notifPanelPointer" />
-        <PanelInner onClose={onClose} />
+        <PanelInner onItemClick={onItemClick} onMarkAllRead={onMarkAllRead} />
       </div>
     </div>
   );
 }
 
 /** 패널 내부 콘텐츠: 헤더 / 알림 목록 / 푸터 */
-function PanelInner({ onClose: _ }: { onClose: () => void }) {
+function PanelInner({
+  onItemClick,
+  onMarkAllRead,
+}: {
+  onItemClick: (item: NotificationToastItem) => void;
+  onMarkAllRead: () => void;
+}) {
   const history = useNotificationStore((s) => s.history);
-  const dismissFromHistory = useNotificationStore((s) => s.dismissFromHistory);
-  const clearHistory = useNotificationStore((s) => s.clearHistory);
+  const hasUnread = history.some((item) => !item.isRead);
 
   return (
     <div className="notifPanelInner">
@@ -92,8 +105,13 @@ function PanelInner({ onClose: _ }: { onClose: () => void }) {
         <div className="notifPanelHeaderTitle">
           <h2 className="notifPanelTitle">알 림</h2>
         </div>
-        {/* 모두 읽기: history 전체 삭제 → 빈 상태 표시 */}
-        <button type="button" className="notifPanelMarkAll" onClick={clearHistory}>
+        {/* 모두 읽기: 읽음 처리 후 목록에서 제거 */}
+        <button
+          type="button"
+          className="notifPanelMarkAll"
+          onClick={onMarkAllRead}
+          disabled={!hasUnread}
+        >
           모두 읽기
         </button>
       </div>
@@ -107,7 +125,7 @@ function PanelInner({ onClose: _ }: { onClose: () => void }) {
         <ul className="notifPanelList">
           {history.map((item) => (
             <li key={item.id}>
-              <div className="notifPanelCard">
+              <button type="button" className="notifPanelCard" onClick={() => onItemClick(item)}>
                 {/* 읽지 않음 빨간 점 — 카드 왼쪽 상단 모서리 */}
                 <span className="notifPanelCardUnreadDot" />
                 {/* 타입별 아이콘: resident=캐릭터 아바타, reward=사과 */}
@@ -129,19 +147,7 @@ function PanelInner({ onClose: _ }: { onClose: () => void }) {
                   </div>
                   <p className="notifPanelCardTime">{relativeTime(item.createdAt)}</p>
                 </div>
-
-                {/* 오른쪽 열: 닫기 / 읽지않음 점 / 꽃 장식 */}
-                <div className="notifPanelCardRight">
-                  <button
-                    type="button"
-                    className="notifPanelCardDismiss"
-                    aria-label="닫기"
-                    onClick={() => dismissFromHistory(item.id)}
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
+              </button>
             </li>
           ))}
         </ul>

@@ -305,10 +305,18 @@
   background: #fef8e6;
   border: 2px solid #e7c98c;
   border-radius: 14px;
-  padding: 9px 32px 9px 9px;
+  width: 100%;
+  padding: 9px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
   box-shadow:
     0 3px 8px rgba(150, 108, 40, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.notifPanelCard:hover {
+  background: #fffdf4;
 }
 
 /* 캐릭터 아바타 or 아이콘 이미지 */

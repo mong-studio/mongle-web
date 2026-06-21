@@ -24,6 +24,7 @@ type AppModalLayerProps = {
   lastCreatedResident: Resident | null;
   loginOpen: boolean;
   reflectionOpen: boolean;
+  reflectionDate?: string;
   resetPwOpen: boolean;
   residents: Resident[];
   selectedKeywordCategories: string[];
@@ -69,6 +70,7 @@ export function AppModalLayer({
   lastCreatedResident,
   loginOpen,
   reflectionOpen,
+  reflectionDate,
   resetPwOpen,
   residents,
   selectedKeywordCategories,
@@ -117,7 +119,9 @@ export function AppModalLayer({
             onKeyDown={(event) => event.stopPropagation()}
           >
             <ReflectionModal
+              key={reflectionDate ?? "today"}
               todos={todos}
+              initialDate={reflectionDate}
               tokenBalance={apples}
               onRewardApples={onRewardApples}
               onNotice={onNotice}

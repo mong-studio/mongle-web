@@ -76,7 +76,12 @@ function ToastCard({ item }: { item: NotificationToastItem }) {
     <div ref={cardRef} className="notifToastCard">
       {/* 캐릭터 아바타 — 없으면 기본 이미지 */}
       <img
-        src={item.avatarUrl ?? "/assets/character/avatar.png"}
+        src={
+          item.avatarUrl ??
+          (item.type === "reflection"
+            ? "/assets/icon/calendar.png"
+            : "/assets/character/avatar.png")
+        }
         alt=""
         className="notifToastAvatar"
       />
