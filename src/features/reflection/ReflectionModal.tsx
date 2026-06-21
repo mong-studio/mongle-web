@@ -6,7 +6,7 @@ import type { ClipboardEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
   createReflection,
-  fetchReflectionByDate,
+  fetchPastReflections,
   fetchReflectionContext,
   type ReflectionContextResponse,
   type ReflectionRecord,
@@ -30,6 +30,7 @@ type ReflectionTodo = {
 
 type ReflectionModalProps = {
   todos: ReflectionTodo[];
+  initialDate?: string;
   tokenBalance: number;
   onRewardApples: (amount: number) => void;
   onNotice: (message: string) => void;
@@ -40,7 +41,6 @@ const EDIT_TOKEN_COST = 15;
 const APPLE_REWARD_PER_FIELD = 2;
 const REFLECTION_REWARD_MIN_LENGTH = 30;
 const MAX_REFLECTION_LENGTH = 400;
-const HISTORY_LOOKBACK_DAYS = 30;
 const EMPTY_SERVER_FIELD_TEXT = "기록하지 않았어요.";
 const DIARY_ICONS = {
   apple: "/assets/icon/icon-apple.png",
@@ -73,12 +73,6 @@ function getTodayIso() {
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
-}
-
-function addDays(date: string, days: number) {
-  const value = new Date(`${date}T00:00:00`);
-  value.setDate(value.getDate() + days);
-  return value.toISOString().slice(0, 10);
 }
 
 function normalizeReflection(record: ReflectionRecord): ReflectionEntry {
@@ -146,12 +140,14 @@ function DiaryIcon({
 
 export function ReflectionModal({
   todos,
+  initialDate,
   tokenBalance,
   onRewardApples,
   onNotice,
   onClose,
 }: ReflectionModalProps) {
   const today = useMemo(() => getTodayIso(), []);
+  const reflectionDate = initialDate ?? today;
   const [entries, setEntries] = useState<ReflectionEntry[]>([]);
   const [contextTodos, setContextTodos] = useState<ReflectionTodo[] | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
@@ -165,29 +161,29 @@ export function ReflectionModal({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const todayEntry = entries.find((entry) => entry.date === today);
+  const primaryEntry = entries.find((entry) => entry.date === reflectionDate);
   const editingEntry = editingEntryId
     ? (entries.find((entry) => entry.id === editingEntryId) ?? null)
     : null;
   const historyEntries = [...entries]
-    .filter((entry) => entry.date !== today)
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .filter((entry) => entry.date !== reflectionDate && entry.date !== today)
+    .sort((a, b) => a.date.localeCompare(b.date));
   const historyPageStart = Math.max(0, pageIndex - 1) * 2;
   const historyLeftEntry = historyEntries[historyPageStart];
   const historyRightEntry = historyEntries[historyPageStart + 1];
   const maxPageIndex = Math.ceil(historyEntries.length / 2);
-  const matchingTodayTodos = todos.filter(
-    (todo) => todo.dueDate === today && todo.status !== "candidate",
+  const matchingDateTodos = todos.filter(
+    (todo) => todo.dueDate === reflectionDate && todo.status !== "candidate",
   );
-  const todayTodos =
+  const reflectionTodos =
     contextTodos ??
-    (matchingTodayTodos.length > 0
-      ? matchingTodayTodos
+    (matchingDateTodos.length > 0
+      ? matchingDateTodos
       : todos.filter((todo) => todo.status !== "candidate"));
   const canSubmit = good.trim() || regret.trim();
-  const isTodayPage = pageIndex === 0;
+  const isPrimaryPage = pageIndex === 0;
   const isEditingExistingEntry = Boolean(editingEntry);
-  const isReadOnly = !isEditingExistingEntry && (Boolean(todayEntry) || !isTodayPage);
+  const isReadOnly = !isEditingExistingEntry && (Boolean(primaryEntry) || !isPrimaryPage);
   const hasEnoughEditTokens = tokenBalance >= EDIT_TOKEN_COST;
   const _expectedCreateReward =
     [good, regret].filter((value) => value.trim().length >= REFLECTION_REWARD_MIN_LENGTH).length *
@@ -199,7 +195,7 @@ export function ReflectionModal({
     async function loadReflectionData() {
       setIsLoading(true);
       try {
-        const context = await fetchReflectionContext(today);
+        const context = await fetchReflectionContext(reflectionDate);
         if (ignore) {
           return;
         }
@@ -213,28 +209,14 @@ export function ReflectionModal({
         }
         setContextTodos(normalizeContextTodos(context));
 
-        const historyDates = Array.from({ length: HISTORY_LOOKBACK_DAYS }, (_, index) =>
-          addDays(today, -(index + 1)),
-        );
-        const historyResults = await Promise.all(
-          historyDates.map(async (date) => {
-            try {
-              return normalizeReflection(await fetchReflectionByDate(date));
-            } catch (error) {
-              if (getApiErrorCode(error) === "REFLECTION_NOT_FOUND") {
-                return null;
-              }
-              throw error;
-            }
-          }),
-        );
+        const historyResults = await fetchPastReflections(today);
         if (ignore) {
           return;
         }
 
-        const loadedHistoryEntries = historyResults.filter(
-          (entry): entry is ReflectionEntry => entry !== null,
-        );
+        const loadedHistoryEntries = historyResults
+          .map(normalizeReflection)
+          .filter((entry) => entry.date !== reflectionDate);
         setEntries([...loadedEntries, ...loadedHistoryEntries]);
       } catch (error) {
         if (!ignore) {
@@ -257,7 +239,7 @@ export function ReflectionModal({
     return () => {
       ignore = true;
     };
-  }, [today, onNotice]);
+  }, [reflectionDate, today, onNotice]);
 
   function hydrateForm(entry: ReflectionEntry) {
     setGood(entry.good);
@@ -300,10 +282,11 @@ export function ReflectionModal({
 
   function warnIfTextLimitReached(field: "good" | "regret", event: FormEvent<HTMLTextAreaElement>) {
     const nativeEvent = event.nativeEvent as InputEvent;
+    const inputType = typeof nativeEvent.inputType === "string" ? nativeEvent.inputType : "";
     const textarea = event.currentTarget;
     const selectedLength = textarea.selectionEnd - textarea.selectionStart;
     if (
-      nativeEvent.inputType.startsWith("insert") &&
+      inputType.startsWith("insert") &&
       selectedLength === 0 &&
       textarea.value.length >= MAX_REFLECTION_LENGTH
     ) {
@@ -334,8 +317,8 @@ export function ReflectionModal({
       return;
     }
 
-    if (todayEntry && isTodayPage && !isEditingExistingEntry) {
-      onNotice("오늘의 회고는 이미 작성했어요. 수정하려면 사과 15개가 필요해요.");
+    if (primaryEntry && isPrimaryPage && !isEditingExistingEntry) {
+      onNotice("해당 날짜의 회고는 이미 작성했어요. 수정하려면 사과 15개가 필요해요.");
       return;
     }
 
@@ -359,15 +342,21 @@ export function ReflectionModal({
         );
         setGood(nextEntry.good);
         setRegret(nextEntry.regret);
-        onRewardApples(updated.reward);
+        const updateCost = updated.update_cost ?? EDIT_TOKEN_COST;
+        const newReward = updated.new_reward ?? 0;
+        onRewardApples(updated.token_delta ?? updated.reward);
         setIsEditing(false);
         setEditingEntryId(null);
-        onNotice("회고를 다시 정리했어요. 사과 15개를 사용했어요.");
+        onNotice(
+          newReward > 0
+            ? `회고를 수정했어요. 수정 비용 ${updateCost}개를 사용하고 새 보상 ${newReward}개를 받았어요.`
+            : `회고를 다시 정리했어요. 사과 ${updateCost}개를 사용했어요.`,
+        );
         return;
       }
 
       const created = await createReflection({
-        reflection_date: today,
+        reflection_date: reflectionDate,
         ...payload,
       });
       const nextEntry = normalizeReflection({
@@ -377,8 +366,8 @@ export function ReflectionModal({
         improvement_points: created.improvement_points,
       });
       setEntries((current) => {
-        const withoutToday = current.filter((entry) => entry.date !== today);
-        return [nextEntry, ...withoutToday];
+        const withoutDate = current.filter((entry) => entry.date !== reflectionDate);
+        return [nextEntry, ...withoutDate];
       });
       setGood(nextEntry.good);
       setRegret(nextEntry.regret);
@@ -388,13 +377,13 @@ export function ReflectionModal({
     } catch (error) {
       const code = getApiErrorCode(error);
       if (code === "REFLECTION_ALREADY_CONFIRMED") {
-        onNotice("오늘의 회고는 이미 작성했어요. 다시 불러올게요.");
-        const context = await fetchReflectionContext(today);
+        onNotice("해당 날짜의 회고는 이미 작성했어요. 다시 불러올게요.");
+        const context = await fetchReflectionContext(reflectionDate);
         if (context.reflection) {
           const nextEntry = normalizeReflection(context.reflection);
           setEntries((current) => {
-            const withoutToday = current.filter((entry) => entry.date !== today);
-            return [nextEntry, ...withoutToday];
+            const withoutDate = current.filter((entry) => entry.date !== reflectionDate);
+            return [nextEntry, ...withoutDate];
           });
           setGood(nextEntry.good);
           setRegret(nextEntry.regret);
@@ -437,15 +426,15 @@ export function ReflectionModal({
     }, 190);
   }
 
-  const readOnlyEntry = isTodayPage ? todayEntry : editingEntry;
+  const readOnlyEntry = isPrimaryPage ? primaryEntry : editingEntry;
   const goodValue = isReadOnly && readOnlyEntry ? readOnlyEntry.good : good;
   const regretValue = isReadOnly && readOnlyEntry ? readOnlyEntry.regret : regret;
   const goodLimitWarning = limitWarningField === "good";
   const regretLimitWarning = limitWarningField === "regret";
   const canSaveReflection = Boolean(canSubmit);
-  const dateLabel = formatKoreanDate(today);
-  const completedCount = todayTodos.filter((todo) => todo.status === "done").length;
-  const incompleteCount = todayTodos.length - completedCount;
+  const dateLabel = formatKoreanDate(reflectionDate);
+  const completedCount = reflectionTodos.filter((todo) => todo.status === "done").length;
+  const incompleteCount = reflectionTodos.length - completedCount;
 
   function renderHistoryEntry(entry: ReflectionEntry) {
     return (
@@ -581,13 +570,15 @@ export function ReflectionModal({
         className={`reflectionContentLayer reflectionContentLayer-${contentPhase}`}
       >
         {isLoading ? <div className="reflectionLoadingState">회고를 불러오고 있어요...</div> : null}
-        {isTodayPage ? (
+        {isPrimaryPage ? (
           <>
             <section className="reflectionLeftPage" aria-label="회고 요약">
               <header className="reflectionTitle">
                 <DiaryIcon name="calendar" />
                 <div>
-                  <h3>오늘 하루를 천천히 돌아봐요</h3>
+                  <h3>
+                    {reflectionDate === today ? "오늘 하루를" : "그날 하루를"} 천천히 돌아봐요
+                  </h3>
                 </div>
                 <DiaryIcon name="flower" className="reflectionTitleFlower" />
               </header>
@@ -610,7 +601,7 @@ export function ReflectionModal({
                   </p>
                 </div>
                 <ul className="reflectionTodoList">
-                  {todayTodos.slice(0, 4).map((todo) => {
+                  {reflectionTodos.map((todo) => {
                     const done = todo.status === "done";
                     return (
                       <li key={todo.id}>
@@ -718,12 +709,12 @@ export function ReflectionModal({
           </>
         )}
 
-        {todayEntry && !isEditingExistingEntry && isTodayPage ? (
+        {primaryEntry && !isEditingExistingEntry && isPrimaryPage ? (
           <div className="reflectionActions">
             <button
               type="button"
               className="reflectionEditButton"
-              onClick={() => requestEditReflection(todayEntry)}
+              onClick={() => requestEditReflection(primaryEntry)}
             >
               <DiaryIcon name="pencil" />
               수정하기
@@ -751,7 +742,7 @@ export function ReflectionModal({
               {isSaving ? "저장 중" : "수정 완료"}
             </button>
           </div>
-        ) : isTodayPage && !todayEntry ? (
+        ) : isPrimaryPage && !primaryEntry ? (
           <div className="reflectionActions">
             <button
               type="button"
@@ -799,7 +790,7 @@ export function ReflectionModal({
 
       {!isEditingExistingEntry ? (
         <>
-          {!isTodayPage ? (
+          {!isPrimaryPage ? (
             <button
               type="button"
               className="reflectionArrow reflectionArrowPrev"
