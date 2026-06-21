@@ -72,6 +72,36 @@ describe("useAuthStore", () => {
     expect(useAuthStore.getState().accessToken).toBe("token-2");
   });
 
+  it("선제 재발급이 일시적(네트워크)으로 실패해도 세션을 유지하고 재시도한다", async () => {
+    vi.mocked(authApi.login).mockResolvedValue(LOGIN_RESPONSE);
+    // 1차: 네트워크 에러(401 아님) → 세션 유지, 2차(재시도): 성공
+    vi.mocked(authApi.refreshToken)
+      .mockRejectedValueOnce(new Error("network down"))
+      .mockResolvedValue({ access_token: "token-3", expires_in_seconds: 3600 });
+
+    await useAuthStore.getState().login("test@test.com", "password123", true);
+    await vi.advanceTimersByTimeAsync((3600 - 60) * 1000);
+    expect(useAuthStore.getState().status).toBe("authenticated"); // 로그아웃되지 않음
+
+    await vi.advanceTimersByTimeAsync(30 * 1000); // 재시도
+    expect(useAuthStore.getState().accessToken).toBe("token-3");
+  });
+
+  it("선제 재발급이 401(refresh token 거부)이면 로그아웃한다", async () => {
+    vi.mocked(authApi.login).mockResolvedValue(LOGIN_RESPONSE);
+    const authError = Object.assign(new Error("unauthorized"), {
+      isAxiosError: true,
+      response: { status: 401 },
+    });
+    vi.mocked(authApi.refreshToken).mockRejectedValue(authError);
+
+    await useAuthStore.getState().login("test@test.com", "password123", true);
+    await vi.advanceTimersByTimeAsync((3600 - 60) * 1000);
+
+    expect(useAuthStore.getState().status).toBe("anonymous");
+    expect(useAuthStore.getState().accessToken).toBeNull();
+  });
+
   it("restoreSession 성공 시 me를 조회해 user를 복원한다", async () => {
     vi.mocked(authApi.refreshToken).mockResolvedValue({
       access_token: "token-9",
@@ -91,6 +121,33 @@ describe("useAuthStore", () => {
     expect(state.status).toBe("authenticated");
     expect(state.accessToken).toBe("token-9");
     expect(state.user?.userName).toBe("테스터");
+  });
+
+  it("동시에 여러 refresh가 트리거돼도 네트워크 호출은 1회만 한다(rotation race 방지)", async () => {
+    // 서버는 refresh마다 토큰을 rotation하므로 같은 쿠키로 동시 호출하면 하나가 401난다.
+    // single-flight로 합쳐 1회만 보내야 한다.
+    let resolveRefresh: (v: { access_token: string; expires_in_seconds: number }) => void =
+      () => {};
+    vi.mocked(authApi.refreshToken).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRefresh = resolve;
+      }),
+    );
+
+    // 저장된 토큰이 없으면 restoreSession은 refreshSession을 호출한다 → 동시 2건.
+    const p1 = useAuthStore.getState().restoreSession();
+    const p2 = useAuthStore.getState().restoreSession();
+    resolveRefresh({ access_token: "token-x", expires_in_seconds: 3600 });
+    vi.mocked(authApi.fetchMe).mockResolvedValue({
+      user_id: "u-1",
+      email: "test@test.com",
+      user_name: "테스터",
+      token_balance: 0,
+      login_type: "email",
+    });
+    await Promise.all([p1, p2]);
+
+    expect(authApi.refreshToken).toHaveBeenCalledTimes(1);
   });
 
   it("restoreSession 실패 시 anonymous가 된다", async () => {
