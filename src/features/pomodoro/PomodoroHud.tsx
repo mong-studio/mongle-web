@@ -10,9 +10,9 @@ function fmt(t: number) {
   return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
 }
 
-function saveLocal(mode: Mode, remaining: number, running: boolean) {
+function saveLocal(mode: Mode, remaining: number, running: boolean, endAt: number | null) {
   try {
-    localStorage.setItem("pomodoro_hud", JSON.stringify({ mode, remaining, running }));
+    localStorage.setItem("pomodoro_hud", JSON.stringify({ mode, remaining, running, endAt }));
   } catch {
     // ignore storage errors
   }
@@ -20,10 +20,11 @@ function saveLocal(mode: Mode, remaining: number, running: boolean) {
 
 type PomodoroHudProps = {
   canResumeSavedRun: boolean;
+  isLoggedOut: boolean;
   onBeforeStart: () => boolean | Promise<boolean>;
 };
 
-export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudProps) {
+export function PomodoroHud({ canResumeSavedRun, isLoggedOut, onBeforeStart }: PomodoroHudProps) {
   const [mode, setMode] = useState<Mode>("focus");
   const [remaining, setRemaining] = useState(DUR.focus);
   const [running, setRunning] = useState(false);
@@ -43,46 +44,76 @@ export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudPro
 
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
   const spinTimer = useRef<ReturnType<typeof setTimeout>>();
-  const startedAtRef = useRef(0);
-  const baseRemainingRef = useRef(DUR.focus);
-  const lastSaveRef = useRef(0);
+  const endAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (canResumeSavedRun || !runningRef.current) {
       return;
     }
     setRunning(false);
-    saveLocal(modeRef.current, remainingRef.current, false);
-    lastSaveRef.current = Date.now();
+    endAtRef.current = null;
+    saveLocal(modeRef.current, remainingRef.current, false, null);
   }, [canResumeSavedRun]);
+
+  useEffect(() => {
+    if (!isLoggedOut) return;
+    setRunning(false);
+    runningRef.current = false;
+    setMode("focus");
+    modeRef.current = "focus";
+    setRemaining(DUR.focus);
+    remainingRef.current = DUR.focus;
+    endAtRef.current = null;
+    try {
+      localStorage.removeItem("pomodoro_hud");
+    } catch {
+      // ignore storage errors
+    }
+  }, [isLoggedOut]);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem("pomodoro_hud");
       if (raw) {
-        const s = JSON.parse(raw) as { mode?: string; remaining?: number; running?: boolean };
-        if (s.mode === "focus" || s.mode === "break") {
-          setMode(s.mode);
-          modeRef.current = s.mode;
-        }
-        // Fix 1 & 6: guard remaining > 0 to prevent instant mode-switch on first tick
-        if (typeof s.remaining === "number" && s.remaining > 0) {
-          setRemaining(s.remaining);
-          remainingRef.current = s.remaining;
-        }
-        if (s.running === true && canResumeSavedRun) {
-          setRunning(true);
-          runningRef.current = true;
-          startedAtRef.current = Date.now();
-          baseRemainingRef.current =
-            typeof s.remaining === "number" && s.remaining > 0 ? s.remaining : DUR.focus;
-          lastSaveRef.current = Date.now();
-        } else if (s.running === true) {
-          saveLocal(
-            s.mode === "focus" || s.mode === "break" ? s.mode : "focus",
-            typeof s.remaining === "number" && s.remaining > 0 ? s.remaining : DUR.focus,
-            false,
-          );
+        const s = JSON.parse(raw) as {
+          mode?: string;
+          remaining?: number;
+          running?: boolean;
+          endAt?: number | null;
+        };
+        const mode: Mode = s.mode === "focus" || s.mode === "break" ? s.mode : "focus";
+
+        if (s.running === true && typeof s.endAt === "number") {
+          // Display accuracy doesn't depend on auth - it's pure arithmetic
+          // from the stored end timestamp. Only resuming the actual ticking
+          // (setRunning) is gated by canResumeSavedRun.
+          const r = Math.ceil((s.endAt - Date.now()) / 1000);
+          if (r > 0) {
+            setMode(mode);
+            modeRef.current = mode;
+            setRemaining(r);
+            remainingRef.current = r;
+            if (canResumeSavedRun) {
+              setRunning(true);
+              runningRef.current = true;
+              endAtRef.current = s.endAt;
+            }
+          } else {
+            const nm: Mode = mode === "focus" ? "break" : "focus";
+            setMode(nm);
+            modeRef.current = nm;
+            setRemaining(DUR[nm]);
+            remainingRef.current = DUR[nm];
+            if (canResumeSavedRun) {
+              saveLocal(nm, DUR[nm], false, null);
+            }
+          }
+        } else {
+          setMode(mode);
+          modeRef.current = mode;
+          const r = typeof s.remaining === "number" && s.remaining > 0 ? s.remaining : DUR[mode];
+          setRemaining(r);
+          remainingRef.current = r;
         }
       }
     } catch {
@@ -90,17 +121,16 @@ export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudPro
     }
 
     const iv = setInterval(() => {
-      if (!runningRef.current) return;
-      const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
-      const r = baseRemainingRef.current - elapsed;
+      if (!runningRef.current || endAtRef.current == null) return;
+      const r = Math.ceil((endAtRef.current - Date.now()) / 1000);
       if (r <= 0) {
         const nm: Mode = modeRef.current === "focus" ? "break" : "focus";
         const next = DUR[nm];
         setMode(nm);
         setRemaining(next);
         setRunning(false);
-        saveLocal(nm, next, false);
-        lastSaveRef.current = Date.now();
+        endAtRef.current = null;
+        saveLocal(nm, next, false, null);
         const msg =
           nm === "break" ? "휴식 시간이에요! 잠시 쉬어가요" : "집중 시간이에요! 다시 힘내요";
         setToast(msg);
@@ -108,11 +138,6 @@ export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudPro
         toastTimer.current = setTimeout(() => setToast(""), 2800);
       } else {
         setRemaining(r);
-        const now = Date.now();
-        if (now - lastSaveRef.current >= 30000) {
-          saveLocal(modeRef.current, r, true);
-          lastSaveRef.current = now;
-        }
       }
     }, 1000);
 
@@ -130,30 +155,34 @@ export function PomodoroHud({ canResumeSavedRun, onBeforeStart }: PomodoroHudPro
       if (!canStart) {
         return;
       }
-      startedAtRef.current = Date.now();
-      baseRemainingRef.current = remainingRef.current;
-      lastSaveRef.current = Date.now();
+      const endAt = Date.now() + remainingRef.current * 1000;
+      endAtRef.current = endAt;
+      saveLocal(modeRef.current, remainingRef.current, true, endAt);
     } else {
-      saveLocal(modeRef.current, remainingRef.current, false);
-      lastSaveRef.current = Date.now();
+      endAtRef.current = null;
+      saveLocal(modeRef.current, remainingRef.current, false, null);
     }
     setRunning(next);
   }
 
-  function switchMode() {
+  async function switchMode() {
     if (runningRef.current) return;
+    const canProceed = await onBeforeStart();
+    if (!canProceed) return;
     const nm: Mode = modeRef.current === "focus" ? "break" : "focus";
     setMode(nm);
     setRemaining(DUR[nm]);
-    saveLocal(nm, DUR[nm], false);
+    saveLocal(nm, DUR[nm], false, null);
   }
 
-  function reset() {
+  async function reset() {
     if (runningRef.current) return;
+    const canProceed = await onBeforeStart();
+    if (!canProceed) return;
     const r = DUR[modeRef.current];
     setRemaining(r);
     setSpinning(true);
-    saveLocal(modeRef.current, r, false);
+    saveLocal(modeRef.current, r, false, null);
     clearTimeout(spinTimer.current);
     spinTimer.current = setTimeout(() => setSpinning(false), 520);
   }

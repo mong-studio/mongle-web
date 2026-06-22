@@ -945,11 +945,8 @@ export function App() {
       <NotificationToastLayer />
 
       <PomodoroHud
-        canResumeSavedRun={
-          authStatus === "authenticated" &&
-          authUser?.hasCharacter === true &&
-          hasUserCreatedResident(residents)
-        }
+        canResumeSavedRun={authStatus === "authenticated" && hasUserCreatedResident(residents)}
+        isLoggedOut={authStatus === "anonymous"}
         onBeforeStart={() => guardFeatureAccess(() => undefined)}
       />
     </main>
