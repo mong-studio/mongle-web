@@ -62,6 +62,11 @@ export async function createComment(postId: string, content: string): Promise<Ap
   return data;
 }
 
+export async function toggleLike(postId: string): Promise<boolean> {
+  const { data } = await apiClient.post<{ is_liked: boolean }>(`/posts/${postId}/like/`);
+  return data.is_liked;
+}
+
 interface CharacterListResponse {
   items: ApiCharacter[];
   page: { limit: number; next_cursor: string | null; has_next: boolean };
@@ -94,7 +99,7 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     caption: [post.content],
     quest: { label: "퀘스트", value: post.quest_id },
     tags: [],
-    likes: 0,
+    likes: post.is_liked ? 1 : 0,
     isLiked: post.is_liked,
     comments: post.comments.length,
     heroPlaceholder: "사진",

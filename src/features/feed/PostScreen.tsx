@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type ApiPost, fetchPostDetail } from "./api.js";
+import { type ApiPost, fetchPostDetail, toggleLike } from "./api.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -18,9 +18,25 @@ const ME = "나";
 export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProps) {
   const [post, setPost] = useState<ApiPost | null>(null);
   const [liked, setLiked] = useState(false);
+  const [likeSaving, setLikeSaving] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
   const [postError, setPostError] = useState(false);
+
+  async function doLike() {
+    if (!post || likeSaving) return;
+    const next = !liked;
+    setLiked(next); // 낙관적 업데이트
+    setLikeSaving(true);
+    try {
+      const serverLiked = await toggleLike(post.post_id);
+      setLiked(serverLiked);
+    } catch {
+      setLiked(!next); // 실패 시 롤백
+    } finally {
+      setLikeSaving(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -132,7 +148,7 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
             <button
               type="button"
               className={`pd-react${liked ? " on" : ""}`}
-              onClick={() => setLiked((v) => !v)}
+              onClick={doLike}
               aria-pressed={liked}
               aria-label="좋아요"
             >

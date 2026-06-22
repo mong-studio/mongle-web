@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toggleLike } from "./api.js";
 import type { FeedPostData, ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -15,18 +16,30 @@ export function FeedPost({ post, th, onAuthorClick, onOpen, onShare }: FeedPostP
   const [liked, setLiked] = useState(post.isLiked);
   const [likeCount, setLikeCount] = useState(post.likes);
   const [pop, setPop] = useState(false);
+  const [saving, setSaving] = useState(false);
   const px = 3;
 
-  function doLike() {
-    if (liked) {
-      setLiked(false);
-      setLikeCount((c) => c - 1);
-      return;
+  async function doLike() {
+    if (saving) return;
+    const next = !liked;
+    // 낙관적 업데이트
+    setLiked(next);
+    setLikeCount((c) => (next ? c + 1 : c - 1));
+    if (next) {
+      setPop(true);
+      setTimeout(() => setPop(false), 420);
     }
-    setLiked(true);
-    setLikeCount((c) => c + 1);
-    setPop(true);
-    setTimeout(() => setPop(false), 420);
+    setSaving(true);
+    try {
+      const serverLiked = await toggleLike(post.id);
+      setLiked(serverLiked);
+    } catch {
+      // 실패 시 롤백
+      setLiked(!next);
+      setLikeCount((c) => (next ? c - 1 : c + 1));
+    } finally {
+      setSaving(false);
+    }
   }
 
   const heartArt = liked ? SPRITES.heart : SPRITES.heartOutline;
