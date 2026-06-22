@@ -197,7 +197,7 @@ export function PomodoroHud({ canResumeSavedRun, isLoggedOut, onBeforeStart }: P
           <div className="pmTwinkle pmTwinkle--tr2">✦</div>
           <div className="pmTitle">
             <span className="pmFlower">✿</span>
-            <span className="pmTitleText pmTitleText--focus">뽀모도로</span>
+            <span className="pmTitleText pmTitleText--focus">포모도로</span>
             <span className="pmFlower">✿</span>
           </div>
           <div className="pmMain">
@@ -253,7 +253,7 @@ export function PomodoroHud({ canResumeSavedRun, isLoggedOut, onBeforeStart }: P
           <div className="pmTwinkle pmTwinkle--tr1b">✦</div>
           <div className="pmTitle">
             <span className="pmStar">✦</span>
-            <span className="pmTitleText pmTitleText--break">뽀모도로</span>
+            <span className="pmTitleText pmTitleText--break">포모도로</span>
             <span className="pmStar">✦</span>
           </div>
           <div className="pmMain">
