@@ -302,16 +302,7 @@ export function MyPageModal({
                   <div className="mpInfoRow">
                     <img src="/assets/icon/calendar.png" alt="" className="mpInfoIcon" />
                     <span className="mpInfoLabel">생년월일</span>
-                    {editingInfo ? (
-                      <input
-                        type="date"
-                        className="mpInfoDateInput"
-                        value={birthDraft}
-                        onChange={(e) => setBirthDraft(e.target.value)}
-                      />
-                    ) : (
-                      <span className="mpInfoVal">{fmtBirth(userBirth)}</span>
-                    )}
+                    <span className="mpInfoVal">{fmtBirth(userBirth)}</span>
                   </div>
                 </div>
               </div>

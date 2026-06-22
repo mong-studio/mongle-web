@@ -679,7 +679,10 @@ export function App() {
         avatarUrl: resident.avatarUrl,
       });
       setVillageVersion((current) => current + 1);
-      resetCharacterDraft();
+      // 생성 후에도 이름·키워드·설명은 남겨 수정할 수 있게 하고, 사용된 원본 이미지만 비운다.
+      setSourceImagePreview("");
+      setSourceImageName("");
+      setSourceImageFile(null);
       setLastCreatedResident(resident);
       useAuthStore.setState((state) => ({
         user: state.user ? { ...state.user, hasCharacter: true } : null,

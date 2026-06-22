@@ -313,6 +313,18 @@
   opacity: 1;
 }
 
+/* 생성 중 입력 잠금 표시 */
+.ccInput:disabled,
+.ccTextarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ccChip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .ccNameError {
   color: #d9785a;
   font-family: var(--font-tmoney-dungunbaram);
