@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTags } from "../../shared/tags/useTags.js";
 import { readableInk } from "../../shared/ui/Tag/Tag.js";
 import { TagPicker } from "../../shared/ui/tags/TagPicker.js";
@@ -34,6 +34,30 @@ export type TodoCommitResult = {
 
 // 캐릭터 퀘스트는 당일 TODO에 한해 하루 5개까지만 LLM으로 부여(백엔드 _assign_quests_to_todos가 강제).
 const QUEST_DAILY_LIMIT = 5;
+
+// 행마다 색깔 핀을 번갈아(디자인 시안의 압정 모티프).
+const PIN_CYCLE = ["red_pin", "blue_pin", "green_pin", "todo_pin_icon"];
+const pinSrc = (index: number) => `/assets/todo/${PIN_CYCLE[index % PIN_CYCLE.length]}.png`;
+
+// 제목 키워드로 카테고리 아이콘 매칭(디자인 시안의 ORGANIZE_RULES와 동일). 없으면 null.
+const ICON_RULES: { kw: string[]; icon: string }[] = [
+  { kw: ["헬스", "운동", "조깅", "러닝"], icon: "dumbbell_icon" },
+  { kw: ["빨래", "세탁"], icon: "washing_machine_icon" },
+  { kw: ["청소"], icon: "vacuum_icon" },
+];
+const iconSrc = (title: string): string | null => {
+  const rule = ICON_RULES.find((r) => r.kw.some((k) => title.includes(k)));
+  return rule ? `/assets/todo/${rule.icon}.png` : null;
+};
+
+// 플래너 챗봇(PlannerCloseIcon)과 동일한 X 아이콘.
+function BoardCloseIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+    </svg>
+  );
+}
 
 function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -92,6 +116,45 @@ export function TodoCreation({
   const [toast, setToast] = useState("");
 
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // 디자인(.dc.html)과 동일: 1240px 고정 패널을 화면에 맞게 transform:scale로 축소.
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [natH, setNatH] = useState<number | null>(null);
+  // page 변경 시 새 패널(modalRef)에 ResizeObserver를 다시 붙이려고 page를 의존성에 둔다.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: page는 본문에서 직접 쓰진 않지만 재연결 트리거로 의도적으로 필요
+  useLayoutEffect(() => {
+    const NAT_W = 1240;
+    const PAD = 48;
+    // 시안은 1240px이지만 다른 모달(캐릭터 ~700px, 캘린더 등)과 어우러지도록
+    // 최대 배율을 낮춰 글씨·버튼·여백을 한 번에 차분하게 줄인다(디자인 비율은 그대로 유지).
+    const MAX_SCALE = 0.8;
+    const fitToViewport = () => {
+      const el = modalRef.current;
+      if (!el) return;
+      const h = el.offsetHeight; // transform은 offsetHeight에 영향 없음 → 미스케일 높이
+      const next = Math.min(
+        MAX_SCALE,
+        (window.innerWidth - PAD) / NAT_W,
+        (window.innerHeight - PAD) / h,
+      );
+      setScale(next);
+      setNatH(h);
+    };
+    fitToViewport();
+    const ro = new ResizeObserver(fitToViewport);
+    if (modalRef.current) ro.observe(modalRef.current);
+    window.addEventListener("resize", fitToViewport);
+    const t = setTimeout(fitToViewport, 350); // 폰트 로드 후 재측정
+    return () => {
+      window.removeEventListener("resize", fitToViewport);
+      ro.disconnect();
+      clearTimeout(t);
+    };
+  }, [page]);
+
+  const wrapStyle = natH ? { width: `${1240 * scale}px`, height: `${natH * scale}px` } : undefined;
+  const panelStyle = { transform: `scale(${scale})` };
 
   // 유저 태그는 캘린더와 동일한 /tags/ 에서 공유한다. 이 모달은 로그인 상태에서만 열린다.
   const { tagItems, fetchTags, createTag, editTag, deleteTag } = useTags(true);
@@ -326,300 +389,350 @@ export function TodoCreation({
     <div className="tdRoot">
       {/* ── PAGE 0: 마을 게시판 ── */}
       {page === 0 && (
-        <div className="boardPanel">
-          {onClose && (
-            <button type="button" className="boardClose" onClick={onClose} aria-label="닫기">
-              ✕
-            </button>
-          )}
+        <div className="tdScaleWrap" style={wrapStyle}>
+          <div className="boardPanel" ref={modalRef} style={panelStyle}>
+            {onClose && (
+              <button type="button" className="boardClose" onClick={onClose} aria-label="닫기">
+                <BoardCloseIcon />
+              </button>
+            )}
 
-          {/* HEADER */}
-          <header className="boardHeader">
-            <img src="/assets/mongle_chief.png" alt="이장님" className="boardMayor" />
-            <div className="boardPlaque">
-              <span className="boardPlaqueStar boardPlaqueStar--l">✦</span>
+            {/* HEADER */}
+            <header className="boardHeader">
+              <img
+                src="/assets/todo/flower_cluster_left.png"
+                alt=""
+                className="boardHeaderFlower"
+                aria-hidden="true"
+              />
               <h1 className="boardTitle">오늘의 마을 게시판</h1>
-              <span className="boardPlaqueStar boardPlaqueStar--r">✦</span>
-            </div>
-            <span className="boardHeaderDeco" aria-hidden="true">
-              🌼
-            </span>
-          </header>
+              <img
+                src="/assets/todo/flower_cluster_right.png"
+                alt=""
+                className="boardHeaderFlower"
+                aria-hidden="true"
+              />
+            </header>
 
-          {/* BODY */}
-          <div className="boardBody">
-            <div className="boardRow">
-              {/* LEFT: 이장님에게 말하기 */}
-              <section className="boardCard">
-                <div className="boardCardHead">
-                  <span className="boardCardIcon" aria-hidden="true">
-                    💬
-                  </span>
-                  <span className="boardCardTitle">이장님에게 말하기</span>
-                  <span className="boardCardDeco" aria-hidden="true">
-                    🌷
-                  </span>
-                </div>
-                <div className="boardField">
-                  <div className="boardFieldHint">오늘 해야 할 일을 문장으로 말해주세요</div>
-                  <textarea
-                    className="boardTextarea"
-                    value={sentence}
-                    onChange={(e) => setSentence(e.target.value)}
-                    rows={3}
-                    placeholder="예) 헬스장 가야하고, 빨래 돌리고, 청소기도 돌려야해"
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="boardOrganizeBtn"
-                  onClick={() => void handleOrganize()}
-                  disabled={aiLoading}
-                >
-                  {aiLoading ? (
-                    <span className="tdSpinner" />
-                  ) : (
-                    <span className="tdGenStar">✨</span>
-                  )}
-                  {aiLoading ? "정리하는 중..." : "이장님이 TODO로 정리"}
-                </button>
-              </section>
-
-              {/* RIGHT: 직접 적기 */}
-              <section className="boardCard">
-                <div className="boardCardHead">
-                  <span className="boardCardIcon" aria-hidden="true">
-                    📝
-                  </span>
-                  <span className="boardCardTitle">직접 적기</span>
-                  <span className="boardCardDeco" aria-hidden="true">
-                    🌷
-                  </span>
-                </div>
-                <div className="boardAddRow">
-                  <input
-                    className="boardInput"
-                    value={manualText}
-                    onChange={(e) => setManualText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (isImeComposing(e)) return;
-                        e.preventDefault();
-                        addTodo();
-                      }
-                    }}
-                    placeholder="할 일을 적어주세요"
-                  />
-                  <button type="button" className="boardAddBtn" onClick={addTodo}>
-                    추가
-                  </button>
-                </div>
-                {/* 캘린더와 공유하는 유저 태그 캐시(useTags). 새 할일에 적용할 태그 하나 선택. */}
-                <div className="boardTagBox">
-                  <div className="boardTagBoxTitle">
-                    <span>✿</span> 태그 선택 <span>✿</span>
+            {/* BODY */}
+            <div className="boardBody">
+              <div className="boardRow">
+                {/* LEFT: 이장님에게 말하기 */}
+                <section className="boardCard">
+                  <div className="boardCardHead">
+                    <span className="boardStep">1</span>
+                    <span className="boardCardTitle">이장님에게 말하기</span>
+                    <img
+                      src="/assets/todo/mayor_character.png"
+                      alt=""
+                      className="boardCardDeco"
+                      aria-hidden="true"
+                    />
                   </div>
-                  <TagPicker
-                    tags={tagItems}
-                    selectedId={selectedTagId}
-                    onSelect={setSelectedTagId}
-                    onCreateTag={createTag}
-                    onEditTag={editTag}
-                    onDeleteTag={deleteTag}
-                  />
-                </div>
-              </section>
-            </div>
+                  <div className="boardField">
+                    <div className="boardFieldHint">오늘 해야 할 일을 문장으로 말해주세요</div>
+                    <textarea
+                      className="boardTextarea"
+                      value={sentence}
+                      onChange={(e) => setSentence(e.target.value)}
+                      rows={3}
+                      placeholder="예) 헬스장 가야하고, 빨래 돌리고, 청소기도 돌려야해"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="boardOrganizeBtn"
+                    onClick={() => void handleOrganize()}
+                    disabled={aiLoading}
+                  >
+                    {aiLoading ? (
+                      <span className="tdSpinner" />
+                    ) : (
+                      <span className="tdGenStar">✨</span>
+                    )}
+                    {aiLoading ? "정리하는 중..." : "이장님이 TODO로 정리"}
+                  </button>
+                </section>
 
-            {/* BOTTOM: 생성된 TODO */}
-            <section className="boardCard boardGenerated">
-              <div className="boardSectionDivider">
-                <span className="boardDividerLine" />
-                <span className="boardDividerLabel">
-                  <span className="boardDividerStar">✦</span> 생성된 TODO{" "}
-                  <span className="boardDividerStar">✦</span>
-                </span>
-                <span className="boardDividerLine" />
+                {/* RIGHT: 직접 적기 */}
+                <section className="boardCard">
+                  <div className="boardCardHead">
+                    <span className="boardStep">2</span>
+                    <span className="boardCardTitle">직접 적기</span>
+                    <img
+                      src="/assets/todo/yellow_chick.png"
+                      alt=""
+                      className="boardCardDeco"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div className="boardAddRow">
+                    <input
+                      className="boardInput"
+                      value={manualText}
+                      onChange={(e) => setManualText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          if (isImeComposing(e)) return;
+                          e.preventDefault();
+                          addTodo();
+                        }
+                      }}
+                      placeholder="할 일을 적어주세요"
+                    />
+                    <button type="button" className="boardAddBtn" onClick={addTodo}>
+                      추가
+                    </button>
+                  </div>
+                  {/* 캘린더와 공유하는 유저 태그 캐시(useTags). 새 할일에 적용할 태그 하나 선택. */}
+                  <div className="boardTagBox">
+                    <div className="boardTagBoxTitle">태그 선택</div>
+                    <TagPicker
+                      tags={tagItems}
+                      selectedId={selectedTagId}
+                      onSelect={setSelectedTagId}
+                      onCreateTag={createTag}
+                      onEditTag={editTag}
+                      onDeleteTag={deleteTag}
+                    />
+                  </div>
+                </section>
               </div>
 
-              {todos.length > 0 && (
-                <div className={`boardQuestBudget${questAvailable === 0 ? " is-empty" : ""}`}>
-                  <span aria-hidden="true">⭐</span> 캐릭터 퀘스트 {questAvailable}/
-                  {QUEST_DAILY_LIMIT} 남음
-                </div>
-              )}
+              {/* 점선 구분선 + 가운데 꽃 */}
+              <div className="boardDivider">
+                <img
+                  src="/assets/todo/divider_flower.png"
+                  alt=""
+                  className="boardDividerFlower"
+                  aria-hidden="true"
+                />
+              </div>
 
-              {todos.length === 0 ? (
-                <div className="boardEmpty">아직 생성된 TODO가 없어요. 위에서 추가해보세요!</div>
-              ) : (
-                <div className="boardTodoList">
-                  {todos.map((todo) => {
-                    const tag = todo.tagId != null ? tagById.get(todo.tagId) : undefined;
-                    const lockQuest = !todo.quest && questAvailable <= 0;
-                    return (
-                      <div key={todo.id} className="boardTodoRow">
-                        <span className="boardPin" aria-hidden="true">
-                          📌
-                        </span>
-                        <input
-                          className="boardTodoName"
-                          value={todo.name}
-                          onChange={(event) => updateTodoName(todo.id, event.target.value)}
-                          aria-label="TODO 항목 수정"
-                        />
-                        <div className="boardTodoChips">
-                          {tag && (
-                            <span
-                              className="boardChip"
-                              style={{
-                                background: `${tag.color}22`,
-                                color: readableInk(tag.color),
-                                borderColor: tag.color,
-                              }}
-                            >
-                              #{tag.content}
-                              <button
-                                type="button"
-                                className="boardChipRemove"
-                                onClick={() => clearTodoTag(todo.id)}
-                                aria-label={`${tag.content} 태그 제거`}
-                              >
-                                ×
-                              </button>
-                            </span>
+              {/* BOTTOM: 생성된 TODO */}
+              <section className="boardCard boardGenerated">
+                <div className="boardCardHead">
+                  <span className="boardStep">3</span>
+                  <span className="boardCardTitle">생성된 TODO</span>
+                  <img
+                    src="/assets/todo/small_flower_deco.png"
+                    alt=""
+                    className="boardCardDeco boardCardDeco--sm"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                {todos.length > 0 && (
+                  <div className={`boardQuestBudget${questAvailable === 0 ? " is-empty" : ""}`}>
+                    <span aria-hidden="true">⭐</span> 캐릭터 퀘스트 {questAvailable}/
+                    {QUEST_DAILY_LIMIT} 남음
+                  </div>
+                )}
+
+                {todos.length === 0 ? (
+                  <div className="boardEmpty">아직 생성된 TODO가 없어요. 위에서 추가해보세요!</div>
+                ) : (
+                  <div className="boardTodoList">
+                    {todos.map((todo, index) => {
+                      const tag = todo.tagId != null ? tagById.get(todo.tagId) : undefined;
+                      const lockQuest = !todo.quest && questAvailable <= 0;
+                      return (
+                        <div key={todo.id} className="boardTodoRow">
+                          <img src={pinSrc(index)} alt="" className="boardPin" aria-hidden="true" />
+                          {iconSrc(todo.name) && (
+                            <img
+                              src={iconSrc(todo.name) as string}
+                              alt=""
+                              className="boardTodoIcon"
+                              aria-hidden="true"
+                            />
                           )}
+                          <input
+                            className="boardTodoName"
+                            value={todo.name}
+                            onChange={(event) => updateTodoName(todo.id, event.target.value)}
+                            aria-label="TODO 항목 수정"
+                          />
+                          <div className="boardTodoChips">
+                            {tag && (
+                              <span
+                                className="boardChip"
+                                style={{
+                                  background: `${tag.color}22`,
+                                  color: readableInk(tag.color),
+                                  borderColor: tag.color,
+                                }}
+                              >
+                                #{tag.content}
+                                <button
+                                  type="button"
+                                  className="boardChipRemove"
+                                  onClick={() => clearTodoTag(todo.id)}
+                                  aria-label={`${tag.content} 태그 제거`}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            className="boardApplyTag"
+                            onClick={() => applySelectedTag(todo.id)}
+                          >
+                            태그 적용
+                          </button>
+                          <button
+                            type="button"
+                            className={`boardQuestToggle${todo.quest ? " is-on" : ""}`}
+                            onClick={() => toggleQuest(todo.id)}
+                            disabled={lockQuest}
+                            aria-pressed={todo.quest}
+                            title={
+                              lockQuest
+                                ? `캐릭터 퀘스트는 하루 ${QUEST_DAILY_LIMIT}개까지예요`
+                                : "이 할 일을 애착인형 퀘스트로"
+                            }
+                          >
+                            {todo.quest ? "⭐" : "☆"} 퀘스트
+                          </button>
+                          <button
+                            type="button"
+                            className="boardRemove"
+                            onClick={() => deleteTodo(todo.id)}
+                            aria-label="삭제"
+                          >
+                            ✕
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          className="boardApplyTag"
-                          onClick={() => applySelectedTag(todo.id)}
-                        >
-                          태그 적용
-                        </button>
-                        <button
-                          type="button"
-                          className={`boardQuestToggle${todo.quest ? " is-on" : ""}`}
-                          onClick={() => toggleQuest(todo.id)}
-                          disabled={lockQuest}
-                          aria-pressed={todo.quest}
-                          title={
-                            lockQuest
-                              ? `캐릭터 퀘스트는 하루 ${QUEST_DAILY_LIMIT}개까지예요`
-                              : "이 할 일을 애착인형 퀘스트로"
-                          }
-                        >
-                          {todo.quest ? "⭐" : "☆"} 퀘스트
-                        </button>
-                        <button
-                          type="button"
-                          className="boardRemove"
-                          onClick={() => deleteTodo(todo.id)}
-                          aria-label="삭제"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            </div>
 
-          {/* FOOTER */}
-          <footer className="boardFooter">
-            <button
-              type="button"
-              className="boardSaveBtn"
-              onClick={() => void handleSave()}
-              disabled={isBusy}
-            >
-              {isBusy ? <span className="tdSpinner tdSpinner--lg" /> : <span>✨</span>}
-              {isBusy ? "저장 중..." : "오늘의 TODO에 저장하기"}
-              {!isBusy && <span>💾</span>}
-            </button>
-          </footer>
+            {/* FOOTER */}
+            <footer className="boardFooter">
+              <button
+                type="button"
+                className="boardSaveBtn"
+                onClick={() => void handleSave()}
+                disabled={isBusy}
+              >
+                {isBusy ? (
+                  <span className="tdSpinner tdSpinner--lg" />
+                ) : (
+                  <img
+                    src="/assets/todo/sparkle_star.png"
+                    alt=""
+                    className="boardSaveIcon"
+                    aria-hidden="true"
+                  />
+                )}
+                {isBusy ? "저장 중..." : "오늘의 TODO에 저장하기"}
+                {!isBusy && (
+                  <img
+                    src="/assets/todo/save_disk_icon.png"
+                    alt=""
+                    className="boardSaveIcon"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            </footer>
+          </div>
         </div>
       )}
 
       {/* ── PAGE 1: 저장 결과(확정 TODO + 캐릭터 퀘스트) ── */}
       {page === 1 && (
-        <div className="boardPanel tdPageIn">
-          {onClose && (
-            <button type="button" className="boardClose" onClick={onClose} aria-label="닫기">
-              ✕
-            </button>
-          )}
-          <header className="boardResultHeader">
-            <div className="boardPlaque">
-              <span className="boardPlaqueStar boardPlaqueStar--l">✦</span>
-              <h1 className="boardTitle">오늘의 할 일 목록</h1>
-              <span className="boardPlaqueStar boardPlaqueStar--r">✦</span>
-            </div>
-            <div className="boardResultSub">
-              <span className="boardDividerStar">✦</span>
-              오늘의 할 일을 저장했어요
-              <span className="boardDividerStar">✦</span>
-            </div>
-          </header>
+        <div className="tdScaleWrap" style={wrapStyle}>
+          <div className="boardPanel tdPageIn" ref={modalRef} style={panelStyle}>
+            {onClose && (
+              <button type="button" className="boardClose" onClick={onClose} aria-label="닫기">
+                <BoardCloseIcon />
+              </button>
+            )}
+            <header className="boardResultHeader">
+              <div className="boardHeader">
+                <img
+                  src="/assets/todo/flower_cluster_left.png"
+                  alt=""
+                  className="boardHeaderFlower"
+                  aria-hidden="true"
+                />
+                <h1 className="boardTitle">오늘의 할 일 목록</h1>
+                <img
+                  src="/assets/todo/flower_cluster_right.png"
+                  alt=""
+                  className="boardHeaderFlower"
+                  aria-hidden="true"
+                />
+              </div>
+              <div className="boardResultSub">
+                <span className="boardDividerStar">✦</span>
+                오늘의 할 일을 저장했어요
+                <span className="boardDividerStar">✦</span>
+              </div>
+            </header>
 
-          <div className="boardBody">
-            <section className="boardCard boardGenerated">
-              <div className="boardTodoList">
-                {committed.map((q) => {
-                  const tag = q.tagId != null ? tagById.get(q.tagId) : undefined;
-                  return (
-                    <div key={q.id} className="boardQuestRow">
-                      {q.questText ? (
-                        <img
-                          src={q.characterAvatarUrl ?? "/assets/character/bear.png"}
-                          alt=""
-                          className="boardQuestAvatar"
-                        />
-                      ) : (
-                        <span className="boardPin" aria-hidden="true">
-                          📌
-                        </span>
-                      )}
-                      <div className="boardQuestContent">
-                        <div className="boardQuestTop">
-                          <span className="boardQuestTitle">{q.title}</span>
-                          {tag && (
-                            <span
-                              className="boardChip"
-                              style={{
-                                background: `${tag.color}22`,
-                                color: readableInk(tag.color),
-                                borderColor: tag.color,
-                              }}
-                            >
-                              #{tag.content}
-                            </span>
+            <div className="boardBody">
+              <section className="boardCard boardGenerated">
+                <div className="boardTodoList">
+                  {committed.map((q, index) => {
+                    const tag = q.tagId != null ? tagById.get(q.tagId) : undefined;
+                    return (
+                      <div key={q.id} className="boardQuestRow">
+                        {q.questText ? (
+                          <img
+                            src={q.characterAvatarUrl ?? "/assets/character/bear.png"}
+                            alt=""
+                            className="boardQuestAvatar"
+                          />
+                        ) : (
+                          <img src={pinSrc(index)} alt="" className="boardPin" aria-hidden="true" />
+                        )}
+                        <div className="boardQuestContent">
+                          <div className="boardQuestTop">
+                            <span className="boardQuestTitle">{q.title}</span>
+                            {tag && (
+                              <span
+                                className="boardChip"
+                                style={{
+                                  background: `${tag.color}22`,
+                                  color: readableInk(tag.color),
+                                  borderColor: tag.color,
+                                }}
+                              >
+                                #{tag.content}
+                              </span>
+                            )}
+                          </div>
+                          {q.questText && (
+                            <div className="boardQuestDesc">
+                              <span className="boardDividerStar">✦</span>
+                              <span>
+                                <b>{q.characterName ?? "애착인형"}</b>
+                                <span className="boardQuestLabel">퀘스트</span>
+                                {q.questText}
+                              </span>
+                            </div>
                           )}
                         </div>
-                        {q.questText && (
-                          <div className="boardQuestDesc">
-                            <span className="boardDividerStar">✦</span>
-                            <span>
-                              <b>{q.characterName ?? "애착인형"}</b>
-                              <span className="boardQuestLabel">퀘스트</span>
-                              {q.questText}
-                            </span>
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          </div>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
 
-          <footer className="boardFooter">
-            <button type="button" className="boardSaveBtn" onClick={() => onClose?.()}>
-              <span>✓</span> 완료
-            </button>
-          </footer>
+            <footer className="boardFooter">
+              <button type="button" className="boardSaveBtn" onClick={() => onClose?.()}>
+                <span>✓</span> 완료
+              </button>
+            </footer>
+          </div>
         </div>
       )}
 

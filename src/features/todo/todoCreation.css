@@ -3,18 +3,34 @@
    몽글마을 공용 토큰(cream / honey-primary / go-green / accent)에 맞춤.
    ============================================================ */
 
+/* 디자인(.dc.html)과 동일 폰트. 이 모달에만 스코프. */
+@font-face {
+  font-family: "Cafe24 Ssurround";
+  src: url("/assets/todo/Cafe24Ssurround.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 .tdRoot {
-  /* 공용 팔레트(캐릭터 모달과 동일 계열). 다른 feature 토큰을 직접 참조하지 않고 같은 값으로 복제. */
-  --bd-bg: #fbf3de;
-  --bd-panel: #fffdf6;
-  --bd-card: #fbefcf;
-  --bd-field: #fffdf7;
-  --bd-border: #ead8ac;
-  --bd-border-strong: #d9be84;
-  --bd-ink: #6e5c44;
-  --bd-ink-soft: #9a876a;
-  --bd-ink-faint: #bcaa88;
-  --bd-divider: #ecddb8;
+  --bd-font: "Cafe24 Ssurround", "TMoneyDungunbaram", "Apple SD Gothic Neo", sans-serif;
+  /* 몽글마을 공용 팔레트 — 캘린더 창(calendar.css)의 cream/ink/accent 계열과 동일 값으로 맞춤.
+     다른 feature 토큰을 직접 참조하지 않고 같은 값으로 복제(결합도↓). */
+  --bd-bg: #fbf3de; /* 모달 바탕 (디자인 스펙) */
+  --bd-panel: #fffdf8; /* 카드/필드/행 흰 면 */
+  --bd-card: #fbf6e8; /* 태그함 등 따뜻한 우물 */
+  --bd-field: #ffffff; /* 입력 내부 면(가장 밝음) */
+  --bd-border: #efe3c5; /* 카드·입력 테두리 */
+  --bd-border-strong: #e3d6b4; /* 구분선·강조 테두리 */
+  --bd-ink: #5b4a2c; /* 제목·본문 갈색 */
+  --bd-ink-soft: #9c8e6e; /* 라벨 */
+  --bd-ink-faint: #b3a684; /* 힌트·빈상태 */
+  --bd-divider: #e3d6b4; /* 점선 구분선 */
+  --bd-step: #dcb877; /* ①②③ 단계 뱃지 */
+
+  /* 깊이 */
+  --bd-sh-card: 0 4px 10px -4px rgba(120, 84, 38, 0.18);
+  --bd-sh-pop: 0 26px 64px rgba(74, 56, 22, 0.3);
 
   --bd-primary: #f6c84c;
   --bd-primary-dk: #e0a52a;
@@ -22,6 +38,10 @@
   --bd-go: #93cd6e;
   --bd-go-dk: #6fa84e;
   --bd-go-ink: #3f6b2c;
+  /* 마을 공용 액션 버튼: 허니→앰버 그라데이션 + 진한 바닥 베벨, 흰 글씨 */
+  --bd-btn-top: #f6c357;
+  --bd-btn-bot: #efa838;
+  --bd-btn-edge: #d38e2c;
   --bd-accent: #ee9b36;
   --bd-accent-deep: #ce7c1e;
   --bd-accent-soft: #fbe6c7;
@@ -30,10 +50,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 20px 16px;
-  min-height: 100%;
   box-sizing: border-box;
-  font-family: var(--font-tmoney-dungunbaram);
+  font-family: var(--bd-font);
   color: var(--bd-ink);
 }
 
@@ -50,24 +68,11 @@
   }
 }
 
-@keyframes tdModalIn {
-  0% {
-    transform: scale(0.96) translateY(10px);
-    opacity: 0;
-  }
-  100% {
-    transform: none;
-    opacity: 1;
-  }
-}
-
 @keyframes tdPageIn {
   0% {
-    transform: translateX(36px) scale(0.98);
     opacity: 0;
   }
   100% {
-    transform: none;
     opacity: 1;
   }
 }
@@ -103,139 +108,141 @@
   }
 }
 
-/* ── Panel ── */
-.boardPanel {
+/* ── Panel ──
+   디자인(.dc.html)은 1240px 고정폭으로 그린 뒤 transform:scale로 화면에 맞춘다.
+   .tdScaleWrap이 (1240*scale × natH*scale) 만큼 자리를 잡고, 패널은 그 위에 absolute로 얹혀 scale된다. */
+.tdScaleWrap {
   position: relative;
-  width: min(960px, 100%);
-  max-height: calc(100dvh - 36px);
+  flex: none;
+}
+
+.boardPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  width: 1240px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, var(--bd-panel), var(--bd-bg));
-  border: 3px solid var(--bd-border-strong);
-  border-radius: 30px;
-  padding: 24px 26px 26px;
+  background: var(--bd-bg);
+  border: 4px solid #f4e9ce;
+  border-radius: 32px;
+  padding: 34px 40px 38px;
   box-sizing: border-box;
-  box-shadow:
-    inset 0 0 0 2px #fffdf7,
-    0 30px 70px -20px rgba(80, 52, 20, 0.55);
-  animation: tdModalIn 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  box-shadow: var(--bd-sh-pop);
 }
 
 .tdPageIn {
-  animation: tdPageIn 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+  animation: tdPageIn 0.32s ease both;
 }
 
+/* 플래너 챗봇(.plannerCloseButton)과 동일한 X 버튼 */
 .boardClose {
   position: absolute;
-  top: 14px;
-  right: 18px;
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: transparent;
-  color: var(--bd-ink-soft);
-  font-size: 19px;
-  cursor: pointer;
+  top: 24px;
+  right: 24px;
+  z-index: 8;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: rgba(90, 50, 29, 0.55);
   line-height: 1;
-  z-index: 2;
-  transition: color 0.12s;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    transform 0.12s ease;
+}
+
+.boardClose svg {
+  width: 20px;
+  height: 20px;
 }
 
 .boardClose:hover {
-  color: var(--bd-ink);
+  background: #f0e4c4;
+  color: var(--ui-brown);
 }
 
-/* ── Header ── */
+.boardClose:active {
+  transform: translateY(1px);
+}
+
+/* ── Header (간판/이장님 제거 → 가운데 큰 제목 + 꽃 장식) ── */
+/* calendar.css의 .boardHeader(갈색 그라데이션)와 클래스명이 겹쳐 배경이 새어드는 것을 차단 */
 .boardHeader {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  min-height: 92px;
-  margin-bottom: 10px;
-  padding: 0 40px;
-}
-
-.boardMayor {
-  height: 88px;
-  width: auto;
-  flex: none;
-  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.12));
-}
-
-.boardPlaque {
-  position: relative;
-  flex: none;
-  padding: 13px 48px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, var(--bd-primary), #eeb83e);
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.08),
-    0 4px 0 var(--bd-primary-dk),
-    0 9px 14px -6px rgba(190, 140, 40, 0.45);
-}
-
-.boardPlaqueStar {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #fff3cf;
-  font-size: 17px;
-  text-shadow: 0 1px 1px rgba(150, 110, 30, 0.5);
-  animation: tdTwinkle 1.8s infinite;
-}
-
-.boardPlaqueStar--l {
-  left: 20px;
-}
-
-.boardPlaqueStar--r {
-  right: 20px;
+  gap: 18px;
+  margin-bottom: 30px;
+  padding: 4px 0 0;
+  background: none;
+  border: none;
 }
 
 .boardTitle {
   margin: 0;
-  font-size: 33px;
+  font-size: 42px;
+  font-weight: 800;
   line-height: 1;
-  color: var(--bd-primary-ink);
+  color: var(--bd-ink);
   letter-spacing: 0.5px;
   white-space: nowrap;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
 }
 
-.boardHeaderDeco {
-  font-size: 40px;
+.boardHeaderFlower {
+  height: 50px;
+  width: auto;
   flex: none;
+  image-rendering: pixelated;
 }
 
-/* ── Body ── */
+/* 섹션 번호 뱃지 ①②③ */
+.boardStep {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bd-step);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(150, 110, 40, 0.25);
+}
+
+/* ── Body ── (패널 전체가 scale로 맞춰지므로 내부 스크롤 없음) */
 .boardBody {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: 2px;
 }
 
 .boardRow {
   display: flex;
-  gap: 20px;
+  gap: 36px;
   align-items: stretch;
+  margin-bottom: 26px;
 }
 
+/* 섹션은 패널 위에 그대로(테두리 없는 컬럼). 안쪽 필드만 박스. */
 .boardCard {
   flex: 1;
   min-width: 0;
-  background: var(--bd-panel);
-  border: 2px solid var(--bd-border);
-  border-radius: 22px;
-  padding: 20px 22px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
 }
@@ -243,53 +250,65 @@
 .boardCardHead {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.boardCardIcon {
-  font-size: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .boardCardTitle {
-  font-size: 21px;
+  font-size: 26px;
+  font-weight: 800;
   color: var(--bd-ink);
   white-space: nowrap;
 }
 
 .boardCardDeco {
-  font-size: 18px;
+  height: 42px;
+  width: auto;
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.boardCardDeco--sm {
+  height: 30px;
+}
+
+/* 저장 버튼 양옆 아이콘(반짝이·디스크) */
+.boardSaveIcon {
+  height: 30px;
+  width: auto;
+  flex: none;
+  image-rendering: pixelated;
 }
 
 /* ── Left: 이장님에게 말하기 ── */
 .boardField {
-  background: var(--bd-card);
+  background: var(--bd-panel);
   border: 2px solid var(--bd-border);
-  border-radius: 16px;
-  padding: 15px 17px;
+  border-radius: 20px;
+  padding: 20px 22px;
   margin-bottom: 18px;
 }
 
 .boardFieldHint {
-  font-size: 14px;
-  color: var(--bd-ink-soft);
-  margin-bottom: 11px;
+  font-size: 19px;
+  color: var(--bd-ink-faint);
+  margin-bottom: 14px;
 }
 
 .boardTextarea {
   width: 100%;
-  min-height: 76px;
+  min-height: 74px;
   resize: none;
-  border: 2px solid var(--bd-border);
-  border-radius: 12px;
+  border: 2px solid #efe6ce;
+  border-radius: 14px;
   background: var(--bd-field);
-  padding: 13px 15px;
-  font-size: 16px;
-  line-height: 1.5;
+  padding: 16px 18px;
+  font-size: 23px;
+  line-height: 1.4;
   color: var(--bd-ink);
   outline: none;
   box-sizing: border-box;
-  font-family: var(--font-tmoney-dungunbaram);
+  font-family: var(--bd-font);
   transition: border-color 0.15s;
 }
 
@@ -302,40 +321,45 @@
   opacity: 1;
 }
 
-/* AI 정리 = 생성형 보조 액션(go-green) */
+/* 마을 공용 액션 버튼(앰버 베벨) — 좌측 정리 버튼은 컬럼 폭을 채운다 */
 .boardOrganizeBtn {
-  align-self: center;
+  align-self: stretch;
   margin-top: auto;
   border: none;
   cursor: pointer;
-  padding: 13px 30px;
-  border-radius: 15px;
-  background: linear-gradient(180deg, #a6dd86, var(--bd-go));
+  padding: 15px 0;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bd-btn-top), var(--bd-btn-bot));
   color: #fff;
-  font-size: 18px;
+  font-size: 24px;
+  font-weight: 800;
   letter-spacing: 0.3px;
-  font-family: var(--font-tmoney-dungunbaram);
-  text-shadow: 0 1px 1px rgba(50, 90, 30, 0.35);
+  font-family: var(--bd-font);
+  text-shadow: 0 1px 1px rgba(150, 90, 20, 0.35);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 9px;
   box-shadow:
-    0 5px 0 var(--bd-go-dk),
-    0 12px 18px -8px rgba(90, 150, 60, 0.5);
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 5px 0 var(--bd-btn-edge),
+    0 9px 14px rgba(140, 90, 20, 0.16);
   transition:
     transform 0.08s ease,
     filter 0.08s;
 }
 
 .boardOrganizeBtn:hover:not(:disabled) {
-  filter: brightness(1.03);
+  filter: brightness(1.05);
+  transform: translateY(-1px);
 }
 
 .boardOrganizeBtn:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow:
-    0 2px 0 var(--bd-go-dk),
-    0 6px 10px -6px rgba(90, 150, 60, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 2px 0 var(--bd-btn-edge),
+    0 6px 10px -6px rgba(190, 140, 40, 0.5);
 }
 
 .boardOrganizeBtn:disabled {
@@ -346,8 +370,8 @@
 /* ── Right: 직접 적기 ── */
 .boardAddRow {
   display: flex;
-  gap: 11px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .boardInput {
@@ -355,13 +379,13 @@
   min-width: 0;
   border: 2px solid var(--bd-border);
   border-radius: 14px;
-  padding: 12px 15px;
-  font-size: 17px;
+  padding: 14px 18px;
+  font-size: 23px;
   color: var(--bd-ink);
   background: var(--bd-field);
   outline: none;
   box-sizing: border-box;
-  font-family: var(--font-tmoney-dungunbaram);
+  font-family: var(--bd-font);
   transition: border-color 0.15s;
 }
 
@@ -374,71 +398,78 @@
   opacity: 1;
 }
 
-/* 직접 추가 = 보조(테르티어리) 액션: accent 아웃라인 */
+/* 직접 추가 = 마을 공용 앰버 버튼(소형) */
 .boardAddBtn {
   flex: none;
   cursor: pointer;
-  padding: 0 26px;
+  padding: 0 30px;
   border-radius: 14px;
-  border: 2px solid var(--bd-accent);
-  background: var(--bd-accent-tint);
-  color: var(--bd-accent-deep);
-  font-size: 18px;
+  border: none;
+  background: linear-gradient(180deg, var(--bd-btn-top), var(--bd-btn-bot));
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
   white-space: nowrap;
-  font-family: var(--font-tmoney-dungunbaram);
+  text-shadow: 0 1px 1px rgba(150, 90, 20, 0.35);
+  font-family: var(--bd-font);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 4px 0 var(--bd-btn-edge),
+    0 7px 10px rgba(140, 90, 20, 0.16);
   transition:
-    background 0.12s,
+    transform 0.08s ease,
     filter 0.08s;
 }
 
 .boardAddBtn:hover {
-  background: var(--bd-accent-soft);
+  filter: brightness(1.05);
+  transform: translateY(-1px);
 }
 
 .boardAddBtn:active {
-  filter: brightness(0.97);
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 1px 0 var(--bd-btn-edge),
+    0 5px 8px -6px rgba(190, 140, 40, 0.5);
 }
 
 .boardTagBox {
+  margin-top: auto;
   background: var(--bd-card);
   border: 2px solid var(--bd-border);
-  border-radius: 16px;
-  padding: 14px 16px 16px;
-  margin-top: auto;
+  border-radius: 20px;
+  padding: 18px 20px 20px;
 }
 
 .boardTagBoxTitle {
-  text-align: center;
-  font-size: 15px;
-  color: var(--bd-accent-deep);
-  margin-bottom: 12px;
-}
-
-.boardTagBoxTitle span {
-  font-size: 12px;
-}
-
-/* ── Bottom: 생성된 TODO ── */
-.boardGenerated {
-  padding-top: 18px;
-}
-
-.boardSectionDivider {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  font-size: 20px;
+  color: var(--bd-ink-soft);
   margin-bottom: 16px;
 }
 
-.boardDividerLine {
-  flex: 1;
+/* ── Bottom: 생성된 TODO (전폭 점선 구분선 + 가운데 꽃 + ③ 헤더) ── */
+.boardDivider {
+  position: relative;
+  height: 0;
+  margin: 0 0 24px;
   border-top: 2px dashed var(--bd-divider);
+  display: flex;
+  justify-content: center;
 }
 
-.boardDividerLabel {
-  font-size: 20px;
-  color: var(--bd-ink-soft);
-  white-space: nowrap;
+/* 점선 위에 꽃을 얹고, 뒤 배경색으로 선을 살짝 끊어 꽃이 떠 보이게 한다 */
+.boardDividerFlower {
+  position: relative;
+  top: -22px;
+  height: 40px;
+  width: auto;
+  padding: 0 12px;
+  background: var(--bd-bg);
+}
+
+.boardGenerated {
+  padding-top: 2px;
 }
 
 .boardDividerStar {
@@ -450,9 +481,9 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 5px;
-  margin: -6px 0 14px;
-  font-size: 14px;
+  gap: 6px;
+  margin: -6px 0 16px;
+  font-size: 16px;
   color: var(--bd-accent-deep);
 }
 
@@ -463,30 +494,47 @@
 .boardEmpty {
   text-align: center;
   color: var(--bd-ink-faint);
-  font-size: 17px;
-  padding: 24px 0 12px;
+  font-size: 21px;
+  padding: 34px 0;
+  border: 2px dashed #e0d2ae;
+  border-radius: 18px;
 }
 
 .boardTodoList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .boardTodoRow {
   display: flex;
   align-items: center;
-  gap: 13px;
-  background: var(--bd-field);
+  gap: 16px;
+  background: var(--bd-panel);
   border: 2px solid var(--bd-border);
-  border-radius: 14px;
-  padding: 11px 16px;
+  border-radius: 16px;
+  padding: 14px 18px 14px 20px;
   animation: tdRowIn 0.28s ease both;
+  transition: border-color 0.12s;
+}
+
+.boardTodoRow:hover {
+  border-color: var(--bd-border-strong);
 }
 
 .boardPin {
-  font-size: 20px;
+  height: 30px;
+  width: auto;
   flex: none;
+  image-rendering: pixelated;
+}
+
+/* 항목 카테고리 아이콘(덤벨/세탁기/청소기 — 키워드 매칭 시에만 노출) */
+.boardTodoIcon {
+  height: 34px;
+  width: auto;
+  flex: none;
+  image-rendering: pixelated;
 }
 
 .boardTodoName {
@@ -496,10 +544,11 @@
   border-radius: 9px;
   background: transparent;
   padding: 6px 8px;
-  font-size: 18px;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--bd-ink);
   outline: none;
-  font-family: var(--font-tmoney-dungunbaram);
+  font-family: var(--bd-font);
 }
 
 .boardTodoName:focus {
@@ -517,13 +566,11 @@
 .boardChip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 11px;
-  border-radius: 9px;
-  border: 1.5px solid currentColor;
-  font-size: 14px;
+  gap: 6px;
+  padding: 4px 13px;
+  border-radius: 10px;
+  font-size: 18px;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.7);
 }
 
 .boardChipRemove {
@@ -541,14 +588,14 @@
 
 .boardApplyTag {
   flex: none;
-  padding: 6px 12px;
-  border-radius: 9px;
+  padding: 8px 14px;
+  border-radius: 11px;
   border: 1.5px solid var(--bd-go);
   background: #f3faec;
   color: var(--bd-go-dk);
   cursor: pointer;
-  font-size: 14px;
-  font-family: var(--font-tmoney-dungunbaram);
+  font-size: 17px;
+  font-family: var(--bd-font);
 }
 
 /* ⭐ 퀘스트 옵트인 토글 (켜면 honey, 꺼지면 중립 아웃라인) */
@@ -557,15 +604,15 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
-  border-radius: 9px;
+  padding: 8px 14px;
+  border-radius: 11px;
   border: 1.5px solid var(--bd-border-strong);
   background: var(--bd-field);
   color: var(--bd-ink-soft);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 17px;
   white-space: nowrap;
-  font-family: var(--font-tmoney-dungunbaram);
+  font-family: var(--bd-font);
   transition:
     background 0.12s,
     color 0.12s,
@@ -588,7 +635,7 @@
   border: none;
   background: transparent;
   color: var(--bd-ink-faint);
-  font-size: 20px;
+  font-size: 26px;
   cursor: pointer;
   padding: 0 4px;
   transition: color 0.12s;
@@ -602,51 +649,56 @@
 .boardFooter {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 28px;
 }
 
-/* 메인 CTA = honey primary (앱 전역 1차 액션 색) */
+/* 메인 CTA = 마을 공용 앰버 버튼(가장 큼) */
 .boardSaveBtn {
-  width: 620px;
+  width: 560px;
   max-width: 100%;
   border: none;
   cursor: pointer;
-  padding: 17px 0;
+  padding: 18px 0;
   border-radius: 18px;
-  background: var(--bd-primary);
-  color: var(--bd-primary-ink);
-  font-size: 24px;
+  background: linear-gradient(180deg, var(--bd-btn-top), var(--bd-btn-bot));
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
   letter-spacing: 0.5px;
-  font-family: var(--font-tmoney-dungunbaram);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  font-family: var(--bd-font);
+  text-shadow: 0 1px 1px rgba(150, 90, 20, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   box-shadow:
-    0 5px 0 var(--bd-primary-dk),
-    0 12px 18px -8px rgba(190, 140, 40, 0.5);
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 6px 0 var(--bd-btn-edge),
+    0 11px 16px rgba(140, 90, 20, 0.18);
   transition:
     transform 0.08s ease,
     filter 0.08s;
 }
 
 .boardSaveBtn:hover:not(:disabled) {
-  filter: brightness(1.03);
+  filter: brightness(1.05);
+  transform: translateY(-1px);
 }
 
 .boardSaveBtn:active:not(:disabled) {
-  transform: translateY(3px);
+  transform: translateY(4px);
   box-shadow:
-    0 2px 0 var(--bd-primary-dk),
-    0 6px 10px -6px rgba(190, 140, 40, 0.5);
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    0 2px 0 var(--bd-btn-edge),
+    0 7px 10px -6px rgba(190, 140, 40, 0.55);
 }
 
 .boardSaveBtn:disabled {
   cursor: wait;
   background: #e7decb;
-  color: #b8a888;
-  box-shadow: 0 3px 0 #d3c7ad;
+  color: #fff;
+  text-shadow: none;
+  box-shadow: 0 4px 0 #d3c7ad;
 }
 
 /* ── Result page (확정 TODO + 캐릭터 퀘스트) ── */
@@ -774,44 +826,25 @@
   white-space: nowrap;
 }
 
-/* ── Responsive: 좁은 화면에서 두 칼럼을 세로로 ── */
-@media (max-width: 760px) {
-  .boardRow {
-    flex-direction: column;
-  }
-  .boardHeader {
-    padding: 0;
-    gap: 10px;
-  }
-  .boardMayor {
-    height: 60px;
-  }
-  .boardTitle {
-    font-size: 24px;
-  }
-  .boardPlaque {
-    padding: 11px 30px;
-  }
-  .boardHeaderDeco {
-    display: none;
-  }
-}
-
 /* 동작 최소화 선호 시 진입/반짝임 애니메이션 정지. 스피너만 느린 회전 유지. */
 @media (prefers-reduced-motion: reduce) {
   .boardPanel,
   .tdPageIn,
   .boardTodoRow,
   .boardQuestRow,
-  .boardPlaqueStar,
   .tdGenStar,
   .tdToast {
     animation: none;
   }
   .boardOrganizeBtn,
   .boardAddBtn,
-  .boardSaveBtn {
+  .boardSaveBtn,
+  .boardTodoRow {
     transition: none;
+  }
+  .boardTodoRow:hover {
+    transform: none;
+    box-shadow: none;
   }
   .tdSpinner {
     animation-duration: 1.4s;
