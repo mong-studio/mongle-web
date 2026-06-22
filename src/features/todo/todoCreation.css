@@ -448,6 +448,27 @@
   margin-bottom: 16px;
 }
 
+/* 태그 선택 칩(공용 TagPicker/TagChip)을 이 보드에서만 키운다(원본 13px ↔ 확대 19px의 중간). 다른 화면(캘린더)엔 영향 없음 */
+.tdRoot .tagPickerRow {
+  gap: 8px;
+}
+.tdRoot .tagChipSelect {
+  padding: 8px 12px 8px 14px;
+  gap: 6px;
+  font-size: 16px;
+}
+.tdRoot .tagChipDot {
+  width: 10px;
+  height: 10px;
+}
+.tdRoot .tagChipDelete {
+  font-size: 16px;
+}
+.tdRoot .tagPickerNew {
+  padding: 8px 15px;
+  font-size: 16px;
+}
+
 /* ── Bottom: 생성된 TODO (전폭 점선 구분선 + 가운데 꽃 + ③ 헤더) ── */
 .boardDivider {
   position: relative;
@@ -567,9 +588,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 13px;
+  padding: 5px 14px;
   border-radius: 10px;
-  font-size: 18px;
+  font-size: 19px;
   white-space: nowrap;
 }
 
