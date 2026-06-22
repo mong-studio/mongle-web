@@ -172,6 +172,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   INVALID_CURRENT_PASSWORD: "현재 비밀번호가 올바르지 않아요.",
   VALIDATION_ERROR: "입력값을 다시 확인해 주세요.",
   EMAIL_DUPLICATED: "이미 가입된 이메일이에요.",
+  USER_NOT_FOUND: "등록되어 있지 않은 이메일입니다.",
   EMAIL_NOT_VERIFIED: "이메일 인증을 먼저 완료해 주세요.",
   INVALID_VERIFICATION_CODE: "인증 코드가 올바르지 않아요.",
   VERIFICATION_CODE_EXPIRED: "인증 코드가 만료됐어요. 다시 요청해 주세요.",
