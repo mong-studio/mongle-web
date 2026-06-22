@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type ApiPost, fetchPostDetail } from "./api.js";
+import { type ApiPost, fetchPostDetail, toggleLike } from "./api.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -103,6 +103,20 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
             <div className="pd-author-txt">
               <div className="pd-author-name" style={{ color: th.ink }}>
                 {authorName}
+                {post.character_is_active === false && (
+                  <span
+                    style={{
+                      marginLeft: 6,
+                      padding: "1px 6px",
+                      borderRadius: 6,
+                      fontSize: 11,
+                      background: th.inkFaint,
+                      color: th.modalBg,
+                    }}
+                  >
+                    비활성
+                  </span>
+                )}
               </div>
               <div className="pd-author-meta" style={{ color: th.inkSoft }}>
                 {new Date(post.created_at).toLocaleDateString("ko-KR")}
@@ -132,7 +146,12 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
             <button
               type="button"
               className={`pd-react${liked ? " on" : ""}`}
-              onClick={() => setLiked((v) => !v)}
+              onClick={() => {
+                // 낙관적 업데이트 후 서버 저장 — 실패하면 롤백.
+                const prev = liked;
+                setLiked(!prev);
+                toggleLike(postId).catch(() => setLiked(prev));
+              }}
               aria-pressed={liked}
               aria-label="좋아요"
             >

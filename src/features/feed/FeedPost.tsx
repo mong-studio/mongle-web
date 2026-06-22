@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toggleLike } from "./api.js";
 import type { FeedPostData, ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -18,15 +19,19 @@ export function FeedPost({ post, th, onAuthorClick, onOpen, onShare }: FeedPostP
   const px = 3;
 
   function doLike() {
-    if (liked) {
-      setLiked(false);
-      setLikeCount((c) => c - 1);
-      return;
+    // 낙관적 업데이트 후 서버에 저장 — 실패하면 롤백.
+    const prev = liked;
+    const next = !prev;
+    setLiked(next);
+    setLikeCount((c) => c + (next ? 1 : -1));
+    if (next) {
+      setPop(true);
+      setTimeout(() => setPop(false), 420);
     }
-    setLiked(true);
-    setLikeCount((c) => c + 1);
-    setPop(true);
-    setTimeout(() => setPop(false), 420);
+    toggleLike(post.id).catch(() => {
+      setLiked(prev);
+      setLikeCount((c) => c + (next ? -1 : 1));
+    });
   }
 
   const heartArt = liked ? SPRITES.heart : SPRITES.heartOutline;
@@ -57,6 +62,11 @@ export function FeedPost({ post, th, onAuthorClick, onOpen, onShare }: FeedPostP
               {post.role && (
                 <span className="mg-badge" style={{ background: th.badgeBg, color: th.badgeInk }}>
                   {post.role}
+                </span>
+              )}
+              {post.isActive === false && (
+                <span className="mg-badge" style={{ background: th.inkFaint, color: th.cardBg }}>
+                  비활성
                 </span>
               )}
             </div>

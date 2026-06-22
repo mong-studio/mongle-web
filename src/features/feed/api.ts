@@ -22,6 +22,7 @@ export interface ApiPost {
   post_id: string;
   character: string;
   character_name: string;
+  character_is_active: boolean;
   quest_id: string;
   img_url: string;
   content: string;
@@ -55,6 +56,11 @@ export async function fetchPosts(): Promise<ApiPost[]> {
 export async function fetchPostDetail(postId: string): Promise<ApiPost> {
   const { data } = await apiClient.get<ApiPost>(`/posts/${postId}/`);
   return data;
+}
+
+export async function toggleLike(postId: string): Promise<boolean> {
+  const { data } = await apiClient.post<{ is_liked: boolean }>(`/posts/${postId}/like/`);
+  return data.is_liked;
 }
 
 export async function createComment(postId: string, content: string): Promise<ApiComment> {
@@ -100,6 +106,7 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     heroPlaceholder: "사진",
     imageUrl: post.img_url,
     commentList,
+    isActive: post.character_is_active,
   };
 }
 

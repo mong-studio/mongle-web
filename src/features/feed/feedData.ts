@@ -126,6 +126,8 @@ export interface FeedPostData {
   heroPlaceholder: string;
   imageUrl?: string;
   commentList: FeedComment[];
+  // 비활성(은퇴) 캐릭터면 false — 미지정이면 활성으로 간주.
+  isActive?: boolean;
 }
 
 export interface CharacterProfile {
