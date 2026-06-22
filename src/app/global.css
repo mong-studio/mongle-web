@@ -578,13 +578,15 @@ button {
 }
 
 .todoModalShell {
-  width: min(960px, 100%);
-  max-height: calc(100vh - 28px);
+  /* TodoCreation이 1240px 패널을 자체 scale로 맞추므로 셸은 콘텐츠 크기에 맡긴다 */
+  width: auto;
+  max-width: none;
+  max-height: none;
   padding: 0;
   border: 0;
   box-shadow: none;
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .reflectionModalShell {
