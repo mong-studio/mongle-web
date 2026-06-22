@@ -6,7 +6,6 @@ import {
   signup as signupRequest,
   toUserMessage,
 } from "./api.js";
-import { AI_CONSENT, ConsentDetailModal, PRIVACY_CONSENT } from "./ConsentDetailModal.js";
 import "./SignupModal.css";
 
 const JOBS = [
@@ -39,6 +38,12 @@ const AGREEMENTS = [
   },
 ];
 
+// 약관 보기 링크. URL은 추후 직접 채워 넣는다.
+const CONSENT_LINKS: Record<"privacy" | "ai", string> = {
+  privacy: "https://spiffy-beach-2f1.notion.site/387cfd330227806d930bc427ea314a1f?source=copy_link",
+  ai: "https://spiffy-beach-2f1.notion.site/AI-387cfd3302278056b526e1a2ee9bc13d?source=copy_link",
+};
+
 type SignupModalProps = {
   open: boolean;
   onClose: () => void;
@@ -64,8 +69,6 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [agree, setAgree] = useState({ terms: false, privacy: false, ai: false });
   const [toast, setToast] = useState("");
-  const [privacyDetailOpen, setPrivacyDetailOpen] = useState(false);
-  const [aiDetailOpen, setAiDetailOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -84,8 +87,6 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       setSubmitting(false);
       setAgree({ terms: false, privacy: false, ai: false });
       setToast("");
-      setPrivacyDetailOpen(false);
-      setAiDetailOpen(false);
       clearTimeout(toastTimer.current);
       clearInterval(cooldownRef.current);
       setCooldown(0);
@@ -482,15 +483,14 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
                       </span>
                     </button>
                     {detail && (
-                      <button
-                        type="button"
+                      <a
                         className="suAgreeViewBtn"
-                        onClick={() =>
-                          detail === "privacy" ? setPrivacyDetailOpen(true) : setAiDetailOpen(true)
-                        }
+                        href={CONSENT_LINKS[detail]}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         보기
-                      </button>
+                      </a>
                     )}
                   </div>
                 ))}
@@ -517,16 +517,6 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
           )}
         </div>
       }
-      <ConsentDetailModal
-        open={privacyDetailOpen}
-        onClose={() => setPrivacyDetailOpen(false)}
-        detail={PRIVACY_CONSENT}
-      />
-      <ConsentDetailModal
-        open={aiDetailOpen}
-        onClose={() => setAiDetailOpen(false)}
-        detail={AI_CONSENT}
-      />
     </>
   );
 }
