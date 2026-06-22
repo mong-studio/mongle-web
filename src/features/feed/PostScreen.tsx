@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type ApiPost, fetchPostDetail, toggleLike } from "./api.js";
+import { type ApiPost, createComment, fetchPostDetail, toggleLike } from "./api.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -20,8 +20,25 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
   const [liked, setLiked] = useState(false);
   const [likeSaving, setLikeSaving] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [commentSaving, setCommentSaving] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [postError, setPostError] = useState(false);
+
+  async function submitComment() {
+    const content = commentText.trim();
+    if (!post || commentSaving || !content) return;
+    setCommentSaving(true);
+    try {
+      const newComment = await createComment(post.post_id, content);
+      // 응답 댓글을 목록에 바로 추가 (답글은 약 10분 뒤 서버가 생성)
+      setPost((prev) => (prev ? { ...prev, comments: [...prev.comments, newComment] } : prev));
+      setCommentText("");
+    } catch {
+      // 실패 시 입력값은 보존 — 사용자가 다시 시도할 수 있게 둔다
+    } finally {
+      setCommentSaving(false);
+    }
+  }
 
   async function doLike() {
     if (!post || likeSaving) return;
@@ -221,7 +238,7 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
           ))}
         </div>
 
-        {/* TODO: wire createComment API — 유저가 댓글 입력 시 캐릭터 답글 예약 */}
+        {/* 댓글 게시 시 약 2분 뒤 서버가 캐릭터 답글을 예약 생성한다 */}
         <div className="pd-ci">
           <div className="pd-ci-av" style={{ color: th.badgeInk }}>
             {ME}
@@ -231,9 +248,22 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
             style={{ background: th.rowBg, borderColor: th.rowEdge, color: th.ink }}
             placeholder="댓글을 입력해주세요…"
             value={commentText}
+            maxLength={50}
             onChange={(e) => setCommentText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                submitComment();
+              }
+            }}
           />
-          <button type="button" className="pd-ci-send" style={{ color: th.accent }}>
+          <button
+            type="button"
+            className="pd-ci-send"
+            style={{ color: th.accent }}
+            onClick={submitComment}
+            disabled={commentSaving || !commentText.trim()}
+          >
             게시
           </button>
         </div>
