@@ -222,7 +222,19 @@ export function TodoCreation({
   }
 
   function updateTodoName(id: string, name: string) {
-    setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, name } : todo)));
+    const trimmed = name.slice(0, 20);
+    setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, name: trimmed } : todo)));
+  }
+
+  // 20자 도달 후 글자를 더 치려고 하면(선택 영역 없이 입력 키) 경고 토스트.
+  function warnTodoNameLimit(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (isImeComposing(event)) return;
+    if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) return;
+    const input = event.currentTarget;
+    const hasSelection = input.selectionStart !== input.selectionEnd;
+    if (input.value.length >= 20 && !hasSelection) {
+      showToast("할 일은 20자까지만 쓸 수 있어요.");
+    }
   }
 
   function clearTodoTag(id: string) {
@@ -303,6 +315,10 @@ export function TodoCreation({
     if (isBusy) return;
     if (!todos.length) {
       showToast("할 일을 먼저 추가해주세요!");
+      return;
+    }
+    if (todos.some((t) => !t.name.trim())) {
+      showToast("빈 할 일은 저장할 수 없어요. 내용을 입력해주세요!");
       return;
     }
     setIsBusy(true);
@@ -606,6 +622,8 @@ export function TodoCreation({
                               className="boardTodoName"
                               value={todo.name}
                               onChange={(event) => updateTodoName(todo.id, event.target.value)}
+                              onKeyDown={warnTodoNameLimit}
+                              maxLength={20}
                               aria-label="TODO 항목 수정"
                             />
                             <div className="boardTodoChips">
