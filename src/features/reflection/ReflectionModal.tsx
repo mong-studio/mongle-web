@@ -244,6 +244,7 @@ export function ReflectionModal({
   function hydrateForm(entry: ReflectionEntry) {
     setGood(entry.good);
     setRegret(entry.regret);
+    setLimitWarningField(null);
   }
 
   function requestEditReflection(entry: ReflectionEntry) {
@@ -342,6 +343,7 @@ export function ReflectionModal({
         );
         setGood(nextEntry.good);
         setRegret(nextEntry.regret);
+        setLimitWarningField(null);
         const updateCost = updated.update_cost ?? EDIT_TOKEN_COST;
         const newReward = updated.new_reward ?? 0;
         onRewardApples(updated.token_delta ?? updated.reward);
@@ -371,6 +373,7 @@ export function ReflectionModal({
       });
       setGood(nextEntry.good);
       setRegret(nextEntry.regret);
+      setLimitWarningField(null);
       setIsEditing(false);
       onRewardApples(created.token);
       onNotice(`오늘 회고가 저장됐어요. 사과 ${created.token}개를 받았어요.`);
@@ -387,6 +390,7 @@ export function ReflectionModal({
           });
           setGood(nextEntry.good);
           setRegret(nextEntry.regret);
+          setLimitWarningField(null);
         }
         return;
       }
