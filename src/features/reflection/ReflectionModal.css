@@ -403,6 +403,18 @@ body ::-webkit-scrollbar {
   line-height: 1.45;
 }
 
+.reflectionTodoList .reflectionTodoEmpty {
+  grid-template-columns: 1fr;
+  height: 90%;
+  place-content: center;
+  justify-items: center;
+  border-bottom: 0;
+  color: #8b6846;
+  font-size: clamp(0.76rem, 1vw, 1.1rem);
+  font-weight: 900;
+  text-align: center;
+}
+
 .reflectionRewardCard {
   background: rgba(255, 238, 212, 0.6);
   position: absolute;
@@ -418,12 +430,20 @@ body ::-webkit-scrollbar {
   display: grid;
   grid-template-columns: 11% minmax(0, 1fr) 17.8%;
   align-items: center;
-  height: 50%;
+  height: 100%;
   padding: 0 10px;
   column-gap: 2%;
 }
 
 .reflectionRewardCard > div:first-child {
+  border-bottom: 0;
+}
+
+.reflectionRewardCard-withReward > div {
+  height: 50%;
+}
+
+.reflectionRewardCard-withReward > div:first-child {
   border-bottom: 1px solid rgba(226, 190, 132, 0.62);
 }
 
@@ -462,10 +482,14 @@ body ::-webkit-scrollbar {
 .reflectionRewardCard small {
   position: absolute;
   right: 5%;
-  bottom: 53%;
+  bottom: 8%;
   color: #9b6a3a;
   font-size: clamp(0.52rem, 0.66vw, 0.72rem);
   font-weight: 900;
+}
+
+.reflectionRewardCard-withReward small {
+  bottom: 53%;
 }
 
 .reflectionEditGuideCard {
@@ -764,7 +788,7 @@ body ::-webkit-scrollbar {
 .reflectionHistoryEntry {
   height: 86.5%;
   display: grid;
-  grid-template-rows: 12.5% 1fr 1fr;
+  grid-template-rows: 12.5% 24% 1fr 1fr;
   gap: 2.5%;
 }
 
@@ -774,6 +798,7 @@ body ::-webkit-scrollbar {
 }
 
 .reflectionHistoryDate,
+.reflectionHistoryTodos,
 .reflectionHistoryEssay,
 .reflectionEmptyHistory {
   border: 1.8px solid rgba(222, 174, 105, 0.68);
@@ -835,6 +860,135 @@ body ::-webkit-scrollbar {
   width: clamp(11px, 0.9vw, 16px);
 }
 
+.reflectionHistoryTodos {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  padding: 2.6% 3.2%;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.reflectionHistoryTodoHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4%;
+  min-height: 0;
+  margin-bottom: 1.2%;
+}
+
+.reflectionHistoryTodoHead h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.42em;
+  margin: 0;
+  color: #4b3323;
+  font-size: clamp(0.72rem, 1vw, 1.08rem);
+  white-space: nowrap;
+}
+
+.reflectionHistoryTodoHead .reflectionIcon-sprout {
+  width: clamp(16px, 1.5vw, 25px);
+}
+
+.reflectionHistoryTodoHead p {
+  display: flex;
+  gap: 0.55em;
+  margin: 0;
+  font-size: clamp(0.58rem, 0.78vw, 0.86rem);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.reflectionHistoryTodoHead span:first-child {
+  color: #1d7f34;
+}
+
+.reflectionHistoryTodoHead span:last-child {
+  color: #e45a24;
+}
+
+.reflectionHistoryTodoList {
+  display: grid;
+  align-content: start;
+  grid-auto-rows: minmax(24px, 1fr);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: rgba(190, 132, 68, 0.62) transparent;
+  scrollbar-width: thin;
+}
+
+.reflectionHistoryTodoList::-webkit-scrollbar {
+  display: block;
+  width: 5px;
+}
+
+.reflectionHistoryTodoList::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(190, 132, 68, 0.62);
+}
+
+.reflectionHistoryTodoList li {
+  display: grid;
+  grid-template-columns: clamp(16px, 1.4vw, 24px) minmax(0, 1fr) 17%;
+  align-items: center;
+  column-gap: 3%;
+  min-height: 0;
+  border-bottom: 1px dashed rgba(219, 174, 111, 0.45);
+  padding: 0.28em 0;
+}
+
+.reflectionHistoryTodoList li:last-child {
+  border-bottom: 0;
+}
+
+.reflectionHistoryTodoList .reflectionCheck {
+  width: clamp(16px, 1.4vw, 24px);
+  height: clamp(16px, 1.4vw, 24px);
+  font-size: clamp(0.58rem, 0.7vw, 0.85rem);
+}
+
+.reflectionHistoryTodoList strong {
+  overflow: hidden;
+  color: #3e2b1d;
+  font-size: clamp(0.62rem, 0.86vw, 0.96rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reflectionHistoryTodoList em {
+  display: grid;
+  min-height: 1.7em;
+  place-items: center;
+  border: 1px solid #eda75c;
+  border-radius: 7px;
+  background: #fff0d5;
+  color: #e45a24;
+  font-size: clamp(0.52rem, 0.68vw, 0.76rem);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.reflectionHistoryTodoList em.isDone {
+  border-color: #bfd27c;
+  background: #eef5c9;
+  color: #247a36;
+}
+
+.reflectionHistoryTodoList .reflectionHistoryTodoEmpty {
+  grid-template-columns: 1fr;
+  place-items: center;
+  border-bottom: 0;
+  color: #8b6846;
+  font-size: clamp(0.64rem, 0.86vw, 0.96rem);
+  font-weight: 900;
+}
+
 .reflectionHistoryEssay {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -884,6 +1038,41 @@ body ::-webkit-scrollbar {
   font-weight: normal;
   line-height: var(--reflection-writing-line-height);
   white-space: pre-line;
+}
+
+.reflectionHistoryReflectionPage {
+  top: 15.5%;
+  height: 70%;
+}
+
+.reflectionHistoryReflectionPage .reflectionEssayCard {
+  height: 49.5%;
+  padding: 3.8% 4.2%;
+}
+
+.reflectionHistoryReflectionPage .reflectionHistoryTextBox {
+  height: calc(100% - 2.85rem);
+}
+
+.reflectionHistoryReflectionPage .reflectionHistoryText {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.58em 0.64em 0.72em;
+  scrollbar-color: rgba(190, 132, 68, 0.62) transparent;
+  scrollbar-width: thin;
+  touch-action: pan-y;
+}
+
+.reflectionHistoryReflectionPage .reflectionHistoryText::-webkit-scrollbar {
+  display: block;
+  width: 5px;
+}
+
+.reflectionHistoryReflectionPage .reflectionHistoryText::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(190, 132, 68, 0.62);
 }
 
 .reflectionEmptyHistory {
