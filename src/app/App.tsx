@@ -465,6 +465,12 @@ export function App() {
     void fetchResidents();
   }, [fetchResidents]);
 
+  // 마이페이지를 열 때마다 캐릭터 목록을 다시 불러와, 만료됐을 수 있는 썸네일
+  // presigned URL 을 새로 서명받아 갱신한다.
+  useEffect(() => {
+    if (showMyPage) void fetchResidents();
+  }, [showMyPage, fetchResidents]);
+
   // 로그인 직후 캐릭터가 하나도 없으면 캐릭터 생성 모달을 자동으로 띄운다.
   const autoCharacterPromptRef = useRef(false);
   useEffect(() => {
