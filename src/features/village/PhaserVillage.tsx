@@ -316,18 +316,31 @@ class VillageScene extends Phaser.Scene {
             return;
           }
           try {
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            await new Promise<void>((resolve, reject) => {
-              img.onload = () => resolve();
-              img.onerror = () => reject();
-              img.src = resident.avatarUrl ?? "";
-            });
-            if (!this.textures.exists(key)) {
-              this.textures.addImage(key, img);
+            // crossOrigin <img> 대신 cors fetch→blob→objectURL 로 텍스처를 굽는다.
+            // 결과 모달/토스트가 같은 S3 URL을 일반 <img>(no-cors)로 먼저 렌더하면
+            // 브라우저가 그 URL을 CORS 헤더 없는 opaque 응답으로 캐싱하고, 마을의
+            // crossOrigin 재요청이 그 캐시를 재사용해 실패(→NPC 누락)한다. cors fetch 는
+            // opaque 캐시를 재사용하지 않아 항상 CORS-clean 이미지를 얻는다.
+            const response = await fetch(resident.avatarUrl ?? "", { mode: "cors" });
+            if (!response.ok) {
+              return;
+            }
+            const objectUrl = URL.createObjectURL(await response.blob());
+            try {
+              const img = new Image();
+              await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject();
+                img.src = objectUrl;
+              });
+              if (!this.textures.exists(key)) {
+                this.textures.addImage(key, img);
+              }
+            } finally {
+              URL.revokeObjectURL(objectUrl);
             }
           } catch {
-            // 로드 실패 시 폴백 이미지 사용
+            // 로드 실패 시 NPC 없이 집만 표시(폴백)
           }
         }),
     );
