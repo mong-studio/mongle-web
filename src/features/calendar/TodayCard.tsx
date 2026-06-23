@@ -132,7 +132,26 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
           >
             {e.title}
           </div>
-          <Tag color={e.color} bg={e.bg} label={e.tagLabel} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            {failed && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  background: "var(--cream-2)",
+                  color: "var(--ink-3)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: 11,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                포기
+              </span>
+            )}
+            <Tag color={e.color} bg={e.bg} label={e.tagLabel} />
+          </div>
         </div>
       </motion.div>
     );
