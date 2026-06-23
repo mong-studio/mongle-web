@@ -739,6 +739,9 @@
 }
 
 .boardChipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 16px;
   height: 16px;
   padding: 0;
@@ -748,6 +751,7 @@
   color: inherit;
   cursor: pointer;
   font-size: 12px;
+  font-family: var(--bd-font);
   line-height: 1;
 }
 

@@ -218,6 +218,7 @@ export function TodoCreation({
     if (!name) return;
     setTodos((prev) => [...prev, { id: createId("td"), name, tagId: selectedTagId, quest: false }]);
     setManualText("");
+    setSelectedTagId(null);
   }
 
   function updateTodoName(id: string, name: string) {
@@ -624,7 +625,7 @@ export function TodoCreation({
                                     onClick={() => clearTodoTag(todo.id)}
                                     aria-label={`${tag.content} 태그 제거`}
                                   >
-                                    ×
+                                    x
                                   </button>
                                 </span>
                               )}
