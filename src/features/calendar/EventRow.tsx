@@ -12,7 +12,7 @@ import "./EventRow.css";
 type Props = {
   ev: CalEvent;
   isDone: boolean;
-  isToday: boolean;
+  todaySr: number;
   onToggle: () => void;
   onDelete: () => Promise<void>;
   onFail: () => Promise<void>;
@@ -52,7 +52,7 @@ const trashIcon = (
 export function EventRow({
   ev,
   isDone,
-  isToday,
+  todaySr,
   onToggle,
   onDelete,
   onFail,
@@ -67,8 +67,17 @@ export function EventRow({
 
   const isSchedule = !!ev.scheduleId;
   const isFailed = !!ev.failed;
-  // 당일 TODO는 수정 불가 + 삭제 대신 포기. 일정(기간)은 당일이어도 그대로 삭제/수정 가능.
-  const locked = isToday && !isSchedule;
+  // 일정(schedule)만 수정 가능. 할일(TODO)은 항상 수정 불가.
+  const canEdit = isSchedule;
+  // 휴지통 버튼 동작:
+  //   일정 → 삭제 / 지난 할일 → 없음(포기·삭제 불가) / 오늘 할일 → 포기 / 다음날 할일 → 삭제
+  const action: "fail" | "delete" | null = isSchedule
+    ? "delete"
+    : ev.s < todaySr
+      ? null
+      : ev.s === todaySr
+        ? "fail"
+        : "delete";
   const { m: sm, d: sd } = serialToMD(ev.s);
   const { m: em, d: ed } = serialToMD(ev.e);
 
@@ -162,9 +171,9 @@ export function EventRow({
             <Tag color={ev.color} bg={ev.bg} label={ev.tagLabel} />
           </div>
         </div>
-        {!isFailed && (
+        {!isFailed && (canEdit || action) && (
           <div className="eventRowActions">
-            {!locked && (
+            {canEdit && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
@@ -186,27 +195,33 @@ export function EventRow({
                 </svg>
               </button>
             )}
-            <DeleteConfirmDialog
-              trigger={
-                <button
-                  type="button"
-                  className="calIconBtn calBtn-icon"
-                  aria-label={locked ? "포기" : "삭제"}
-                >
-                  {trashIcon}
-                </button>
-              }
-              title={
-                locked ? "포기할까요?" : isSchedule ? "일정을 삭제할까요?" : "할일을 삭제할까요?"
-              }
-              description={
-                locked
-                  ? "포기하면 오늘은 완료할 수 없어요. 포기 기록은 남아요."
-                  : "삭제하면 되돌릴 수 없어요."
-              }
-              confirmLabel={locked ? "포기하기" : undefined}
-              onConfirm={() => void (locked ? handleFail() : handleDelete())}
-            />
+            {action && (
+              <DeleteConfirmDialog
+                trigger={
+                  <button
+                    type="button"
+                    className="calIconBtn calBtn-icon"
+                    aria-label={action === "fail" ? "포기" : "삭제"}
+                  >
+                    {trashIcon}
+                  </button>
+                }
+                title={
+                  action === "fail"
+                    ? "포기할까요?"
+                    : isSchedule
+                      ? "일정을 삭제할까요?"
+                      : "할일을 삭제할까요?"
+                }
+                description={
+                  action === "fail"
+                    ? "포기하면 오늘은 완료할 수 없어요. 포기 기록은 남아요."
+                    : "삭제하면 되돌릴 수 없어요."
+                }
+                confirmLabel={action === "fail" ? "포기하기" : undefined}
+                onConfirm={() => void (action === "fail" ? handleFail() : handleDelete())}
+              />
+            )}
           </div>
         )}
       </motion.div>

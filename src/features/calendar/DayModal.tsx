@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { type CSSProperties, useState } from "react";
 import { AddEventForm } from "./AddEventForm.js";
 import type { CalHook } from "./CalendarCore.js";
-import { serial } from "./calEngine.js";
+import { type CalEvent, serial } from "./calEngine.js";
 import { DayModalHeader } from "./DayModalHeader.js";
 import { EventRow } from "./EventRow.js";
 import type { TagItem } from "./types.js";
@@ -96,6 +96,29 @@ function DayModalPanel({
   const doneCount = evs.filter((e) => e.done).length;
   const isToday = cal.todaySr === serial(y, m, d);
 
+  // 가독성을 위해 일정(schedule)과 할 일(todo)을 분리해 섹션으로 보여준다.
+  const scheduleEvs = evs.filter((e) => e.scheduleId);
+  const todoEvs = evs.filter((e) => !e.scheduleId);
+
+  const renderRow = (e: CalEvent) => (
+    <EventRow
+      key={e.id}
+      ev={e}
+      isDone={e.done}
+      todaySr={cal.todaySr}
+      onToggle={() => onToggle(e.id)}
+      onDelete={() => onDeleteEvent(e.id)}
+      onFail={() => onFailEvent(e.id)}
+      onEdit={(title, tagId, startStr, endStr, description) =>
+        onEditEvent(e.id, title, tagId, startStr, endStr, description)
+      }
+      onCreateTag={onCreateTag}
+      onDeleteTag={onDeleteTag}
+      onEditTag={onEditTag}
+      tags={tags}
+    />
+  );
+
   return (
     <Dialog.Portal>
       <Dialog.Overlay asChild>
@@ -134,37 +157,49 @@ function DayModalPanel({
           />
 
           <div className="calScroll dayModalScrollBody">
-            <div className="dayModalListWrap">
-              {total === 0 ? (
-                <div className="dayModalEmpty">아직 등록된 일정이 없어요</div>
-              ) : (
-                <motion.div
-                  className="dayModalList"
-                  initial="hidden"
-                  animate="show"
-                  variants={staggerContainer}
-                >
-                  {evs.map((e) => (
-                    <EventRow
-                      key={e.id}
-                      ev={e}
-                      isDone={e.done}
-                      isToday={isToday}
-                      onToggle={() => onToggle(e.id)}
-                      onDelete={() => onDeleteEvent(e.id)}
-                      onFail={() => onFailEvent(e.id)}
-                      onEdit={(title, tagId, startStr, endStr, description) =>
-                        onEditEvent(e.id, title, tagId, startStr, endStr, description)
-                      }
-                      onCreateTag={onCreateTag}
-                      onDeleteTag={onDeleteTag}
-                      onEditTag={onEditTag}
-                      tags={tags}
-                    />
-                  ))}
-                </motion.div>
-              )}
-            </div>
+            {/* 추가 모드(＋)에서는 기존 목록을 숨기고 입력 폼만 보여준다. */}
+            {!adding && (
+              <div className="dayModalListWrap">
+                {total === 0 ? (
+                  <div className="dayModalEmpty">아직 등록된 일정이 없어요</div>
+                ) : (
+                  <div className="dayModalSections">
+                    {scheduleEvs.length > 0 && (
+                      <section className="dayModalSection">
+                        <div className="dayModalSectionHead">
+                          <span className="dayModalSectionTitle">📅 일정</span>
+                          <span className="dayModalSectionCount">{scheduleEvs.length}</span>
+                        </div>
+                        <motion.div
+                          className="dayModalList dayModalSectionScroll calScroll"
+                          initial="hidden"
+                          animate="show"
+                          variants={staggerContainer}
+                        >
+                          {scheduleEvs.map(renderRow)}
+                        </motion.div>
+                      </section>
+                    )}
+                    {todoEvs.length > 0 && (
+                      <section className="dayModalSection">
+                        <div className="dayModalSectionHead">
+                          <span className="dayModalSectionTitle">✅ 할 일</span>
+                          <span className="dayModalSectionCount">{todoEvs.length}</span>
+                        </div>
+                        <motion.div
+                          className="dayModalList dayModalSectionScroll calScroll"
+                          initial="hidden"
+                          animate="show"
+                          variants={staggerContainer}
+                        >
+                          {todoEvs.map(renderRow)}
+                        </motion.div>
+                      </section>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="dayModalAddWrap">
               {!adding ? (

@@ -284,51 +284,43 @@ export function App() {
     }
   }, [notificationOpen, syncNotifications]);
 
-  useEffect(() => {
+  // 오늘 할일을 다시 불러와 HUD를 갱신한다. 캘린더에서 할일을 바꿨을 때도 호출해
+  // 메인화면과 동기화한다(단일 출처는 백엔드 /todos/).
+  const refreshTodos = useCallback(async () => {
     if (authStatus !== "authenticated" || !authUserId) {
       setTodos([]);
       return;
     }
-
-    let cancelled = false;
     const today = formatTodayIso();
-    const loadTodos = async () => {
-      try {
-        const res = await apiClient.get<ApiTodo[]>("/todos/", {
-          params: { todo_date: today },
-        });
-        if (cancelled) {
-          return;
-        }
-        setTodos(
-          res.data
-            .filter((todo) => todo.todo_date === today)
-            .map((todo) => ({
-              id: todo.todo_id,
-              title: todo.content,
-              dueDate: todo.todo_date,
-              tags: getApiTodoTags(todo),
-              status: todo.status === "COMPLETED" ? "done" : "saved",
-              assignedQuest: todo.quest
-                ? {
-                    characterName: todo.quest.character_name ?? null,
-                    content: todo.quest.content,
-                  }
-                : null,
-            })),
-        );
-      } catch {
-        if (!cancelled) {
-          setTodos([]);
-        }
-      }
-    };
-    void loadTodos();
-
-    return () => {
-      cancelled = true;
-    };
+    try {
+      const res = await apiClient.get<ApiTodo[]>("/todos/", {
+        params: { todo_date: today },
+      });
+      setTodos(
+        res.data
+          .filter((todo) => todo.todo_date === today)
+          .map((todo) => ({
+            id: todo.todo_id,
+            title: todo.content,
+            dueDate: todo.todo_date,
+            tags: getApiTodoTags(todo),
+            status: todo.status === "COMPLETED" ? "done" : "saved",
+            assignedQuest: todo.quest
+              ? {
+                  characterName: todo.quest.character_name ?? null,
+                  content: todo.quest.content,
+                }
+              : null,
+          })),
+      );
+    } catch {
+      setTodos([]);
+    }
   }, [authStatus, authUserId]);
+
+  useEffect(() => {
+    void refreshTodos();
+  }, [refreshTodos]);
 
   const savedTodos = todos.filter((todo) => todo.status !== "candidate");
   const doneTodoCount = savedTodos.filter((todo) => todo.status === "done").length;
@@ -781,6 +773,23 @@ export function App() {
     }
   }
 
+  // 캘린더에서 할일을 체크했을 때 메인화면(HUD) 완료와 동일하게 처리한다:
+  // /complete 엔드포인트로 사과 보상·알림 동기화 후 HUD 할일을 새로고침한다.
+  const handleCalendarCompleteTodo = useCallback(
+    async (todoId: string, title: string, dueDate: string) => {
+      const completed = await completeTodoRequest(todoId);
+      setApples(completed.token_balance);
+      showNotice(
+        completed.reward > 0
+          ? `${title} 완료! 사과 ${completed.reward}개를 받았어요.`
+          : `${title} 완료! 오늘의 사과 보상 한도에 도달했어요.`,
+      );
+      await syncNotifications(dueDate);
+      await refreshTodos();
+    },
+    [showNotice, syncNotifications, refreshTodos],
+  );
+
   function rewardReflectionApples(amount: number) {
     setApples((current) => applyAppleDelta(current, amount));
   }
@@ -894,6 +903,8 @@ export function App() {
         authStatus={authStatus}
         authUser={authUser}
         calendarOpen={calendarOpen}
+        onCalendarTodosChanged={refreshTodos}
+        onCalendarCompleteTodo={handleCalendarCompleteTodo}
         characterName={characterName}
         characterPersona={characterPersona}
         characterSetupOpen={characterSetupOpen}

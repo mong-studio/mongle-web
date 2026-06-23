@@ -47,6 +47,49 @@
   gap: 9px;
 }
 
+/* 일정 / 할 일 분리 섹션 */
+.dayModalSections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dayModalSection {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+/* 한 섹션에 4개까지 보이고, 넘으면 스크롤. (행 ~69px + gap 9px 기준) */
+.dayModalSectionScroll {
+  max-height: 312px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.dayModalSectionHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 2px 0;
+}
+.dayModalSectionTitle {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.dayModalSectionCount {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--cream-3);
+  color: var(--ink-2);
+  font-family: var(--font-display);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .dayModalAddWrap {
   padding: 8px 19px 19px;
 }

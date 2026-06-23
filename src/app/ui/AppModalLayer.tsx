@@ -34,6 +34,8 @@ type AppModalLayerProps = {
   sourceImagePreview: string;
   todos: TodoItem[];
   onCalendarClose: () => void;
+  onCalendarTodosChanged: () => void;
+  onCalendarCompleteTodo: (todoId: string, title: string, dueDate: string) => Promise<void>;
   onCharacterImageUpload: (file: File | undefined) => void;
   onCharacterNameChange: (value: string) => void;
   onCharacterPersonaChange: (value: string) => void;
@@ -81,6 +83,8 @@ export function AppModalLayer({
   sourceImagePreview,
   todos,
   onCalendarClose,
+  onCalendarTodosChanged,
+  onCalendarCompleteTodo,
   onCharacterImageUpload,
   onCharacterNameChange,
   onCharacterPersonaChange,
@@ -195,6 +199,8 @@ export function AppModalLayer({
         onClose={onCalendarClose}
         isAuthenticated={authStatus === "authenticated"}
         onOpenLogin={onLoginOpen}
+        onTodosChanged={onCalendarTodosChanged}
+        onCompleteTodo={onCalendarCompleteTodo}
       />
 
       {feedOpen ? (
