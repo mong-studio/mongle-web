@@ -39,6 +39,7 @@ type AppModalLayerProps = {
   onCharacterPersonaChange: (value: string) => void;
   onCharacterSetupClose: () => void;
   onCharacterSubmit: () => void;
+  onCharacterConfirm: () => Promise<boolean>;
   onFeedClose: () => void;
   onLoginClose: () => void;
   onLoginOpen: () => void;
@@ -85,6 +86,7 @@ export function AppModalLayer({
   onCharacterPersonaChange,
   onCharacterSetupClose,
   onCharacterSubmit,
+  onCharacterConfirm,
   onFeedClose,
   onLoginClose,
   onLoginOpen,
@@ -181,6 +183,7 @@ export function AppModalLayer({
               onToggleKeyword={onToggleKeyword}
               onNotice={onNotice}
               onSubmit={onCharacterSubmit}
+              onConfirm={onCharacterConfirm}
               onClose={onCharacterSetupClose}
             />
           </section>
