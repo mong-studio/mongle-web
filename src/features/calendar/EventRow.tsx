@@ -70,10 +70,10 @@ export function EventRow({
   // 일정(schedule)만 수정 가능. 할일(TODO)은 항상 수정 불가.
   const canEdit = isSchedule;
   // 휴지통 버튼 동작:
-  //   일정 → 삭제 / 지난 할일 → 없음(포기·삭제 불가) / 오늘 할일 → 포기 / 다음날 할일 → 삭제
+  //   일정 → 삭제 / 완료·지난 할일 → 없음(포기·삭제 불가) / 오늘 할일 → 포기 / 다음날 할일 → 삭제
   const action: "fail" | "delete" | null = isSchedule
     ? "delete"
-    : ev.s < todaySr
+    : isDone || ev.s < todaySr
       ? null
       : ev.s === todaySr
         ? "fail"
