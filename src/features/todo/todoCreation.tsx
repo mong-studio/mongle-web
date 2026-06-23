@@ -213,7 +213,17 @@ export function TodoCreation({
     toastTimer.current = setTimeout(() => setToast(""), ms);
   }
 
+  // 정리·저장 중에는 게시판 조작을 막고, 클릭하면 안내 토스트를 띄운다.
+  function blockedWhileBusy() {
+    if (aiLoading || isBusy) {
+      showToast("저장 중에는 잠시만 기다려주세요.");
+      return true;
+    }
+    return false;
+  }
+
   function addTodo() {
+    if (blockedWhileBusy()) return;
     const name = manualText.trim();
     if (!name) return;
     setTodos((prev) => [...prev, { id: createId("td"), name, tagId: selectedTagId, quest: false }]);
@@ -238,10 +248,12 @@ export function TodoCreation({
   }
 
   function clearTodoTag(id: string) {
+    if (blockedWhileBusy()) return;
     setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, tagId: null } : todo)));
   }
 
   function applySelectedTag(id: string) {
+    if (blockedWhileBusy()) return;
     if (selectedTagId === null) {
       showToast("먼저 적용할 태그를 선택해주세요.");
       return;
@@ -253,6 +265,7 @@ export function TodoCreation({
 
   // ⭐ 토글: 켤 때 하루 한도를 넘으면 막는다.
   function toggleQuest(id: string) {
+    if (blockedWhileBusy()) return;
     setTodos((prev) => {
       const target = prev.find((t) => t.id === id);
       if (!target) return prev;
@@ -265,12 +278,14 @@ export function TodoCreation({
   }
 
   function deleteTodo(id: string) {
+    if (blockedWhileBusy()) return;
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }
 
   // 좌측 "이장님에게 말하기": 문장을 AI가 여러 TODO로 나눠 목록에 더한다.
   async function handleOrganize() {
     if (aiLoading) return;
+    if (blockedWhileBusy()) return;
     const raw = sentence.trim();
     if (!raw) {
       showToast("문장을 먼저 입력해주세요!");
@@ -489,6 +504,7 @@ export function TodoCreation({
                       }
                       maxLength={MAYOR_PROMPT_MAX_LENGTH}
                       rows={3}
+                      disabled={aiLoading || isBusy}
                       placeholder="예) 헬스장 가야하고, 빨래 돌리고, 청소기도 돌려야해"
                       aria-invalid={isSentenceAtLimit}
                       aria-describedby="boardSentenceMeta"
@@ -536,6 +552,7 @@ export function TodoCreation({
                       className="boardInput"
                       value={manualText}
                       onChange={(e) => setManualText(e.target.value)}
+                      disabled={aiLoading || isBusy}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           if (isImeComposing(e)) return;
@@ -601,6 +618,7 @@ export function TodoCreation({
                     <div className="boardTodoList" ref={todoListRef}>
                       {todos.map((todo, index) => {
                         const tag = todo.tagId != null ? tagById.get(todo.tagId) : undefined;
+                        const rowLocked = aiLoading || isBusy;
                         const lockQuest = !todo.quest && questAvailable <= 0;
                         return (
                           <div key={todo.id} className="boardTodoRow">
@@ -624,6 +642,7 @@ export function TodoCreation({
                               onChange={(event) => updateTodoName(todo.id, event.target.value)}
                               onKeyDown={warnTodoNameLimit}
                               maxLength={20}
+                              disabled={rowLocked}
                               aria-label="TODO 항목 수정"
                             />
                             <div className="boardTodoChips">
