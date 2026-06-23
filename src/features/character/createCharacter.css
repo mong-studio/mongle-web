@@ -945,3 +945,12 @@
   justify-content: center;
   padding: 8px 4px;
 }
+
+/* 생성 실패 안내 */
+.ccGenFailed .ccDropIcon {
+  opacity: 0.7;
+}
+
+.ccGenFailed .ccDropTitle {
+  color: #c56577;
+}

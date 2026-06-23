@@ -82,26 +82,34 @@ export function CharacterModal({
   const [activeApple, setActiveApple] = useState(0);
   const [dragOver, setDragOver] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [genFailed, setGenFailed] = useState(false);
   const dragCounter = useRef(0);
   const wasBusyRef = useRef(false);
+  // 생성 시작 시점의 결과를 기억해, 종료 후 새 주민이 안 생겼으면 실패로 판정한다.
+  const residentAtBusyStart = useRef(lastCreatedResident);
   const characterNameRef = useRef(characterName);
   characterNameRef.current = characterName;
   const characterPersonaRef = useRef(characterPersona);
   characterPersonaRef.current = characterPersona;
 
-  const phase: "result" | "uploaded" | "generating" | "idle-upload" | "idle-text" = isBusy
-    ? "generating"
-    : sourceImagePreview
-      ? "uploaded"
-      : showResult
-        ? "result"
-        : mode === "upload"
-          ? "idle-upload"
-          : "idle-text";
+  const phase: "result" | "uploaded" | "generating" | "failed" | "idle-upload" | "idle-text" =
+    isBusy
+      ? "generating"
+      : genFailed
+        ? "failed"
+        : sourceImagePreview
+          ? "uploaded"
+          : showResult
+            ? "result"
+            : mode === "upload"
+              ? "idle-upload"
+              : "idle-text";
 
   useEffect(() => {
     if (isBusy) {
       wasBusyRef.current = true;
+      residentAtBusyStart.current = lastCreatedResident;
+      setGenFailed(false);
       setShowResult(false);
       setActiveApple(0);
       const iv = setInterval(() => {
@@ -111,10 +119,15 @@ export function CharacterModal({
     }
     if (wasBusyRef.current) {
       wasBusyRef.current = false;
-      setShowResult(true);
+      // 새 주민이 생겼으면 성공, 변동이 없으면(에러로 중단) 실패.
+      if (lastCreatedResident && lastCreatedResident !== residentAtBusyStart.current) {
+        setShowResult(true);
+      } else {
+        setGenFailed(true);
+      }
     }
     setActiveApple(0);
-  }, [isBusy]);
+  }, [isBusy, lastCreatedResident]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
   useEffect(() => {
@@ -194,6 +207,7 @@ export function CharacterModal({
                 onClick={() => {
                   setMode("upload");
                   setShowResult(false);
+                  setGenFailed(false);
                 }}
               >
                 <img src="/assets/character/photo.png" alt="" className="ccCardIcon" />
@@ -209,6 +223,7 @@ export function CharacterModal({
                 onClick={() => {
                   setMode("text");
                   setShowResult(false);
+                  setGenFailed(false);
                   if (sourceImagePreview) onImageUpload(undefined);
                 }}
               >
@@ -419,6 +434,15 @@ export function CharacterModal({
                   <br />
                   AI가 캐릭터를 만들어드려요!
                 </div>
+              </div>
+            )}
+
+            {/* 생성 실패 */}
+            {phase === "failed" && (
+              <div className="ccTextIdle ccGenFailed">
+                <img src="/assets/icon/flower3.png" alt="" className="ccDropIcon" />
+                <div className="ccDropTitle">캐릭터 생성을 실패했어요</div>
+                <div className="ccDropSub">다시 시도해 주세요ㅠㅠ</div>
               </div>
             )}
 
