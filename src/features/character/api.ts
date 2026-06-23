@@ -133,7 +133,12 @@ type JobOutcome = "SUCCEEDED" | "FAILED" | "CONSUMED" | "TIMEOUT";
 
 // 3단계: 잡이 종료 상태에 도달할 때까지 폴링한다.
 // 던지지 않고 결과를 반환해, 호출부가 "재개 가능 여부(TIMEOUT)"를 구분할 수 있게 한다.
-async function pollJob(jobId: string): Promise<JobOutcome> {
+type PollResult = {
+  outcome: JobOutcome;
+  result: { gen_img_url: string; persona: string } | null;
+};
+
+async function pollJob(jobId: string): Promise<PollResult> {
   const deadline = Date.now() + POLL_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
@@ -142,24 +147,24 @@ async function pollJob(jobId: string): Promise<JobOutcome> {
     );
 
     if (data.status === "SUCCEEDED") {
-      return "SUCCEEDED";
+      return { outcome: "SUCCEEDED", result: data.result };
     }
     if (data.status === "FAILED") {
-      return "FAILED";
+      return { outcome: "FAILED", result: null };
     }
     if (data.status === "CONSUMED") {
       // 이미 캐릭터로 등록된 잡 — 더 할 일 없음.
-      return "CONSUMED";
+      return { outcome: "CONSUMED", result: null };
     }
 
     await delay(POLL_INTERVAL_MS);
   }
 
-  return "TIMEOUT";
+  return { outcome: "TIMEOUT", result: null };
 }
 
-// 4단계: SUCCEEDED 잡을 캐릭터로 등록하고, 영속화된 진행 상태를 비운다.
-async function registerCharacter(
+// 4단계: SUCCEEDED 잡을 캐릭터로 등록(입주)하고, 영속화된 진행 상태를 비운다.
+export async function registerCharacter(
   jobId: string,
   name: string,
   persona: string,
@@ -178,13 +183,23 @@ async function registerCharacter(
   };
 }
 
+// "입주하기" 전까지 보여줄 미리보기. 등록 전이라 characterId 가 아니라 jobId 를 들고 있다.
+export type CharacterPreview = {
+  jobId: string;
+  name: string;
+  genImgUrl: string;
+  persona: string;
+};
+
 /**
- * 캐릭터 생성 비동기 파이프라인을 한 번에 수행한다.
+ * 캐릭터 생성(이미지/페르소나)까지만 수행하고 **등록은 하지 않는다**.
+ * 등록(입주)은 사용자가 미리보기를 확인하고 "입주하기"를 누를 때 registerCharacter 로 한다.
+ * 그래서 재생성을 반복해도 마을에 고아 캐릭터가 등록되지 않는다.
  * 실패 시 항상 사용자 친화적 메시지를 담은 Error 를 던진다.
  */
-export async function generateCharacter(
+export async function generateCharacterPreview(
   params: GenerateCharacterParams,
-): Promise<GeneratedCharacter> {
+): Promise<CharacterPreview> {
   const { name, persona, personalityKeywords, sourceImageFile } = params;
 
   try {
@@ -200,7 +215,7 @@ export async function generateCharacter(
     // 잡이 큐에 들어간 직후 영속화한다. 이 시점부터는 새로고침해도 재개 가능.
     savePendingJob({ jobId: job.job_id, name, persona });
 
-    const outcome = await pollJob(job.job_id);
+    const { outcome, result } = await pollJob(job.job_id);
     if (outcome === "FAILED") {
       clearPendingJob();
       throw new Error("친구 그림을 그리는 데 실패했어요. 잠시 후 다시 시도해 주세요.");
@@ -212,7 +227,15 @@ export async function generateCharacter(
       );
     }
 
-    return await registerCharacter(job.job_id, name, persona);
+    // 미리보기가 준비됐으니, 새로고침 재개(resume)로 자동 등록되지 않도록 진행 상태를 비운다.
+    // 실제 등록은 "입주하기"에서만 한다.
+    clearPendingJob();
+    return {
+      jobId: job.job_id,
+      name,
+      genImgUrl: result?.gen_img_url ?? "",
+      persona: result?.persona ?? persona,
+    };
   } catch (error) {
     throw new Error(toFriendlyMessage(error));
   }
@@ -234,7 +257,7 @@ export async function resumePendingCharacter(): Promise<GeneratedCharacter | nul
 
   let outcome: JobOutcome;
   try {
-    outcome = await pollJob(pending.jobId);
+    outcome = (await pollJob(pending.jobId)).outcome;
   } catch (error) {
     // 잡 조회 자체가 404(NOT_FOUND) 등으로 실패하면 더 살릴 수 없음.
     clearPendingJob();
