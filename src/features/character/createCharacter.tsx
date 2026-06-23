@@ -13,7 +13,7 @@ const PERSONALITY_CATEGORIES = [
   "분노가 많은",
   "용감한",
   "온화한",
-  "명량한",
+  "명랑한",
 ] as const;
 
 const CHIP_COLORS = [
@@ -237,7 +237,6 @@ export function CharacterModal({
                 id="cc-name"
                 value={characterName}
                 maxLength={10}
-                disabled={isBusy}
                 onChange={(e) => {
                   onNameChange(e.target.value);
                   setNameError(false);
@@ -266,7 +265,6 @@ export function CharacterModal({
                       key={kw}
                       type="button"
                       className="ccChip"
-                      disabled={isBusy}
                       style={
                         selected
                           ? {
@@ -281,7 +279,7 @@ export function CharacterModal({
                             : { background: c.bg, color: c.fg }
                       }
                       onClick={() => {
-                        if (maxReached || isBusy) return;
+                        if (maxReached) return;
                         onToggleKeyword(kw);
                       }}
                     >
@@ -300,7 +298,6 @@ export function CharacterModal({
                 value={characterPersona}
                 rows={4}
                 maxLength={300}
-                disabled={isBusy}
                 onChange={(e) => onPersonaChange(e.target.value)}
                 placeholder={
                   "캐릭터의 특징, 좋아하는 것, 말투 등을 자유롭게 입력해주세요.\n예) 사과를 좋아하고, 새로운 요리를 배우는 걸 좋아해요."
