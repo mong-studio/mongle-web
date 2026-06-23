@@ -519,6 +519,15 @@
   gap: 7px;
 }
 
+/* 계정당 일일 생성 횟수(used/limit) */
+.ccGenQuota {
+  flex-shrink: 0;
+  font-family: var(--font-tmoney-dungunbaram);
+  font-size: 13px;
+  color: var(--cc-ink-soft);
+  white-space: nowrap;
+}
+
 .ccStatusMsg {
   display: flex;
   align-items: center;

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
+import { fetchGenerationQuota, type GenerationQuota } from "./api.js";
 import "./createCharacter.css";
 
 const PERSONALITY_CATEGORIES = [
@@ -86,6 +88,7 @@ export function CharacterModal({
   const [showResult, setShowResult] = useState(false);
   const [genFailed, setGenFailed] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [quota, setQuota] = useState<GenerationQuota | null>(null);
   const dragCounter = useRef(0);
   const wasBusyRef = useRef(false);
   // 생성 시작 시점의 결과를 기억해, 종료 후 새 주민이 안 생겼으면 실패로 판정한다.
@@ -122,6 +125,10 @@ export function CharacterModal({
     }
     if (wasBusyRef.current) {
       wasBusyRef.current = false;
+      // 생성(또는 재생성)이 끝났으니 남은 생성 횟수를 갱신한다.
+      fetchGenerationQuota()
+        .then(setQuota)
+        .catch(() => {});
       // 새 주민이 생겼으면 성공, 변동이 없으면(에러로 중단) 실패.
       if (lastCreatedResident && lastCreatedResident !== residentAtBusyStart.current) {
         setShowResult(true);
@@ -131,6 +138,13 @@ export function CharacterModal({
     }
     setActiveApple(0);
   }, [isBusy, lastCreatedResident]);
+
+  // 마운트 시 계정당 일일 생성 횟수를 조회한다.
+  useEffect(() => {
+    fetchGenerationQuota()
+      .then(setQuota)
+      .catch(() => {});
+  }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: 마운트 시 한 번만 실행해 유효하지 않은 초기 키워드를 제거
   useEffect(() => {
@@ -341,6 +355,11 @@ export function CharacterModal({
                 캐릭터 생성하기
               </button>
               <div className="ccGenStatus">
+                {quota && (
+                  <span className="ccGenQuota">
+                    생성 가능 횟수 {quota.used}/{quota.limit}
+                  </span>
+                )}
                 {phase === "uploaded" && (
                   <div className="ccStatusMsg">
                     <span className="ccStatusStar">✿</span>
@@ -500,14 +519,21 @@ export function CharacterModal({
                     </div>
                   )}
                   <div className="ccActionRow">
-                    <button
-                      type="button"
-                      className="ccChangeBtn"
-                      disabled={isBusy || residents.length >= 10}
-                      onClick={handleGenerate}
-                    >
-                      <span>↻</span> 다시 생성
-                    </button>
+                    <DeleteConfirmDialog
+                      trigger={
+                        <button
+                          type="button"
+                          className="ccChangeBtn"
+                          disabled={isBusy || residents.length >= 10}
+                        >
+                          <span>↻</span> 다시 생성
+                        </button>
+                      }
+                      title="다시 생성할까요?"
+                      description="이미지를 다시 생성하면 생성 가능 횟수가 차감됩니다. 차감하고 다시 생성하시겠습니까?"
+                      confirmLabel="다시 생성"
+                      onConfirm={handleGenerate}
+                    />
                     <button
                       type="button"
                       className="ccCompleteBtn"

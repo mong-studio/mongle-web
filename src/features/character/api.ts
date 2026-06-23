@@ -286,6 +286,14 @@ export async function resumePendingCharacter(): Promise<GeneratedCharacter | nul
   }
 }
 
+export type GenerationQuota = { used: number; limit: number };
+
+/** 오늘의 캐릭터 생성 횟수(used)와 일일 한도(limit)를 조회한다. */
+export async function fetchGenerationQuota(): Promise<GenerationQuota> {
+  const { data } = await apiClient.get<GenerationQuota>("/characters/generation-jobs/quota/");
+  return data;
+}
+
 /** 현재 사용자의 활성 캐릭터 목록을 DB에서 불러온다. */
 export async function fetchCharacters(): Promise<CharacterListItem[]> {
   const { data } = await apiClient.get<CharacterListResponse>("/characters/");
