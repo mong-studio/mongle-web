@@ -53,6 +53,7 @@ type Props = {
   onToggleKeyword: (keyword: string) => void;
   onNotice: (message: string) => void;
   onSubmit: () => void;
+  onConfirm: () => Promise<boolean>;
   onClose: () => void;
 };
 
@@ -71,6 +72,7 @@ export function CharacterModal({
   onToggleKeyword,
   onNotice,
   onSubmit,
+  onConfirm,
   onClose,
 }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -83,6 +85,7 @@ export function CharacterModal({
   const [dragOver, setDragOver] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [genFailed, setGenFailed] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const dragCounter = useRef(0);
   const wasBusyRef = useRef(false);
   // 생성 시작 시점의 결과를 기억해, 종료 후 새 주민이 안 생겼으면 실패로 판정한다.
@@ -505,7 +508,20 @@ export function CharacterModal({
                     >
                       <span>↻</span> 다시 생성
                     </button>
-                    <button type="button" className="ccCompleteBtn" onClick={onClose}>
+                    <button
+                      type="button"
+                      className="ccCompleteBtn"
+                      disabled={confirming}
+                      onClick={async () => {
+                        setConfirming(true);
+                        try {
+                          const ok = await onConfirm();
+                          if (ok) onClose();
+                        } finally {
+                          setConfirming(false);
+                        }
+                      }}
+                    >
                       ✓ 입주하기
                     </button>
                   </div>

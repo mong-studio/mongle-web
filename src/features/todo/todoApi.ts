@@ -12,13 +12,22 @@ type TaskCandidatePayload = {
   tags?: string[];
 };
 
-export type TodoGenerateResult = {
+export type TodoCandidatesResult = {
   kind: "candidates";
   thread_id: string;
   todos: TaskCandidatePayload[];
   calendar_events: TaskCandidatePayload[];
   summary_text?: string | null;
 };
+
+// 일정/TODO로 나눌 수 없는 입력엔 mongle-ai가 이장님 안내문을 내려준다.
+export type TodoOutOfScopeResult = {
+  kind: "out_of_scope";
+  thread_id: string;
+  message: string;
+};
+
+export type TodoGenerateResult = TodoCandidatesResult | TodoOutOfScopeResult;
 
 type TodoCommitResponse = {
   todos: {

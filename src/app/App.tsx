@@ -6,7 +6,8 @@ import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import {
   type CharacterListItem,
   fetchCharacters,
-  generateCharacter,
+  generateCharacterPreview,
+  registerCharacter,
   resumePendingCharacter,
 } from "../features/character/api.js";
 import { hasPendingJob } from "../features/character/pendingJob.js";
@@ -140,6 +141,8 @@ export function App() {
   const [reflectionOpen, setReflectionOpen] = useState(false);
   const [reflectionDate, setReflectionDate] = useState<string>();
   const [lastCreatedResident, setLastCreatedResident] = useState<Resident | null>(null);
+  // 생성됐지만 아직 입주(등록)하지 않은 미리보기 잡. "입주하기" 시 이 잡을 등록한다.
+  const [previewJobId, setPreviewJobId] = useState<string | null>(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const pushToast = useNotificationStore((s) => s.pushToast);
   const notifHistory = useNotificationStore((s) => s.history);
@@ -330,6 +333,7 @@ export function App() {
     setSourceImageName("");
     setSourceImageFile(null);
     setLastCreatedResident(null);
+    setPreviewJobId(null);
   }, []);
 
   const closeActiveFeature = useCallback(() => {
@@ -650,12 +654,44 @@ export function App() {
     setIsBusy(true);
     showNotice("새 친구를 그리는 중이에요. 잠시만 기다려 주세요.");
     try {
-      const result = await generateCharacter({
+      const preview = await generateCharacterPreview({
         name,
         persona,
         personalityKeywords: keywords,
         sourceImageFile,
       });
+      // 미리보기만 표시하고 아직 등록하지 않는다. 등록(입주)은 confirmCharacter 에서.
+      // 재생성하면 이 미리보기가 새 잡으로 교체될 뿐, 이전 잡은 등록된 적이 없어 고아가 안 생긴다.
+      // 사용된 원본 이미지만 비우고 이름·키워드·설명은 남겨 수정/재생성에 재사용한다.
+      setSourceImagePreview("");
+      setSourceImageName("");
+      setSourceImageFile(null);
+      setPreviewJobId(preview.jobId);
+      setLastCreatedResident({
+        id: preview.jobId,
+        name: preview.name,
+        personality: preview.persona,
+        speechStyle: "",
+        avatarUrl: resolveAvatarUrl(preview.genImgUrl),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "원인 미상";
+      showNotice(message);
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  // "입주하기": 미리보기 잡을 실제 캐릭터로 등록하고 마을에 추가한다.
+  // 성공하면 true 를 반환하고, 모달은 호스트의 onClose 로 닫힌다(거기서 draft 초기화).
+  async function confirmCharacter(): Promise<boolean> {
+    if (!previewJobId) {
+      return true;
+    }
+    // 미리보기 후 이름을 수정했을 수 있으니 현재 입력값을 우선 사용한다.
+    const name = characterName.trim() || (lastCreatedResident?.name ?? "").trim();
+    try {
+      const result = await registerCharacter(previewJobId, name, characterPersona.trim());
       const resident: Resident = {
         id: result.characterId,
         name: result.name,
@@ -671,19 +707,14 @@ export function App() {
         avatarUrl: resident.avatarUrl,
       });
       setVillageVersion((current) => current + 1);
-      // 생성 후에도 이름·키워드·설명은 남겨 수정할 수 있게 하고, 사용된 원본 이미지만 비운다.
-      setSourceImagePreview("");
-      setSourceImageName("");
-      setSourceImageFile(null);
-      setLastCreatedResident(resident);
       useAuthStore.setState((state) => ({
         user: state.user ? { ...state.user, hasCharacter: true } : null,
       }));
+      return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
       showNotice(message);
-    } finally {
-      setIsBusy(false);
+      return false;
     }
   }
 
@@ -858,6 +889,7 @@ export function App() {
         onClose={closeActiveFeature}
         lastCreatedResident={lastCreatedResident}
         onCreateCharacter={createCharacter}
+        onConfirmCharacter={confirmCharacter}
         onImageUpload={handleSourceImageUpload}
         onNameChange={setCharacterName}
         onNotice={showNotice}
@@ -896,6 +928,7 @@ export function App() {
         onCharacterSetupClose={closeCharacterSetup}
         lastCreatedResident={lastCreatedResident}
         onCharacterSubmit={createCharacter}
+        onCharacterConfirm={confirmCharacter}
         onFeedClose={() => setFeedOpen(false)}
         onLoginClose={() => setLoginOpen(false)}
         onLoginOpen={() => {
