@@ -267,6 +267,8 @@
   color: var(--mp-ink-soft);
   line-height: 1.9;
   margin: 0;
+  /* 페르소나는 [성격]\n[말투]\n[배경] 형태로 줄바꿈을 포함하므로 그대로 보존한다. */
+  white-space: pre-line;
 }
 
 .mpRdSec {

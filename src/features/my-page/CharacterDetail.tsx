@@ -44,6 +44,7 @@ type Quest = { quest_id: string; todo_id: string; title: string };
 
 type CharacterDetailData = {
   created_at: string;
+  persona: string;
   active_quests: Quest[];
 };
 
@@ -161,7 +162,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
                 </span>
               ))}
             </div>
-            <p className="mpRdDesc">{resident.speechStyle}</p>
+            <p className="mpRdDesc">{detail?.persona || resident.speechStyle}</p>
           </div>
 
           <div className="mpRdRight">
