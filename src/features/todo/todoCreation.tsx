@@ -1,3 +1,4 @@
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTags } from "../../shared/tags/useTags.js";
 import { readableInk } from "../../shared/ui/Tag/Tag.js";
@@ -34,6 +35,9 @@ export type TodoCommitResult = {
 
 // 캐릭터 퀘스트는 당일 TODO에 한해 하루 5개까지만 LLM으로 부여(백엔드 _assign_quests_to_todos가 강제).
 const QUEST_DAILY_LIMIT = 5;
+const BOARD_NATURAL_WIDTH = 1240;
+const BOARD_NATURAL_HEIGHT = 1080;
+const MAYOR_PROMPT_MAX_LENGTH = 200;
 
 // 행마다 색깔 핀을 번갈아(디자인 시안의 압정 모티프).
 const PIN_CYCLE = ["red_pin", "blue_pin", "green_pin", "todo_pin_icon"];
@@ -108,6 +112,8 @@ export function TodoCreation({
   const [manualText, setManualText] = useState("");
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [todos, setTodos] = useState<LocalTodo[]>([]);
+  const [hasTodoBelow, setHasTodoBelow] = useState(false);
+  const todoListRef = useRef<HTMLDivElement>(null);
 
   // page 0: 게시판(작성/정리), page 1: 저장 결과(확정 TODO + 캐릭터 퀘스트)
   const [page, setPage] = useState<0 | 1>(0);
@@ -117,43 +123,32 @@ export function TodoCreation({
 
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // 디자인(.dc.html)과 동일: 1240px 고정 패널을 화면에 맞게 transform:scale로 축소.
+  // 디자인(.dc.html)과 동일한 고정 크기 패널을 화면에 맞게 transform:scale로 축소.
+  // 콘텐츠 개수와 무관하게 동일한 배율을 유지하고, 넘치는 콘텐츠는 각 영역에서 스크롤한다.
   const modalRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const [natH, setNatH] = useState<number | null>(null);
-  // page 변경 시 새 패널(modalRef)에 ResizeObserver를 다시 붙이려고 page를 의존성에 둔다.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: page는 본문에서 직접 쓰진 않지만 재연결 트리거로 의도적으로 필요
   useLayoutEffect(() => {
-    const NAT_W = 1240;
     const PAD = 48;
     // 시안은 1240px이지만 다른 모달(캐릭터 ~700px, 캘린더 등)과 어우러지도록
     // 최대 배율을 낮춰 글씨·버튼·여백을 한 번에 차분하게 줄인다(디자인 비율은 그대로 유지).
     const MAX_SCALE = 0.8;
     const fitToViewport = () => {
-      const el = modalRef.current;
-      if (!el) return;
-      const h = el.offsetHeight; // transform은 offsetHeight에 영향 없음 → 미스케일 높이
       const next = Math.min(
         MAX_SCALE,
-        (window.innerWidth - PAD) / NAT_W,
-        (window.innerHeight - PAD) / h,
+        (window.innerWidth - PAD) / BOARD_NATURAL_WIDTH,
+        (window.innerHeight - PAD) / BOARD_NATURAL_HEIGHT,
       );
       setScale(next);
-      setNatH(h);
     };
     fitToViewport();
-    const ro = new ResizeObserver(fitToViewport);
-    if (modalRef.current) ro.observe(modalRef.current);
     window.addEventListener("resize", fitToViewport);
-    const t = setTimeout(fitToViewport, 350); // 폰트 로드 후 재측정
-    return () => {
-      window.removeEventListener("resize", fitToViewport);
-      ro.disconnect();
-      clearTimeout(t);
-    };
-  }, [page]);
+    return () => window.removeEventListener("resize", fitToViewport);
+  }, []);
 
-  const wrapStyle = natH ? { width: `${1240 * scale}px`, height: `${natH * scale}px` } : undefined;
+  const wrapStyle = {
+    width: `${BOARD_NATURAL_WIDTH * scale}px`,
+    height: `${BOARD_NATURAL_HEIGHT * scale}px`,
+  };
   const panelStyle = { transform: `scale(${scale})` };
 
   // 유저 태그는 캘린더와 동일한 /tags/ 에서 공유한다. 이 모달은 로그인 상태에서만 열린다.
@@ -162,6 +157,29 @@ export function TodoCreation({
   useEffect(() => {
     void fetchTags();
   }, [fetchTags]);
+
+  useLayoutEffect(() => {
+    const list = todoListRef.current;
+    if (page !== 0 || todos.length === 0 || !list) {
+      setHasTodoBelow(false);
+      return;
+    }
+
+    const updateIndicator = () => {
+      const hasOverflowBelow = list.scrollTop + list.clientHeight < list.scrollHeight - 1;
+      setHasTodoBelow(hasOverflowBelow);
+    };
+
+    updateIndicator();
+    list.addEventListener("scroll", updateIndicator, { passive: true });
+    const resizeObserver = new ResizeObserver(updateIndicator);
+    resizeObserver.observe(list);
+
+    return () => {
+      list.removeEventListener("scroll", updateIndicator);
+      resizeObserver.disconnect();
+    };
+  }, [todos.length, page]);
 
   const tagById = useMemo(() => new Map(tagItems.map((t) => [t.id, t])), [tagItems]);
   const tagByContent = useMemo(() => new Map(tagItems.map((t) => [t.content, t])), [tagItems]);
@@ -173,6 +191,8 @@ export function TodoCreation({
   );
   const selectedQuestCount = todos.filter((t) => t.quest).length;
   const questAvailable = Math.max(0, QUEST_DAILY_LIMIT - usedQuestsToday - selectedQuestCount);
+  const sentenceLength = sentence.length;
+  const isSentenceAtLimit = sentenceLength >= MAYOR_PROMPT_MAX_LENGTH;
 
   // AI가 제안한 태그 문자열을 유저의 실제 태그에 이름으로 매칭. 없으면 null.
   const matchTagId = (names: string[] | undefined): number | null => {
@@ -241,6 +261,10 @@ export function TodoCreation({
     const raw = sentence.trim();
     if (!raw) {
       showToast("문장을 먼저 입력해주세요!");
+      return;
+    }
+    if (sentenceLength > MAYOR_PROMPT_MAX_LENGTH) {
+      showToast(`이장님에게 말하기는 ${MAYOR_PROMPT_MAX_LENGTH}자까지만 가능해요.`);
       return;
     }
     setAiLoading(true);
@@ -429,7 +453,7 @@ export function TodoCreation({
                 {/* LEFT: 이장님에게 말하기 */}
                 <section className="boardCard">
                   <div className="boardCardHead">
-                    <span className="boardStep">1</span>
+                    <span className="boardTypeBadge">TYPE 1</span>
                     <span className="boardCardTitle">이장님에게 말하기</span>
                     <img
                       src="/assets/todo/mayor_character.png"
@@ -441,16 +465,31 @@ export function TodoCreation({
                   <div className="boardField">
                     <div className="boardFieldHint">오늘 해야 할 일을 문장으로 말해주세요</div>
                     <textarea
-                      className="boardTextarea"
+                      className={`boardTextarea${isSentenceAtLimit ? " isError" : ""}`}
                       value={sentence}
-                      onChange={(e) => setSentence(e.target.value)}
+                      onChange={(e) =>
+                        setSentence(e.target.value.slice(0, MAYOR_PROMPT_MAX_LENGTH))
+                      }
+                      maxLength={MAYOR_PROMPT_MAX_LENGTH}
                       rows={3}
                       placeholder="예) 헬스장 가야하고, 빨래 돌리고, 청소기도 돌려야해"
+                      aria-invalid={isSentenceAtLimit}
+                      aria-describedby="boardSentenceMeta"
                     />
+                    <div className="boardFieldMeta" id="boardSentenceMeta" aria-live="polite">
+                      <span className="boardFieldError">
+                        {isSentenceAtLimit
+                          ? `최대 글자수 ${MAYOR_PROMPT_MAX_LENGTH}자에 도달했어요.`
+                          : " "}
+                      </span>
+                      <span className={`boardCharCount${isSentenceAtLimit ? " isError" : ""}`}>
+                        {sentenceLength}/{MAYOR_PROMPT_MAX_LENGTH}
+                      </span>
+                    </div>
                   </div>
                   <button
                     type="button"
-                    className="boardOrganizeBtn"
+                    className={`boardOrganizeBtn${aiLoading ? " isLoading" : ""}`}
                     onClick={() => void handleOrganize()}
                     disabled={aiLoading}
                   >
@@ -466,7 +505,7 @@ export function TodoCreation({
                 {/* RIGHT: 직접 적기 */}
                 <section className="boardCard">
                   <div className="boardCardHead">
-                    <span className="boardStep">2</span>
+                    <span className="boardTypeBadge">TYPE 2</span>
                     <span className="boardCardTitle">직접 적기</span>
                     <img
                       src="/assets/todo/yellow_chick.png"
@@ -498,6 +537,7 @@ export function TodoCreation({
                     <div className="boardTagBoxTitle">태그 선택</div>
                     <TagPicker
                       tags={tagItems}
+                      pinNewButton
                       selectedId={selectedTagId}
                       onSelect={setSelectedTagId}
                       onCreateTag={createTag}
@@ -521,7 +561,6 @@ export function TodoCreation({
               {/* BOTTOM: 생성된 TODO */}
               <section className="boardCard boardGenerated">
                 <div className="boardCardHead">
-                  <span className="boardStep">3</span>
                   <span className="boardCardTitle">생성된 TODO</span>
                   <img
                     src="/assets/todo/small_flower_deco.png"
@@ -541,81 +580,93 @@ export function TodoCreation({
                 {todos.length === 0 ? (
                   <div className="boardEmpty">아직 생성된 TODO가 없어요. 위에서 추가해보세요!</div>
                 ) : (
-                  <div className="boardTodoList">
-                    {todos.map((todo, index) => {
-                      const tag = todo.tagId != null ? tagById.get(todo.tagId) : undefined;
-                      const lockQuest = !todo.quest && questAvailable <= 0;
-                      return (
-                        <div key={todo.id} className="boardTodoRow">
-                          <img src={pinSrc(index)} alt="" className="boardPin" aria-hidden="true" />
-                          {iconSrc(todo.name) && (
+                  <div className="boardTodoListWrap">
+                    <div className="boardTodoList" ref={todoListRef}>
+                      {todos.map((todo, index) => {
+                        const tag = todo.tagId != null ? tagById.get(todo.tagId) : undefined;
+                        const lockQuest = !todo.quest && questAvailable <= 0;
+                        return (
+                          <div key={todo.id} className="boardTodoRow">
                             <img
-                              src={iconSrc(todo.name) as string}
+                              src={pinSrc(index)}
                               alt=""
-                              className="boardTodoIcon"
+                              className="boardPin"
                               aria-hidden="true"
                             />
-                          )}
-                          <input
-                            className="boardTodoName"
-                            value={todo.name}
-                            onChange={(event) => updateTodoName(todo.id, event.target.value)}
-                            aria-label="TODO 항목 수정"
-                          />
-                          <div className="boardTodoChips">
-                            {tag && (
-                              <span
-                                className="boardChip"
-                                style={{
-                                  background: `${tag.color}22`,
-                                  color: readableInk(tag.color),
-                                  borderColor: tag.color,
-                                }}
-                              >
-                                #{tag.content}
-                                <button
-                                  type="button"
-                                  className="boardChipRemove"
-                                  onClick={() => clearTodoTag(todo.id)}
-                                  aria-label={`${tag.content} 태그 제거`}
-                                >
-                                  ×
-                                </button>
-                              </span>
+                            {iconSrc(todo.name) && (
+                              <img
+                                src={iconSrc(todo.name) as string}
+                                alt=""
+                                className="boardTodoIcon"
+                                aria-hidden="true"
+                              />
                             )}
+                            <input
+                              className="boardTodoName"
+                              value={todo.name}
+                              onChange={(event) => updateTodoName(todo.id, event.target.value)}
+                              aria-label="TODO 항목 수정"
+                            />
+                            <div className="boardTodoChips">
+                              {tag && (
+                                <span
+                                  className="boardChip"
+                                  style={{
+                                    background: `${tag.color}22`,
+                                    color: readableInk(tag.color),
+                                    borderColor: tag.color,
+                                  }}
+                                >
+                                  #{tag.content}
+                                  <button
+                                    type="button"
+                                    className="boardChipRemove"
+                                    onClick={() => clearTodoTag(todo.id)}
+                                    aria-label={`${tag.content} 태그 제거`}
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              className="boardApplyTag"
+                              onClick={() => applySelectedTag(todo.id)}
+                            >
+                              태그 적용
+                            </button>
+                            <button
+                              type="button"
+                              className={`boardQuestToggle${todo.quest ? " is-on" : ""}`}
+                              onClick={() => toggleQuest(todo.id)}
+                              disabled={lockQuest}
+                              aria-pressed={todo.quest}
+                              title={
+                                lockQuest
+                                  ? `캐릭터 퀘스트는 하루 ${QUEST_DAILY_LIMIT}개까지예요`
+                                  : "이 할 일을 애착인형 퀘스트로"
+                              }
+                            >
+                              {todo.quest ? "⭐" : "☆"} 퀘스트
+                            </button>
+                            <button
+                              type="button"
+                              className="boardRemove"
+                              onClick={() => deleteTodo(todo.id)}
+                              aria-label="삭제"
+                            >
+                              ✕
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            className="boardApplyTag"
-                            onClick={() => applySelectedTag(todo.id)}
-                          >
-                            태그 적용
-                          </button>
-                          <button
-                            type="button"
-                            className={`boardQuestToggle${todo.quest ? " is-on" : ""}`}
-                            onClick={() => toggleQuest(todo.id)}
-                            disabled={lockQuest}
-                            aria-pressed={todo.quest}
-                            title={
-                              lockQuest
-                                ? `캐릭터 퀘스트는 하루 ${QUEST_DAILY_LIMIT}개까지예요`
-                                : "이 할 일을 애착인형 퀘스트로"
-                            }
-                          >
-                            {todo.quest ? "⭐" : "☆"} 퀘스트
-                          </button>
-                          <button
-                            type="button"
-                            className="boardRemove"
-                            onClick={() => deleteTodo(todo.id)}
-                            aria-label="삭제"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
+                    {hasTodoBelow && (
+                      <div className="boardTodoMoreIndicator" aria-hidden="true">
+                        <KeyboardArrowDownRoundedIcon />
+                      </div>
+                    )}
                   </div>
                 )}
               </section>

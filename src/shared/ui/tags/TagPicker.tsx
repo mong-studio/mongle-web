@@ -8,6 +8,7 @@ const DEFAULT_COLOR = "#8478C0";
 
 type Props = {
   tags: TagItem[];
+  pinNewButton?: boolean;
   // 단일 선택. 선택된 태그를 다시 누르면 해제(null).
   selectedId: number | null;
   onSelect: (id: number | null) => void;
@@ -19,6 +20,7 @@ type Props = {
 
 export function TagPicker({
   tags,
+  pinNewButton = false,
   selectedId,
   onSelect,
   onCreateTag,
@@ -61,7 +63,9 @@ export function TagPicker({
   };
 
   return (
-    <div className="tagPicker">
+    <div
+      className={`tagPicker${pinNewButton ? " isNewPinned" : ""}${creating ? " isCreating" : ""}`}
+    >
       <div className="tagPickerRow">
         {tags.map((t) => (
           <TagChip
@@ -73,14 +77,15 @@ export function TagPicker({
             onDelete={() => void onDeleteTag(t.id)}
           />
         ))}
-        <button
-          type="button"
-          className={`tagPickerNew${creating ? " isSel" : ""}`}
-          onClick={startCreate}
-        >
-          ＋ 새 태그
-        </button>
       </div>
+
+      <button
+        type="button"
+        className={`tagPickerNew${creating ? " isSel" : ""}`}
+        onClick={startCreate}
+      >
+        ＋ 새 태그
+      </button>
 
       {editingId !== null && (
         <TagEditorForm
