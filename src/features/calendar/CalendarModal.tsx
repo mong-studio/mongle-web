@@ -14,6 +14,10 @@ type Props = {
   onClose: () => void;
   isAuthenticated: boolean;
   onOpenLogin: () => void;
+  // 캘린더에서 할일을 바꾸면 호출 — 메인화면(HUD) 할일과 동기화한다.
+  onTodosChanged?: () => void;
+  // 할일 체크(완료) 시 메인화면과 동일한 보상 처리를 위임한다.
+  onCompleteTodo: (todoId: string, title: string, dueDate: string) => Promise<void>;
 };
 
 function mergeById<T>(prev: T[], next: T[], key: keyof T): T[] {
@@ -22,7 +26,14 @@ function mergeById<T>(prev: T[], next: T[], key: keyof T): T[] {
   return Array.from(map.values());
 }
 
-export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }: Props) {
+export function CalendarModal({
+  isOpen,
+  onClose,
+  isAuthenticated,
+  onOpenLogin,
+  onTodosChanged,
+  onCompleteTodo,
+}: Props) {
   const [todos, setTodos] = useState<CalTodo[]>([]);
   const [schedules, setSchedules] = useState<CalSchedule[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,18 +94,23 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
     async (id: string) => {
       const ev = baseEvents.find((e) => e.id === id);
       if (!ev?.todoId) return; // 일정(schedule)은 체크 대상이 아니다
+      if (ev.done) return; // 완료한 할일은 체크 해제 불가 (체크는 되지만 되돌릴 수 없다)
       const todoId = ev.todoId;
-      const next = ev.done ? "IN_PROGRESS" : "COMPLETED";
-      const revert = ev.done ? "COMPLETED" : "IN_PROGRESS";
-      // 낙관적 업데이트: 상태를 바로 반영하고 실패 시 되돌린다.
-      setTodos((prev) => prev.map((t) => (t.todo_id === todoId ? { ...t, status: next } : t)));
+      const dueDate = todos.find((t) => t.todo_id === todoId)?.todo_date ?? "";
+      // 낙관적 업데이트: 완료로 바로 반영하고 실패 시 되돌린다.
+      setTodos((prev) =>
+        prev.map((t) => (t.todo_id === todoId ? { ...t, status: "COMPLETED" } : t)),
+      );
       try {
-        await apiClient.patch(`/todos/${todoId}/`, { status: next });
+        // 메인화면 체크와 동일한 로직(/complete — 사과 보상·알림·HUD 동기화)을 위임한다.
+        await onCompleteTodo(todoId, ev.title, dueDate);
       } catch {
-        setTodos((prev) => prev.map((t) => (t.todo_id === todoId ? { ...t, status: revert } : t)));
+        setTodos((prev) =>
+          prev.map((t) => (t.todo_id === todoId ? { ...t, status: "IN_PROGRESS" } : t)),
+        );
       }
     },
-    [baseEvents],
+    [baseEvents, todos, onCompleteTodo],
   );
 
   const handleAddEvent = useCallback(
@@ -114,6 +130,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
           ...tagParam,
         });
         setTodos((prev) => [...prev, res.data as CalTodo]);
+        onTodosChanged?.();
       } else {
         const res = await apiClient.post("/schedules/", {
           title,
@@ -125,27 +142,35 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
         setSchedules((prev) => [...prev, res.data as CalSchedule]);
       }
     },
-    [],
+    [onTodosChanged],
   );
 
-  const handleDeleteEvent = useCallback(async (id: string) => {
-    if (id.startsWith("todo-")) {
-      const todoId = id.slice(5);
-      await apiClient.delete(`/todos/${todoId}/`);
-      setTodos((prev) => prev.filter((t) => t.todo_id !== todoId));
-    } else if (id.startsWith("sched-")) {
-      const schedId = id.slice(6);
-      await apiClient.delete(`/schedules/${schedId}/`);
-      setSchedules((prev) => prev.filter((s) => s.schedule_id !== schedId));
-    }
-  }, []);
+  const handleDeleteEvent = useCallback(
+    async (id: string) => {
+      if (id.startsWith("todo-")) {
+        const todoId = id.slice(5);
+        await apiClient.delete(`/todos/${todoId}/`);
+        setTodos((prev) => prev.filter((t) => t.todo_id !== todoId));
+        onTodosChanged?.();
+      } else if (id.startsWith("sched-")) {
+        const schedId = id.slice(6);
+        await apiClient.delete(`/schedules/${schedId}/`);
+        setSchedules((prev) => prev.filter((s) => s.schedule_id !== schedId));
+      }
+    },
+    [onTodosChanged],
+  );
 
-  const handleFailEvent = useCallback(async (id: string) => {
-    if (!id.startsWith("todo-")) return;
-    const todoId = id.slice(5);
-    await apiClient.patch(`/todos/${todoId}/fail/`);
-    setTodos((prev) => prev.map((t) => (t.todo_id === todoId ? { ...t, status: "FAILED" } : t)));
-  }, []);
+  const handleFailEvent = useCallback(
+    async (id: string) => {
+      if (!id.startsWith("todo-")) return;
+      const todoId = id.slice(5);
+      await apiClient.patch(`/todos/${todoId}/fail/`);
+      setTodos((prev) => prev.map((t) => (t.todo_id === todoId ? { ...t, status: "FAILED" } : t)));
+      onTodosChanged?.();
+    },
+    [onTodosChanged],
+  );
 
   const handleEditEvent = useCallback(
     async (
@@ -167,6 +192,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
         setTodos((prev) =>
           prev.map((t) => (t.todo_id === todoId ? { ...t, ...(res.data as CalTodo) } : t)),
         );
+        onTodosChanged?.();
       } else if (id.startsWith("sched-")) {
         const schedId = id.slice(6);
         const res = await apiClient.patch(`/schedules/${schedId}/`, {
@@ -181,7 +207,7 @@ export function CalendarModal({ isOpen, onClose, isAuthenticated, onOpenLogin }:
         );
       }
     },
-    [],
+    [onTodosChanged],
   );
 
   const backdrop = useBackdropDismiss(onClose);
