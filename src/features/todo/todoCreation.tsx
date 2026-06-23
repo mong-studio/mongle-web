@@ -187,10 +187,10 @@ export function TodoCreation({
     [],
   );
 
-  function showToast(msg: string) {
+  function showToast(msg: string, ms = 2600) {
     setToast(msg);
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 2600);
+    toastTimer.current = setTimeout(() => setToast(""), ms);
   }
 
   function addTodo() {
@@ -246,6 +246,15 @@ export function TodoCreation({
     setAiLoading(true);
     try {
       const result = await generateTodos(raw);
+      // 일정/TODO로 나눌 수 없는 입력: 에러가 아니라 이장님 안내문으로 다시 적게 유도한다.
+      if (result.kind === "out_of_scope") {
+        showToast(
+          result.message ||
+            "음… 그건 할 일로 나누긴 어려워요. 준비할 일이나 이루고 싶은 목표를 들려주세요!",
+          4200,
+        );
+        return;
+      }
       const items = [...result.todos, ...result.calendar_events].map((t) => ({
         id: createId("ai"),
         name: t.title,
