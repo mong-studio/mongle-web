@@ -149,7 +149,9 @@ export function ReflectionModal({
   const today = useMemo(() => getTodayIso(), []);
   const reflectionDate = initialDate ?? today;
   const [entries, setEntries] = useState<ReflectionEntry[]>([]);
-  const [contextTodos, setContextTodos] = useState<ReflectionTodo[] | null>(null);
+  const [contextTodosByDate, setContextTodosByDate] = useState<
+    Record<string, ReflectionTodo[] | null>
+  >({});
   const [pageIndex, setPageIndex] = useState(0);
   const [good, setGood] = useState("");
   const [regret, setRegret] = useState("");
@@ -167,19 +169,19 @@ export function ReflectionModal({
     : null;
   const historyEntries = [...entries]
     .filter((entry) => entry.date !== reflectionDate && entry.date !== today)
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const historyPageStart = Math.max(0, pageIndex - 1) * 2;
-  const historyLeftEntry = historyEntries[historyPageStart];
-  const historyRightEntry = historyEntries[historyPageStart + 1];
-  const maxPageIndex = Math.ceil(historyEntries.length / 2);
+    .sort((a, b) => b.date.localeCompare(a.date));
+  const historyPageEntry = historyEntries[Math.max(0, pageIndex - 1)];
+  const maxPageIndex = historyEntries.length;
   const matchingDateTodos = todos.filter(
     (todo) => todo.dueDate === reflectionDate && todo.status !== "candidate",
   );
+  const serverReflectionTodos = contextTodosByDate[reflectionDate];
   const reflectionTodos =
-    contextTodos ??
-    (matchingDateTodos.length > 0
-      ? matchingDateTodos
-      : todos.filter((todo) => todo.status !== "candidate"));
+    serverReflectionTodos && serverReflectionTodos.length > 0
+      ? serverReflectionTodos
+      : matchingDateTodos.length > 0
+        ? matchingDateTodos
+        : (serverReflectionTodos ?? todos.filter((todo) => todo.status !== "candidate"));
   const canSubmit = good.trim() || regret.trim();
   const isPrimaryPage = pageIndex === 0;
   const isEditingExistingEntry = Boolean(editingEntry);
@@ -207,7 +209,10 @@ export function ReflectionModal({
           setGood(todayReflection.good);
           setRegret(todayReflection.regret);
         }
-        setContextTodos(normalizeContextTodos(context));
+        setContextTodosByDate((current) => ({
+          ...current,
+          [reflectionDate]: normalizeContextTodos(context),
+        }));
 
         const historyResults = await fetchPastReflections(today);
         if (ignore) {
@@ -241,9 +246,59 @@ export function ReflectionModal({
     };
   }, [reflectionDate, today, onNotice]);
 
+  useEffect(() => {
+    if (isPrimaryPage) {
+      return;
+    }
+
+    const visibleDates = [historyPageEntry?.date].filter(
+      (date): date is string => Boolean(date) && !(date in contextTodosByDate),
+    );
+    if (visibleDates.length === 0) {
+      return;
+    }
+
+    let ignore = false;
+
+    async function loadVisibleHistoryTodos() {
+      const results = await Promise.allSettled(
+        visibleDates.map(async (date) => ({
+          date,
+          todos: normalizeContextTodos(await fetchReflectionContext(date)),
+        })),
+      );
+
+      if (ignore) {
+        return;
+      }
+
+      setContextTodosByDate((current) => {
+        const next = { ...current };
+        results.forEach((result, index) => {
+          const date = visibleDates[index];
+          if (!date) {
+            return;
+          }
+          if (result.status === "fulfilled") {
+            next[date] = result.value.todos;
+          } else {
+            next[date] = null;
+          }
+        });
+        return next;
+      });
+    }
+
+    void loadVisibleHistoryTodos();
+    return () => {
+      ignore = true;
+    };
+  }, [isPrimaryPage, historyPageEntry?.date, contextTodosByDate]);
+
   function hydrateForm(entry: ReflectionEntry) {
     setGood(entry.good);
     setRegret(entry.regret);
+    setLimitWarningField(null);
   }
 
   function requestEditReflection(entry: ReflectionEntry) {
@@ -342,6 +397,7 @@ export function ReflectionModal({
         );
         setGood(nextEntry.good);
         setRegret(nextEntry.regret);
+        setLimitWarningField(null);
         const updateCost = updated.update_cost ?? EDIT_TOKEN_COST;
         const newReward = updated.new_reward ?? 0;
         onRewardApples(updated.token_delta ?? updated.reward);
@@ -371,6 +427,7 @@ export function ReflectionModal({
       });
       setGood(nextEntry.good);
       setRegret(nextEntry.regret);
+      setLimitWarningField(null);
       setIsEditing(false);
       onRewardApples(created.token);
       onNotice(`오늘 회고가 저장됐어요. 사과 ${created.token}개를 받았어요.`);
@@ -387,6 +444,7 @@ export function ReflectionModal({
           });
           setGood(nextEntry.good);
           setRegret(nextEntry.regret);
+          setLimitWarningField(null);
         }
         return;
       }
@@ -404,7 +462,7 @@ export function ReflectionModal({
     }
   }
 
-  function movePage(direction: "prev" | "next") {
+  function movePage(direction: "older" | "newer") {
     setIsEditing(false);
     setEditingEntryId(null);
     setPendingEditEntry(null);
@@ -413,7 +471,7 @@ export function ReflectionModal({
     }
 
     const nextPage =
-      direction === "prev" ? Math.max(0, pageIndex - 1) : Math.min(maxPageIndex, pageIndex + 1);
+      direction === "newer" ? Math.max(0, pageIndex - 1) : Math.min(maxPageIndex, pageIndex + 1);
     if (nextPage === pageIndex) {
       return;
     }
@@ -435,44 +493,175 @@ export function ReflectionModal({
   const dateLabel = formatKoreanDate(reflectionDate);
   const completedCount = reflectionTodos.filter((todo) => todo.status === "done").length;
   const incompleteCount = reflectionTodos.length - completedCount;
+  const visibleReadOnlyEntry = isPrimaryPage ? primaryEntry : historyPageEntry;
 
-  function renderHistoryEntry(entry: ReflectionEntry) {
+  function renderTodoRows(
+    todoItems: ReflectionTodo[] | null | undefined,
+    emptyMessage = "그날의 TODO가 없어요.",
+  ) {
     return (
-      <article className="reflectionHistoryEntry">
-        <div className="reflectionHistoryDate">
-          <DiaryIcon name="calendar" />
-          <strong>{formatKoreanDate(entry.date)}</strong>
-          <button
-            type="button"
-            className="reflectionInlineEditButton"
-            onClick={() => requestEditReflection(entry)}
-            disabled={isLoading || isSaving}
-          >
-            <DiaryIcon name="pencil" />
-            수정
-          </button>
+      <>
+        {todoItems === undefined ? (
+          <li className="reflectionTodoEmpty">TODO를 불러오고 있어요.</li>
+        ) : todoItems === null ? (
+          <li className="reflectionTodoEmpty">TODO를 불러오지 못했어요.</li>
+        ) : todoItems.length === 0 ? (
+          <li className="reflectionTodoEmpty">{emptyMessage}</li>
+        ) : (
+          todoItems.map((todo) => {
+            const done = todo.status === "done";
+            return (
+              <li key={todo.id}>
+                <span className={`reflectionCheck ${done ? "isDone" : ""}`}>{done ? "✓" : ""}</span>
+                <strong>{todo.title}</strong>
+                <em className={done ? "isDone" : ""}>{done ? "완료" : "미완료"}</em>
+              </li>
+            );
+          })
+        )}
+      </>
+    );
+  }
+
+  function renderEditCostCard(label = "회고 완료 후 수정은") {
+    return (
+      <section className="reflectionRewardCard" aria-label="회고 수정 비용 안내">
+        <div>
+          <DiaryIcon name="edit" />
+          <p>
+            <strong>{label}</strong>
+            사과 {EDIT_TOKEN_COST}개를 지불해야 수정할 수 있어요.
+          </p>
+          <b>
+            <DiaryIcon name="apple" />-{EDIT_TOKEN_COST}
+          </b>
         </div>
+        <small>보유 사과 {tokenBalance}개</small>
+      </section>
+    );
+  }
 
-        <section className="reflectionHistoryEssay">
-          <h3>
-            <DiaryIcon name="sprout" />
-            잘한 점
-          </h3>
-          <div className="reflectionHistoryTextBox">
-            <p className="reflectionHistoryText">{entry.good || "기록된 내용이 없어요."}</p>
+  function renderTodayRewardCard() {
+    return (
+      <section
+        className="reflectionRewardCard reflectionRewardCard-withReward"
+        aria-label="회고 보상 안내"
+      >
+        <div>
+          <DiaryIcon name="apple" />
+          <p>
+            <strong>회고 작성 보상</strong>
+            30자 이상 작성한 항목 1개당 사과 2개 지급!
+          </p>
+          <b>
+            <DiaryIcon name="apple" />+ 2{" "}
+          </b>
+        </div>
+        <div>
+          <DiaryIcon name="edit" />
+          <p>
+            <strong>회고 완료 후 수정은</strong>
+            사과 {EDIT_TOKEN_COST}개를 지불해야 수정할 수 있어요.
+          </p>
+          <b>
+            <DiaryIcon name="apple" />-{EDIT_TOKEN_COST}
+          </b>
+        </div>
+        <small>보유 사과 {tokenBalance}개</small>
+      </section>
+    );
+  }
+
+  function renderHistorySpread(entry: ReflectionEntry | undefined) {
+    if (!entry) {
+      return (
+        <>
+          <section className="reflectionHistoryPage reflectionHistoryLeftPage">
+            <header className="reflectionHistoryTitle">
+              <DiaryIcon name="flower" />
+              <DiaryIcon name="calendar" />
+              <h3>이전 회고 보기</h3>
+              <DiaryIcon name="flowerWide" />
+            </header>
+            {renderEmptyHistoryPage()}
+          </section>
+
+          <section className="reflectionHistoryPage reflectionHistoryRightPage">
+            {renderEmptyHistoryPage()}
+          </section>
+        </>
+      );
+    }
+
+    const entryTodos = contextTodosByDate[entry.date];
+    const entryTodoCount = entryTodos?.filter((todo) => todo.status === "done").length ?? 0;
+    const entryIncompleteCount = entryTodos ? entryTodos.length - entryTodoCount : 0;
+
+    return (
+      <>
+        <section className="reflectionLeftPage reflectionHistorySummaryPage" aria-label="회고 요약">
+          <header className="reflectionTitle">
+            <DiaryIcon name="calendar" />
+            <div>
+              <h3>그날 하루를 다시 펼쳐봐요</h3>
+            </div>
+            <DiaryIcon name="flower" className="reflectionTitleFlower" />
+          </header>
+
+          <div className="reflectionDateCard">
+            <DiaryIcon name="calendar" />
+            <strong>{formatKoreanDate(entry.date)}</strong>
+            <DiaryIcon name="flowerWide" />
           </div>
+
+          <section className="reflectionTodoCard" aria-label="그날의 TODO">
+            <div className="reflectionTodoHead">
+              <h3>
+                <DiaryIcon name="sprout" />
+                그날의 TODO
+              </h3>
+              {entryTodos ? (
+                <p>
+                  <span>완료 {entryTodoCount}</span>
+                  <span>미완료 {entryIncompleteCount}</span>
+                </p>
+              ) : null}
+            </div>
+            <ul className="reflectionTodoList">{renderTodoRows(entryTodos)}</ul>
+          </section>
+
+          {renderEditCostCard("이 회고를 수정하려면")}
         </section>
 
-        <section className="reflectionHistoryEssay">
-          <h3>
-            <DiaryIcon name="sprout" />
-            아쉬운 점
-          </h3>
-          <div className="reflectionHistoryTextBox">
-            <p className="reflectionHistoryText">{entry.regret || "기록된 내용이 없어요."}</p>
-          </div>
+        <section
+          className="reflectionRightPage reflectionHistoryReflectionPage"
+          aria-label="회고 보기"
+        >
+          <article className="reflectionEssayCard reflectionEssayGood">
+            <div className="reflectionEssayHeader">
+              <h3>
+                <DiaryIcon name="sprout" />
+                잘한 점
+              </h3>
+            </div>
+            <div className="reflectionHistoryTextBox">
+              <p className="reflectionHistoryText">{entry.good || "기록된 내용이 없어요."}</p>
+            </div>
+          </article>
+
+          <article className="reflectionEssayCard reflectionEssayRegret">
+            <div className="reflectionEssayHeader">
+              <h3>
+                <DiaryIcon name="sprout" />
+                아쉬운 점
+              </h3>
+            </div>
+            <div className="reflectionHistoryTextBox">
+              <p className="reflectionHistoryText">{entry.regret || "기록된 내용이 없어요."}</p>
+            </div>
+          </article>
         </section>
-      </article>
+      </>
     );
   }
 
@@ -601,45 +790,11 @@ export function ReflectionModal({
                   </p>
                 </div>
                 <ul className="reflectionTodoList">
-                  {reflectionTodos.map((todo) => {
-                    const done = todo.status === "done";
-                    return (
-                      <li key={todo.id}>
-                        <span className={`reflectionCheck ${done ? "isDone" : ""}`}>
-                          {done ? "✓" : ""}
-                        </span>
-                        <strong>{todo.title}</strong>
-                        <em className={done ? "isDone" : ""}>{done ? "완료" : "미완료"}</em>
-                      </li>
-                    );
-                  })}
+                  {renderTodoRows(reflectionTodos, "오늘의 TODO가 없어요.")}
                 </ul>
               </section>
 
-              <section className="reflectionRewardCard" aria-label="회고 보상 안내">
-                <div>
-                  <DiaryIcon name="apple" />
-                  <p>
-                    <strong>회고 작성 보상</strong>
-                    30자 이상 작성한 항목 1개당 사과 2개 지급!
-                  </p>
-                  <b>
-                    <DiaryIcon name="apple" />+ 2{" "}
-                  </b>
-                </div>
-                <div>
-                  <DiaryIcon name="edit" />
-                  <p>
-                    <strong>회고 완료 후 수정은</strong>
-                    사과 15개를 지불해야 수정할 수 있어요.
-                  </p>
-                  <b>
-                    <DiaryIcon name="apple" />
-                    -15
-                  </b>
-                </div>
-                <small>보유 사과 {tokenBalance}개</small>
-              </section>
+              {renderTodayRewardCard()}
             </section>
 
             {renderReflectionEditor()}
@@ -692,29 +847,15 @@ export function ReflectionModal({
             {renderReflectionEditor()}
           </>
         ) : (
-          <>
-            <section className="reflectionHistoryPage reflectionHistoryLeftPage">
-              <header className="reflectionHistoryTitle">
-                <DiaryIcon name="flower" />
-                <DiaryIcon name="calendar" />
-                <h3>이전 회고 보기</h3>
-                <DiaryIcon name="flowerWide" />
-              </header>
-              {historyLeftEntry ? renderHistoryEntry(historyLeftEntry) : renderEmptyHistoryPage()}
-            </section>
-
-            <section className="reflectionHistoryPage reflectionHistoryRightPage">
-              {historyRightEntry ? renderHistoryEntry(historyRightEntry) : renderEmptyHistoryPage()}
-            </section>
-          </>
+          renderHistorySpread(historyPageEntry)
         )}
 
-        {primaryEntry && !isEditingExistingEntry && isPrimaryPage ? (
+        {visibleReadOnlyEntry && !isEditingExistingEntry ? (
           <div className="reflectionActions">
             <button
               type="button"
               className="reflectionEditButton"
-              onClick={() => requestEditReflection(primaryEntry)}
+              onClick={() => requestEditReflection(visibleReadOnlyEntry)}
             >
               <DiaryIcon name="pencil" />
               수정하기
@@ -790,25 +931,26 @@ export function ReflectionModal({
 
       {!isEditingExistingEntry ? (
         <>
-          {!isPrimaryPage ? (
+          {pageIndex < maxPageIndex ? (
             <button
               type="button"
               className="reflectionArrow reflectionArrowPrev"
-              onClick={() => movePage("prev")}
+              onClick={() => movePage("older")}
               aria-label="이전 회고 보기"
             >
               <WestRoundedIcon aria-hidden="true" />
             </button>
           ) : null}
-          <button
-            type="button"
-            className="reflectionArrow reflectionArrowNext"
-            onClick={() => movePage("next")}
-            disabled={pageIndex >= maxPageIndex}
-            aria-label="다음 회고 보기"
-          >
-            <EastRoundedIcon aria-hidden="true" />
-          </button>
+          {!isPrimaryPage ? (
+            <button
+              type="button"
+              className="reflectionArrow reflectionArrowNext"
+              onClick={() => movePage("newer")}
+              aria-label={pageIndex === 1 ? "오늘 회고 보기" : "다음 회고 보기"}
+            >
+              <EastRoundedIcon aria-hidden="true" />
+            </button>
+          ) : null}
         </>
       ) : null}
     </div>
