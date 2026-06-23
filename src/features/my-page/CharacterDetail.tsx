@@ -40,11 +40,20 @@ function fmtDate(iso: string) {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
 
+const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+
+// gen_img_url 은 보통 S3 presigned 절대 URL(http)이지만, 상대 경로면 API_BASE 를 붙인다.
+function resolveImgUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.startsWith("http") ? url : `${API_BASE}${url}`;
+}
+
 type Quest = { quest_id: string; todo_id: string; title: string };
 
 type CharacterDetailData = {
   created_at: string;
   persona: string;
+  gen_img_url: string;
   active_quests: Quest[];
 };
 
@@ -70,6 +79,9 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
   }, [resident.id]);
 
   const quests = detail?.active_quests ?? [];
+  // 마이페이지 진입 시점에 서버가 새로 서명한 gen_img_url 을 우선 사용한다.
+  // resident.avatarUrl 은 목록 로드 시점에 서명돼 이미 만료됐을 수 있다.
+  const avatarUrl = resolveImgUrl(detail?.gen_img_url) ?? resident.avatarUrl;
   const backdrop = useBackdropDismiss(onClose);
 
   async function handleMoveOut() {
@@ -124,8 +136,8 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
           <div className="mpRdLeft">
             <div className="mpRdImgCard">
               <div className="mpRdImgWrap">
-                {resident.avatarUrl ? (
-                  <img src={resident.avatarUrl} alt={resident.name} className="mpRdImg" />
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={resident.name} className="mpRdImg" />
                 ) : (
                   <div
                     className="mpRdAv"
