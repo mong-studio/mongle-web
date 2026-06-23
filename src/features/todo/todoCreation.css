@@ -122,6 +122,7 @@
   left: 0;
   transform-origin: top left;
   width: 1240px;
+  height: 1080px;
   display: flex;
   flex-direction: column;
   background: var(--bd-bg);
@@ -205,31 +206,36 @@
   image-rendering: pixelated;
 }
 
-/* 섹션 번호 뱃지 ①②③ */
-.boardStep {
+/* 생성 방식 타입 뱃지 */
+.boardTypeBadge {
   flex: none;
-  width: 32px;
-  height: 32px;
+  min-width: 72px;
+  height: 30px;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--bd-step);
   color: #fff;
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1;
+  letter-spacing: 0.5px;
   box-shadow: 0 2px 4px rgba(150, 110, 40, 0.25);
 }
 
-/* ── Body ── (패널 전체가 scale로 맞춰지므로 내부 스크롤 없음) */
+/* ── Body ── (패널 높이는 고정하고, 넘치는 항목만 해당 영역에서 스크롤) */
 .boardBody {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .boardRow {
   display: flex;
+  flex: 0 0 500px;
   gap: 36px;
   align-items: stretch;
   margin-bottom: 26px;
@@ -282,6 +288,11 @@
 
 /* ── Left: 이장님에게 말하기 ── */
 .boardField {
+  display: flex;
+  flex: 0 0 356px;
+  min-height: 0;
+  flex-direction: column;
+  box-sizing: border-box;
   background: var(--bd-panel);
   border: 2px solid var(--bd-border);
   border-radius: 20px;
@@ -296,6 +307,7 @@
 }
 
 .boardTextarea {
+  flex: 1;
   width: 100%;
   min-height: 74px;
   resize: none;
@@ -309,6 +321,8 @@
   outline: none;
   box-sizing: border-box;
   font-family: var(--bd-font);
+  overflow-y: auto;
+  scrollbar-width: none;
   transition: border-color 0.15s;
 }
 
@@ -316,9 +330,43 @@
   border-color: var(--bd-accent);
 }
 
+.boardTextarea.isError,
+.boardTextarea.isError:focus {
+  border-color: #e45c5c;
+}
+
+.boardTextarea::-webkit-scrollbar {
+  display: none;
+}
+
 .boardTextarea::placeholder {
   color: var(--bd-ink-faint);
   opacity: 1;
+}
+
+.boardFieldMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 22px;
+  margin-top: 8px;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.boardFieldError {
+  min-width: 0;
+  color: #d9534f;
+}
+
+.boardCharCount {
+  flex: none;
+  color: var(--bd-ink-faint);
+}
+
+.boardCharCount.isError {
+  color: #d9534f;
 }
 
 /* 마을 공용 액션 버튼(앰버 베벨) — 좌측 정리 버튼은 컬럼 폭을 채운다 */
@@ -363,8 +411,12 @@
 }
 
 .boardOrganizeBtn:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.82;
+}
+
+.boardOrganizeBtn.isLoading:disabled {
+  cursor: wait;
 }
 
 /* ── Right: 직접 적기 ── */
@@ -435,7 +487,15 @@
 }
 
 .boardTagBox {
+  position: relative;
+  display: flex;
+  flex: 0 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  min-width: 0;
+  max-height: 100%;
   margin-top: auto;
+  overflow: hidden;
   background: var(--bd-card);
   border: 2px solid var(--bd-border);
   border-radius: 20px;
@@ -450,7 +510,40 @@
 
 /* 태그 선택 칩(공용 TagPicker/TagChip)을 이 보드에서만 키운다(원본 13px ↔ 확대 19px의 중간). 다른 화면(캘린더)엔 영향 없음 */
 .tdRoot .tagPickerRow {
+  flex: none;
+  align-content: flex-start;
   gap: 8px;
+  max-height: 86px;
+  margin-top: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: var(--bd-border-strong) transparent;
+  scrollbar-width: thin;
+  box-sizing: border-box;
+  overscroll-behavior-y: contain;
+}
+.tdRoot .tagPicker {
+  flex: 0 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: visible;
+}
+.tdRoot .tagPickerRow::-webkit-scrollbar {
+  width: 6px;
+}
+.tdRoot .tagPickerRow::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tdRoot .tagPickerRow::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--bd-border-strong);
+}
+.tdRoot .tagPicker.isCreating .tagPickerRow {
+  margin-top: 0;
+  padding-bottom: 8px;
+}
+.tdRoot .tagPickerRow > * {
+  flex: none;
 }
 .tdRoot .tagChipSelect {
   padding: 8px 12px 8px 14px;
@@ -467,6 +560,12 @@
 .tdRoot .tagPickerNew {
   padding: 8px 15px;
   font-size: 16px;
+}
+.tdRoot .tagPicker.isNewPinned .tagPickerNew {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 1;
 }
 
 /* ── Bottom: 생성된 TODO (전폭 점선 구분선 + 가운데 꽃 + ③ 헤더) ── */
@@ -490,6 +589,8 @@
 }
 
 .boardGenerated {
+  flex: 1;
+  min-height: 0;
   padding-top: 2px;
 }
 
@@ -523,8 +624,51 @@
 
 .boardTodoList {
   display: flex;
+  flex: 1;
   flex-direction: column;
+  min-height: 0;
   gap: 12px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  overscroll-behavior-y: contain;
+}
+
+.boardGenerated > .boardTodoList,
+.boardTodoListWrap {
+  flex: 1;
+}
+
+.boardTodoList::-webkit-scrollbar {
+  display: none;
+}
+
+.boardTodoListWrap {
+  position: relative;
+  display: flex;
+  min-height: 0;
+}
+
+.boardTodoMoreIndicator {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 28px;
+  border: 2px solid var(--bd-border-strong);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.94);
+  color: var(--bd-accent-deep);
+  box-shadow: 0 4px 10px rgba(120, 84, 38, 0.2);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.boardTodoMoreIndicator svg {
+  width: 28px;
+  height: 28px;
 }
 
 .boardTodoRow {
@@ -595,6 +739,9 @@
 }
 
 .boardChipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 16px;
   height: 16px;
   padding: 0;
@@ -604,6 +751,7 @@
   color: inherit;
   cursor: pointer;
   font-size: 12px;
+  font-family: var(--bd-font);
   line-height: 1;
 }
 
@@ -668,6 +816,7 @@
 
 /* ── Footer ── */
 .boardFooter {
+  flex: none;
   display: flex;
   justify-content: center;
   margin-top: 28px;
