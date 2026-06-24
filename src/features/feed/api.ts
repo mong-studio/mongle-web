@@ -25,7 +25,6 @@ export interface ApiPost {
   character_name: string;
   quest_id: string;
   gen_img_url?: string | null;
-  character_gen_img_url?: string | null;
   img_url: string;
   content: string;
   is_liked: boolean;
@@ -111,7 +110,7 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     comments: post.comments.length,
     heroPlaceholder: "사진",
     imageUrl: post.img_url,
-    avatarUrl: char?.gen_img_url ?? post.gen_img_url ?? post.character_gen_img_url ?? undefined,
+    avatarUrl: char?.gen_img_url ?? post.gen_img_url ?? undefined,
     commentList,
   };
 }

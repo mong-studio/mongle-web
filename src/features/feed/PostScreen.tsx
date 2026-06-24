@@ -140,7 +140,7 @@ export function PostScreen({
   const heartArt = liked ? SPRITES.heart : SPRITES.heartOutline;
   const heartPal = liked ? { r: th.like, h: "#FFD7DF" } : { r: th.inkFaint };
   const authorName = post.character_name || post.character.slice(0, 8);
-  const postAuthorAvatarUrl = post.gen_img_url ?? post.character_gen_img_url ?? authorAvatarUrl;
+  const postAuthorAvatarUrl = post.gen_img_url ?? authorAvatarUrl;
 
   return (
     <div className="pd-screen" style={{ background: th.modalBg }}>
