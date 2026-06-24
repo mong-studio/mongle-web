@@ -5,6 +5,7 @@ import { consumeKakaoCallback } from "../features/auth/kakaoCallback.js";
 import { type AuthState, useAuthStore } from "../features/auth/store.js";
 import {
   type CharacterListItem,
+  cancelGenerationJob,
   fetchCharacters,
   generateCharacterPreview,
   registerCharacter,
@@ -152,6 +153,10 @@ export function App() {
   const [lastCreatedResident, setLastCreatedResident] = useState<Resident | null>(null);
   // 생성됐지만 아직 입주(등록)하지 않은 미리보기 잡. "입주하기" 시 이 잡을 등록한다.
   const [previewJobId, setPreviewJobId] = useState<string | null>(null);
+  // 생성 취소용: 현재 생성의 폴링 중단 컨트롤러 / 취소 대상 job_id / 취소 여부 플래그.
+  const genAbortRef = useRef<AbortController | null>(null);
+  const genJobIdRef = useRef<string | null>(null);
+  const genCancelledRef = useRef(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const pushToast = useNotificationStore((s) => s.pushToast);
   const notifHistory = useNotificationStore((s) => s.history);
@@ -677,14 +682,26 @@ export function App() {
     }
     const keywords = selectedKeywordCategories.slice(0, 3);
     setIsBusy(true);
+    genCancelledRef.current = false;
+    const controller = new AbortController();
+    genAbortRef.current = controller;
+    genJobIdRef.current = null;
     showNotice("새 친구를 그리는 중이에요. 잠시만 기다려 주세요.");
     try {
-      const preview = await generateCharacterPreview({
-        name,
-        persona,
-        personalityKeywords: keywords,
-        sourceImageFile,
-      });
+      const preview = await generateCharacterPreview(
+        {
+          name,
+          persona,
+          personalityKeywords: keywords,
+          sourceImageFile,
+        },
+        {
+          signal: controller.signal,
+          onJobCreated: (jobId) => {
+            genJobIdRef.current = jobId;
+          },
+        },
+      );
       // 미리보기만 표시하고 아직 등록하지 않는다. 등록(입주)은 confirmCharacter 에서.
       // 재생성하면 이 미리보기가 새 잡으로 교체될 뿐, 이전 잡은 등록된 적이 없어 고아가 안 생긴다.
       // 사용된 원본 이미지만 비우고 이름·키워드·설명은 남겨 수정/재생성에 재사용한다.
@@ -700,11 +717,31 @@ export function App() {
         avatarUrl: resolveAvatarUrl(preview.genImgUrl),
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "원인 미상";
-      showNotice(message);
+      // 사용자가 취소한 경우(AbortError)엔 에러 메시지를 띄우지 않는다.
+      const isCancelled =
+        genCancelledRef.current || (error instanceof DOMException && error.name === "AbortError");
+      if (!isCancelled) {
+        const message = error instanceof Error ? error.message : "원인 미상";
+        showNotice(message);
+      }
     } finally {
       setIsBusy(false);
+      genAbortRef.current = null;
+      genJobIdRef.current = null;
     }
+  }
+
+  // 생성 중 "생성 취소": 폴링을 멈추고 서버에 취소를 요청한다.
+  // 서버는 결과를 폐기하고 차감했던 일일 생성 횟수를 환불한다(태스크 체크포인트, 곧 반영).
+  function cancelCharacterGeneration() {
+    genCancelledRef.current = true;
+    genAbortRef.current?.abort();
+    const jobId = genJobIdRef.current;
+    if (jobId) {
+      void cancelGenerationJob(jobId);
+    }
+    setIsBusy(false);
+    showNotice("생성을 취소했어요. 생성 횟수는 차감되지 않아요.");
   }
 
   // "입주하기": 미리보기 잡을 실제 캐릭터로 등록하고 마을에 추가한다.
@@ -952,6 +989,7 @@ export function App() {
         onClose={closeActiveFeature}
         lastCreatedResident={lastCreatedResident}
         onCreateCharacter={createCharacter}
+        onCancelCharacterGeneration={cancelCharacterGeneration}
         onConfirmCharacter={confirmCharacter}
         onImageUpload={handleSourceImageUpload}
         onNameChange={setCharacterName}
@@ -991,6 +1029,7 @@ export function App() {
         onCharacterSetupClose={closeCharacterSetup}
         lastCreatedResident={lastCreatedResident}
         onCharacterSubmit={createCharacter}
+        onCharacterCancelGeneration={cancelCharacterGeneration}
         onCharacterConfirm={confirmCharacter}
         onApplesRefresh={refreshApples}
         onFeedClose={() => setFeedOpen(false)}

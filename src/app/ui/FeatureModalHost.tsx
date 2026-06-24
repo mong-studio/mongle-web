@@ -22,6 +22,7 @@ type FeatureModalHostProps = {
   sourceImagePreview: string;
   onClose: () => void;
   onCreateCharacter: () => void;
+  onCancelCharacterGeneration: () => void;
   onConfirmCharacter: () => Promise<boolean>;
   onImageUpload: (file: File | undefined) => void;
   onNameChange: (value: string) => void;
@@ -44,6 +45,7 @@ export function FeatureModalHost({
   sourceImagePreview,
   onClose,
   onCreateCharacter,
+  onCancelCharacterGeneration,
   onConfirmCharacter,
   onImageUpload,
   onNameChange,
@@ -85,6 +87,7 @@ export function FeatureModalHost({
             onToggleKeyword={onToggleKeyword}
             onNotice={onNotice}
             onSubmit={onCreateCharacter}
+            onCancelGeneration={onCancelCharacterGeneration}
             onConfirm={onConfirmCharacter}
             onClose={onClose}
           />
