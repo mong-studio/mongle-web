@@ -1,7 +1,7 @@
 import type { InternalAxiosRequestConfig } from "axios";
 import { beforeEach, describe, expect, it } from "vitest";
 import { apiClient, configureAuthClient } from "../../shared/api/client.js";
-import { createComment, fetchPostDetail, fetchPosts } from "./api.js";
+import { createComment, fetchPostDetail, fetchPosts, toFeedPost } from "./api.js";
 
 type AdapterHandler = (config: InternalAxiosRequestConfig) => {
   status: number;
@@ -110,6 +110,28 @@ describe("feed API", () => {
     it("404면 에러를 던진다", async () => {
       useAdapter(() => ({ status: 404, data: {} }));
       await expect(fetchPostDetail("nonexistent")).rejects.toThrow();
+    });
+  });
+
+  describe("toFeedPost", () => {
+    it("활성 캐릭터 목록에 없어도 게시물의 gen_img_url을 아바타로 사용한다", () => {
+      const post = {
+        post_id: "post-inactive",
+        character: "char-inactive",
+        character_name: "모찌",
+        quest_id: "q-1",
+        gen_img_url: "https://example.com/inactive-avatar.png",
+        img_url: "https://example.com/post.png",
+        content: "이사 전 게시물",
+        is_liked: false,
+        comments: [],
+        created_at: new Date().toISOString(),
+      };
+
+      const result = toFeedPost(post, new Map());
+
+      expect(result.name).toBe("모찌");
+      expect(result.avatarUrl).toBe("https://example.com/inactive-avatar.png");
     });
   });
 

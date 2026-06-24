@@ -110,7 +110,7 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     comments: post.comments.length,
     heroPlaceholder: "사진",
     imageUrl: post.img_url,
-    avatarUrl: char?.gen_img_url,
+    avatarUrl: char?.gen_img_url ?? post.gen_img_url ?? post.character_gen_img_url ?? undefined,
     commentList,
   };
 }
