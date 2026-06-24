@@ -77,7 +77,8 @@ const POLL_TIMEOUT_MS = 6 * 60 * 1000;
 // 백엔드가 내려주는 error 코드를 사용자 친화적 한국어 메시지로 변환한다.
 const ERROR_MESSAGES: Record<string, string> = {
   CHARACTER_LIMIT_EXCEEDED: "마을에 들어올 수 있는 친구는 최대 10명이에요.",
-  DAILY_GENERATION_LIMIT_EXCEEDED: "오늘은 친구를 더 만들 수 없어요. 내일 다시 시도해 주세요.",
+  // 정확한 안내는 dailyLimitMessage() 가 남은 시간을 계산해 동적으로 만든다(아래 fallback).
+  DAILY_GENERATION_LIMIT_EXCEEDED: "오늘은 친구를 더 만들 수 없어요. 잠시 후 다시 시도해 주세요.",
   SOURCE_IMAGE_NOT_FOUND: "올린 사진을 찾을 수 없어요. 다시 시도해 주세요.",
   SOURCE_IMAGE_UPLOAD_EXPIRED: "사진 업로드 시간이 지났어요. 다시 올려 주세요.",
   STORAGE_NOT_CONFIGURED: "이미지 저장소가 아직 준비되지 않았어요.",
@@ -92,9 +93,32 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// 일일 생성 한도는 서버 기준 로컬 자정(0시)에 리셋된다. 리셋까지 남은 분을 계산한다.
+function minutesUntilDailyReset(): number {
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+  return Math.max(1, Math.ceil((nextMidnight.getTime() - now.getTime()) / 60_000));
+}
+
+// "OO분 후" / "O시간 O분 후" 형태의 재시도 안내. 한도 초과 시 '내일' 대신 남은 시간을 보여준다.
+export function retryAfterText(): string {
+  const total = minutesUntilDailyReset();
+  if (total < 60) return `${total}분 후에`;
+  const hours = Math.floor(total / 60);
+  const minutes = total % 60;
+  return minutes === 0 ? `${hours}시간 후에` : `${hours}시간 ${minutes}분 후에`;
+}
+
+function dailyLimitMessage(): string {
+  return `오늘은 친구를 더 만들 수 없어요. ${retryAfterText()} 다시 시도해 주세요.`;
+}
+
 function toFriendlyMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const code = error.response?.data?.error;
+    if (code === "DAILY_GENERATION_LIMIT_EXCEEDED") {
+      return dailyLimitMessage();
+    }
     if (typeof code === "string" && ERROR_MESSAGES[code]) {
       return ERROR_MESSAGES[code];
     }
