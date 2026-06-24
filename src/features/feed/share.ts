@@ -11,6 +11,8 @@ export interface SharePayload {
   title: string;
   /** 공유 본문(미리보기 설명) */
   text: string;
+  /** 카드 썸네일(게시물 생성 이미지). 공개 http(s) URL만 유효. */
+  imageUrl?: string;
 }
 
 export interface ShareResult {
@@ -134,7 +136,7 @@ export async function shareToKakao(payload: SharePayload): Promise<ShareResult> 
         content: {
           title: payload.title,
           description: payload.text,
-          imageUrl: "",
+          imageUrl: payload.imageUrl ?? "",
           link: { mobileWebUrl: payload.url, webUrl: payload.url },
         },
         buttons: [
@@ -178,13 +180,21 @@ export async function shareCopyLink(payload: SharePayload): Promise<ShareResult>
 }
 
 // 게시물로부터 공유 페이로드를 만든다. 앱 진입 링크 + 작성자/내용 미리보기.
-export function buildPostShare(postId: string, authorName: string, content: string): SharePayload {
+export function buildPostShare(
+  postId: string,
+  authorName: string,
+  content: string,
+  imageUrl?: string,
+): SharePayload {
   const base =
     typeof window !== "undefined" ? `${window.location.origin}${window.location.pathname}` : "";
   const snippet = content.trim().split("\n")[0]?.slice(0, 60) ?? "";
+  // 카카오는 공개 http(s) 썸네일만 받는다. raw 오브젝트 키 등은 버린다.
+  const cardImage = imageUrl && /^https?:\/\//.test(imageUrl) ? imageUrl : undefined;
   return {
     url: `${base}?post=${encodeURIComponent(postId)}`,
     title: `${authorName}님의 몽글마을 소식`,
     text: snippet || "몽글마을의 따뜻한 소식을 확인해보세요 🌱",
+    imageUrl: cardImage,
   };
 }

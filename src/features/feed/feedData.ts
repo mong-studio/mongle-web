@@ -115,6 +115,7 @@ export interface FeedPostData {
   name: string;
   role: string;
   time: string;
+  createdAt?: string;
   place: string;
   tint: string;
   caption: string[];
@@ -125,6 +126,7 @@ export interface FeedPostData {
   comments: number;
   heroPlaceholder: string;
   imageUrl?: string;
+  avatarUrl?: string;
   commentList: FeedComment[];
 }
 
