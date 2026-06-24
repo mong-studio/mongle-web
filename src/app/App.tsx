@@ -833,6 +833,9 @@ export function App() {
   // /complete 엔드포인트로 사과 보상·알림 동기화 후 HUD 할일을 새로고침한다.
   const handleCalendarCompleteTodo = useCallback(
     async (todoId: string, title: string, dueDate: string) => {
+      if (dueDate < formatTodayIso()) {
+        throw new Error("과거 TODO는 완료할 수 없어요.");
+      }
       const completed = await completeTodoRequest(todoId);
       setApples(completed.token_balance);
       showNotice(

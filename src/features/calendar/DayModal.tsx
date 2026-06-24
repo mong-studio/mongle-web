@@ -87,10 +87,11 @@ function DayModalPanel({
 }: DayModalPanelProps) {
   // 부모가 날짜(y-m-d)로 key를 주므로, 날짜가 바뀌면 이 컴포넌트가 remount되어
   // adding 초기값(추가 의도 selAdd)이 자연히 다시 잡힌다. 별도 effect 불필요.
-  const [adding, setAdding] = useState(!!cal.selAdd);
   const { y, m, d } = ymd;
 
   const wd = new Date(y, m, d).getDay();
+  const isPastDay = serial(y, m, d) < cal.todaySr;
+  const [adding, setAdding] = useState(!isPastDay && !!cal.selAdd);
   const evs = cal.getEvents(y, m, d);
   const total = evs.length;
   const doneCount = evs.filter((e) => e.done).length;
@@ -183,7 +184,20 @@ function DayModalPanel({
                     {todoEvs.length > 0 && (
                       <section className="dayModalSection">
                         <div className="dayModalSectionHead">
-                          <span className="dayModalSectionTitle">✅ 할 일</span>
+                          <span className="dayModalSectionTitle">
+                            <img
+                              src="/assets/icon/sprout.png"
+                              alt=""
+                              aria-hidden="true"
+                              style={{
+                                width: 15,
+                                height: 15,
+                                objectFit: "contain",
+                                flex: "0 0 auto",
+                              }}
+                            />
+                            할 일
+                          </span>
                           <span className="dayModalSectionCount">{todoEvs.length}</span>
                         </div>
                         <motion.div
@@ -201,28 +215,30 @@ function DayModalPanel({
               </div>
             )}
 
-            <div className="dayModalAddWrap">
-              {!adding ? (
-                <button
-                  type="button"
-                  className="calBtn-dashed dayModalAddBtn"
-                  onClick={() => setAdding(true)}
-                >
-                  <span className="dayModalAddBtnPlus">＋</span> 할일 추가
-                </button>
-              ) : (
-                <AddEventForm
-                  key={`${y}-${m}-${d}`}
-                  ymd={{ y, m, d }}
-                  tags={tags}
-                  onAddEvent={onAddEvent}
-                  onCreateTag={onCreateTag}
-                  onDeleteTag={onDeleteTag}
-                  onEditTag={onEditTag}
-                  onCancel={() => setAdding(false)}
-                />
-              )}
-            </div>
+            {!isPastDay && (
+              <div className="dayModalAddWrap">
+                {!adding ? (
+                  <button
+                    type="button"
+                    className="calBtn-dashed dayModalAddBtn"
+                    onClick={() => setAdding(true)}
+                  >
+                    <span className="dayModalAddBtnPlus">＋</span> 할일 추가
+                  </button>
+                ) : (
+                  <AddEventForm
+                    key={`${y}-${m}-${d}`}
+                    ymd={{ y, m, d }}
+                    tags={tags}
+                    onAddEvent={onAddEvent}
+                    onCreateTag={onCreateTag}
+                    onDeleteTag={onDeleteTag}
+                    onEditTag={onEditTag}
+                    onCancel={() => setAdding(false)}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
       </Dialog.Content>

@@ -72,6 +72,9 @@
   padding: 2px 2px 0;
 }
 .dayModalSectionTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-family: var(--font-display);
   font-size: 15px;
   color: var(--ink-2);

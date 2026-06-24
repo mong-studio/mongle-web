@@ -22,9 +22,6 @@
   border: 2px solid var(--line);
   background: var(--cream-2);
   color: var(--ink-3);
-  font-family: var(--font-display);
-  font-size: 14px;
-  line-height: 1;
 }
 
 .eventRowDot {

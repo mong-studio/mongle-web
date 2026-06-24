@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import type { ReactNode } from "react";
 import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
 import { Tag } from "../../shared/ui/Tag/Tag.js";
 import type { CalHook } from "./CalendarCore.js";
@@ -22,14 +23,25 @@ export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCar
   const { y: sy, m: sm, d: sd } = cal.selDate;
   const swd = new Date(sy, sm, sd).getDay();
   const isToday = cal.todaySr === serial(sy, sm, sd);
+  const isPastDay = serial(sy, sm, sd) < cal.todaySr;
   const evs = cal.getEvents(sy, sm, sd).filter((e) => e.s === e.e);
   const scheduleEvs = evs.filter((e) => e.scheduleId);
   const todoEvs = evs.filter((e) => !e.scheduleId);
 
-  const sectionLabel = (icon: string, text: string, count: number) => (
+  const sectionLabel = (icon: ReactNode, text: string, count: number) => (
     <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "10px 0 2px" }}>
-      <span style={{ fontFamily: "var(--font-display)", fontSize: 15, color: "var(--ink-2)" }}>
-        {icon} {text}
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+          fontFamily: "var(--font-display)",
+          fontSize: 15,
+          color: "var(--ink-2)",
+        }}
+      >
+        {icon}
+        {text}
       </span>
       <span
         style={{
@@ -55,8 +67,8 @@ export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCar
     const on = e.done;
     const failed = !!e.failed;
     const isTodo = !!e.todoId;
-    const checkable = isTodo && !failed && !on;
-    const canFail = isTodo && !failed && !on;
+    const checkable = isTodo && !isPastDay && !failed && !on;
+    const canFail = isTodo && !isPastDay && !failed && !on;
 
     return (
       <motion.div
@@ -70,7 +82,7 @@ export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCar
         onKeyDown={(ev) => ev.key === "Enter" && checkable && onToggle(e.id)}
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           gap: 7,
           padding: "12px 2px",
           cursor: checkable ? "pointer" : "default",
@@ -93,14 +105,23 @@ export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCar
               border: "2px solid var(--line)",
               background: "var(--cream-2)",
               color: "var(--ink-3)",
-              fontFamily: "var(--font-display)",
-              fontSize: 14,
             }}
           >
-            x
+            <svg
+              aria-hidden="true"
+              width="15"
+              height="15"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="var(--ink-3)"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+            >
+              <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
+            </svg>
           </span>
         ) : isTodo ? (
-          <Check on={on} onClick={() => onToggle(e.id)} />
+          <Check on={on} onClick={() => onToggle(e.id)} disabled={isPastDay} />
         ) : (
           <span
             aria-hidden="true"
@@ -154,41 +175,44 @@ export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCar
               </span>
             )}
             <Tag color={e.color} bg={e.bg} label={e.tagLabel} />
-            {canFail && (
-              <DeleteConfirmDialog
-                trigger={
-                  <button
-                    type="button"
-                    aria-label={`${e.title} 포기`}
-                    onClick={(event) => event.stopPropagation()}
-                    style={{
-                      minHeight: 24,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "3px 9px",
-                      border: "1.5px solid #d8a46d",
-                      borderRadius: 999,
-                      background: "var(--cream-1)",
-                      color: "#9a5735",
-                      cursor: "pointer",
-                      fontFamily: "var(--font-display)",
-                      fontSize: 11,
-                      lineHeight: 1,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    포기
-                  </button>
-                }
-                title="포기할까요?"
-                description="포기하면 완료할 수 없어요. 포기 기록은 남아요."
-                confirmLabel="포기하기"
-                onConfirm={() => void onFailEvent(e.id)}
-              />
-            )}
           </div>
         </div>
+        {canFail && (
+          <DeleteConfirmDialog
+            trigger={
+              <button
+                type="button"
+                aria-label={`${e.title} 포기`}
+                onClick={(event) => event.stopPropagation()}
+                style={{
+                  minHeight: 24,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "3px 9px",
+                  border: "1.5px solid #d8a46d",
+                  borderRadius: 999,
+                  background: "var(--cream-1)",
+                  color: "#9a5735",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                  fontSize: 11,
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  flex: "0 0 auto",
+                  alignSelf: "flex-end",
+                  marginLeft: 8,
+                }}
+              >
+                포기
+              </button>
+            }
+            title="포기할까요?"
+            description="포기하면 완료할 수 없어요. 포기 기록은 남아요."
+            confirmLabel="포기하기"
+            onConfirm={() => void onFailEvent(e.id)}
+          />
+        )}
       </motion.div>
     );
   };
@@ -244,66 +268,68 @@ export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCar
           {evs.length}
         </span>
         <div style={{ flex: 1 }} />
-        <button
-          type="button"
-          className="calBtn-accent"
-          onClick={() => !isRefreshing && cal.openAdd({ y: sy, m: sm, d: sd })}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: "50%",
-            cursor: isRefreshing ? "default" : "pointer",
-            border: "none",
-            background: "var(--accent)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 2px 6px rgba(120,84,38,.30), inset 0 -2px 0 rgba(0,0,0,.12)",
-            flexShrink: 0,
-            transition: "background .14s",
-          }}
-        >
-          {isRefreshing ? (
-            <motion.svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
-              aria-hidden="true"
-            >
-              <circle
-                cx="8"
-                cy="8"
-                r="5.5"
-                fill="none"
-                stroke="rgba(255,255,255,.35)"
-                strokeWidth="2.5"
-              />
-              <path
-                d="M8 2.5 A5.5 5.5 0 0 1 13.5 8"
+        {!isPastDay && (
+          <button
+            type="button"
+            className="calBtn-accent"
+            onClick={() => !isRefreshing && cal.openAdd({ y: sy, m: sm, d: sd })}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              cursor: isRefreshing ? "default" : "pointer",
+              border: "none",
+              background: "var(--accent)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 6px rgba(120,84,38,.30), inset 0 -2px 0 rgba(0,0,0,.12)",
+              flexShrink: 0,
+              transition: "background .14s",
+            }}
+          >
+            {isRefreshing ? (
+              <motion.svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+                aria-hidden="true"
+              >
+                <circle
+                  cx="8"
+                  cy="8"
+                  r="5.5"
+                  fill="none"
+                  stroke="rgba(255,255,255,.35)"
+                  strokeWidth="2.5"
+                />
+                <path
+                  d="M8 2.5 A5.5 5.5 0 0 1 13.5 8"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </motion.svg>
+            ) : (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
                 fill="none"
                 stroke="#fff"
                 strokeWidth="2.5"
                 strokeLinecap="round"
-              />
-            </motion.svg>
-          ) : (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="M8 3v10M3 8h10" />
-            </svg>
-          )}
-        </button>
+                aria-hidden="true"
+              >
+                <path d="M8 3v10M3 8h10" />
+              </svg>
+            )}
+          </button>
+        )}
       </div>
       <motion.div
         style={{ display: "flex", flexDirection: "column" }}
@@ -324,7 +350,16 @@ export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCar
         )}
         {todoEvs.length > 0 && (
           <>
-            {sectionLabel("✓", "할 일", todoEvs.length)}
+            {sectionLabel(
+              <img
+                src="/assets/icon/sprout.png"
+                alt=""
+                aria-hidden="true"
+                style={{ width: 15, height: 15, objectFit: "contain", flex: "0 0 auto" }}
+              />,
+              "할 일",
+              todoEvs.length,
+            )}
             <div
               className="calScroll"
               style={{ maxHeight: 290, overflowX: "hidden", overflowY: "auto" }}
