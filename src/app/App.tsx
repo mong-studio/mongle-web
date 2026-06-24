@@ -225,7 +225,7 @@ export function App() {
     setNoticeVisible(false);
   }, [notice]);
 
-  useEffect(() => {
+  const refreshApples = useCallback(() => {
     if (authStatus !== "authenticated") {
       setApples(0);
       return;
@@ -237,6 +237,10 @@ export function App() {
       })
       .catch(() => {});
   }, [authStatus]);
+
+  useEffect(() => {
+    refreshApples();
+  }, [refreshApples]);
 
   const syncNotifications = useCallback(
     async (announceReflectionDate?: string) => {
@@ -935,6 +939,7 @@ export function App() {
         lastCreatedResident={lastCreatedResident}
         onCharacterSubmit={createCharacter}
         onCharacterConfirm={confirmCharacter}
+        onApplesRefresh={refreshApples}
         onFeedClose={() => setFeedOpen(false)}
         onLoginClose={() => setLoginOpen(false)}
         onLoginOpen={() => {

@@ -27,6 +27,7 @@ export interface ApiPost {
   content: string;
   is_liked: boolean;
   comments: ApiComment[];
+  daily_comment_count?: number | null;
   created_at: string;
 }
 
