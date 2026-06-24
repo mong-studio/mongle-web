@@ -56,6 +56,7 @@ type CharacterDetailData = {
   persona: string;
   gen_img_url: string;
   active_quests: Quest[];
+  feed_count: number;
 };
 
 type Props = {
@@ -227,7 +228,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
                     <img src="/assets/hud/icon-phone.png" alt="" className="mpRdInfoIcon" />
                     함께한 피드 수
                   </span>
-                  <span className="mpRdInfoVal">—</span>
+                  <span className="mpRdInfoVal">{detail ? `${detail.feed_count}개` : "—"}</span>
                 </div>
               </div>
             </div>
