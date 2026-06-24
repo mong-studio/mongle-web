@@ -12,7 +12,7 @@ export type TodoItem = {
   dueDate: string;
   tags: string[];
   tagColors?: Record<string, string>;
-  status: "candidate" | "saved" | "done";
+  status: "candidate" | "saved" | "done" | "failed";
   assignedQuest?: {
     characterName: string | null;
     content: string;

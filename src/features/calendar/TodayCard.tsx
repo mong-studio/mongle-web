@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
 import { Tag } from "../../shared/ui/Tag/Tag.js";
 import type { CalHook } from "./CalendarCore.js";
 import { Check } from "./CalendarCore.js";
@@ -13,15 +14,15 @@ const todayItemVariants = {
 type TodayCardProps = {
   cal: CalHook;
   onToggle: (id: string) => void;
+  onFailEvent: (id: string) => Promise<void>;
   isRefreshing: boolean;
 };
 
-export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
+export function TodayCard({ cal, onToggle, onFailEvent, isRefreshing }: TodayCardProps) {
   const { y: sy, m: sm, d: sd } = cal.selDate;
   const swd = new Date(sy, sm, sd).getDay();
   const isToday = cal.todaySr === serial(sy, sm, sd);
   const evs = cal.getEvents(sy, sm, sd).filter((e) => e.s === e.e);
-  // 가독성을 위해 일정(schedule)과 할 일(todo)을 분리해 섹션으로 보여준다.
   const scheduleEvs = evs.filter((e) => e.scheduleId);
   const todoEvs = evs.filter((e) => !e.scheduleId);
 
@@ -53,8 +54,10 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
   const renderItem = (e: CalEvent, i: number) => {
     const on = e.done;
     const failed = !!e.failed;
-    const isTodo = !!e.todoId; // 일정(schedule)은 체크 불가
-    const checkable = isTodo && !failed && !on; // 완료한 할일은 체크 해제 불가
+    const isTodo = !!e.todoId;
+    const checkable = isTodo && !failed && !on;
+    const canFail = isTodo && !failed && !on;
+
     return (
       <motion.div
         key={e.id}
@@ -94,7 +97,7 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
               fontSize: 14,
             }}
           >
-            ✕
+            x
           </span>
         ) : isTodo ? (
           <Check on={on} onClick={() => onToggle(e.id)} />
@@ -151,6 +154,39 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
               </span>
             )}
             <Tag color={e.color} bg={e.bg} label={e.tagLabel} />
+            {canFail && (
+              <DeleteConfirmDialog
+                trigger={
+                  <button
+                    type="button"
+                    aria-label={`${e.title} 포기`}
+                    onClick={(event) => event.stopPropagation()}
+                    style={{
+                      minHeight: 24,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "3px 9px",
+                      border: "1.5px solid #d8a46d",
+                      borderRadius: 999,
+                      background: "var(--cream-1)",
+                      color: "#9a5735",
+                      cursor: "pointer",
+                      fontFamily: "var(--font-display)",
+                      fontSize: 11,
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    포기
+                  </button>
+                }
+                title="포기할까요?"
+                description="포기하면 완료할 수 없어요. 포기 기록은 남아요."
+                confirmLabel="포기하기"
+                onConfirm={() => void onFailEvent(e.id)}
+              />
+            )}
           </div>
         </div>
       </motion.div>
@@ -277,8 +313,7 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
       >
         {scheduleEvs.length > 0 && (
           <>
-            {sectionLabel("📅", "일정", scheduleEvs.length)}
-            {/* 4개까지 보이고 넘으면 스크롤 (항목 ~69px 기준) */}
+            {sectionLabel("•", "일정", scheduleEvs.length)}
             <div
               className="calScroll"
               style={{ maxHeight: 290, overflowX: "hidden", overflowY: "auto" }}
@@ -289,7 +324,7 @@ export function TodayCard({ cal, onToggle, isRefreshing }: TodayCardProps) {
         )}
         {todoEvs.length > 0 && (
           <>
-            {sectionLabel("✅", "할 일", todoEvs.length)}
+            {sectionLabel("✓", "할 일", todoEvs.length)}
             <div
               className="calScroll"
               style={{ maxHeight: 290, overflowX: "hidden", overflowY: "auto" }}

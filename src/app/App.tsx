@@ -18,7 +18,11 @@ import { useNotificationStore } from "../features/notification/store.js";
 import type { NotificationToastItem } from "../features/notification/types.js";
 import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
-import { completeTodo as completeTodoRequest, formatTodayIso } from "../features/todo/todoApi.js";
+import {
+  completeTodo as completeTodoRequest,
+  failTodo as failTodoRequest,
+  formatTodayIso,
+} from "../features/todo/todoApi.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
 import { PhaserVillage } from "../features/village/PhaserVillage.js";
 import { apiClient } from "../shared/api/client.js";
@@ -313,7 +317,8 @@ export function App() {
             title: todo.content,
             dueDate: todo.todo_date,
             tags: getApiTodoTags(todo),
-            status: todo.status === "COMPLETED" ? "done" : "saved",
+            status:
+              todo.status === "COMPLETED" ? "done" : todo.status === "FAILED" ? "failed" : "saved",
             assignedQuest: todo.quest
               ? {
                   characterName: todo.quest.character_name ?? null,
@@ -757,7 +762,12 @@ export function App() {
 
   async function completeHudTodo(todoId: string) {
     const targetTodo = todos.find((todo) => todo.id === todoId);
-    if (!targetTodo || targetTodo.status === "candidate" || targetTodo.status === "done") {
+    if (
+      !targetTodo ||
+      targetTodo.status === "candidate" ||
+      targetTodo.status === "done" ||
+      targetTodo.status === "failed"
+    ) {
       return;
     }
 
@@ -785,6 +795,37 @@ export function App() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "원인 미상";
       showNotice(`TODO 완료 처리에 실패했어요. ${message}`);
+    }
+  }
+
+  async function failHudTodo(todoId: string) {
+    const targetTodo = todos.find((todo) => todo.id === todoId);
+    if (
+      !targetTodo ||
+      targetTodo.status === "candidate" ||
+      targetTodo.status === "done" ||
+      targetTodo.status === "failed"
+    ) {
+      return;
+    }
+
+    if (!UUID_PATTERN.test(todoId)) {
+      setTodos((current) =>
+        current.map((todo) => (todo.id === todoId ? { ...todo, status: "failed" } : todo)),
+      );
+      showNotice(`${targetTodo.title} 포기 처리가 완료됐어요.`);
+      return;
+    }
+
+    try {
+      await failTodoRequest(todoId);
+      setTodos((current) =>
+        current.map((todo) => (todo.id === todoId ? { ...todo, status: "failed" } : todo)),
+      );
+      showNotice(`${targetTodo.title} 포기 처리가 완료됐어요.`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "원인 미상";
+      showNotice(`TODO 포기 처리에 실패했어요. ${message}`);
     }
   }
 
@@ -878,6 +919,7 @@ export function App() {
         todos={todos}
         tagColors={todoTagColors}
         onCompleteTodo={completeHudTodo}
+        onFailTodo={failHudTodo}
         onAddTodo={openTodoFromHud}
       />
 
