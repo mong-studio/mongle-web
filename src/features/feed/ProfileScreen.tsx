@@ -9,9 +9,17 @@ interface ProfileScreenProps {
   onOpenPost: (id: string) => void;
   posts: ApiPost[];
   characterId: string;
+  neighborCount: number;
 }
 
-export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: ProfileScreenProps) {
+export function ProfileScreen({
+  th,
+  onBack,
+  onOpenPost,
+  posts,
+  characterId,
+  neighborCount,
+}: ProfileScreenProps) {
   const [following, setFollowing] = useState(false);
   const [character, setCharacter] = useState<ApiCharacterDetail | null>(null);
 
@@ -28,6 +36,8 @@ export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: Pr
   }, [characterId]);
 
   const characterPosts = posts.filter((p) => p.character === characterId);
+  const heartCount = characterPosts.filter((p) => p.is_liked).length;
+  // 이웃은 백엔드 미구현 — "캐릭터·나 모두 서로 이웃" 설정으로 계산(상위에서 내려받음).
 
   return (
     <div className="pf-screen" style={{ background: th.modalBg }}>
@@ -87,8 +97,8 @@ export function ProfileScreen({ th, onBack, onOpenPost, posts, characterId }: Pr
             {(
               [
                 ["게시물", characterPosts.length],
-                ["하트", 0],
-                ["이웃", 0],
+                ["하트", heartCount],
+                ["이웃", neighborCount],
               ] as const
             ).map(([label, val]) => (
               <div key={label} className="pf-stat">

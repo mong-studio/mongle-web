@@ -1,6 +1,13 @@
 import type React from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { type ApiCharacter, type ApiPost, fetchCharacters, fetchPosts, toFeedPost } from "./api.js";
+import {
+  type ApiCharacter,
+  type ApiPost,
+  fetchCharacters,
+  fetchPosts,
+  toFeedPost,
+  toggleLike,
+} from "./api.js";
 import { FeedPost } from "./FeedPost.js";
 import { THEMES, type ThemeTokens } from "./feedData.js";
 import { APPLE_PAL, PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -144,6 +151,25 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
     };
   }, []);
 
+  // 좋아요는 apiPosts를 단일 소스로 둔다 — 피드/상세/프로필이 같은 상태를 공유한다.
+  function setPostLiked(postId: string, value: boolean) {
+    setApiPosts((prev) => prev.map((p) => (p.post_id === postId ? { ...p, is_liked: value } : p)));
+  }
+
+  // 피드 목록에서의 토글: 낙관적 갱신 후 서버 응답으로 보정, 실패 시 롤백.
+  // ponytail: 연타 시 race 가능, 서버 응답이 최종값으로 수렴하므로 무시
+  async function toggleLikeFor(postId: string) {
+    const cur = apiPosts.find((p) => p.post_id === postId);
+    if (!cur) return;
+    const next = !cur.is_liked;
+    setPostLiked(postId, next);
+    try {
+      setPostLiked(postId, await toggleLike(postId));
+    } catch {
+      setPostLiked(postId, !next);
+    }
+  }
+
   const hasMore = visibleCount < apiPosts.length;
 
   // 무한 스크롤 — 센티넬 노출 시 0.9초 뒤 추가 로드
@@ -227,6 +253,7 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
                   setNavScreen("profile");
                 }}
                 onOpen={() => openPostFrom(p.post_id, p.character, "feed")}
+                onToggleLike={() => toggleLikeFor(p.post_id)}
                 onShare={() =>
                   setSharePayload(
                     buildPostShare(
@@ -263,6 +290,7 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
           onOpenPost={(id) => openPostFrom(id, selectedCharacterId, "profile")}
           posts={apiPosts}
           characterId={selectedCharacterId}
+          neighborCount={charMap.size + 1 - (charMap.has(selectedCharacterId) ? 1 : 0)}
         />
       )}
       {navScreen === "post" && selectedPostId && (
@@ -271,6 +299,7 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
           th={th}
           onBack={() => setNavScreen(postBackTo)}
           onOpenProfile={() => setNavScreen("profile")}
+          onLikeChange={setPostLiked}
           onNotice={onNotice}
           onApplesRefresh={onApplesRefresh}
         />

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { toggleLike } from "./api.js";
 import type { FeedPostData, ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -9,37 +8,30 @@ interface FeedPostProps {
   th: ThemeTokens;
   onAuthorClick?: () => void;
   onOpen?: () => void;
+  onToggleLike?: () => void;
   onShare?: () => void;
 }
 
-export function FeedPost({ post, th, onAuthorClick, onOpen, onShare }: FeedPostProps) {
-  const [liked, setLiked] = useState(post.isLiked);
-  const [likeCount, setLikeCount] = useState(post.likes);
+export function FeedPost({
+  post,
+  th,
+  onAuthorClick,
+  onOpen,
+  onToggleLike,
+  onShare,
+}: FeedPostProps) {
+  // 좋아요 상태는 상위(apiPosts)에서 내려온 prop을 그대로 따른다 — 상세 화면과 동기화.
+  const liked = post.isLiked;
+  const likeCount = post.likes;
   const [pop, setPop] = useState(false);
-  const [saving, setSaving] = useState(false);
   const px = 3;
 
-  async function doLike() {
-    if (saving) return;
-    const next = !liked;
-    // 낙관적 업데이트
-    setLiked(next);
-    setLikeCount((c) => (next ? c + 1 : c - 1));
-    if (next) {
+  function doLike() {
+    if (!liked) {
       setPop(true);
       setTimeout(() => setPop(false), 420);
     }
-    setSaving(true);
-    try {
-      const serverLiked = await toggleLike(post.id);
-      setLiked(serverLiked);
-    } catch {
-      // 실패 시 롤백
-      setLiked(!next);
-      setLikeCount((c) => (next ? c - 1 : c + 1));
-    } finally {
-      setSaving(false);
-    }
+    onToggleLike?.();
   }
 
   const heartArt = liked ? SPRITES.heart : SPRITES.heartOutline;

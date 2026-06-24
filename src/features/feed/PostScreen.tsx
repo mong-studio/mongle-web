@@ -13,6 +13,7 @@ interface PostScreenProps {
   th: ThemeTokens;
   onBack: () => void;
   onOpenProfile: () => void;
+  onLikeChange: (postId: string, value: boolean) => void;
   onNotice: (message: string) => void;
   onApplesRefresh: () => void;
 }
@@ -24,6 +25,7 @@ export function PostScreen({
   th,
   onBack,
   onOpenProfile,
+  onLikeChange,
   onNotice,
   onApplesRefresh,
 }: PostScreenProps) {
@@ -80,12 +82,15 @@ export function PostScreen({
     if (!post || likeSaving) return;
     const next = !liked;
     setLiked(next); // 낙관적 업데이트
+    onLikeChange(post.post_id, next); // 피드 목록과 동기화
     setLikeSaving(true);
     try {
       const serverLiked = await toggleLike(post.post_id);
       setLiked(serverLiked);
+      onLikeChange(post.post_id, serverLiked);
     } catch {
       setLiked(!next); // 실패 시 롤백
+      onLikeChange(post.post_id, !next);
     } finally {
       setLikeSaving(false);
     }
