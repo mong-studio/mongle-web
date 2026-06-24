@@ -69,15 +69,18 @@ type Props = {
 
 export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, onMoveOut }: Props) {
   const [detail, setDetail] = useState<CharacterDetailData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isBusy, setIsBusy] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     setDetail(null);
+    setIsLoading(true);
     apiClient
       .get<CharacterDetailData>(`/characters/${resident.id}/`)
       .then((res) => setDetail(res.data))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, [resident.id]);
 
   const quests = detail?.active_quests ?? [];
@@ -122,6 +125,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
       >
+        {isLoading && <div className="mpRdLoading">캐릭터 정보를 불러오고 있어요…</div>}
         <div className="mpRdHdr">
           <div className="mpRdHdrTitle">
             <img src="/assets/icon/rabbit.png" alt="" className="mpRdHdrIcon" />
@@ -186,7 +190,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
                 진행 중인 퀘스트
               </div>
               <div className="mpRdQuestBody">
-                {quests.length === 0 ? (
+                {isLoading ? null : quests.length === 0 ? (
                   <div className="mpRdQuestEmpty">
                     <span>아직 진행 중인 퀘스트가 없어요</span>
                   </div>
@@ -214,7 +218,13 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
                     <img src="/assets/icon/calendar.png" alt="" className="mpRdInfoIcon" />
                     생성일
                   </span>
-                  <span className="mpRdInfoVal">{detail ? fmtDate(detail.created_at) : "—"}</span>
+                  <span className="mpRdInfoVal">
+                    {isLoading ? null : detail ? (
+                      fmtDate(detail.created_at)
+                    ) : (
+                      <span className="mpRdInfoMuted">정보 없음</span>
+                    )}
+                  </span>
                 </div>
                 <div className="mpRdInfoRow">
                   <span className="mpRdInfoKey">
@@ -228,7 +238,13 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
                     <img src="/assets/hud/icon-phone.png" alt="" className="mpRdInfoIcon" />
                     함께한 피드 수
                   </span>
-                  <span className="mpRdInfoVal">{detail ? `${detail.feed_count}개` : "—"}</span>
+                  <span className="mpRdInfoVal">
+                    {isLoading ? null : detail ? (
+                      `${detail.feed_count}개`
+                    ) : (
+                      <span className="mpRdInfoMuted">정보 없음</span>
+                    )}
+                  </span>
                 </div>
               </div>
             </div>

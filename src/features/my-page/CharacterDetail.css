@@ -14,6 +14,7 @@
 }
 
 .mpRdModal {
+  position: relative;
   width: 900px;
   max-width: 96vw;
   max-height: 88vh;
@@ -353,6 +354,30 @@
   color: var(--mp-ink);
   font-family: "Jua", sans-serif;
   font-size: 15px;
+}
+
+/* 로딩 완료 후 데이터가 없을 때의 안내 텍스트 */
+.mpRdInfoMuted {
+  color: var(--mp-ink-soft, #9a8f86);
+  font-style: italic;
+}
+
+/* 로딩 중 모달 중앙에 떠 있는 알림창 (회고 reflectionLoadingState 와 동일 톤) */
+.mpRdLoading {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.9em 1.35em;
+  border: 1.8px solid rgba(188, 133, 75, 0.82);
+  border-radius: 14px;
+  background: rgba(255, 246, 217, 0.94);
+  color: #6f4727;
+  font-family: var(--font-tmoney-dungunbaram);
+  font-size: clamp(0.82rem, 1vw, 1.08rem);
+  box-shadow: 0 6px 16px rgba(65, 43, 24, 0.16);
+  white-space: nowrap;
 }
 
 .mpRdMoveBtnWrap {
