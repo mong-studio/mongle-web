@@ -171,6 +171,11 @@ export function App() {
     feedOpen ||
     activeFeature !== null;
 
+  // 마을(Phaser)은 windowEvents 로 DOM 모달 위 클릭까지 처리하므로, 어떤 모달이든 열려 있으면
+  // 마을 입력을 막아야 한다(회고 전용 X). 안 그러면 캐릭터 재생성 확인 팝업의 '취소' 클릭이
+  // 뒤편 일정 게시판(캘린더)으로 새어 들어가 모달이 닫히고 미리보기·생성 횟수가 소실된다.
+  const villageInputBlocked = overlayOpenRef.current || reflectionOpen;
+
   useEffect(() => {
     void useAuthStore.getState().restoreSession();
   }, []);
@@ -883,7 +888,7 @@ export function App() {
   return (
     <main className="appShell">
       <PhaserVillage
-        inputBlocked={reflectionOpen}
+        inputBlocked={villageInputBlocked}
         residents={residents}
         reloadKey={villageVersion}
         onOpenBoard={openVillageBoard}
