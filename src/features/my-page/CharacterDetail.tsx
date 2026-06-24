@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
 import { apiClient } from "../../shared/api/client.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
+import { residenceLabel } from "../../shared/ui/village/residence.js";
 import { deleteCharacter } from "../character/api.js";
 import "./CharacterDetail.css";
 
@@ -219,7 +220,7 @@ export function CharacterDetail({ resident, residentIdx, onClose, onShowToast, o
                     <img src="/assets/icon/house.png" alt="" className="mpRdInfoIcon" />
                     현재 거주지
                   </span>
-                  <span className="mpRdInfoVal">—</span>
+                  <span className="mpRdInfoVal">{residenceLabel(residentIdx, resident.id)}</span>
                 </div>
                 <div className="mpRdInfoRow">
                   <span className="mpRdInfoKey">

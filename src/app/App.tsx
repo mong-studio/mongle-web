@@ -78,13 +78,18 @@ function getApiTodoTags(todo: ApiTodo) {
 }
 
 function toResidentPreviews(items: CharacterListItem[]): Resident[] {
-  return items.slice(0, 10).map((item) => ({
-    id: item.characterId,
-    name: item.name,
-    personality: "",
-    speechStyle: "",
-    avatarUrl: resolveAvatarUrl(item.genImgUrl),
-  }));
+  // 서버는 최신순(-created_at)으로 내려준다. 오래된 순으로 뒤집어 슬롯(집 위치)을 고정한다.
+  // → 신규/재생성 캐릭터가 배열 끝에 붙어 기존 캐릭터의 거주지가 밀리지 않는다.
+  return [...items]
+    .reverse()
+    .slice(0, 10)
+    .map((item) => ({
+      id: item.characterId,
+      name: item.name,
+      personality: "",
+      speechStyle: "",
+      avatarUrl: resolveAvatarUrl(item.genImgUrl),
+    }));
 }
 
 function hasUserCreatedCharacter(items: CharacterListItem[]) {
