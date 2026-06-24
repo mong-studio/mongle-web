@@ -102,7 +102,17 @@ export function MyPageModal({
   }, [userName, userJob, userBirth]);
 
   async function handleSaveInfo() {
-    await onUpdateProfile(nicknameDraft, jobDraft, birthDraft);
+    // 닉네임 규정은 회원가입과 동일하게: 2~8자, 한글·영문·숫자만.
+    const nickTrimmed = nicknameDraft.trim();
+    if (nickTrimmed.length < 2 || nickTrimmed.length > 8) {
+      showToast("닉네임은 2~8자로 입력해주세요");
+      return;
+    }
+    if (!/^[가-힣a-zA-Z0-9]+$/.test(nickTrimmed)) {
+      showToast("닉네임은 한글·영문·숫자만 사용할 수 있어요");
+      return;
+    }
+    await onUpdateProfile(nickTrimmed, jobDraft, birthDraft);
     setEditingInfo(false);
     showToast("기본 정보가 저장되었어요!");
   }
@@ -273,7 +283,7 @@ export function MyPageModal({
                         className="mpInfoTextInput"
                         type="text"
                         value={nicknameDraft}
-                        maxLength={20}
+                        maxLength={8}
                         onChange={(e) => setNicknameDraft(e.target.value)}
                       />
                     ) : (
