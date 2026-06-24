@@ -3,6 +3,11 @@ import Phaser from "phaser";
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import { FullScreenLoader } from "../../shared/ui/FullScreenLoader.js";
+import {
+  colorOf,
+  RESIDENT_HOUSE_COLORS,
+  RESIDENT_OFFSETS,
+} from "../../shared/ui/village/residence.js";
 import "./PhaserVillage.css";
 
 const MAP_BASE_PATH = "/assets/map";
@@ -11,7 +16,6 @@ const BOARD_KEY = "village-board";
 const BOARD_PATH = "/assets/objects/board.png";
 const CHIEF_HOUSE_KEY = "chief-house";
 const CHIEF_HOUSE_PATH = "/assets/objects/chief_house.png";
-const RESIDENT_HOUSE_COLORS = ["blue", "green", "purple", "yellow"] as const;
 const RESIDENT_HOUSE_DISPLAY_WIDTH = 84;
 const RESIDENT_HOUSE_DISPLAY_HEIGHT = 76;
 const CHIEF_NPC_KEY = "chief-npc";
@@ -505,22 +509,9 @@ class VillageScene extends Phaser.Scene {
 
     this.addWanderingChief(map, centerX, centerY);
 
-    const residentOffsets = [
-      [-220, -126],
-      [190, -108],
-      [-314, 124],
-      [266, 146],
-      [-54, 218],
-      [78, -236],
-      [-390, -14],
-      [358, -36],
-      [-140, 300],
-      [230, 280],
-    ];
-
     const residentHouseMarkers: MinimapMarker[] = [];
-    this.residents.slice(0, residentOffsets.length).forEach((resident, index) => {
-      const [offsetX, offsetY] = residentOffsets[index];
+    this.residents.slice(0, RESIDENT_OFFSETS.length).forEach((resident, index) => {
+      const [offsetX, offsetY] = RESIDENT_OFFSETS[index];
       // 집 크기(84×76)와 origin(0.5, 0.86)을 고려해 맵 안쪽에 여백을 둔다.
       const houseHalfW = RESIDENT_HOUSE_DISPLAY_WIDTH / 2 + 16;
       const houseTopH = Math.ceil(RESIDENT_HOUSE_DISPLAY_HEIGHT * 0.86) + 16;
@@ -535,7 +526,7 @@ class VillageScene extends Phaser.Scene {
         houseTopH,
         map.height * map.tileheight - houseBotH,
       );
-      const color = RESIDENT_HOUSE_COLORS[index % RESIDENT_HOUSE_COLORS.length];
+      const color = colorOf(resident.id);
       const houseKey = `resident-house-${color}`;
 
       this.blockedWorldRects.push(
