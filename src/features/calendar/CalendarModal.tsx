@@ -4,7 +4,7 @@ import { useTags } from "../../shared/tags/useTags.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { useCalendar } from "./CalendarCore.js";
 import { CalendarWindow } from "./CalendarWindow.js";
-import type { CalEvent } from "./calEngine.js";
+import { type CalEvent, ymdStrToSerial } from "./calEngine.js";
 import type { CalSchedule, CalTodo } from "./types.js";
 import { scheduleToEvent, todoToEvent } from "./types.js";
 import "./calendar.css";
@@ -95,6 +95,7 @@ export function CalendarModal({
       const ev = baseEvents.find((e) => e.id === id);
       if (!ev?.todoId) return; // 일정(schedule)은 체크 대상이 아니다
       if (ev.done) return; // 완료한 할일은 체크 해제 불가 (체크는 되지만 되돌릴 수 없다)
+      if (ev.s < cal.todaySr) return; // 과거 TODO는 완료 처리하지 않는다.
       const todoId = ev.todoId;
       const dueDate = todos.find((t) => t.todo_id === todoId)?.todo_date ?? "";
       // 낙관적 업데이트: 완료로 바로 반영하고 실패 시 되돌린다.
@@ -110,7 +111,7 @@ export function CalendarModal({
         );
       }
     },
-    [baseEvents, todos, onCompleteTodo],
+    [baseEvents, cal.todaySr, todos, onCompleteTodo],
   );
 
   const handleAddEvent = useCallback(
@@ -122,6 +123,7 @@ export function CalendarModal({
       endStr: string,
       description: string,
     ) => {
+      if (ymdStrToSerial(startStr) < cal.todaySr) return;
       const tagParam = tagId !== null ? { tag_id: tagId } : {};
       if (kind === "todo") {
         const res = await apiClient.post("/todos/", {
@@ -142,7 +144,7 @@ export function CalendarModal({
         setSchedules((prev) => [...prev, res.data as CalSchedule]);
       }
     },
-    [onTodosChanged],
+    [cal.todaySr, onTodosChanged],
   );
 
   const handleDeleteEvent = useCallback(

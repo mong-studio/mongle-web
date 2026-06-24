@@ -67,13 +67,14 @@ export function EventRow({
 
   const isSchedule = !!ev.scheduleId;
   const isFailed = !!ev.failed;
+  const isPastTodo = !isSchedule && ev.s < todaySr;
   // 일정(schedule)만 수정 가능. 할일(TODO)은 항상 수정 불가.
   const canEdit = isSchedule;
   // 휴지통 버튼 동작:
   //   일정 → 삭제 / 완료·지난 할일 → 없음(포기·삭제 불가) / 오늘 할일 → 포기 / 다음날 할일 → 삭제
   const action: "fail" | "delete" | null = isSchedule
     ? "delete"
-    : isDone || ev.s < todaySr
+    : isDone || isPastTodo
       ? null
       : ev.s === todaySr
         ? "fail"
@@ -127,10 +128,21 @@ export function EventRow({
           <div className="eventRowMark">
             {isFailed ? (
               <span role="img" aria-label="포기됨" className="eventRowFailMark">
-                ✕
+                <svg
+                  aria-hidden="true"
+                  width="15"
+                  height="15"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="var(--ink-3)"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                >
+                  <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
+                </svg>
               </span>
             ) : (
-              <Check on={isDone} onClick={onToggle} />
+              <Check on={isDone} onClick={onToggle} disabled={isPastTodo} />
             )}
           </div>
         )}

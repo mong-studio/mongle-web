@@ -100,12 +100,24 @@ export function useCalendar(baseEvents: CalEvent[]) {
 
 // ── Check ─────────────────────────────────────────────────────
 
-export function Check({ on, onClick }: { on: boolean; onClick?: () => void }) {
+export function Check({
+  on,
+  onClick,
+  disabled = false,
+}: {
+  on: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
+  const active = on && !disabled;
   return (
     <button
       type="button"
+      disabled={disabled}
+      aria-disabled={disabled}
       onClick={(e) => {
         e.stopPropagation();
+        if (disabled) return;
         onClick?.();
       }}
       style={{
@@ -113,10 +125,12 @@ export function Check({ on, onClick }: { on: boolean; onClick?: () => void }) {
         height: 26,
         flex: "0 0 auto",
         borderRadius: 9,
-        cursor: "pointer",
-        border: on ? "none" : "2.5px solid var(--line)",
-        background: on ? "var(--accent)" : "var(--cream-0)",
-        boxShadow: on ? "inset 0 -2px 0 rgba(0,0,0,.12)" : "none",
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: 1,
+        pointerEvents: disabled ? "none" : "auto",
+        border: active ? "none" : `2.5px solid var(${disabled ? "--line-soft" : "--line"})`,
+        background: active ? "var(--accent)" : disabled ? "var(--cream-2)" : "var(--cream-0)",
+        boxShadow: active ? "inset 0 -2px 0 rgba(0,0,0,.12)" : "none",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -131,7 +145,7 @@ export function Check({ on, onClick }: { on: boolean; onClick?: () => void }) {
           height="14"
           viewBox="0 0 14 14"
           fill="none"
-          stroke="#fff"
+          stroke={disabled ? "var(--ink-3)" : "#fff"}
           strokeWidth="2.6"
           strokeLinecap="round"
           strokeLinejoin="round"
