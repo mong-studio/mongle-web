@@ -20,18 +20,25 @@ const RESIDENT_HOUSE_DISPLAY_WIDTH = 84;
 const RESIDENT_HOUSE_DISPLAY_HEIGHT = 76;
 const CHIEF_NPC_KEY = "chief-npc";
 const CHIEF_NPC_PATH = "/assets/mongle_chief.png";
-const CHIEF_NPC_SPEED = 10;
+const CHIEF_NPC_SPEED = 12;
 const CHIEF_NPC_DISPLAY_SIZE = 50;
-const CHIEF_NPC_BOB_AMPLITUDE = 2;
-const CHIEF_NPC_BOB_FREQUENCY = 0.01;
-const CHIEF_NPC_TARGET_RADIUS = 5;
+const CHIEF_NPC_BOB_AMPLITUDE = 2.0;
+const CHIEF_NPC_BOB_FREQUENCY = 0.006;
+const CHIEF_NPC_TARGET_RADIUS = 2.5;
 const CHIEF_NPC_TARGET_RETRIES = 60;
-const CHIEF_NPC_STEERING = 0.055;
+const CHIEF_NPC_STEERING = 7.5;
+const CHIEF_NPC_ARRIVAL_RADIUS = 28;
+const CHIEF_NPC_MIN_SPEED_FACTOR = 0.24;
 const CHIEF_NPC_MIN_WANDER_DISTANCE = 72;
 const CHIEF_NPC_MAX_WANDER_DISTANCE = 180;
+const NPC_HUD_PADDING = 12;
+const NPC_HUD_ESCAPE_GAP = 2;
+const NPC_MAX_FRAME_DELTA = 34;
 const DECORATION_LAYER_NAME = "타일 레이어 4";
 const BASIC_GRASS_OBJECTS_SOURCE = "Basic Grass Biom things 1.tsx";
-const BLOCKING_OBJECT_FRAMES = new Set([0, 1, 2, 6, 7, 8, 14, 15, 16, 25, 27, 28, 31, 32, 33]);
+// 여러 타일에 걸친 큰 나무만 막는다.
+// 작은 나무·관목과 돌·꽃·버섯·바구니 같은 장식은 자연스럽게 통과할 수 있다.
+const BLOCKING_OBJECT_FRAMES = new Set([0, 1, 2, 3, 4]);
 const MAX_ZOOM_MULTIPLIER = 1.5;
 const WHEEL_ZOOM_STEP = 0.12;
 const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
@@ -55,6 +62,7 @@ type ResidentNpcState = {
 };
 
 type PhaserVillageProps = {
+  inputBlocked: boolean;
   residents: ResidentPreview[];
   reloadKey: number;
   onOpenBoard: () => void;
@@ -130,6 +138,61 @@ type ActiveObjectHint = {
   worldY: number;
 };
 
+function getHudAvoidRects(width: number, height: number) {
+  const pomodoroX = 23;
+  const pomodoroY = 100;
+  const pomodoroWidth = Math.min(300, Math.max(0, width - 52));
+  const pomodoroHeight = 196;
+  const todoTop = width <= 1060 ? 190 : 80;
+  const todoWidth = Math.min(360, Math.max(0, width - 38));
+  const todoHeight = Math.min(width <= 1060 ? 590 : 586, Math.max(0, height - 18));
+  const minimapWidth =
+    width <= 760
+      ? Math.min(240, Math.max(0, width - 28))
+      : height <= 820
+        ? Math.min(236, Math.max(0, width - 56))
+        : width <= 1060
+          ? Math.min(320, Math.max(0, width - 48))
+          : Math.min(270, Math.max(0, width - 64));
+  const minimapPadding = width <= 760 || (width <= 1060 && height > 820) ? 28 : 22;
+  const minimapHeight = (minimapWidth - minimapPadding) * 0.6 + minimapPadding;
+  const minimapX = width <= 760 ? 14 : height <= 820 ? 28 : width <= 1060 ? 24 : 30;
+  const minimapBottom = width <= 760 ? 14 : height <= 820 ? 16 : 20;
+
+  return [
+    new Phaser.Geom.Rectangle(
+      pomodoroX,
+      pomodoroY,
+      pomodoroWidth,
+      Math.min(pomodoroHeight, Math.max(0, height - pomodoroY)),
+    ),
+    new Phaser.Geom.Rectangle(
+      Math.max(0, width - todoWidth - 20),
+      Math.min(todoTop, height),
+      todoWidth,
+      Math.min(todoHeight, Math.max(0, height - todoTop)),
+    ),
+    new Phaser.Geom.Rectangle(
+      minimapX,
+      Math.max(0, height - minimapHeight - minimapBottom),
+      minimapWidth,
+      minimapHeight,
+    ),
+  ];
+}
+
+function getPaddedHudAvoidRects(width: number, height: number) {
+  return getHudAvoidRects(width, height).map(
+    (rect) =>
+      new Phaser.Geom.Rectangle(
+        rect.x - NPC_HUD_PADDING,
+        rect.y - NPC_HUD_PADDING,
+        rect.width + NPC_HUD_PADDING * 2,
+        rect.height + NPC_HUD_PADDING * 2,
+      ),
+  );
+}
+
 function encodeAssetPath(fileName: string) {
   return `${MAP_BASE_PATH}/${fileName.split("/").map(encodeURIComponent).join("/")}`;
 }
@@ -202,6 +265,7 @@ class VillageScene extends Phaser.Scene {
   private cleanupCameraControls: Array<() => void> = [];
   private dragStart: { pointerX: number; pointerY: number } | null = null;
   private hasDragged = false;
+  private isInputBlocked = false;
   private activeObjectHint: ActiveObjectHint | null = null;
   private blockedWorldRects: Phaser.Geom.Rectangle[] = [];
   private chiefNpc: Phaser.GameObjects.Image | null = null;
@@ -224,22 +288,44 @@ class VillageScene extends Phaser.Scene {
     onOpenBoard: () => void,
     isDisposed: () => boolean,
     residents: ResidentPreview[],
+    inputBlocked: boolean,
   ) {
     super(sceneKey);
     this.isDisposed = isDisposed;
     this.onOpenBoard = onOpenBoard;
     this.onOpenDialogue = onOpenDialogue;
     this.residents = residents;
+    this.isInputBlocked = inputBlocked;
   }
 
   create() {
     this.cameras.main.setBackgroundColor("#47783d");
+    // pixelArt 모드는 기본적으로 좌표를 정수 픽셀로 반올림한다. 맵 텍스처는 선명하게
+    // 유지하되 느리게 움직이는 NPC는 소수점 좌표로 그려 계단식 이동을 방지한다.
+    this.cameras.main.roundPixels = false;
+    this.input.enabled = !this.isInputBlocked;
     void this.buildVillage();
   }
 
+  setInputBlocked(blocked: boolean) {
+    this.isInputBlocked = blocked;
+    if (!this.input) {
+      return;
+    }
+    this.input.enabled = !blocked;
+    if (blocked) {
+      this.dragStart = null;
+      this.hasDragged = false;
+      this.input.setDefaultCursor("default");
+    } else {
+      this.updateCameraCursor();
+    }
+  }
+
   update(time: number, delta: number) {
-    this.updateChiefNpc(time, delta);
-    this.updateResidentNpcs(time, delta);
+    const movementDelta = Math.min(delta, NPC_MAX_FRAME_DELTA);
+    this.updateChiefNpc(time, movementDelta);
+    this.updateResidentNpcs(time, movementDelta);
     this.publishMinimapStateIfChanged();
     this.publishActiveObjectHint();
     this.publishHoveredResidentHint();
@@ -658,6 +744,12 @@ class VillageScene extends Phaser.Scene {
       return;
     }
 
+    if (this.moveWorldPointOutsideHud(this.chiefWorldPosition)) {
+      this.chiefTarget = null;
+      this.chiefVelocity.set(0, 0);
+      this.applyChiefDisplayMotion(time, 0, 0, false);
+    }
+
     if (!this.chiefTarget && time < this.chiefWaitUntil) {
       this.updateChiefMinimapMarker();
       return;
@@ -680,31 +772,49 @@ class VillageScene extends Phaser.Scene {
     const distance = Math.hypot(dx, dy);
     if (distance <= CHIEF_NPC_TARGET_RADIUS) {
       this.chiefTarget = null;
-      this.chiefVelocity.scale(0.72);
-      this.chiefWaitUntil = time + Phaser.Math.Between(900, 2200);
+      this.chiefVelocity.set(0, 0);
+      this.chiefWaitUntil = time + Phaser.Math.Between(700, 1800);
       this.applyChiefDisplayMotion(time, 0, 0, false);
       this.updateChiefMinimapMarker();
       return;
     }
 
-    const desiredVelocity = new Phaser.Math.Vector2(dx / distance, dy / distance).scale(
-      CHIEF_NPC_SPEED,
+    const arrivalFactor = Phaser.Math.Clamp(
+      distance / CHIEF_NPC_ARRIVAL_RADIUS,
+      CHIEF_NPC_MIN_SPEED_FACTOR,
+      1,
     );
-    this.chiefVelocity.lerp(desiredVelocity, Math.min(1, CHIEF_NPC_STEERING * (delta / 16.67)));
+    const desiredVelocity = new Phaser.Math.Vector2(dx / distance, dy / distance).scale(
+      CHIEF_NPC_SPEED * arrivalFactor,
+    );
+    const steeringAmount = 1 - Math.exp((-CHIEF_NPC_STEERING * delta) / 1000);
+    this.chiefVelocity.lerp(desiredVelocity, steeringAmount);
 
-    const nextX = this.chiefWorldPosition.x + (this.chiefVelocity.x * delta) / 1000;
-    const nextY = this.chiefWorldPosition.y + (this.chiefVelocity.y * delta) / 1000;
-    if (this.isChiefPointBlocked(nextX, nextY)) {
+    const stepX = (this.chiefVelocity.x * delta) / 1000;
+    const stepY = (this.chiefVelocity.y * delta) / 1000;
+    const movement = this.resolveNpcMovement(
+      this.chiefWorldPosition.x,
+      this.chiefWorldPosition.y,
+      stepX,
+      stepY,
+    );
+    if (!movement) {
       this.chiefTarget = null;
       this.chiefVelocity.set(0, 0);
-      this.chiefWaitUntil = time + 500;
+      this.chiefWaitUntil = time + Phaser.Math.Between(180, 420);
       this.applyChiefDisplayMotion(time, 0, 0, false);
       this.updateChiefMinimapMarker();
       return;
     }
 
-    this.chiefWorldPosition.set(nextX, nextY);
-    this.applyChiefDisplayMotion(time, this.chiefVelocity.x, this.chiefVelocity.y, true);
+    if (movement.dx === 0) {
+      this.chiefVelocity.x = 0;
+    }
+    if (movement.dy === 0) {
+      this.chiefVelocity.y = 0;
+    }
+    this.chiefWorldPosition.set(movement.x, movement.y);
+    this.applyChiefDisplayMotion(time, movement.dx, movement.dy, true);
     this.updateChiefMinimapMarker();
   }
 
@@ -713,8 +823,7 @@ class VillageScene extends Phaser.Scene {
       return;
     }
 
-    const bobPhase = Math.sin(time * CHIEF_NPC_BOB_FREQUENCY);
-    const bob = moving ? Math.max(0, bobPhase) : 0;
+    const bob = moving ? Math.abs(Math.sin(time * CHIEF_NPC_BOB_FREQUENCY)) : 0;
     const yOffset = -bob * CHIEF_NPC_BOB_AMPLITUDE;
 
     this.chiefNpc.setPosition(this.chiefWorldPosition.x, this.chiefWorldPosition.y + yOffset);
@@ -752,7 +861,7 @@ class VillageScene extends Phaser.Scene {
       );
       if (
         !this.isWorldPointCoveredByHud(target.x, target.y) &&
-        this.isChiefPathAllowed(fromX, fromY, target.x, target.y)
+        this.isNpcPathAllowed(fromX, fromY, target.x, target.y)
       ) {
         this.chiefTarget = target;
         this.chiefWaitUntil = 0;
@@ -764,12 +873,12 @@ class VillageScene extends Phaser.Scene {
     this.chiefWaitUntil = time + Phaser.Math.Between(900, 1800);
   }
 
-  private isChiefPathAllowed(fromX: number, fromY: number, toX: number, toY: number) {
-    for (let index = 1; index <= 12; index += 1) {
-      const t = index / 12;
+  private isNpcPathAllowed(fromX: number, fromY: number, toX: number, toY: number) {
+    for (let index = 1; index <= 24; index += 1) {
+      const t = index / 24;
       const x = Phaser.Math.Linear(fromX, toX, t);
       const y = Phaser.Math.Linear(fromY, toY, t);
-      if (this.isChiefWorldObjectBlocked(x, y)) {
+      if (this.isChiefWorldObjectBlocked(x, y) || this.isWorldPointCoveredByHud(x, y)) {
         return false;
       }
     }
@@ -778,6 +887,27 @@ class VillageScene extends Phaser.Scene {
 
   private isChiefPointBlocked(x: number, y: number) {
     return this.isChiefWorldObjectBlocked(x, y) || this.isWorldPointCoveredByHud(x, y);
+  }
+
+  private resolveNpcMovement(fromX: number, fromY: number, stepX: number, stepY: number) {
+    const axisCandidates = [
+      { dx: stepX, dy: 0 },
+      { dx: 0, dy: stepY },
+    ].sort((a, b) => Math.hypot(b.dx, b.dy) - Math.hypot(a.dx, a.dy));
+    const candidates = [{ dx: stepX, dy: stepY }, ...axisCandidates];
+
+    for (const candidate of candidates) {
+      if (candidate.dx === 0 && candidate.dy === 0) {
+        continue;
+      }
+      const x = fromX + candidate.dx;
+      const y = fromY + candidate.dy;
+      if (!this.isChiefPointBlocked(x, y)) {
+        return { ...candidate, x, y };
+      }
+    }
+
+    return null;
   }
 
   private isChiefWorldObjectBlocked(x: number, y: number) {
@@ -806,6 +936,12 @@ class VillageScene extends Phaser.Scene {
   }
 
   private updateSingleResidentNpc(state: ResidentNpcState, time: number, delta: number) {
+    if (this.moveWorldPointOutsideHud(state.worldPosition)) {
+      state.target = null;
+      state.velocity.set(0, 0);
+      this.applyResidentDisplayMotion(state, time, 0, 0, false);
+    }
+
     if (!state.target && time < state.waitUntil) {
       return;
     }
@@ -827,30 +963,47 @@ class VillageScene extends Phaser.Scene {
 
     if (distance <= CHIEF_NPC_TARGET_RADIUS) {
       state.target = null;
-      state.velocity.scale(0.72);
-      state.waitUntil = time + Phaser.Math.Between(900, 2200);
+      state.velocity.set(0, 0);
+      state.waitUntil = time + Phaser.Math.Between(700, 1800);
       this.applyResidentDisplayMotion(state, time, 0, 0, false);
       return;
     }
 
-    const desiredVelocity = new Phaser.Math.Vector2(dx / distance, dy / distance).scale(
-      CHIEF_NPC_SPEED,
+    const arrivalFactor = Phaser.Math.Clamp(
+      distance / CHIEF_NPC_ARRIVAL_RADIUS,
+      CHIEF_NPC_MIN_SPEED_FACTOR,
+      1,
     );
-    state.velocity.lerp(desiredVelocity, Math.min(1, CHIEF_NPC_STEERING * (delta / 16.67)));
+    const desiredVelocity = new Phaser.Math.Vector2(dx / distance, dy / distance).scale(
+      CHIEF_NPC_SPEED * arrivalFactor,
+    );
+    const steeringAmount = 1 - Math.exp((-CHIEF_NPC_STEERING * delta) / 1000);
+    state.velocity.lerp(desiredVelocity, steeringAmount);
 
-    const nextX = state.worldPosition.x + (state.velocity.x * delta) / 1000;
-    const nextY = state.worldPosition.y + (state.velocity.y * delta) / 1000;
-
-    if (this.isChiefPointBlocked(nextX, nextY)) {
+    const stepX = (state.velocity.x * delta) / 1000;
+    const stepY = (state.velocity.y * delta) / 1000;
+    const movement = this.resolveNpcMovement(
+      state.worldPosition.x,
+      state.worldPosition.y,
+      stepX,
+      stepY,
+    );
+    if (!movement) {
       state.target = null;
       state.velocity.set(0, 0);
-      state.waitUntil = time + 500;
+      state.waitUntil = time + Phaser.Math.Between(180, 420);
       this.applyResidentDisplayMotion(state, time, 0, 0, false);
       return;
     }
 
-    state.worldPosition.set(nextX, nextY);
-    this.applyResidentDisplayMotion(state, time, state.velocity.x, state.velocity.y, true);
+    if (movement.dx === 0) {
+      state.velocity.x = 0;
+    }
+    if (movement.dy === 0) {
+      state.velocity.y = 0;
+    }
+    state.worldPosition.set(movement.x, movement.y);
+    this.applyResidentDisplayMotion(state, time, movement.dx, movement.dy, true);
   }
 
   private applyResidentDisplayMotion(
@@ -860,8 +1013,7 @@ class VillageScene extends Phaser.Scene {
     dy: number,
     moving: boolean,
   ) {
-    const bobPhase = Math.sin(time * CHIEF_NPC_BOB_FREQUENCY);
-    const bob = moving ? Math.max(0, bobPhase) : 0;
+    const bob = moving ? Math.abs(Math.sin(time * CHIEF_NPC_BOB_FREQUENCY)) : 0;
     const yOffset = -bob * CHIEF_NPC_BOB_AMPLITUDE;
 
     state.npc.setPosition(state.worldPosition.x, state.worldPosition.y + yOffset);
@@ -897,7 +1049,7 @@ class VillageScene extends Phaser.Scene {
       );
       if (
         !this.isWorldPointCoveredByHud(target.x, target.y) &&
-        this.isChiefPathAllowed(fromX, fromY, target.x, target.y)
+        this.isNpcPathAllowed(fromX, fromY, target.x, target.y)
       ) {
         state.target = target;
         state.waitUntil = 0;
@@ -919,56 +1071,62 @@ class VillageScene extends Phaser.Scene {
       return false;
     }
 
-    return this.getHudAvoidRects(width, height).some((rect) => rect.contains(screenX, screenY));
+    return getPaddedHudAvoidRects(width, height).some((rect) => rect.contains(screenX, screenY));
   }
 
-  private getHudAvoidRects(width: number, height: number) {
-    const headerHeight = width <= 760 ? 74 : 92;
-    const logoWidth = width <= 760 ? 140 : width <= 1060 ? 168 : 188;
-    const topRightWidth = width <= 760 ? 250 : width <= 1060 ? 440 : 500;
-    const todoTop = width <= 1060 ? 190 : 80;
-    const todoWidth = Math.min(360, Math.max(0, width - 38));
-    const todoHeight = Math.min(width <= 1060 ? 590 : 586, Math.max(0, height - 18));
-    const bottomButtonWidth = width <= 760 ? Math.min(220, width) : 230;
-    const bottomButtonHeight = 94;
-    const minimapWidth =
-      width <= 760
-        ? Math.min(258, Math.max(0, width - 28))
-        : height <= 820
-          ? Math.min(256, Math.max(0, width - 56))
-          : width <= 1060
-            ? Math.min(346, Math.max(0, width - 48))
-            : Math.min(292, Math.max(0, width - 64));
-    const minimapHeight = width <= 760 ? 184 : height <= 820 ? 186 : width <= 1060 ? 238 : 210;
-    const minimapX = width <= 760 ? 14 : height <= 820 ? 28 : width <= 1060 ? 24 : 20;
+  private moveWorldPointOutsideHud(worldPosition: Phaser.Math.Vector2) {
+    const camera = this.cameras.main;
+    const screenPoint = new Phaser.Math.Vector2(
+      (worldPosition.x - camera.worldView.x) * camera.zoom,
+      (worldPosition.y - camera.worldView.y) * camera.zoom,
+    );
+    const hudRects = getPaddedHudAvoidRects(camera.width, camera.height);
 
-    return [
-      new Phaser.Geom.Rectangle(0, 0, Math.min(logoWidth, width), Math.min(headerHeight, height)),
-      new Phaser.Geom.Rectangle(
-        Math.max(0, width - topRightWidth),
-        0,
-        topRightWidth,
-        Math.min(headerHeight, height),
-      ),
-      new Phaser.Geom.Rectangle(
-        Math.max(0, width - todoWidth - 20),
-        Math.min(todoTop, height),
-        todoWidth + 20,
-        Math.min(todoHeight, Math.max(0, height - todoTop)),
-      ),
-      new Phaser.Geom.Rectangle(
-        Math.max(0, width / 2 - bottomButtonWidth / 2),
-        Math.max(0, height - bottomButtonHeight),
-        bottomButtonWidth,
-        bottomButtonHeight,
-      ),
-      new Phaser.Geom.Rectangle(
-        minimapX,
-        Math.max(0, height - minimapHeight),
-        minimapWidth + 20,
-        minimapHeight,
-      ),
-    ];
+    if (!hudRects.some((rect) => rect.contains(screenPoint.x, screenPoint.y))) {
+      return false;
+    }
+
+    const candidates: Phaser.Math.Vector2[] = [];
+    for (const rect of hudRects) {
+      if (!rect.contains(screenPoint.x, screenPoint.y)) {
+        continue;
+      }
+      candidates.push(
+        new Phaser.Math.Vector2(rect.left - NPC_HUD_ESCAPE_GAP, screenPoint.y),
+        new Phaser.Math.Vector2(rect.right + NPC_HUD_ESCAPE_GAP, screenPoint.y),
+        new Phaser.Math.Vector2(screenPoint.x, rect.top - NPC_HUD_ESCAPE_GAP),
+        new Phaser.Math.Vector2(screenPoint.x, rect.bottom + NPC_HUD_ESCAPE_GAP),
+      );
+    }
+
+    candidates.sort(
+      (a, b) =>
+        Phaser.Math.Distance.Squared(screenPoint.x, screenPoint.y, a.x, a.y) -
+        Phaser.Math.Distance.Squared(screenPoint.x, screenPoint.y, b.x, b.y),
+    );
+
+    for (const candidate of candidates) {
+      if (
+        candidate.x < 0 ||
+        candidate.y < 0 ||
+        candidate.x > camera.width ||
+        candidate.y > camera.height ||
+        hudRects.some((rect) => rect.contains(candidate.x, candidate.y))
+      ) {
+        continue;
+      }
+
+      const worldX = camera.worldView.x + candidate.x / camera.zoom;
+      const worldY = camera.worldView.y + candidate.y / camera.zoom;
+      if (this.isChiefWorldObjectBlocked(worldX, worldY)) {
+        continue;
+      }
+
+      worldPosition.set(worldX, worldY);
+      return true;
+    }
+
+    return false;
   }
 
   private updateChiefMinimapMarker() {
@@ -1176,6 +1334,9 @@ class VillageScene extends Phaser.Scene {
 
     const canvas = this.game.canvas;
     const handleCanvasWheel = (event: WheelEvent) => {
+      if (this.isInputBlocked) {
+        return;
+      }
       event.preventDefault();
       const bounds = canvas.getBoundingClientRect();
       this.zoomAtPoint(event.deltaY, event.clientX - bounds.left, event.clientY - bounds.top);
@@ -1184,7 +1345,11 @@ class VillageScene extends Phaser.Scene {
     this.cleanupCameraControls.push(() => canvas.removeEventListener("wheel", handleCanvasWheel));
 
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-      if (!pointer.leftButtonDown() || this.cameras.main.zoom <= this.baseZoom) {
+      if (
+        this.isInputBlocked ||
+        !pointer.leftButtonDown() ||
+        this.cameras.main.zoom <= this.baseZoom
+      ) {
         return;
       }
 
@@ -1338,12 +1503,14 @@ class VillageScene extends Phaser.Scene {
 }
 
 export function PhaserVillage({
+  inputBlocked,
   reloadKey,
   onOpenBoard,
   onOpenDialogue,
   residents,
 }: PhaserVillageProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const sceneRef = useRef<VillageScene | null>(null);
   const [minimapState, setMinimapState] = useState<MinimapState | null>(null);
   const [objectHint, setObjectHint] = useState<ObjectHintState | null>(null);
   const [villageReady, setVillageReady] = useState(false);
@@ -1353,9 +1520,11 @@ export function PhaserVillage({
   const onOpenBoardRef = useRef(onOpenBoard);
   const onOpenDialogueRef = useRef(onOpenDialogue);
   const residentsRef = useRef(residents);
+  const inputBlockedRef = useRef(inputBlocked);
   onOpenBoardRef.current = onOpenBoard;
   onOpenDialogueRef.current = onOpenDialogue;
   residentsRef.current = residents;
+  inputBlockedRef.current = inputBlocked;
 
   // ponytail: 주민 명단은 id 집합으로만 비교한다. 아바타 URL이 매 fetch마다 달라져도(프리사인 등)
   // 재생성을 트리거하지 않게 하기 위함. 아바타 갱신은 reloadKey 증가 시 반영된다.
@@ -1366,11 +1535,21 @@ export function PhaserVillage({
       return undefined;
     }
 
+    const container = containerRef.current;
     setVillageReady(false);
     let disposed = false;
+    const scene = new VillageScene(
+      `VillageScene-${reloadKey}-${residentSignature}`,
+      () => onOpenDialogueRef.current(),
+      () => onOpenBoardRef.current(),
+      () => disposed,
+      residentsRef.current,
+      inputBlockedRef.current,
+    );
+    sceneRef.current = scene;
     const game = new Phaser.Game({
       backgroundColor: "#47783d",
-      parent: containerRef.current,
+      parent: container,
       pixelArt: true,
       render: {
         antialias: false,
@@ -1381,22 +1560,21 @@ export function PhaserVillage({
         mode: Phaser.Scale.RESIZE,
         width: containerRef.current.clientWidth,
       },
-      scene: new VillageScene(
-        `VillageScene-${reloadKey}-${residentSignature}`,
-        () => onOpenDialogueRef.current(),
-        () => onOpenBoardRef.current(),
-        () => disposed,
-        residentsRef.current,
-      ),
+      scene,
       type: Phaser.AUTO,
     });
 
     return () => {
       disposed = true;
+      sceneRef.current = null;
       game.destroy(true);
     };
     // residentSignature: 실제 주민 명단(id)이 바뀔 때만 재생성. reloadKey: 명시적 새로고침.
   }, [reloadKey, residentSignature]);
+
+  useEffect(() => {
+    sceneRef.current?.setInputBlocked(inputBlocked);
+  }, [inputBlocked]);
 
   useEffect(() => {
     function handleMinimapUpdate(event: Event) {
@@ -1433,7 +1611,7 @@ export function PhaserVillage({
     <>
       <div
         ref={containerRef}
-        className="phaserLayer"
+        className={`phaserLayer${inputBlocked ? " isInputBlocked" : ""}`}
         role="img"
         aria-label="몽글마을 Phaser 배경"
       />

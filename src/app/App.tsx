@@ -842,6 +842,7 @@ export function App() {
   return (
     <main className="appShell">
       <PhaserVillage
+        inputBlocked={reflectionOpen}
         residents={residents}
         reloadKey={villageVersion}
         onOpenBoard={openVillageBoard}
