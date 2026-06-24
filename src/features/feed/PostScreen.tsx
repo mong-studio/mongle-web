@@ -1,8 +1,10 @@
+import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { type ApiPost, createComment, fetchPostDetail, toggleLike } from "./api.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
-import { PixelSprite, SPRITES } from "./PixelSprite.js";
+import { APPLE_PAL, PixelSprite, SPRITES } from "./PixelSprite.js";
 import { ShareSheet } from "./ShareSheet.js";
 import { buildPostShare } from "./share.js";
 
@@ -11,30 +13,68 @@ interface PostScreenProps {
   th: ThemeTokens;
   onBack: () => void;
   onOpenProfile: () => void;
+  onNotice: (message: string) => void;
+  onApplesRefresh: () => void;
 }
 
 const ME = "나";
+// 서버(apps/posts/views.py)의 댓글 작성 정책과 일치시켜 둔다.
+const COMMENT_TOKEN_COST = 3;
+const DAILY_COMMENT_LIMIT = 5;
 
-export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProps) {
+// 서버가 돌려주는 상태코드를 몽글마을 말투의 안내 문구로 변환한다.
+function commentErrorMessage(error: unknown): string {
+  if (isAxiosError(error)) {
+    if (error.response?.status === 429) {
+      return "오늘은 댓글을 5개까지 남길 수 있어요. 내일 또 만나요 🌷";
+    }
+    if (error.response?.status === 402) {
+      return "사과가 부족해 댓글을 남길 수 없어요.";
+    }
+  }
+  return "댓글을 남기지 못했어요. 잠시 후 다시 시도해주세요.";
+}
+
+export function PostScreen({
+  postId,
+  th,
+  onBack,
+  onOpenProfile,
+  onNotice,
+  onApplesRefresh,
+}: PostScreenProps) {
   const [post, setPost] = useState<ApiPost | null>(null);
   const [liked, setLiked] = useState(false);
   const [likeSaving, setLikeSaving] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentSaving, setCommentSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [dailyCount, setDailyCount] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [postError, setPostError] = useState(false);
+  const confirmBackdrop = useBackdropDismiss(() => setConfirmOpen(false));
+
+  // 게시 버튼 → 토큰 안내 확인 모달을 먼저 띄운다.
+  function requestComment() {
+    if (!post || commentSaving || !commentText.trim()) return;
+    setConfirmOpen(true);
+  }
 
   async function submitComment() {
     const content = commentText.trim();
     if (!post || commentSaving || !content) return;
+    setConfirmOpen(false);
     setCommentSaving(true);
     try {
       const newComment = await createComment(post.post_id, content);
       // 응답 댓글을 목록에 바로 추가 (답글은 약 10분 뒤 서버가 생성)
       setPost((prev) => (prev ? { ...prev, comments: [...prev.comments, newComment] } : prev));
       setCommentText("");
-    } catch {
+      setDailyCount((c) => c + 1); // 오늘 할당량 표시 갱신
+      onApplesRefresh(); // 차감된 사과 잔액을 HUD에 반영
+    } catch (error) {
       // 실패 시 입력값은 보존 — 사용자가 다시 시도할 수 있게 둔다
+      onNotice(commentErrorMessage(error));
     } finally {
       setCommentSaving(false);
     }
@@ -62,6 +102,7 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
         if (cancelled) return;
         setPost(p);
         setLiked(p.is_liked);
+        setDailyCount(p.daily_comment_count ?? 0);
       })
       .catch(() => {
         if (cancelled) return;
@@ -253,7 +294,7 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                submitComment();
+                requestComment();
               }
             }}
           />
@@ -261,13 +302,54 @@ export function PostScreen({ postId, th, onBack, onOpenProfile }: PostScreenProp
             type="button"
             className="pd-ci-send"
             style={{ color: th.accent }}
-            onClick={submitComment}
+            onClick={requestComment}
             disabled={commentSaving || !commentText.trim()}
           >
             게시
           </button>
         </div>
       </div>
+
+      {confirmOpen && (
+        <div className="pd-confirm-backdrop" {...confirmBackdrop}>
+          <div
+            className="pd-confirm-card"
+            style={{ background: th.cardBg, borderColor: th.modalEdge }}
+          >
+            <div className="pd-confirm-icon" aria-hidden="true">
+              <PixelSprite art={SPRITES.apple} palette={APPLE_PAL} px={3.4} />
+            </div>
+            <div className="pd-confirm-title" style={{ color: th.ink }}>
+              {authorName}에게 댓글을 남길까요?
+            </div>
+            <div className="pd-confirm-quota" style={{ color: th.inkFaint }}>
+              오늘 남긴 댓글 {dailyCount}/{DAILY_COMMENT_LIMIT}
+            </div>
+            <div className="pd-confirm-actions">
+              <button
+                type="button"
+                className="pd-confirm-cancel"
+                style={{ background: th.rowBg, borderColor: th.rowEdge, color: th.inkSoft }}
+                onClick={() => setConfirmOpen(false)}
+              >
+                다음에
+              </button>
+              <button
+                type="button"
+                className="pd-confirm-ok"
+                style={{ background: th.accent, color: "#fff" }}
+                onClick={submitComment}
+              >
+                남기기
+                <span className="pd-confirm-cost">
+                  <PixelSprite art={SPRITES.apple} palette={APPLE_PAL} px={1.7} />-
+                  {COMMENT_TOKEN_COST}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {shareOpen && (
         <ShareSheet

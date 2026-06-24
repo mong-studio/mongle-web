@@ -102,9 +102,11 @@ type NavScreen = "feed" | "profile" | "post";
 // ── Main FeedModal ────────────────────────────────────────────────────────────
 interface FeedModalProps {
   onClose: () => void;
+  onNotice: (message: string) => void;
+  onApplesRefresh: () => void;
 }
 
-export function FeedModal({ onClose: _onClose }: FeedModalProps) {
+export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: FeedModalProps) {
   const [navScreen, setNavScreen] = useState<NavScreen>("feed");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -269,6 +271,8 @@ export function FeedModal({ onClose: _onClose }: FeedModalProps) {
           th={th}
           onBack={() => setNavScreen(postBackTo)}
           onOpenProfile={() => setNavScreen("profile")}
+          onNotice={onNotice}
+          onApplesRefresh={onApplesRefresh}
         />
       )}
 

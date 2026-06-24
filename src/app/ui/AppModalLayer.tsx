@@ -42,6 +42,7 @@ type AppModalLayerProps = {
   onCharacterSetupClose: () => void;
   onCharacterSubmit: () => void;
   onCharacterConfirm: () => Promise<boolean>;
+  onApplesRefresh: () => void;
   onFeedClose: () => void;
   onLoginClose: () => void;
   onLoginOpen: () => void;
@@ -91,6 +92,7 @@ export function AppModalLayer({
   onCharacterSetupClose,
   onCharacterSubmit,
   onCharacterConfirm,
+  onApplesRefresh,
   onFeedClose,
   onLoginClose,
   onLoginOpen,
@@ -205,7 +207,7 @@ export function AppModalLayer({
 
       {feedOpen ? (
         <div className="modalBackdrop" role="presentation" {...feedBackdrop}>
-          <FeedModal onClose={onFeedClose} />
+          <FeedModal onClose={onFeedClose} onNotice={onNotice} onApplesRefresh={onApplesRefresh} />
         </div>
       ) : null}
     </>
