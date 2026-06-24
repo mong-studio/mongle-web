@@ -1,7 +1,7 @@
-import { isAxiosError } from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { type ApiPost, createComment, fetchPostDetail, toggleLike } from "./api.js";
+import { COMMENT_TOKEN_COST, commentErrorMessage, DAILY_COMMENT_LIMIT } from "./commentPolicy.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { APPLE_PAL, PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -18,22 +18,6 @@ interface PostScreenProps {
 }
 
 const ME = "나";
-// 서버(apps/posts/views.py)의 댓글 작성 정책과 일치시켜 둔다.
-const COMMENT_TOKEN_COST = 3;
-const DAILY_COMMENT_LIMIT = 5;
-
-// 서버가 돌려주는 상태코드를 몽글마을 말투의 안내 문구로 변환한다.
-function commentErrorMessage(error: unknown): string {
-  if (isAxiosError(error)) {
-    if (error.response?.status === 429) {
-      return "오늘은 댓글을 5개까지 남길 수 있어요. 내일 또 만나요 🌷";
-    }
-    if (error.response?.status === 402) {
-      return "사과가 부족해 댓글을 남길 수 없어요.";
-    }
-  }
-  return "댓글을 남기지 못했어요. 잠시 후 다시 시도해주세요.";
-}
 
 export function PostScreen({
   postId,
@@ -53,6 +37,18 @@ export function PostScreen({
   const [shareOpen, setShareOpen] = useState(false);
   const [postError, setPostError] = useState(false);
   const confirmBackdrop = useBackdropDismiss(() => setConfirmOpen(false));
+  const confirmOkRef = useRef<HTMLButtonElement>(null);
+
+  // 확인 모달: 열리면 기본 버튼에 포커스, Esc 로 닫는다(키보드 접근성).
+  useEffect(() => {
+    if (!confirmOpen) return;
+    confirmOkRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setConfirmOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmOpen]);
 
   // 게시 버튼 → 토큰 안내 확인 모달을 먼저 띄운다.
   function requestComment() {
@@ -315,11 +311,14 @@ export function PostScreen({
           <div
             className="pd-confirm-card"
             style={{ background: th.cardBg, borderColor: th.modalEdge }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pd-confirm-title"
           >
             <div className="pd-confirm-icon" aria-hidden="true">
               <PixelSprite art={SPRITES.apple} palette={APPLE_PAL} px={3.4} />
             </div>
-            <div className="pd-confirm-title" style={{ color: th.ink }}>
+            <div id="pd-confirm-title" className="pd-confirm-title" style={{ color: th.ink }}>
               {authorName}에게 댓글을 남길까요?
             </div>
             <div className="pd-confirm-quota" style={{ color: th.inkFaint }}>
@@ -335,6 +334,7 @@ export function PostScreen({
                 다음에
               </button>
               <button
+                ref={confirmOkRef}
                 type="button"
                 className="pd-confirm-ok"
                 style={{ background: th.accent, color: "#fff" }}
