@@ -1,5 +1,6 @@
 import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { type ApiPost, createComment, fetchPostDetail, toggleLike } from "./api.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
@@ -51,6 +52,7 @@ export function PostScreen({
   const [dailyCount, setDailyCount] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [postError, setPostError] = useState(false);
+  const confirmBackdrop = useBackdropDismiss(() => setConfirmOpen(false));
 
   // 게시 버튼 → 토큰 안내 확인 모달을 먼저 띄운다.
   function requestComment() {
@@ -309,15 +311,10 @@ export function PostScreen({
       </div>
 
       {confirmOpen && (
-        // biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop stop-propagation
-        // biome-ignore lint/a11y/useKeyWithClickEvents: modal backdrop stop-propagation
-        <div className="pd-confirm-backdrop" onClick={() => setConfirmOpen(false)}>
-          {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation only */}
-          {/* biome-ignore lint/a11y/useKeyWithClickEvents: stop propagation only */}
+        <div className="pd-confirm-backdrop" {...confirmBackdrop}>
           <div
             className="pd-confirm-card"
             style={{ background: th.cardBg, borderColor: th.modalEdge }}
-            onClick={(e) => e.stopPropagation()}
           >
             <div className="pd-confirm-icon" aria-hidden="true">
               <PixelSprite art={SPRITES.apple} palette={APPLE_PAL} px={3.4} />
