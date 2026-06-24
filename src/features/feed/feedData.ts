@@ -115,6 +115,7 @@ export interface FeedPostData {
   name: string;
   role: string;
   time: string;
+  createdAt?: string;
   place: string;
   tint: string;
   caption: string[];

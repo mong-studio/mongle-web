@@ -171,6 +171,7 @@
 .mg-meta {
   font-size: 12px;
   margin-top: 3px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* hero */
@@ -711,6 +712,7 @@
 .pd-author-meta {
   font-size: 12px;
   margin-top: 3px;
+  font-variant-numeric: tabular-nums;
 }
 .pd-img {
   margin: 13px 0 4px;
@@ -798,10 +800,22 @@
 .pd-comment-bubble-mine {
   border-radius: 14px 4px 14px 14px;
 }
+.pd-comment-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
 .pd-comment-bubble b {
   font-family: var(--font-tmoney-dungunbaram);
   font-weight: 400;
-  margin-right: 7px;
+}
+.pd-comment-time {
+  margin-left: auto;
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .pd-comment-group {
   margin-bottom: 12px;

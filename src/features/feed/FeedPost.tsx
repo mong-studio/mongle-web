@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CharacterAvatar } from "./CharacterAvatar.js";
+import { FeedTimestamp } from "./FeedTimestamp.js";
 import type { FeedPostData, ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -67,7 +68,7 @@ export function FeedPost({
               )}
             </div>
             <div className="mg-meta" style={{ color: th.inkSoft }}>
-              {post.time}
+              {post.createdAt ? <FeedTimestamp dateTime={post.createdAt} /> : post.time}
             </div>
           </div>
         </button>

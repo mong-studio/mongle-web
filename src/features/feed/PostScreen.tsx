@@ -9,6 +9,7 @@ import {
   DAILY_COMMENT_LIMIT,
   INACTIVE_AUTHOR_MESSAGE,
 } from "./commentPolicy.js";
+import { FeedTimestamp } from "./FeedTimestamp.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { APPLE_PAL, PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -189,7 +190,7 @@ export function PostScreen({
                 {authorName}
               </div>
               <div className="pd-author-meta" style={{ color: th.inkSoft }}>
-                {new Date(post.created_at).toLocaleDateString("ko-KR")}
+                <FeedTimestamp dateTime={post.created_at} />
               </div>
             </div>
           </button>
@@ -260,7 +261,14 @@ export function PostScreen({
                   className="pd-comment-bubble"
                   style={{ background: th.rowBg, borderColor: th.rowEdge }}
                 >
-                  <b style={{ color: th.ink }}>{c.user_name}</b>
+                  <div className="pd-comment-head">
+                    <b style={{ color: th.ink }}>{c.user_name}</b>
+                    <FeedTimestamp
+                      dateTime={c.created_at}
+                      className="pd-comment-time"
+                      style={{ color: th.inkFaint }}
+                    />
+                  </div>
                   <span style={{ color: th.inkSoft }}>{c.content}</span>
                 </div>
               </div>
@@ -278,7 +286,14 @@ export function PostScreen({
                     className="pd-comment-bubble"
                     style={{ background: th.badgeBg, borderColor: th.badgeBg }}
                   >
-                    <b style={{ color: th.ink }}>{r.character_name}</b>
+                    <div className="pd-comment-head">
+                      <b style={{ color: th.ink }}>{r.character_name}</b>
+                      <FeedTimestamp
+                        dateTime={r.created_at}
+                        className="pd-comment-time"
+                        style={{ color: th.inkFaint }}
+                      />
+                    </div>
                     <span style={{ color: th.inkSoft }}>{r.content}</span>
                   </div>
                 </div>

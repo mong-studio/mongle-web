@@ -99,7 +99,8 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     id: post.post_id,
     name: char?.name ?? post.character_name ?? "캐릭터",
     role: "",
-    time: formatRelativeTime(post.created_at),
+    time: "",
+    createdAt: post.created_at,
     place: "",
     tint: "#F4DBC6",
     caption: [post.content],
@@ -113,16 +114,4 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     avatarUrl: char?.gen_img_url ?? post.gen_img_url ?? post.character_gen_img_url ?? undefined,
     commentList,
   };
-}
-
-function formatRelativeTime(isoStr: string): string {
-  const diff = Date.now() - new Date(isoStr).getTime();
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return "방금 전";
-  if (minutes < 60) return `${minutes}분 전`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}시간 전`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}일 전`;
-  return new Date(isoStr).toLocaleDateString("ko-KR");
 }
