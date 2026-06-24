@@ -35,61 +35,6 @@
   transform: translateX(-50%) rotate(45deg);
 }
 
-.hudCollisionDebug {
-  position: absolute;
-  z-index: 60;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hudCollisionDebugRect {
-  position: absolute;
-  box-sizing: border-box;
-}
-
-.hudCollisionDebugRect.isHud {
-  z-index: 1;
-  border: 2px dashed rgba(255, 214, 43, 0.95);
-  background: rgba(255, 214, 43, 0.12);
-}
-
-.hudCollisionDebugRect.isCollision {
-  z-index: 2;
-  border: 2px solid rgba(255, 55, 55, 0.95);
-  background: rgba(255, 55, 55, 0.13);
-}
-
-.hudCollisionDebugLegend {
-  position: absolute;
-  z-index: 3;
-  left: 50%;
-  top: 104px;
-  padding: 7px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: 8px;
-  background: rgba(25, 25, 25, 0.84);
-  color: #fff;
-  font-family: sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  transform: translateX(-50%);
-}
-
-.hudCollisionDebugLegend b {
-  color: #ffdb3d;
-}
-
-.hudCollisionDebugLegend strong {
-  color: #ff6868;
-}
-
-.hudCollisionDebugLegend i {
-  color: #65b5ff;
-  font-style: normal;
-}
-
 .villageMinimap {
   position: absolute;
   z-index: 5;

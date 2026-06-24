@@ -281,9 +281,6 @@ class VillageScene extends Phaser.Scene {
   private minimapImageUrl = "";
   private minimapMarkers: MinimapMarker[] = [];
   private missingAssets: string[] = [];
-  private showCollisionDebug =
-    new URLSearchParams(window.location.search).get("debugHudCollision") === "1";
-  private worldCollisionDebug: Phaser.GameObjects.Graphics | null = null;
 
   constructor(
     sceneKey: string,
@@ -307,17 +304,6 @@ class VillageScene extends Phaser.Scene {
     // 유지하되 느리게 움직이는 NPC는 소수점 좌표로 그려 계단식 이동을 방지한다.
     this.cameras.main.roundPixels = false;
     this.input.enabled = !this.isInputBlocked;
-    this.worldCollisionDebug = this.add.graphics().setDepth(1_000_000);
-    const handleCollisionDebugChange = (event: Event) => {
-      this.showCollisionDebug = (event as CustomEvent<boolean>).detail;
-      if (!this.showCollisionDebug) {
-        this.worldCollisionDebug?.clear();
-      }
-    };
-    window.addEventListener("mongle-collision-debug-change", handleCollisionDebugChange);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      window.removeEventListener("mongle-collision-debug-change", handleCollisionDebugChange);
-    });
     void this.buildVillage();
   }
 
@@ -340,7 +326,6 @@ class VillageScene extends Phaser.Scene {
     const movementDelta = Math.min(delta, NPC_MAX_FRAME_DELTA);
     this.updateChiefNpc(time, movementDelta);
     this.updateResidentNpcs(time, movementDelta);
-    this.renderWorldCollisionDebug();
     this.publishMinimapStateIfChanged();
     this.publishActiveObjectHint();
     this.publishHoveredResidentHint();
@@ -941,25 +926,6 @@ class VillageScene extends Phaser.Scene {
     return false;
   }
 
-  private renderWorldCollisionDebug() {
-    const graphics = this.worldCollisionDebug;
-    if (!graphics || !this.showCollisionDebug) {
-      return;
-    }
-
-    graphics.clear();
-    const lineWidth = 2 / this.cameras.main.zoom;
-    graphics.fillStyle(0x2788ff, 0.2);
-    graphics.lineStyle(lineWidth, 0x156ee8, 0.95);
-    for (const rect of this.blockedWorldRects) {
-      graphics.fillRectShape(rect);
-      graphics.strokeRectShape(rect);
-    }
-
-    graphics.lineStyle(lineWidth, 0x65b5ff, 0.95);
-    graphics.strokeRectShape(this.mapBounds);
-  }
-
   private updateResidentNpcs(time: number, delta: number) {
     if (this.mapBounds.width <= 0 || this.mapBounds.height <= 0) {
       return;
@@ -1548,10 +1514,6 @@ export function PhaserVillage({
   const [minimapState, setMinimapState] = useState<MinimapState | null>(null);
   const [objectHint, setObjectHint] = useState<ObjectHintState | null>(null);
   const [villageReady, setVillageReady] = useState(false);
-  const [showHudCollisionDebug, setShowHudCollisionDebug] = useState(
-    () => new URLSearchParams(window.location.search).get("debugHudCollision") === "1",
-  );
-  const [viewportSize, setViewportSize] = useState({ height: 0, width: 0 });
 
   // 최신 콜백·주민을 ref로 유지해서, 이 값들이 바뀌어도 Phaser 게임을 재생성하지 않는다.
   // (게임 전체 destroy/재생성 = 배경 깜빡임. 모달을 열 때마다 일어나던 현상의 원인)
@@ -1574,16 +1536,6 @@ export function PhaserVillage({
     }
 
     const container = containerRef.current;
-    const updateViewportSize = () => {
-      setViewportSize({
-        height: container.clientHeight,
-        width: container.clientWidth,
-      });
-    };
-    const resizeObserver = new ResizeObserver(updateViewportSize);
-    updateViewportSize();
-    resizeObserver.observe(container);
-
     setVillageReady(false);
     let disposed = false;
     const scene = new VillageScene(
@@ -1614,7 +1566,6 @@ export function PhaserVillage({
 
     return () => {
       disposed = true;
-      resizeObserver.disconnect();
       sceneRef.current = null;
       game.destroy(true);
     };
@@ -1624,29 +1575,6 @@ export function PhaserVillage({
   useEffect(() => {
     sceneRef.current?.setInputBlocked(inputBlocked);
   }, [inputBlocked]);
-
-  useEffect(() => {
-    function handleDebugShortcut(event: KeyboardEvent) {
-      if (
-        event.key.toLowerCase() === "h" &&
-        !(event.target instanceof HTMLInputElement) &&
-        !(event.target instanceof HTMLTextAreaElement)
-      ) {
-        setShowHudCollisionDebug((visible) => !visible);
-      }
-    }
-
-    window.addEventListener("keydown", handleDebugShortcut);
-    return () => window.removeEventListener("keydown", handleDebugShortcut);
-  }, []);
-
-  useEffect(() => {
-    window.dispatchEvent(
-      new CustomEvent<boolean>("mongle-collision-debug-change", {
-        detail: showHudCollisionDebug,
-      }),
-    );
-  }, [showHudCollisionDebug]);
 
   useEffect(() => {
     function handleMinimapUpdate(event: Event) {
@@ -1687,30 +1615,6 @@ export function PhaserVillage({
         role="img"
         aria-label="몽글마을 Phaser 배경"
       />
-      {showHudCollisionDebug && viewportSize.width > 0 ? (
-        <div className="hudCollisionDebug" aria-hidden="true">
-          {getHudAvoidRects(viewportSize.width, viewportSize.height).map((rect, index) => (
-            <span
-              // biome-ignore lint/suspicious/noArrayIndexKey: fixed HUD debug region order
-              key={index}
-              className="hudCollisionDebugRect isHud"
-              style={{ height: rect.height, left: rect.x, top: rect.y, width: rect.width }}
-            />
-          ))}
-          {getPaddedHudAvoidRects(viewportSize.width, viewportSize.height).map((rect, index) => (
-            <span
-              // biome-ignore lint/suspicious/noArrayIndexKey: fixed HUD debug region order
-              key={index}
-              className="hudCollisionDebugRect isCollision"
-              style={{ height: rect.height, left: rect.x, top: rect.y, width: rect.width }}
-            />
-          ))}
-          <span className="hudCollisionDebugLegend">
-            <b>노랑</b> HUD 기준 · <strong>빨강</strong> 실제 HUD 충돌 · <i>파랑</i> 맵 오브젝트 ·
-            H로 닫기
-          </span>
-        </div>
-      ) : null}
       <FullScreenLoader show={!villageReady} />
       {objectHint ? (
         <span
