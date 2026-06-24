@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { type ApiCharacterDetail, type ApiPost, fetchCharacterDetail } from "./api.js";
+import { CharacterAvatar } from "./CharacterAvatar.js";
+// 이웃 여부는 캐릭터 활성 상태(is_active)를 그대로 따른다 — 사용자가 바꿀 수 없다.
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 
@@ -20,7 +22,6 @@ export function ProfileScreen({
   characterId,
   neighborCount,
 }: ProfileScreenProps) {
-  const [following, setFollowing] = useState(false);
   const [character, setCharacter] = useState<ApiCharacterDetail | null>(null);
 
   useEffect(() => {
@@ -37,6 +38,9 @@ export function ProfileScreen({
 
   const characterPosts = posts.filter((p) => p.character === characterId);
   const heartCount = characterPosts.filter((p) => p.is_liked).length;
+  // 활성 캐릭터만 이웃으로 표시한다(읽기 전용). 상세 로딩 전에는 아직 판단하지 않는다.
+  const isNeighbor = character?.is_active === true;
+  const bio = character?.personality ?? "";
   // 이웃은 백엔드 미구현 — "캐릭터·나 모두 서로 이웃" 설정으로 계산(상위에서 내려받음).
 
   return (
@@ -67,32 +71,23 @@ export function ProfileScreen({
           <div className="pf-topbar-name" style={{ color: th.ink }}>
             {character?.name ?? "..."}
           </div>
-          <div className="pf-topbar-sub" style={{ color: th.inkSoft }}>
-            @{character?.name ?? "..."}
-          </div>
         </div>
-        <button
-          type="button"
-          className="pf-iconbtn"
-          style={{ color: th.inkSoft }}
-          aria-label="더보기"
-        >
-          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="5" cy="12" r="1.7" />
-            <circle cx="12" cy="12" r="1.7" />
-            <circle cx="19" cy="12" r="1.7" />
-          </svg>
-        </button>
+        {/* 우측 정렬용 스페이서 — 제목 가운데 정렬 유지 */}
+        <div className="pf-iconbtn" aria-hidden="true" />
       </div>
 
       <div className="pf-scroll">
         <div className="pf-head">
-          <div
+          <CharacterAvatar
+            imageUrl={character?.gen_img_url}
+            name={character?.name}
+            alt={character?.name ?? ""}
             className="pf-avatar"
-            style={{ boxShadow: `0 0 0 2.5px ${th.modalBg}, 0 0 0 4.5px ${th.accent}` }}
-          >
-            {character?.name?.[0] ?? "?"}
-          </div>
+            style={{
+              background: "#fff",
+              boxShadow: `0 0 0 2.5px ${th.modalBg}, 0 0 0 4.5px ${th.accent}`,
+            }}
+          />
           <div className="pf-stats">
             {(
               [
@@ -113,34 +108,27 @@ export function ProfileScreen({
           </div>
         </div>
 
-        <div className="pf-id">
-          <span className="pf-name" style={{ color: th.ink }}>
-            {character?.name ?? "..."}
-          </span>
-          {character?.persona && (
-            <span className="pf-badge" style={{ background: th.badgeBg, color: th.badgeInk }}>
-              {character.persona}
-            </span>
-          )}
-        </div>
+        {/* 소개란 — 이름(상단 표시와 중복) 대신 persona의 [성격] 구획만 간결하게 */}
+        {bio && (
+          <div className="pf-id">
+            <p className="pf-bio" style={{ color: th.inkSoft }}>
+              {bio}
+            </p>
+          </div>
+        )}
 
         <div className="pf-actions">
-          <button
-            type="button"
-            className={`pf-btn${following ? " pf-btn-ghost" : ""}`}
+          {/* 읽기 전용 이웃 상태: 활성=✓ 이웃, 비활성(이사)=옛 친구 */}
+          <div
+            className="pf-btn pf-btn-static"
             style={
-              following
-                ? { borderColor: th.modalEdge, color: th.ink }
-                : {
-                    background: th.accent,
-                    color: th.accentInk,
-                    boxShadow: `0 3px 0 ${th.badgeInk}`,
-                  }
+              isNeighbor
+                ? { background: th.accent, color: th.accentInk }
+                : { background: th.rowBg, color: th.inkSoft }
             }
-            onClick={() => setFollowing((f) => !f)}
           >
-            {following ? "✓ 이웃" : "+ 이웃 맺기"}
-          </button>
+            {isNeighbor ? "✓ 이웃" : "옛 친구"}
+          </div>
         </div>
 
         <div className="pf-grid-wrap" style={{ borderColor: th.modalEdge }}>

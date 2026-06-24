@@ -5,6 +5,7 @@ export interface ApiReply {
   reply_id: string;
   character: string;
   character_name: string;
+  gen_img_url?: string | null;
   content: string;
   created_at: string;
 }
@@ -23,6 +24,8 @@ export interface ApiPost {
   character: string;
   character_name: string;
   quest_id: string;
+  gen_img_url?: string | null;
+  character_gen_img_url?: string | null;
   img_url: string;
   content: string;
   is_liked: boolean;
@@ -43,6 +46,8 @@ export interface ApiCharacterDetail {
   name: string;
   gen_img_url: string;
   persona: string;
+  // persona 의 [성격] 구획만 서버가 추출해 내려준 값(소개란용).
+  personality: string;
   is_active: boolean;
   created_at: string;
   active_quests: { quest_id: string; todo_id: string; title: string }[];
@@ -105,6 +110,7 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     comments: post.comments.length,
     heroPlaceholder: "사진",
     imageUrl: post.img_url,
+    avatarUrl: char?.gen_img_url,
     commentList,
   };
 }

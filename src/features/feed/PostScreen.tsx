@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { type ApiPost, createComment, fetchPostDetail, toggleLike } from "./api.js";
-import { COMMENT_TOKEN_COST, commentErrorMessage, DAILY_COMMENT_LIMIT } from "./commentPolicy.js";
+import { CharacterAvatar } from "./CharacterAvatar.js";
+import {
+  COMMENT_TOKEN_COST,
+  canCommentOnAuthor,
+  commentErrorMessage,
+  DAILY_COMMENT_LIMIT,
+  INACTIVE_AUTHOR_MESSAGE,
+} from "./commentPolicy.js";
 import type { ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { APPLE_PAL, PixelSprite, SPRITES } from "./PixelSprite.js";
 import { ShareSheet } from "./ShareSheet.js";
 import { buildPostShare } from "./share.js";
+import { UserAvatar } from "./UserAvatar.js";
 
 interface PostScreenProps {
   postId: string;
@@ -16,9 +24,9 @@ interface PostScreenProps {
   onLikeChange: (postId: string, value: boolean) => void;
   onNotice: (message: string) => void;
   onApplesRefresh: () => void;
+  authorActive: boolean;
+  authorAvatarUrl?: string;
 }
-
-const ME = "나";
 
 export function PostScreen({
   postId,
@@ -28,7 +36,10 @@ export function PostScreen({
   onLikeChange,
   onNotice,
   onApplesRefresh,
+  authorActive,
+  authorAvatarUrl,
 }: PostScreenProps) {
+  const canComment = canCommentOnAuthor(authorActive);
   const [post, setPost] = useState<ApiPost | null>(null);
   const [liked, setLiked] = useState(false);
   const [likeSaving, setLikeSaving] = useState(false);
@@ -55,6 +66,7 @@ export function PostScreen({
   // 게시 버튼 → 토큰 안내 확인 모달을 먼저 띄운다.
   function requestComment() {
     if (!post || commentSaving || !commentText.trim()) return;
+    if (!canComment) return; // 이사 간 주민에게는 댓글 불가
     setConfirmOpen(true);
   }
 
@@ -127,6 +139,7 @@ export function PostScreen({
   const heartArt = liked ? SPRITES.heart : SPRITES.heartOutline;
   const heartPal = liked ? { r: th.like, h: "#FFD7DF" } : { r: th.inkFaint };
   const authorName = post.character_name || post.character.slice(0, 8);
+  const postAuthorAvatarUrl = post.gen_img_url ?? post.character_gen_img_url ?? authorAvatarUrl;
 
   return (
     <div className="pd-screen" style={{ background: th.modalBg }}>
@@ -155,26 +168,22 @@ export function PostScreen({
         <span className="pd-topbar-title" style={{ color: th.ink }}>
           게시물
         </span>
-        <button
-          type="button"
-          className="pd-iconbtn"
-          style={{ color: th.inkSoft }}
-          aria-label="더보기"
-        >
-          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="5" cy="12" r="1.7" />
-            <circle cx="12" cy="12" r="1.7" />
-            <circle cx="19" cy="12" r="1.7" />
-          </svg>
-        </button>
+        {/* 우측 정렬용 스페이서 — 제목 가운데 정렬 유지 */}
+        <div className="pd-iconbtn" aria-hidden="true" />
       </div>
 
       <div className="pd-scroll">
         <article className="pd-post" style={{ background: th.cardBg, borderColor: th.cardEdge }}>
           <button type="button" className="pd-author" onClick={onOpenProfile}>
-            <div className="pd-avatar" style={{ color: th.badgeInk }}>
-              {authorName[0]?.toUpperCase() ?? "?"}
-            </div>
+            <CharacterAvatar
+              imageUrl={postAuthorAvatarUrl}
+              name={authorName}
+              className="pd-avatar"
+              style={{
+                background: postAuthorAvatarUrl ? "#fff" : th.badgeBg,
+                color: th.badgeInk,
+              }}
+            />
             <div className="pd-author-txt">
               <div className="pd-author-name" style={{ color: th.ink }}>
                 {authorName}
@@ -228,7 +237,7 @@ export function PostScreen({
               onClick={() => setShareOpen(true)}
             >
               <PixelSprite art={SPRITES.arrow} palette={{ x: th.accent }} px={2} />
-              <span style={{ fontFamily: "'Jua', sans-serif" }}>공유하기</span>
+              <span>공유하기</span>
             </button>
           </footer>
         </article>
@@ -246,9 +255,7 @@ export function PostScreen({
             <div key={c.comment_id} className="pd-comment-group">
               {/* 사람이 단 댓글 */}
               <div className="pd-comment">
-                <div className="pd-comment-av" style={{ color: th.tagInk, background: th.tagBg }}>
-                  {c.user_name[0]?.toUpperCase() ?? "?"}
-                </div>
+                <UserAvatar className="pd-comment-av" style={{ background: th.badgeBg }} px={2.1} />
                 <div
                   className="pd-comment-bubble"
                   style={{ background: th.rowBg, borderColor: th.rowEdge }}
@@ -261,12 +268,12 @@ export function PostScreen({
               {/* 캐릭터가 단 답글 (스레드) */}
               {c.replies.map((r) => (
                 <div key={r.reply_id} className="pd-reply">
-                  <div
+                  <CharacterAvatar
+                    imageUrl={r.gen_img_url ?? postAuthorAvatarUrl}
+                    name={r.character_name}
                     className="pd-comment-av"
                     style={{ color: th.badgeInk, background: th.badgeBg }}
-                  >
-                    {r.character_name[0] ?? "?"}
-                  </div>
+                  />
                   <div
                     className="pd-comment-bubble"
                     style={{ background: th.badgeBg, borderColor: th.badgeBg }}
@@ -281,34 +288,38 @@ export function PostScreen({
         </div>
 
         {/* 댓글 게시 시 약 2분 뒤 서버가 캐릭터 답글을 예약 생성한다 */}
-        <div className="pd-ci">
-          <div className="pd-ci-av" style={{ color: th.badgeInk }}>
-            {ME}
+        {canComment ? (
+          <div className="pd-ci">
+            <UserAvatar className="pd-ci-av" style={{ background: th.badgeBg }} px={2.1} />
+            <input
+              className="pd-ci-field"
+              style={{ background: th.rowBg, borderColor: th.rowEdge, color: th.ink }}
+              placeholder="댓글을 입력해주세요…"
+              value={commentText}
+              maxLength={50}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  requestComment();
+                }
+              }}
+            />
+            <button
+              type="button"
+              className="pd-ci-send"
+              style={{ color: th.accent }}
+              onClick={requestComment}
+              disabled={commentSaving || !commentText.trim()}
+            >
+              게시
+            </button>
           </div>
-          <input
-            className="pd-ci-field"
-            style={{ background: th.rowBg, borderColor: th.rowEdge, color: th.ink }}
-            placeholder="댓글을 입력해주세요…"
-            value={commentText}
-            maxLength={50}
-            onChange={(e) => setCommentText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                requestComment();
-              }
-            }}
-          />
-          <button
-            type="button"
-            className="pd-ci-send"
-            style={{ color: th.accent }}
-            onClick={requestComment}
-            disabled={commentSaving || !commentText.trim()}
-          >
-            게시
-          </button>
-        </div>
+        ) : (
+          <div className="pd-ci-blocked" style={{ color: th.inkSoft }}>
+            {INACTIVE_AUTHOR_MESSAGE}
+          </div>
+        )}
       </div>
 
       {confirmOpen && (
@@ -359,7 +370,7 @@ export function PostScreen({
       {shareOpen && (
         <ShareSheet
           th={th}
-          share={buildPostShare(post.post_id, authorName, post.content)}
+          share={buildPostShare(post.post_id, authorName, post.content, post.img_url)}
           onClose={() => setShareOpen(false)}
         />
       )}

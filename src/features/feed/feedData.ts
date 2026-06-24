@@ -125,6 +125,7 @@ export interface FeedPostData {
   comments: number;
   heroPlaceholder: string;
   imageUrl?: string;
+  avatarUrl?: string;
   commentList: FeedComment[];
 }
 

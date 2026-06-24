@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CharacterAvatar } from "./CharacterAvatar.js";
 import type { FeedPostData, ThemeTokens } from "./feedData.js";
 import { ImageSlot } from "./ImageSlot.js";
 import { PixelSprite, SPRITES } from "./PixelSprite.js";
@@ -47,13 +48,13 @@ export function FeedPost({
           onClick={onAuthorClick}
           style={{ cursor: onAuthorClick ? "pointer" : "default" }}
         >
-          <div
+          <CharacterAvatar
+            imageUrl={post.avatarUrl}
+            name={post.name}
             className="mg-avatar"
-            style={{ background: th.badgeBg, color: th.badgeInk }}
-            aria-hidden="true"
-          >
-            {post.name[0]}
-          </div>
+            imageFit="cover"
+            style={{ background: post.avatarUrl ? "#fff" : th.badgeBg, color: th.badgeInk }}
+          />
           <div className="mg-post-id">
             <div className="mg-post-namerow">
               <span className="mg-name" style={{ color: th.ink }}>
@@ -69,28 +70,6 @@ export function FeedPost({
               {post.time}
             </div>
           </div>
-        </button>
-
-        <button
-          type="button"
-          className="mg-iconbtn"
-          aria-label="더보기"
-          style={{ alignSelf: "flex-start" }}
-        >
-          <span className="mg-dots">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: 1,
-                  display: "block",
-                  background: th.inkFaint,
-                }}
-              />
-            ))}
-          </span>
         </button>
       </header>
 
@@ -144,7 +123,7 @@ export function FeedPost({
           onClick={onShare}
         >
           <PixelSprite art={SPRITES.arrow} palette={{ x: th.accent }} px={2} />
-          <span style={{ fontFamily: "'Jua', sans-serif" }}>공유하기</span>
+          <span>공유하기</span>
         </button>
       </footer>
     </article>

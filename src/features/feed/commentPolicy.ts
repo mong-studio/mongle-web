@@ -4,6 +4,13 @@ import { isAxiosError } from "axios";
 export const COMMENT_TOKEN_COST = 3;
 export const DAILY_COMMENT_LIMIT = 5;
 
+// 이사 간(비활성) 주민에게는 댓글을 남길 수 없다.
+export const INACTIVE_AUTHOR_MESSAGE = "이사 간 주민에게는 댓글을 남길 수 없어요.";
+
+export function canCommentOnAuthor(authorActive: boolean): boolean {
+  return authorActive;
+}
+
 // 서버가 돌려주는 상태코드를 몽글마을 말투의 안내 문구로 변환한다.
 export function commentErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {

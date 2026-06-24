@@ -260,6 +260,7 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
                       p.post_id,
                       charMap.get(p.character)?.name ?? "몽글마을 친구",
                       p.content,
+                      p.img_url,
                     ),
                   )
                 }
@@ -302,6 +303,10 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
           onLikeChange={setPostLiked}
           onNotice={onNotice}
           onApplesRefresh={onApplesRefresh}
+          authorActive={selectedCharacterId ? charMap.has(selectedCharacterId) : false}
+          authorAvatarUrl={
+            selectedCharacterId ? charMap.get(selectedCharacterId)?.gen_img_url : undefined
+          }
         />
       )}
 
