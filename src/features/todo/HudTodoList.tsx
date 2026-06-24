@@ -1,6 +1,8 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import type { CSSProperties } from "react";
 import { useState } from "react";
+import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
 import type { TodoItem } from "./todoCreation.js";
 import "./HudTodoList.css";
 
@@ -9,6 +11,7 @@ type HudTodoListProps = {
   tagColors: Record<string, string>;
   onAddTodo: () => void;
   onCompleteTodo: (todoId: string) => void;
+  onFailTodo: (todoId: string) => void;
 };
 
 const FALLBACK_TAG_COLORS: Record<string, string> = {
@@ -38,7 +41,13 @@ function getHudTagStyle(todo: TodoItem, tag: string): CSSProperties {
   };
 }
 
-export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: HudTodoListProps) {
+export function HudTodoList({
+  todos,
+  tagColors,
+  onAddTodo,
+  onCompleteTodo,
+  onFailTodo,
+}: HudTodoListProps) {
   const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
   const [dismissedTooltipId, setDismissedTooltipId] = useState<string | null>(null);
   const visibleTodos = todos.filter((todo) => todo.status !== "candidate");
@@ -51,18 +60,23 @@ export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: Hud
       <ul>
         {visibleTodos.map((todo) => {
           const isDone = todo.status === "done";
+          const isFailed = todo.status === "failed";
+          const isClosed = isDone || isFailed;
           const tags = getDisplayTags(todo.tags);
           const tagTodo = {
             ...todo,
             tagColors: { ...tagColors, ...todo.tagColors },
           };
-
           const isTooltipOpen = openTooltipId === todo.id;
 
           return (
             <li
               key={todo.id}
-              className={[isDone ? "isDone" : "", isTooltipOpen ? "isTooltipOpen" : ""]
+              className={[
+                isDone ? "isDone" : "",
+                isFailed ? "isFailed" : "",
+                isTooltipOpen ? "isTooltipOpen" : "",
+              ]
                 .filter(Boolean)
                 .join(" ")}
               onBlur={(event) => {
@@ -86,7 +100,7 @@ export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: Hud
                 className="hudTodoCheck"
                 aria-label={`${todo.title} 완료`}
                 aria-pressed={isDone}
-                disabled={isDone}
+                disabled={isClosed}
                 onClick={(event) => {
                   event.stopPropagation();
                   onCompleteTodo(todo.id);
@@ -94,8 +108,10 @@ export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: Hud
               >
                 {isDone ? (
                   <CheckRoundedIcon className="hudTodoCheckIcon" aria-hidden="true" />
+                ) : isFailed ? (
+                  <CloseRoundedIcon className="hudTodoFailIcon" aria-hidden="true" />
                 ) : null}
-                <span className="srOnly">{isDone ? "완료됨" : "미완료"}</span>
+                <span className="srOnly">{isDone ? "완료됨" : isFailed ? "포기됨" : "미완료"}</span>
               </button>
               <button
                 type="button"
@@ -132,14 +148,34 @@ export function HudTodoList({ todos, tagColors, onAddTodo, onCompleteTodo }: Hud
                   ))}
                 </div>
               ) : null}
+              {!isClosed ? (
+                <DeleteConfirmDialog
+                  trigger={
+                    <button
+                      type="button"
+                      className="hudTodoFailButton"
+                      aria-label={`${todo.title} 포기`}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      포기
+                    </button>
+                  }
+                  title="포기할까요?"
+                  description="정말로 포기할까요? 포기 기록은 남아요."
+                  confirmLabel="포기하기"
+                  onConfirm={() => onFailTodo(todo.id)}
+                />
+              ) : isFailed ? (
+                <span className="hudTodoFailedBadge">포기</span>
+              ) : null}
             </li>
           );
         })}
         {visibleTodos.length === 0 ? (
           <li className="emptyTodo">
             <img src="/assets/hud/plant.png" alt="" />
-            <b>아직 등록된 할 일이 없어요</b>
-            <p>몽글마을 친구들과 함께 오늘의 첫 할 일을 만들어봐요</p>
+            <b>아직 등록한 할 일이 없어요</b>
+            <p>몽글마을 친구들과 함께 오늘의 첫 할 일을 만들어볼까요?</p>
           </li>
         ) : null}
       </ul>

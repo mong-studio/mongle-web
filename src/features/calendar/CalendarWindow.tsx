@@ -257,7 +257,12 @@ export function CalendarWindow({
                 gap: 16,
               }}
             >
-              <TodayCard cal={cal} onToggle={onToggle} isRefreshing={isRefreshing} />
+              <TodayCard
+                cal={cal}
+                onToggle={onToggle}
+                onFailEvent={onFailEvent}
+                isRefreshing={isRefreshing}
+              />
             </div>
           </div>
 

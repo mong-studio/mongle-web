@@ -200,10 +200,10 @@ export function EventRow({
                 trigger={
                   <button
                     type="button"
-                    className="calIconBtn calBtn-icon"
+                    className={action === "fail" ? "eventRowFailButton" : "calIconBtn calBtn-icon"}
                     aria-label={action === "fail" ? "포기" : "삭제"}
                   >
-                    {trashIcon}
+                    {action === "fail" ? "포기" : trashIcon}
                   </button>
                 }
                 title={
@@ -215,7 +215,7 @@ export function EventRow({
                 }
                 description={
                   action === "fail"
-                    ? "포기하면 오늘은 완료할 수 없어요. 포기 기록은 남아요."
+                    ? "정말로 포기할까요? 포기 기록은 남아요."
                     : "삭제하면 되돌릴 수 없어요."
                 }
                 confirmLabel={action === "fail" ? "포기하기" : undefined}

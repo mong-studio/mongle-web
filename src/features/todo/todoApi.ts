@@ -180,3 +180,13 @@ export async function completeTodo(todoId: string): Promise<TodoCompleteResponse
   const { data } = await apiClient.patch<TodoCompleteResponse>(`/todos/${todoId}/complete/`);
   return data;
 }
+
+export type TodoFailResponse = {
+  todo_id: string;
+  status: string;
+};
+
+export async function failTodo(todoId: string): Promise<TodoFailResponse> {
+  const { data } = await apiClient.patch<TodoFailResponse>(`/todos/${todoId}/fail/`);
+  return data;
+}

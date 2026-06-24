@@ -1,5 +1,6 @@
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode, SyntheticEvent } from "react";
+import { cloneElement, isValidElement } from "react";
 
 type DeleteConfirmDialogProps = {
   trigger: ReactNode;
@@ -8,6 +9,64 @@ type DeleteConfirmDialogProps = {
   onConfirm: () => void;
   confirmLabel?: string;
 };
+
+type TriggerEventProps = {
+  onClick?: (event: SyntheticEvent) => void;
+  onMouseDown?: (event: SyntheticEvent) => void;
+  onMouseUp?: (event: SyntheticEvent) => void;
+  onPointerDown?: (event: SyntheticEvent) => void;
+  onPointerUp?: (event: SyntheticEvent) => void;
+  onTouchStart?: (event: SyntheticEvent) => void;
+  onTouchEnd?: (event: SyntheticEvent) => void;
+};
+
+function stopDialogEvent(event: SyntheticEvent) {
+  event.stopPropagation();
+  event.nativeEvent.stopImmediatePropagation?.();
+}
+
+function stopTriggerEvent(event: SyntheticEvent) {
+  event.stopPropagation();
+  event.nativeEvent.stopImmediatePropagation?.();
+}
+
+function withStoppedTriggerEvents(trigger: ReactNode): ReactNode {
+  if (!isValidElement<TriggerEventProps>(trigger)) {
+    return trigger;
+  }
+
+  const element = trigger as ReactElement<TriggerEventProps>;
+  return cloneElement(element, {
+    onPointerDown: (event: SyntheticEvent) => {
+      element.props.onPointerDown?.(event);
+      stopTriggerEvent(event);
+    },
+    onPointerUp: (event: SyntheticEvent) => {
+      element.props.onPointerUp?.(event);
+      stopTriggerEvent(event);
+    },
+    onMouseDown: (event: SyntheticEvent) => {
+      element.props.onMouseDown?.(event);
+      stopTriggerEvent(event);
+    },
+    onMouseUp: (event: SyntheticEvent) => {
+      element.props.onMouseUp?.(event);
+      stopTriggerEvent(event);
+    },
+    onTouchStart: (event: SyntheticEvent) => {
+      element.props.onTouchStart?.(event);
+      stopTriggerEvent(event);
+    },
+    onTouchEnd: (event: SyntheticEvent) => {
+      element.props.onTouchEnd?.(event);
+      stopTriggerEvent(event);
+    },
+    onClick: (event: SyntheticEvent) => {
+      element.props.onClick?.(event);
+      stopTriggerEvent(event);
+    },
+  });
+}
 
 export function DeleteConfirmDialog({
   trigger,
@@ -18,23 +77,38 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog.Root>
-      <AlertDialog.Trigger asChild>{trigger}</AlertDialog.Trigger>
+      <AlertDialog.Trigger asChild>{withStoppedTriggerEvents(trigger)}</AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay
+          onClick={stopDialogEvent}
+          onMouseDown={stopDialogEvent}
+          onMouseUp={stopDialogEvent}
+          onPointerDown={stopDialogEvent}
+          onPointerUp={stopDialogEvent}
+          onTouchEnd={stopDialogEvent}
+          onTouchStart={stopDialogEvent}
           style={{
             position: "fixed",
             inset: 0,
-            zIndex: 80,
+            zIndex: 1000,
             background: "rgba(70,48,22,0.34)",
+            pointerEvents: "auto",
           }}
         />
         <AlertDialog.Content
+          onClick={stopDialogEvent}
+          onMouseDown={stopDialogEvent}
+          onMouseUp={stopDialogEvent}
+          onPointerDown={stopDialogEvent}
+          onPointerUp={stopDialogEvent}
+          onTouchEnd={stopDialogEvent}
+          onTouchStart={stopDialogEvent}
           style={{
             position: "fixed",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            zIndex: 81,
+            zIndex: 1001,
             width: "90%",
             maxWidth: 340,
             background: "var(--cream-1)",

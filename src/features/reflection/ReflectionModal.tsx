@@ -24,7 +24,7 @@ type ReflectionEntry = {
 type ReflectionTodo = {
   id: string;
   title: string;
-  status: "candidate" | "saved" | "done";
+  status: "candidate" | "saved" | "done" | "failed";
   dueDate: string;
 };
 
