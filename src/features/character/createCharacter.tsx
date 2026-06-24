@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
-import { fetchGenerationQuota, type GenerationQuota } from "./api.js";
+import { fetchGenerationQuota, type GenerationQuota, retryAfterText } from "./api.js";
 import "./createCharacter.css";
 
 const PERSONALITY_CATEGORIES = [
@@ -358,6 +358,11 @@ export function CharacterModal({
                 {quota && (
                   <span className="ccGenQuota">
                     생성 가능 횟수 {quota.used}/{quota.limit}
+                    {quota.used >= quota.limit && (
+                      <span className="ccGenQuotaReset">
+                        {retryAfterText()} 다시 만들 수 있어요
+                      </span>
+                    )}
                   </span>
                 )}
                 {phase === "uploaded" && (
