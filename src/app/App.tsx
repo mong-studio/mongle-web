@@ -732,16 +732,17 @@ export function App() {
   }
 
   // 생성 중 "생성 취소": 폴링을 멈추고 서버에 취소를 요청한다.
-  // 서버는 결과를 폐기하고 차감했던 일일 생성 횟수를 환불한다(태스크 체크포인트, 곧 반영).
-  function cancelCharacterGeneration() {
+  // 서버는 결과를 폐기하고 차감했던 일일 생성 횟수를 즉시 환불한다(취소 뷰에서 동기 처리).
+  // 호출부가 환불 완료 후 quota 를 갱신할 수 있도록 서버 취소 요청을 await 한다.
+  async function cancelCharacterGeneration() {
     genCancelledRef.current = true;
     genAbortRef.current?.abort();
-    const jobId = genJobIdRef.current;
-    if (jobId) {
-      void cancelGenerationJob(jobId);
-    }
     setIsBusy(false);
     showNotice("생성을 취소했어요. 생성 횟수는 차감되지 않아요.");
+    const jobId = genJobIdRef.current;
+    if (jobId) {
+      await cancelGenerationJob(jobId);
+    }
   }
 
   // "입주하기": 미리보기 잡을 실제 캐릭터로 등록하고 마을에 추가한다.

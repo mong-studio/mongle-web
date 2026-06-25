@@ -55,7 +55,7 @@ type Props = {
   onToggleKeyword: (keyword: string) => void;
   onNotice: (message: string) => void;
   onSubmit: () => void;
-  onCancelGeneration: () => void;
+  onCancelGeneration: () => void | Promise<void>;
   onConfirm: () => Promise<boolean>;
   onClose: () => void;
 };
@@ -588,15 +588,14 @@ export function CharacterModal({
                   <button
                     type="button"
                     className="ccCancelGenBtn"
-                    onClick={() => {
+                    onClick={async () => {
                       cancelledRef.current = true;
-                      onCancelGeneration();
-                      // 환불은 서버 태스크 체크포인트에서 처리되므로, 잠시 후 quota 를 다시 갱신해 반영한다.
-                      window.setTimeout(() => {
-                        fetchGenerationQuota()
-                          .then(setQuota)
-                          .catch(() => {});
-                      }, 3000);
+                      // 서버 취소+환불(즉시)이 끝날 때까지 기다린 뒤 quota 를 갱신해
+                      // 정확한 횟수를 표시한다(고정 지연에 의존하지 않는다).
+                      await onCancelGeneration();
+                      fetchGenerationQuota()
+                        .then(setQuota)
+                        .catch(() => {});
                     }}
                   >
                     생성 취소
