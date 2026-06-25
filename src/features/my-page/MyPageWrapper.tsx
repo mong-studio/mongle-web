@@ -2,6 +2,7 @@ import { isAxiosError } from "axios";
 import { useEffect, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
 import { apiClient } from "../../shared/api/client.js";
+import { withdrawAccount } from "../auth/api.js";
 import { MyPageModal } from "./MyPage.js";
 
 type UserProfile = {
@@ -40,15 +41,23 @@ export function MyPageWrapper({
       .catch(() => onNotice("프로필 정보를 불러오지 못했어요."));
   }, [onNotice]);
 
-  async function handleWithdraw() {
+  async function handleWithdraw(password?: string) {
+    // 실패는 throw 해서 탈퇴 모달이 토스트로 안내하게 한다. 성공 시 로그아웃·마이페이지 닫기.
     try {
-      await apiClient.delete("/auth/me/");
-      await onLogout();
-      onClose();
-      onNotice("계정이 탈퇴됐어요.");
+      await withdrawAccount(password);
     } catch (error) {
-      onNotice(error instanceof Error ? error.message : "탈퇴에 실패했어요.");
+      if (isAxiosError(error)) {
+        const code = (error.response?.data as { error?: { message?: string } } | undefined)?.error
+          ?.message;
+        if (code && PASSWORD_ERROR_MESSAGES[code]) {
+          throw new Error(PASSWORD_ERROR_MESSAGES[code]);
+        }
+      }
+      throw error instanceof Error ? error : new Error("탈퇴에 실패했어요.");
     }
+    await onLogout();
+    onClose();
+    onNotice("계정이 탈퇴됐어요.");
   }
 
   async function handleUpdateProfile(nickname: string, job: string, birth: string) {
