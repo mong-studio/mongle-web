@@ -704,10 +704,8 @@ export function App() {
       );
       // 미리보기만 표시하고 아직 등록하지 않는다. 등록(입주)은 confirmCharacter 에서.
       // 재생성하면 이 미리보기가 새 잡으로 교체될 뿐, 이전 잡은 등록된 적이 없어 고아가 안 생긴다.
-      // 사용된 원본 이미지만 비우고 이름·키워드·설명은 남겨 수정/재생성에 재사용한다.
-      setSourceImagePreview("");
-      setSourceImageName("");
-      setSourceImageFile(null);
+      // 원본 사진·이름·키워드·설명을 모두 남겨, 재생성 시 같은 사진으로 다시 그릴 수 있게 한다.
+      // (사진은 매 생성마다 새로 업로드되므로 만료 걱정 없음. 초기화는 닫기 시 resetCharacterDraft 가 한다.)
       setPreviewJobId(preview.jobId);
       setLastCreatedResident({
         id: preview.jobId,

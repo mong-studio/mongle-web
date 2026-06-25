@@ -107,10 +107,10 @@ export function CharacterModal({
       ? "generating"
       : genFailed
         ? "failed"
-        : sourceImagePreview
-          ? "uploaded"
-          : showResult
-            ? "result"
+        : showResult
+          ? "result"
+          : sourceImagePreview
+            ? "uploaded"
             : mode === "upload"
               ? "idle-upload"
               : "idle-text";
