@@ -171,8 +171,11 @@ export function CharacterModal({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
+  // 오늘 일일 생성 횟수를 모두 쓰면 더 생성할 수 없다(버튼 비활성화·생성 차단).
+  const quotaFull = quota !== null && quota.used >= quota.limit;
+
   function handleGenerate() {
-    if (isBusy) return;
+    if (isBusy || quotaFull) return;
     if (mode === "upload" && !sourceImagePreview) {
       setImageError(true);
       setTimeout(() => setImageError(false), 1500);
@@ -354,7 +357,7 @@ export function CharacterModal({
               <button
                 type="button"
                 className="ccGenBtn"
-                disabled={isBusy || residents.length >= 10}
+                disabled={isBusy || residents.length >= 10 || quotaFull}
                 onClick={handleGenerate}
               >
                 <img src="/assets/icon/bear.png" alt="" className="ccBearIcon" />
@@ -535,7 +538,7 @@ export function CharacterModal({
                         <button
                           type="button"
                           className="ccChangeBtn"
-                          disabled={isBusy || residents.length >= 10}
+                          disabled={isBusy || residents.length >= 10 || quotaFull}
                         >
                           <span>↻</span> 다시 생성
                         </button>
