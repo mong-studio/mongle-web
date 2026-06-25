@@ -70,11 +70,6 @@ type CharacterListResponse = {
   page: { limit: number; next_cursor: string | null; has_next: boolean };
 };
 
-type ApiErrorResponse = {
-  error?: unknown;
-  retry_after_seconds?: unknown;
-};
-
 const ALLOWED_CONTENT_TYPES = new Set(["image/jpeg", "image/png"]);
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 6 * 60 * 1000;
@@ -98,31 +93,31 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function retryAfterText(totalMinutes: number): string {
-  const total = Math.max(1, totalMinutes);
+// 일일 생성 한도는 서버 기준 로컬 자정(0시)에 리셋된다. 리셋까지 남은 분을 계산한다.
+function minutesUntilDailyReset(): number {
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+  return Math.max(1, Math.ceil((nextMidnight.getTime() - now.getTime()) / 60_000));
+}
+
+// "OO분 후" / "O시간 O분 후" 형태의 재시도 안내. 한도 초과 시 '내일' 대신 남은 시간을 보여준다.
+export function retryAfterText(): string {
+  const total = minutesUntilDailyReset();
   if (total < 60) return `${total}분 후에`;
   const hours = Math.floor(total / 60);
   const minutes = total % 60;
   return minutes === 0 ? `${hours}시간 후에` : `${hours}시간 ${minutes}분 후에`;
 }
 
-function dailyLimitMessage(retryAfterSeconds?: number): string {
-  if (typeof retryAfterSeconds !== "number") {
-    return ERROR_MESSAGES.DAILY_GENERATION_LIMIT_EXCEEDED;
-  }
-  return `오늘은 친구를 더 만들 수 없어요. ${retryAfterText(
-    Math.ceil(retryAfterSeconds / 60),
-  )} 다시 시도해 주세요.`;
+function dailyLimitMessage(): string {
+  return `오늘은 친구를 더 만들 수 없어요. ${retryAfterText()} 다시 시도해 주세요.`;
 }
 
 function toFriendlyMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as ApiErrorResponse | undefined;
-    const code = data?.error;
+    const code = error.response?.data?.error;
     if (code === "DAILY_GENERATION_LIMIT_EXCEEDED") {
-      return dailyLimitMessage(
-        typeof data?.retry_after_seconds === "number" ? data.retry_after_seconds : undefined,
-      );
+      return dailyLimitMessage();
     }
     if (typeof code === "string" && ERROR_MESSAGES[code]) {
       return ERROR_MESSAGES[code];
@@ -344,12 +339,7 @@ export async function resumePendingCharacter(): Promise<GeneratedCharacter | nul
   }
 }
 
-export type GenerationQuota = {
-  used: number;
-  limit: number;
-  reset_at?: string;
-  retry_after_seconds?: number;
-};
+export type GenerationQuota = { used: number; limit: number };
 
 /** 오늘의 캐릭터 생성 횟수(used)와 일일 한도(limit)를 조회한다. */
 export async function fetchGenerationQuota(): Promise<GenerationQuota> {
