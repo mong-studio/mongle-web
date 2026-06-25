@@ -67,6 +67,14 @@ export async function logout(): Promise<void> {
   await apiClient.post("/auth/logout");
 }
 
+/**
+ * 회원 탈퇴. 이메일 가입자는 현재 비밀번호를 함께 보내고,
+ * 소셜 가입자는 비밀번호 없이 호출한다. 성공 시 서버가 개인정보를 익명화한다.
+ */
+export async function withdrawAccount(password?: string): Promise<void> {
+  await apiClient.post("/auth/withdraw", password ? { password } : {});
+}
+
 export async function fetchMe(): Promise<MeResponse> {
   const { data } = await apiClient.get<MeResponse>("/auth/me/");
   return data;
