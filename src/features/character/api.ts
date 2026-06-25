@@ -153,7 +153,7 @@ async function uploadSourceImage(file: File): Promise<string> {
   return data.source_img_id;
 }
 
-type JobOutcome = "SUCCEEDED" | "FAILED" | "CONSUMED" | "TIMEOUT";
+type JobOutcome = "SUCCEEDED" | "FAILED" | "CONSUMED" | "TIMEOUT" | "CANCELLED";
 
 // 3단계: 잡이 종료 상태에 도달할 때까지 폴링한다.
 // 던지지 않고 결과를 반환해, 호출부가 "재개 가능 여부(TIMEOUT)"를 구분할 수 있게 한다.
@@ -162,10 +162,14 @@ type PollResult = {
   result: { gen_img_url: string; persona: string } | null;
 };
 
-async function pollJob(jobId: string): Promise<PollResult> {
+async function pollJob(jobId: string, signal?: AbortSignal): Promise<PollResult> {
   const deadline = Date.now() + POLL_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
+    // 사용자가 생성을 취소했으면 폴링을 멈춘다(서버 취소·환불은 별도 호출).
+    if (signal?.aborted) {
+      return { outcome: "CANCELLED", result: null };
+    }
     const { data } = await apiClient.get<JobStatusResponse>(
       `/characters/generation-jobs/${jobId}/`,
     );
@@ -223,6 +227,7 @@ export type CharacterPreview = {
  */
 export async function generateCharacterPreview(
   params: GenerateCharacterParams,
+  options?: { signal?: AbortSignal; onJobCreated?: (jobId: string) => void },
 ): Promise<CharacterPreview> {
   const { name, persona, personalityKeywords, sourceImageFile } = params;
 
@@ -236,10 +241,17 @@ export async function generateCharacterPreview(
       source_img_id: sourceImgId,
     });
 
+    // 잡 생성 직후 job_id 를 호출부에 알려, 취소 버튼이 이 잡을 대상으로 취소할 수 있게 한다.
+    options?.onJobCreated?.(job.job_id);
     // 잡이 큐에 들어간 직후 영속화한다. 이 시점부터는 새로고침해도 재개 가능.
     savePendingJob({ jobId: job.job_id, name, persona });
 
-    const { outcome, result } = await pollJob(job.job_id);
+    const { outcome, result } = await pollJob(job.job_id, options?.signal);
+    if (outcome === "CANCELLED") {
+      // 사용자가 취소함 — 재개되지 않도록 진행 상태를 비우고 AbortError 로 알린다.
+      clearPendingJob();
+      throw new DOMException("generation cancelled", "AbortError");
+    }
     if (outcome === "FAILED") {
       clearPendingJob();
       throw new Error("친구 그림을 그리는 데 실패했어요. 잠시 후 다시 시도해 주세요.");
@@ -261,7 +273,24 @@ export async function generateCharacterPreview(
       persona: result?.persona ?? persona,
     };
   } catch (error) {
+    // 취소(AbortError)는 친화적 메시지로 감싸지 않고 그대로 전달해, 호출부가 구분하게 한다.
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
     throw new Error(toFriendlyMessage(error));
+  }
+}
+
+/**
+ * 생성 중인 잡을 서버에 취소 요청한다(best-effort).
+ * 서버는 결과를 폐기하고 제출 시 차감했던 일일 생성 횟수를 환불한다.
+ * 이미 완료/취소된 잡이면 서버가 409 를 주며, 여기선 조용히 무시한다.
+ */
+export async function cancelGenerationJob(jobId: string): Promise<void> {
+  try {
+    await apiClient.post(`/characters/generation-jobs/${jobId}/cancel/`);
+  } catch {
+    // best-effort — 이미 완료/취소됐을 수 있으므로 실패해도 무시한다.
   }
 }
 

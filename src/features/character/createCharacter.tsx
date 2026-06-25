@@ -55,6 +55,7 @@ type Props = {
   onToggleKeyword: (keyword: string) => void;
   onNotice: (message: string) => void;
   onSubmit: () => void;
+  onCancelGeneration: () => void;
   onConfirm: () => Promise<boolean>;
   onClose: () => void;
 };
@@ -74,6 +75,7 @@ export function CharacterModal({
   onToggleKeyword,
   onNotice,
   onSubmit,
+  onCancelGeneration,
   onConfirm,
   onClose,
 }: Props) {
@@ -91,6 +93,8 @@ export function CharacterModal({
   const [quota, setQuota] = useState<GenerationQuota | null>(null);
   const dragCounter = useRef(0);
   const wasBusyRef = useRef(false);
+  // 생성 취소 시 실패 화면 대신 입력 화면으로 복귀하도록 표시하는 플래그.
+  const cancelledRef = useRef(false);
   // 생성 시작 시점의 결과를 기억해, 종료 후 새 주민이 안 생겼으면 실패로 판정한다.
   const residentAtBusyStart = useRef(lastCreatedResident);
   const characterNameRef = useRef(characterName);
@@ -129,9 +133,11 @@ export function CharacterModal({
       fetchGenerationQuota()
         .then(setQuota)
         .catch(() => {});
-      // 새 주민이 생겼으면 성공, 변동이 없으면(에러로 중단) 실패.
+      // 새 주민이 생겼으면 성공, 취소면 입력 화면 복귀, 그 외 변동 없으면 실패.
       if (lastCreatedResident && lastCreatedResident !== residentAtBusyStart.current) {
         setShowResult(true);
+      } else if (cancelledRef.current) {
+        cancelledRef.current = false;
       } else {
         setGenFailed(true);
       }
@@ -579,6 +585,23 @@ export function CharacterModal({
                       </div>
                     ))}
                   </div>
+                  <button
+                    type="button"
+                    className="ccCancelGenBtn"
+                    onClick={() => {
+                      cancelledRef.current = true;
+                      onCancelGeneration();
+                      // 환불은 서버 태스크 체크포인트에서 처리되므로, 잠시 후 quota 를 다시 갱신해 반영한다.
+                      window.setTimeout(() => {
+                        fetchGenerationQuota()
+                          .then(setQuota)
+                          .catch(() => {});
+                      }, 3000);
+                    }}
+                  >
+                    생성 취소
+                  </button>
+                  <p className="ccCancelGenHint">취소하면 생성 횟수는 차감되지 않아요.</p>
                 </div>
               </>
             )}
