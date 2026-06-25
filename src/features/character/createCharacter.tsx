@@ -6,7 +6,7 @@ import "./createCharacter.css";
 const PERSONALITY_CATEGORIES = [
   "모험적인",
   "차분한",
-  "호기심 많은",
+  "호기심많은",
   "다정한",
   "장난스러운",
   "부지런한",
@@ -369,8 +369,7 @@ export function CharacterModal({
                     생성 가능 횟수 {quota.used}/{quota.limit}
                     {quota.used >= quota.limit && (
                       <span className="ccGenQuotaReset">
-                        {retryAfterText(Math.ceil((quota.retry_after_seconds ?? 60) / 60))} 다시
-                        만들 수 있어요
+                        {retryAfterText()} 다시 만들 수 있어요
                       </span>
                     )}
                   </span>
