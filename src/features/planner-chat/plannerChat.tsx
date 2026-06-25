@@ -15,6 +15,7 @@ type PlannerMessage = {
   id: string;
   role: "chief" | "user";
   text: string;
+  createdAt: number;
 };
 
 type PlannerChatProps = {
@@ -25,6 +26,16 @@ type PlannerChatProps = {
 
 function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+const TIME_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+});
+
+function formatMessageTime(createdAt: number) {
+  return TIME_FORMATTER.format(new Date(createdAt));
 }
 
 function formatPlannerDate(date: string) {
@@ -67,6 +78,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
       id: createId("msg"),
       role: "chief",
       text: "목표를 알려주면 기간, 우선순위, 반복 여부를 물어보고 플랜으로 정리할게.",
+      createdAt: Date.now(),
     },
   ]);
   const [days, setDays] = useState<PlannerDay[]>([]);
@@ -95,7 +107,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
 
     const nextMessages = [
       ...messages,
-      { id: createId("msg"), role: "user" as const, text: message },
+      { id: createId("msg"), role: "user" as const, text: message, createdAt: Date.now() },
     ];
     setMessages(nextMessages);
     setInput("");
@@ -119,6 +131,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
             id: createId("msg"),
             role: "chief",
             text: result.summary_text || "실행 가능한 플랜으로 정리했어요.",
+            createdAt: Date.now(),
           },
         ]);
         onNotice("플래너가 일자별 실행안을 만들었어요.");
@@ -129,6 +142,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
             id: createId("msg"),
             role: "chief",
             text: result.message || "플래너로 도와드릴 수 있는 범위를 벗어났어요.",
+            createdAt: Date.now(),
           },
         ]);
       } else {
@@ -138,6 +152,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
             id: createId("msg"),
             role: "chief",
             text: result.question || "조금 더 구체적으로 알려주세요.",
+            createdAt: Date.now(),
           },
         ]);
       }
@@ -150,6 +165,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
           id: createId("msg"),
           role: "chief",
           text: "플랜을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
+          createdAt: Date.now(),
         },
       ]);
       onNotice("플래너 결과를 불러오지 못했어요.");
@@ -274,7 +290,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
 
           <section className="plannerChatCard" aria-label="이장님 대화">
             <div className="plannerConversation" ref={conversationRef}>
-              {messages.map((message, index) => (
+              {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`plannerMessageRow ${message.role === "user" ? "isUser" : "isChief"}`}
@@ -295,7 +311,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
                     >
                       <p>{message.text}</p>
                     </div>
-                    <time>{index === 0 ? "오전 09:30" : "오전 09:31"}</time>
+                    <time>{formatMessageTime(message.createdAt)}</time>
                   </div>
                 </div>
               ))}
