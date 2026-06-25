@@ -86,6 +86,8 @@ export function MyPageWrapper({
       }
       throw error;
     }
+    // 비밀번호 변경 후에는 보안을 위해 로그아웃해 재로그인하도록 한다.
+    await onLogout();
   }
 
   return (
