@@ -22,7 +22,7 @@ type FeatureModalHostProps = {
   sourceImagePreview: string;
   onClose: () => void;
   onCreateCharacter: () => void;
-  onCancelCharacterGeneration: () => void;
+  onCancelCharacterGeneration: () => void | Promise<void>;
   onConfirmCharacter: () => Promise<boolean>;
   onImageUpload: (file: File | undefined) => void;
   onNameChange: (value: string) => void;
