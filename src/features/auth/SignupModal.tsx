@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { JOB_OPTIONS as JOBS } from "../../shared/jobs.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import {
   confirmEmailVerification,
@@ -7,18 +8,6 @@ import {
   toUserMessage,
 } from "./api.js";
 import "./SignupModal.css";
-
-const JOBS = [
-  "학생",
-  "직장인",
-  "프리랜서",
-  "자영업",
-  "주부",
-  "기획자",
-  "개발자",
-  "디자이너",
-  "기타",
-];
 
 const AGREEMENTS = [
   { k: "terms" as const, label: "만 14세 이상입니다.", tag: "(필수)", req: true, detail: null },

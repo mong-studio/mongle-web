@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
+import { JOB_OPTIONS } from "../../shared/jobs.js";
 import { ChangePasswordModal } from "./ChangePasswordModal.js";
 import { CharacterDetail } from "./CharacterDetail.js";
 import { WithdrawModal } from "./WithdrawModal.js";
@@ -20,17 +21,6 @@ type Props = {
   onUpdatePassword: (current: string, next: string) => Promise<void>;
   loginType: string;
 };
-
-const JOB_OPTIONS = [
-  "회사원",
-  "전문직 (의사, 변호사, 회계사 등)",
-  "사업자/자영업자",
-  "공무원/교직원",
-  "프리랜서",
-  "학생",
-  "주부",
-  "무직/기타",
-] as const;
 
 const CHIP_COLORS = [
   { bg: "#f8d9df", fg: "#c56b7d" },
