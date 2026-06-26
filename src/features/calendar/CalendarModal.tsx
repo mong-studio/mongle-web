@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiClient } from "../../shared/api/client.js";
 import { useTags } from "../../shared/tags/useTags.js";
+import { ConfirmDialog } from "../../shared/ui/ConfirmDialog.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { useCalendar } from "./CalendarCore.js";
 import { CalendarWindow } from "./CalendarWindow.js";
@@ -90,29 +91,39 @@ export function CalendarModal({
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen, onClose, cal.sel]);
 
-  const handleToggle = useCallback(
-    async (id: string) => {
+  // 완료는 되돌릴 수 없어, 체크 시 바로 처리하지 않고 확인 다이얼로그를 띄운다.
+  const [pendingToggleId, setPendingToggleId] = useState<string | null>(null);
+
+  const requestToggle = useCallback(
+    (id: string) => {
       const ev = baseEvents.find((e) => e.id === id);
       if (!ev?.todoId) return; // 일정(schedule)은 체크 대상이 아니다
-      if (ev.done) return; // 완료한 할일은 체크 해제 불가 (체크는 되지만 되돌릴 수 없다)
+      if (ev.done) return; // 완료한 할일은 체크 해제 불가
       if (ev.s < cal.todaySr) return; // 과거 TODO는 완료 처리하지 않는다.
-      const todoId = ev.todoId;
-      const dueDate = todos.find((t) => t.todo_id === todoId)?.todo_date ?? "";
-      // 낙관적 업데이트: 완료로 바로 반영하고 실패 시 되돌린다.
-      setTodos((prev) =>
-        prev.map((t) => (t.todo_id === todoId ? { ...t, status: "COMPLETED" } : t)),
-      );
-      try {
-        // 메인화면 체크와 동일한 로직(/complete — 사과 보상·알림·HUD 동기화)을 위임한다.
-        await onCompleteTodo(todoId, ev.title, dueDate);
-      } catch {
-        setTodos((prev) =>
-          prev.map((t) => (t.todo_id === todoId ? { ...t, status: "IN_PROGRESS" } : t)),
-        );
-      }
+      setPendingToggleId(id); // 유효하면 확인 다이얼로그를 연다.
     },
-    [baseEvents, cal.todaySr, todos, onCompleteTodo],
+    [baseEvents, cal.todaySr],
   );
+
+  const confirmToggle = useCallback(async () => {
+    const id = pendingToggleId;
+    setPendingToggleId(null);
+    if (id === null) return;
+    const ev = baseEvents.find((e) => e.id === id);
+    if (!ev?.todoId) return;
+    const todoId = ev.todoId;
+    const dueDate = todos.find((t) => t.todo_id === todoId)?.todo_date ?? "";
+    // 낙관적 업데이트: 완료로 바로 반영하고 실패 시 되돌린다.
+    setTodos((prev) => prev.map((t) => (t.todo_id === todoId ? { ...t, status: "COMPLETED" } : t)));
+    try {
+      // 메인화면 체크와 동일한 로직(/complete — 사과 보상·알림·HUD 동기화)을 위임한다.
+      await onCompleteTodo(todoId, ev.title, dueDate);
+    } catch {
+      setTodos((prev) =>
+        prev.map((t) => (t.todo_id === todoId ? { ...t, status: "IN_PROGRESS" } : t)),
+      );
+    }
+  }, [pendingToggleId, baseEvents, todos, onCompleteTodo]);
 
   const handleAddEvent = useCallback(
     async (
@@ -271,7 +282,7 @@ export function CalendarModal({
           <CalendarWindow
             cal={cal}
             onClose={onClose}
-            onToggle={handleToggle}
+            onToggle={requestToggle}
             onAddEvent={handleAddEvent}
             onDeleteEvent={handleDeleteEvent}
             onFailEvent={handleFailEvent}
@@ -284,6 +295,16 @@ export function CalendarModal({
           />
         )}
       </div>
+      <ConfirmDialog
+        open={pendingToggleId !== null}
+        onOpenChange={(o) => {
+          if (!o) setPendingToggleId(null);
+        }}
+        title="할일을 완료할까요?"
+        description="완료하면 다시 되돌릴 수 없어요."
+        confirmLabel="완료"
+        onConfirm={() => void confirmToggle()}
+      />
     </div>
   );
 }
