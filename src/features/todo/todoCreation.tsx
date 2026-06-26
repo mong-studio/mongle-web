@@ -224,7 +224,8 @@ export function TodoCreation({
 
   function addTodo() {
     if (blockedWhileBusy()) return;
-    const name = manualText.trim();
+    // 백엔드 content 는 최대 20자라, 입력 maxLength 와 더불어 안전망으로 한 번 더 자른다.
+    const name = manualText.trim().slice(0, 20);
     if (!name) return;
     setTodos((prev) => [...prev, { id: createId("td"), name, tagId: selectedTagId, quest: false }]);
     setManualText("");
@@ -551,6 +552,7 @@ export function TodoCreation({
                     <input
                       className="boardInput"
                       value={manualText}
+                      maxLength={20}
                       onChange={(e) => setManualText(e.target.value)}
                       disabled={aiLoading || isBusy}
                       onKeyDown={(e) => {
@@ -560,7 +562,7 @@ export function TodoCreation({
                           addTodo();
                         }
                       }}
-                      placeholder="할 일을 적어주세요"
+                      placeholder="할 일을 적어주세요 (최대 20자)"
                     />
                     <button type="button" className="boardAddBtn" onClick={addTodo}>
                       추가
