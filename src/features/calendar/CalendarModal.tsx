@@ -123,7 +123,14 @@ export function CalendarModal({
       endStr: string,
       description: string,
     ) => {
-      if (ymdStrToSerial(startStr) < cal.todaySr) return;
+      // 지난 날짜에는 추가할 수 없다. throw 하면 폼이 닫히지 않고 안내 메시지가 표시된다.
+      if (ymdStrToSerial(startStr) < cal.todaySr) {
+        throw new Error(
+          kind === "todo"
+            ? "지난 날짜에는 할일을 추가할 수 없어요."
+            : "지난 날짜에는 일정을 추가할 수 없어요.",
+        );
+      }
       const tagParam = tagId !== null ? { tag_id: tagId } : {};
       if (kind === "todo") {
         const res = await apiClient.post("/todos/", {
