@@ -169,15 +169,15 @@ button {
 
 .brandBadge {
   justify-self: start;
-  width: 132px;
   height: 58px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .brandBadge img {
   display: block;
-  width: 100%;
+  width: 132px;
   max-height: 100%;
   object-fit: contain;
   filter: sepia(0.08) saturate(0.9) brightness(0.98);
