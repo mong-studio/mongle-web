@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Resident } from "../../app/model/appTypes.js";
 import { ChangePasswordModal } from "./ChangePasswordModal.js";
 import { CharacterDetail } from "./CharacterDetail.js";
+import { WithdrawModal } from "./WithdrawModal.js";
 import "./MyPage.css";
 
 type Props = {
@@ -13,7 +14,7 @@ type Props = {
   tokenBalance: number;
   residents: Resident[];
   onClose: () => void;
-  onWithdraw: () => void;
+  onWithdraw: (password?: string) => Promise<void>;
   onMoveOut: (characterId: string) => void;
   onUpdateProfile: (nickname: string, job: string, birth: string) => Promise<void>;
   onUpdatePassword: (current: string, next: string) => Promise<void>;
@@ -80,6 +81,7 @@ export function MyPageModal({
   loginType,
 }: Props) {
   const [changePwOpen, setChangePwOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [editingInfo, setEditingInfo] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(userName);
   const [jobDraft, setJobDraft] = useState(userJob);
@@ -334,7 +336,11 @@ export function MyPageModal({
                     비밀번호 변경
                   </button>
                 )}
-                <button type="button" className="mpWithdrawBtn" onClick={onWithdraw}>
+                <button
+                  type="button"
+                  className="mpWithdrawBtn"
+                  onClick={() => setWithdrawOpen(true)}
+                >
                   회원 탈퇴
                 </button>
               </div>
@@ -372,6 +378,12 @@ export function MyPageModal({
           }}
         />
       )}
+      <WithdrawModal
+        open={withdrawOpen}
+        loginType={loginType}
+        onClose={() => setWithdrawOpen(false)}
+        onConfirm={onWithdraw}
+      />
     </>
   );
 }
