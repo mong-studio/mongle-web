@@ -2,6 +2,7 @@ import type React from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   type ApiCharacter,
+  type ApiComment,
   type ApiPost,
   fetchCharacters,
   fetchPosts,
@@ -156,6 +157,11 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
     setApiPosts((prev) => prev.map((p) => (p.post_id === postId ? { ...p, is_liked: value } : p)));
   }
 
+  // 상세에서 댓글이 바뀌면 목록의 댓글 수도 같이 맞춘다(좋아요 동기화와 동형).
+  function setPostComments(postId: string, comments: ApiComment[]) {
+    setApiPosts((prev) => prev.map((p) => (p.post_id === postId ? { ...p, comments } : p)));
+  }
+
   // 피드 목록에서의 토글: 낙관적 갱신 후 서버 응답으로 보정, 실패 시 롤백.
   // ponytail: 연타 시 race 가능, 서버 응답이 최종값으로 수렴하므로 무시
   async function toggleLikeFor(postId: string) {
@@ -301,6 +307,7 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
           onBack={() => setNavScreen(postBackTo)}
           onOpenProfile={() => setNavScreen("profile")}
           onLikeChange={setPostLiked}
+          onCommentsChange={setPostComments}
           onNotice={onNotice}
           onApplesRefresh={onApplesRefresh}
           authorActive={selectedCharacterId ? charMap.has(selectedCharacterId) : false}
