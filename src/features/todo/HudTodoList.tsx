@@ -95,24 +95,31 @@ export function HudTodoList({
                 setDismissedTooltipId(null);
               }}
             >
-              <button
-                type="button"
-                className="hudTodoCheck"
-                aria-label={`${todo.title} 완료`}
-                aria-pressed={isDone}
-                disabled={isClosed}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onCompleteTodo(todo.id);
-                }}
-              >
-                {isDone ? (
-                  <CheckRoundedIcon className="hudTodoCheckIcon" aria-hidden="true" />
-                ) : isFailed ? (
-                  <CloseRoundedIcon className="hudTodoFailIcon" aria-hidden="true" />
-                ) : null}
-                <span className="srOnly">{isDone ? "완료됨" : isFailed ? "포기됨" : "미완료"}</span>
-              </button>
+              <DeleteConfirmDialog
+                title="할일을 완료할까요?"
+                description="완료하면 다시 되돌릴 수 없어요."
+                confirmLabel="완료"
+                onConfirm={() => onCompleteTodo(todo.id)}
+                trigger={
+                  <button
+                    type="button"
+                    className="hudTodoCheck"
+                    aria-label={`${todo.title} 완료`}
+                    aria-pressed={isDone}
+                    disabled={isClosed}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    {isDone ? (
+                      <CheckRoundedIcon className="hudTodoCheckIcon" aria-hidden="true" />
+                    ) : isFailed ? (
+                      <CloseRoundedIcon className="hudTodoFailIcon" aria-hidden="true" />
+                    ) : null}
+                    <span className="srOnly">
+                      {isDone ? "완료됨" : isFailed ? "포기됨" : "미완료"}
+                    </span>
+                  </button>
+                }
+              />
               <button
                 type="button"
                 className="hudTodoContentButton"
