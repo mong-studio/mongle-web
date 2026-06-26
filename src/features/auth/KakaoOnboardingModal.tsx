@@ -1,21 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { JOB_OPTIONS as JOBS } from "../../shared/jobs.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { completeKakaoSignup, toUserMessage } from "./api.js";
 import { AI_CONSENT, ConsentDetailModal, PRIVACY_CONSENT } from "./ConsentDetailModal.js";
 import { useAuthStore } from "./store.js";
 import "./SignupModal.css";
-
-const JOBS = [
-  "학생",
-  "직장인",
-  "프리랜서",
-  "자영업",
-  "주부",
-  "기획자",
-  "개발자",
-  "디자이너",
-  "기타",
-];
 
 type Props = {
   open: boolean;
