@@ -230,7 +230,11 @@ function DayModalPanel({
                     key={`${y}-${m}-${d}`}
                     ymd={{ y, m, d }}
                     tags={tags}
-                    onAddEvent={onAddEvent}
+                    onAddEvent={async (...args) => {
+                      // 추가가 성공하면 모달을 닫아 캘린더로 돌아간다(실패 시엔 폼 유지).
+                      await onAddEvent(...args);
+                      onClose();
+                    }}
                     onCreateTag={onCreateTag}
                     onDeleteTag={onDeleteTag}
                     onEditTag={onEditTag}
