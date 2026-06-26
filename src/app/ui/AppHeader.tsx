@@ -12,6 +12,7 @@ type AppHeaderProps = {
   onLogin: () => void;
   onLogout: () => void;
   onOpenSettings: () => void;
+  onOpenTutorial: () => void;
   onSignup: () => void;
   unreadNotificationCount?: number;
 };
@@ -26,6 +27,7 @@ export function AppHeader({
   onLogin,
   onLogout,
   onOpenSettings,
+  onOpenTutorial,
   onSignup,
   unreadNotificationCount,
 }: AppHeaderProps) {
@@ -94,6 +96,14 @@ export function AppHeader({
     <header className="townNav">
       <div className="brandBadge">
         <img className="navLogo" src="/assets/hud/square_logo.png" alt="몽글 로고" />
+        <button
+          type="button"
+          className="tutorialHelpButton"
+          aria-label="튜토리얼 보기"
+          onClick={onOpenTutorial}
+        >
+          ?
+        </button>
       </div>
       <div className="navUserArea">
         {isAuthenticated ? (
