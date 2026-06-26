@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
-import { type ApiPost, createComment, fetchPostDetail, toggleLike } from "./api.js";
+import {
+  type ApiComment,
+  type ApiPost,
+  createComment,
+  fetchPostDetail,
+  toggleLike,
+} from "./api.js";
 import { CharacterAvatar } from "./CharacterAvatar.js";
 import {
   COMMENT_TOKEN_COST,
@@ -23,6 +29,8 @@ interface PostScreenProps {
   onBack: () => void;
   onOpenProfile: () => void;
   onLikeChange: (postId: string, value: boolean) => void;
+  // 댓글 수를 피드 목록과 동기화한다(좋아요의 onLikeChange 와 동형).
+  onCommentsChange: (postId: string, comments: ApiComment[]) => void;
   onNotice: (message: string) => void;
   onApplesRefresh: () => void;
   authorActive: boolean;
@@ -35,6 +43,7 @@ export function PostScreen({
   onBack,
   onOpenProfile,
   onLikeChange,
+  onCommentsChange,
   onNotice,
   onApplesRefresh,
   authorActive,
@@ -79,7 +88,9 @@ export function PostScreen({
     try {
       const newComment = await createComment(post.post_id, content);
       // 응답 댓글을 목록에 바로 추가 (답글은 약 10분 뒤 서버가 생성)
-      setPost((prev) => (prev ? { ...prev, comments: [...prev.comments, newComment] } : prev));
+      const nextComments = [...post.comments, newComment];
+      setPost((prev) => (prev ? { ...prev, comments: nextComments } : prev));
+      onCommentsChange(post.post_id, nextComments); // 피드 목록 카운트도 동기화
       setCommentText("");
       setDailyCount((c) => c + 1); // 오늘 할당량 표시 갱신
       onApplesRefresh(); // 차감된 사과 잔액을 HUD에 반영
