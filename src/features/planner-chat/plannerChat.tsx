@@ -50,6 +50,9 @@ function formatPlannerDate(date: string) {
   }).format(value);
 }
 
+// 이장님과 대화하기 입력은 공백 포함 최대 600자(백엔드 chat message max_length=600 와 일치).
+const PLANNER_MESSAGE_MAX_LENGTH = 600;
+
 function resizePlannerInput(inputElement: HTMLTextAreaElement | null) {
   if (!inputElement) {
     return;
@@ -343,6 +346,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
               <textarea
                 ref={inputRef}
                 value={input}
+                maxLength={PLANNER_MESSAGE_MAX_LENGTH}
                 onChange={(event) => {
                   setInput(event.target.value);
                   resizePlannerInput(event.currentTarget);
