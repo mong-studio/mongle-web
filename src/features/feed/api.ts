@@ -72,6 +72,11 @@ export async function toggleLike(postId: string): Promise<boolean> {
   return data.is_liked;
 }
 
+/** 본인 게시물을 삭제한다. 댓글·답글은 서버에서 함께 삭제된다(CASCADE). */
+export async function deletePost(postId: string): Promise<void> {
+  await apiClient.delete(`/posts/${postId}/`);
+}
+
 interface CharacterListResponse {
   items: ApiCharacter[];
   page: { limit: number; next_cursor: string | null; has_next: boolean };

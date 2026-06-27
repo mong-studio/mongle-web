@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import {
   type ApiComment,
   type ApiPost,
   createComment,
+  deletePost,
   fetchPostDetail,
   toggleLike,
 } from "./api.js";
@@ -31,6 +33,8 @@ interface PostScreenProps {
   onLikeChange: (postId: string, value: boolean) => void;
   // 댓글 수를 피드 목록과 동기화한다(좋아요의 onLikeChange 와 동형).
   onCommentsChange: (postId: string, comments: ApiComment[]) => void;
+  // 게시물 삭제 후 피드 목록에서도 제거한다.
+  onDeleted: (postId: string) => void;
   onNotice: (message: string) => void;
   onApplesRefresh: () => void;
   authorActive: boolean;
@@ -44,6 +48,7 @@ export function PostScreen({
   onOpenProfile,
   onLikeChange,
   onCommentsChange,
+  onDeleted,
   onNotice,
   onApplesRefresh,
   authorActive,
@@ -59,6 +64,7 @@ export function PostScreen({
   const [dailyCount, setDailyCount] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [postError, setPostError] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const confirmBackdrop = useBackdropDismiss(() => setConfirmOpen(false));
   const confirmOkRef = useRef<HTMLButtonElement>(null);
 
@@ -117,6 +123,19 @@ export function PostScreen({
       onLikeChange(post.post_id, !next);
     } finally {
       setLikeSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!post || deleting) return;
+    setDeleting(true);
+    try {
+      await deletePost(post.post_id);
+      onDeleted(post.post_id); // 피드 목록에서 제거
+      onBack(); // 목록으로 돌아간다
+    } catch {
+      setDeleting(false);
+      onNotice("게시물을 삭제하지 못했어요. 잠시 후 다시 시도해주세요.");
     }
   }
 
@@ -186,6 +205,22 @@ export function PostScreen({
 
       <div className="pd-scroll">
         <article className="pd-post" style={{ background: th.cardBg, borderColor: th.cardEdge }}>
+          <DeleteConfirmDialog
+            title="게시물을 삭제할까요?"
+            description="삭제하면 댓글·답글도 함께 사라지고 되돌릴 수 없어요."
+            confirmLabel="삭제"
+            onConfirm={() => void handleDelete()}
+            trigger={
+              <button
+                type="button"
+                className="pd-delete"
+                disabled={deleting}
+                aria-label="게시물 삭제"
+              >
+                {deleting ? "삭제 중…" : "삭제"}
+              </button>
+            }
+          />
           <button type="button" className="pd-author" onClick={onOpenProfile}>
             <CharacterAvatar
               imageUrl={postAuthorAvatarUrl}
