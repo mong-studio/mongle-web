@@ -675,11 +675,29 @@
 
 /* ── post detail: card ───────────────────────────────────────────────────── */
 .pd-post {
+  position: relative;
   border: 1px solid;
   border-radius: 22px;
   padding: 14px;
   box-shadow: 0 6px 18px -14px rgba(94, 71, 40, 0.5);
   margin-bottom: 16px;
+}
+/* 게시글 카드 오른쪽 위의 삭제 버튼(테두리·배경 없이 글자만). */
+.pd-delete {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: #c56b7d;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pd-delete:disabled {
+  cursor: default;
+  opacity: 0.6;
 }
 .pd-author {
   display: flex;

@@ -205,6 +205,22 @@ export function PostScreen({
 
       <div className="pd-scroll">
         <article className="pd-post" style={{ background: th.cardBg, borderColor: th.cardEdge }}>
+          <DeleteConfirmDialog
+            title="게시물을 삭제할까요?"
+            description="삭제하면 댓글·답글도 함께 사라지고 되돌릴 수 없어요."
+            confirmLabel="삭제"
+            onConfirm={() => void handleDelete()}
+            trigger={
+              <button
+                type="button"
+                className="pd-delete"
+                disabled={deleting}
+                aria-label="게시물 삭제"
+              >
+                {deleting ? "삭제 중…" : "삭제"}
+              </button>
+            }
+          />
           <button type="button" className="pd-author" onClick={onOpenProfile}>
             <CharacterAvatar
               imageUrl={postAuthorAvatarUrl}
@@ -270,24 +286,6 @@ export function PostScreen({
               <PixelSprite art={SPRITES.arrow} palette={{ x: th.accent }} px={2} />
               <span>공유하기</span>
             </button>
-
-            <DeleteConfirmDialog
-              title="게시물을 삭제할까요?"
-              description="삭제하면 댓글·답글도 함께 사라지고 되돌릴 수 없어요."
-              confirmLabel="삭제"
-              onConfirm={() => void handleDelete()}
-              trigger={
-                <button
-                  type="button"
-                  className="pd-react"
-                  style={{ color: "#c56b7d" }}
-                  disabled={deleting}
-                  aria-label="게시물 삭제"
-                >
-                  <span>{deleting ? "삭제 중…" : "삭제"}</span>
-                </button>
-              }
-            />
           </footer>
         </article>
 
