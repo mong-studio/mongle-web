@@ -4,6 +4,7 @@ import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import {
   type ApiComment,
   type ApiPost,
+  commentTotal,
   createComment,
   deletePost,
   fetchPostDetail,
@@ -272,7 +273,7 @@ export function PostScreen({
 
             <button type="button" className="pd-react" style={{ color: th.ink }}>
               <PixelSprite art={SPRITES.comment} palette={{ x: th.inkFaint }} px={3} />
-              <span>{post.comments.length}</span>
+              <span>{commentTotal(post.comments)}</span>
             </button>
 
             <div style={{ flex: 1 }} />
@@ -291,7 +292,7 @@ export function PostScreen({
 
         <div className="pd-comments">
           <div className="pd-comments-h" style={{ color: th.ink }}>
-            댓글 {post.comments.length}
+            댓글 {commentTotal(post.comments)}
           </div>
           {post.comments.length === 0 && (
             <div className="pd-comments-empty" style={{ color: th.inkSoft }}>
