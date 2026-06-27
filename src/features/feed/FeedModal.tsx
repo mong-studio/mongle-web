@@ -162,6 +162,11 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
     setApiPosts((prev) => prev.map((p) => (p.post_id === postId ? { ...p, comments } : p)));
   }
 
+  // 게시물 삭제 후 목록에서도 제거한다.
+  function removePost(postId: string) {
+    setApiPosts((prev) => prev.filter((p) => p.post_id !== postId));
+  }
+
   // 피드 목록에서의 토글: 낙관적 갱신 후 서버 응답으로 보정, 실패 시 롤백.
   // ponytail: 연타 시 race 가능, 서버 응답이 최종값으로 수렴하므로 무시
   async function toggleLikeFor(postId: string) {
@@ -308,6 +313,7 @@ export function FeedModal({ onClose: _onClose, onNotice, onApplesRefresh }: Feed
           onOpenProfile={() => setNavScreen("profile")}
           onLikeChange={setPostLiked}
           onCommentsChange={setPostComments}
+          onDeleted={removePost}
           onNotice={onNotice}
           onApplesRefresh={onApplesRefresh}
           authorActive={selectedCharacterId ? charMap.has(selectedCharacterId) : false}
