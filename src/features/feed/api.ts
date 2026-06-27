@@ -33,6 +33,11 @@ export interface ApiPost {
   created_at: string;
 }
 
+/** 댓글 + 각 댓글의 답글까지 합한 총 개수(스레드 전체 댓글 수). */
+export function commentTotal(comments: ApiComment[]): number {
+  return comments.reduce((sum, c) => sum + 1 + c.replies.length, 0);
+}
+
 export interface ApiCharacter {
   character_id: string;
   name: string;
@@ -112,7 +117,7 @@ export function toFeedPost(post: ApiPost, charMap: Map<string, ApiCharacter>): F
     tags: [],
     likes: post.is_liked ? 1 : 0,
     isLiked: post.is_liked,
-    comments: post.comments.length,
+    comments: commentTotal(post.comments),
     heroPlaceholder: "사진",
     imageUrl: post.img_url,
     avatarUrl: char?.gen_img_url ?? post.gen_img_url ?? undefined,
