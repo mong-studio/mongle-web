@@ -23,12 +23,12 @@ function todo(over: Partial<CalEvent>): CalEvent {
 }
 
 describe("canExtendTodo — 연장 버튼 노출 조건", () => {
-  it("지난 진행 중(IN_PROGRESS) 할일은 연장 가능", () => {
-    expect(canExtendTodo(todo({ s: PAST, done: false, failed: false }), TODAY)).toBe(true);
+  it("지난 실패(FAILED) 할일은 연장 가능 — 자동 실패·포기 모두 FAILED 상태", () => {
+    expect(canExtendTodo(todo({ s: PAST, done: false, failed: true }), TODAY)).toBe(true);
   });
 
-  it("지난 포기(FAILED) 할일도 연장 가능", () => {
-    expect(canExtendTodo(todo({ s: PAST, done: false, failed: true }), TODAY)).toBe(true);
+  it("지난 진행 중(자정 배치 전 잔여분)도 방어적으로 연장 가능", () => {
+    expect(canExtendTodo(todo({ s: PAST, done: false, failed: false }), TODAY)).toBe(true);
   });
 
   it("지난 완료(COMPLETED) 할일은 연장 불가", () => {
