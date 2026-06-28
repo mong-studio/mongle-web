@@ -21,6 +21,7 @@ import { PomodoroHud } from "../features/pomodoro/PomodoroHud.js";
 import { HudTodoList } from "../features/todo/HudTodoList.js";
 import {
   completeTodo as completeTodoRequest,
+  extendTodo as extendTodoRequest,
   failTodo as failTodoRequest,
   formatTodayIso,
 } from "../features/todo/todoApi.js";
@@ -912,6 +913,32 @@ export function App() {
     [showNotice, syncNotifications, refreshTodos],
   );
 
+  // 캘린더에서 지난 미완료 할일을 토큰을 써서 연장한다.
+  // 토큰 차감·잔액 갱신·안내·HUD 동기화를 담당하고, 실패는 다시 throw 해 호출부가 알게 한다.
+  const handleCalendarExtendTodo = useCallback(
+    async (todoId: string, newDate: string, title: string) => {
+      try {
+        const result = await extendTodoRequest(todoId, newDate);
+        setApples(result.token_balance);
+        showNotice(`${title} 일정을 연장했어요.`);
+        await refreshTodos();
+      } catch (error) {
+        // 백엔드 오류 응답({error:"..."} 또는 {error:{message}})에서 안내 문구를 뽑는다.
+        const data = (error as { response?: { data?: { error?: unknown } } }).response?.data;
+        const serverError = data?.error;
+        const message =
+          typeof serverError === "string"
+            ? serverError
+            : serverError && typeof serverError === "object" && "message" in serverError
+              ? String((serverError as { message?: unknown }).message ?? "")
+              : "";
+        showNotice(message || "연장에 실패했어요.");
+        throw error;
+      }
+    },
+    [showNotice, refreshTodos],
+  );
+
   function rewardReflectionApples(amount: number) {
     setApples((current) => applyAppleDelta(current, amount));
   }
@@ -1031,6 +1058,7 @@ export function App() {
         calendarOpen={calendarOpen}
         onCalendarTodosChanged={refreshTodos}
         onCalendarCompleteTodo={handleCalendarCompleteTodo}
+        onCalendarExtendTodo={handleCalendarExtendTodo}
         characterName={characterName}
         characterPersona={characterPersona}
         characterSetupOpen={characterSetupOpen}

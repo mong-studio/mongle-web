@@ -190,3 +190,18 @@ export async function failTodo(todoId: string): Promise<TodoFailResponse> {
   const { data } = await apiClient.patch<TodoFailResponse>(`/todos/${todoId}/fail/`);
   return data;
 }
+
+export type TodoExtendResponse = {
+  todo_id: string;
+  status: string;
+  todo_date: string;
+  token_balance: number;
+};
+
+// 지난 미완료 TODO를 토큰을 사용해 희망 날짜(오늘 이후)로 옮긴다.
+export async function extendTodo(todoId: string, todoDate: string): Promise<TodoExtendResponse> {
+  const { data } = await apiClient.patch<TodoExtendResponse>(`/todos/${todoId}/extend/`, {
+    todo_date: todoDate,
+  });
+  return data;
+}

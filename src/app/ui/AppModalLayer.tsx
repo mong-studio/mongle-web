@@ -36,6 +36,7 @@ type AppModalLayerProps = {
   onCalendarClose: () => void;
   onCalendarTodosChanged: () => void;
   onCalendarCompleteTodo: (todoId: string, title: string, dueDate: string) => Promise<void>;
+  onCalendarExtendTodo: (todoId: string, newDate: string, title: string) => Promise<void>;
   onCharacterImageUpload: (file: File | undefined) => void;
   onCharacterNameChange: (value: string) => void;
   onCharacterPersonaChange: (value: string) => void;
@@ -87,6 +88,7 @@ export function AppModalLayer({
   onCalendarClose,
   onCalendarTodosChanged,
   onCalendarCompleteTodo,
+  onCalendarExtendTodo,
   onCharacterImageUpload,
   onCharacterNameChange,
   onCharacterPersonaChange,
@@ -206,6 +208,7 @@ export function AppModalLayer({
         onOpenLogin={onLoginOpen}
         onTodosChanged={onCalendarTodosChanged}
         onCompleteTodo={onCalendarCompleteTodo}
+        onExtendTodo={onCalendarExtendTodo}
       />
 
       {feedOpen ? (
