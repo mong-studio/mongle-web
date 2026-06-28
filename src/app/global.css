@@ -169,15 +169,17 @@ button {
 
 .brandBadge {
   justify-self: start;
-  width: 132px;
   height: 58px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
 }
 
-.brandBadge img {
+.brandBadge .navLogo {
   display: block;
-  width: 100%;
+  width: clamp(96px, 12vw, 132px);
+  flex: 0 1 auto;
   max-height: 100%;
   object-fit: contain;
   filter: sepia(0.08) saturate(0.9) brightness(0.98);
@@ -872,9 +874,10 @@ input[type="checkbox"]:checked::after {
 
 @media (max-width: 1060px) {
   .brandBadge {
-    width: 140px;
     height: 54px;
+    gap: 10px;
   }
+
   .townNav .tokenBadge {
     height: 54px;
     min-height: 54px;
@@ -906,8 +909,11 @@ input[type="checkbox"]:checked::after {
     gap: 10px;
   }
   .brandBadge {
-    width: 112px;
     height: 48px;
+    gap: 8px;
+  }
+  .brandBadge .navLogo {
+    width: clamp(76px, 24vw, 96px);
   }
   .navUserArea {
     gap: 7px;
