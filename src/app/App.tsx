@@ -25,6 +25,7 @@ import {
   formatTodayIso,
 } from "../features/todo/todoApi.js";
 import type { TodoCommitResult, TodoItem } from "../features/todo/todoCreation.js";
+import { TutorialModal } from "../features/tutorial/TutorialModal.js";
 import { PhaserVillage } from "../features/village/PhaserVillage.js";
 import { apiClient } from "../shared/api/client.js";
 import { FEATURES, type FeatureId } from "./featureRegistry.js";
@@ -145,6 +146,7 @@ export function App() {
   const logoutSession = useAuthStore((state: AuthState) => state.logout);
   const [loginOpen, setLoginOpen] = useState(false);
   const [kakaoSignupToken, setKakaoSignupToken] = useState<string | null>(null);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [feedOpen, setFeedOpen] = useState(false);
   const [characterSetupOpen, setCharacterSetupOpen] = useState(false);
@@ -179,10 +181,30 @@ export function App() {
   // 마을(Phaser)은 windowEvents 로 DOM 모달 위 클릭까지 처리하므로, 어떤 모달이든 열려 있으면
   // 마을 입력을 막아야 한다(회고 전용 X). 안 그러면 캐릭터 재생성 확인 팝업의 '취소' 클릭이
   // 뒤편 일정 게시판(캘린더)으로 새어 들어가 모달이 닫히고 미리보기·생성 횟수가 소실된다.
-  const villageInputBlocked = overlayOpenRef.current || reflectionOpen;
+  const villageInputBlocked = overlayOpenRef.current || reflectionOpen || tutorialOpen;
 
   useEffect(() => {
     void useAuthStore.getState().restoreSession();
+  }, []);
+
+  // 최초 접속(튜토리얼 미열람)이면 튜토리얼을 자동으로 띄운다. 닫으면 다시 뜨지 않는다.
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("mongle:tutorialSeen")) {
+        setTutorialOpen(true);
+      }
+    } catch {
+      // localStorage 접근 불가(시크릿 모드 등)면 자동 표시를 건너뛴다.
+    }
+  }, []);
+
+  const closeTutorial = useCallback(() => {
+    setTutorialOpen(false);
+    try {
+      localStorage.setItem("mongle:tutorialSeen", "1");
+    } catch {
+      // 저장 실패해도 이번 세션에서는 닫힌 상태를 유지한다.
+    }
   }, []);
 
   const clearNoticeTimer = useCallback(() => {
@@ -952,6 +974,7 @@ export function App() {
         onLogin={() => setLoginOpen(true)}
         onLogout={() => void logoutSession()}
         onOpenSettings={openSettings}
+        onOpenTutorial={() => setTutorialOpen(true)}
         onSignup={() => setSignupOpen(true)}
         unreadNotificationCount={
           notifHistory.length > 0 && !notificationOpen ? notifHistory.length : undefined
@@ -1093,6 +1116,8 @@ export function App() {
           showNotice("환영해요! 몽글마을에 오신 걸 축하해요.");
         }}
       />
+
+      <TutorialModal open={tutorialOpen} onClose={closeTutorial} />
 
       <NotificationToastLayer />
 

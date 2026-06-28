@@ -75,6 +75,10 @@
   transform: scale(1.78);
 }
 
+.hudButton--tutorial .hudButtonIcon {
+  transform: scale(1.76);
+}
+
 .hudButtonText {
   position: absolute;
   inset: 0;
