@@ -53,6 +53,23 @@ describe("notification store", () => {
     expect(useNotificationStore.getState().toasts.map((item) => item.serverId)).toEqual([1]);
   });
 
+  it("서버 feed 알림은 type을 feed로 매핑하고 동기화 후 토스트로 노출한다", () => {
+    // 캐릭터 생성 알림처럼, 피드 알림도 토스트 + 알림창(history)에 함께 떠야 한다.
+    useNotificationStore.getState().replaceServerNotifications([]); // 최초 동기화로 hydrate
+    useNotificationStore.getState().replaceServerNotifications([
+      serverNotification(5, {
+        type: "feed",
+        title: "몽이의 새 소식이 도착했어요!",
+        content: "오늘도 산책했어요!",
+        data: { target: "feed", post_id: "abc" },
+      }),
+    ]);
+
+    const state = useNotificationStore.getState();
+    expect(state.history.find((item) => item.serverId === 5)?.type).toBe("feed");
+    expect(state.toasts.map((item) => item.serverId)).toEqual([5]);
+  });
+
   it("개별 및 전체 읽음 처리한 알림은 목록에서 제거한다", () => {
     // 개별 읽음과 모두 읽기 동작이 패널의 로컬 목록을 즉시 갱신하는지 검증한다.
     useNotificationStore

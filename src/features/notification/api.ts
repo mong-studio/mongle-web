@@ -9,6 +9,7 @@ export type ServerNotification = {
   data: {
     target?: string;
     reflection_date?: string;
+    post_id?: string;
   };
   created_at: string;
 };
