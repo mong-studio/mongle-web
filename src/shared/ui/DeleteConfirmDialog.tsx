@@ -119,7 +119,7 @@ export function DeleteConfirmDialog({
             width: "90%",
             maxWidth: 340,
             background: "var(--cream-1)",
-            borderRadius: "var(--r-xl)",
+            borderRadius: "var(--r-lg)",
             border: "2px solid var(--line)",
             boxShadow: "var(--sh-pop)",
             padding: "22px 20px 18px",
@@ -149,12 +149,11 @@ export function DeleteConfirmDialog({
           >
             {description}
           </AlertDialog.Description>
-          <div style={{ display: "flex", gap: 9, marginTop: 4 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9, marginTop: 4 }}>
             <AlertDialog.Cancel asChild>
               <button
                 type="button"
                 style={{
-                  flex: 1,
                   padding: "10px",
                   borderRadius: "var(--r-md)",
                   cursor: "pointer",
@@ -173,7 +172,6 @@ export function DeleteConfirmDialog({
                 type="button"
                 onClick={onConfirm}
                 style={{
-                  flex: 2,
                   padding: "10px",
                   borderRadius: "var(--r-md)",
                   cursor: "pointer",
