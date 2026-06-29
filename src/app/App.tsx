@@ -960,6 +960,12 @@ export function App() {
       setReflectionDate(item.reflectionDate);
       setReflectionOpen(true);
     }
+
+    // 피드 알림을 누르면 마을 게시판(피드) 모달을 연다.
+    if (item.type === "feed") {
+      setNotificationOpen(false);
+      setFeedOpen(true);
+    }
   }
 
   async function handleMarkAllNotificationsRead() {

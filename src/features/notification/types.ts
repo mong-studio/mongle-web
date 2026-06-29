@@ -1,9 +1,11 @@
 /**
  * 알림 타입 종류
- *   "resident" — 새 주민이 마을에 입주했을 때  (캐릭터 생성 완료)
- *   "reward"   — 할일 완료 보상을 받았을 때     (사과 +N)
+ *   "resident"   — 새 주민이 마을에 입주했을 때  (캐릭터 생성 완료)
+ *   "reward"     — 할일 완료 보상을 받았을 때     (사과 +N)
+ *   "reflection" — 회고 작성 안내                 (서버 알림)
+ *   "feed"       — 캐릭터가 새 피드 글을 올렸을 때 (서버 알림)
  */
-export type NotificationToastType = "resident" | "reward" | "reflection";
+export type NotificationToastType = "resident" | "reward" | "reflection" | "feed";
 
 /**
  * 토스트 / 알림 패널 양쪽에서 공통으로 쓰는 알림 데이터 구조.

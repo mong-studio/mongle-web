@@ -40,6 +40,7 @@ function iconForItem(item: NotificationToastItem): string {
   if (item.avatarUrl) return item.avatarUrl;
   if (item.type === "reward") return "/assets/notification/icon-apple.png";
   if (item.type === "reflection") return "/assets/icon/calendar.png";
+  if (item.type === "feed") return "/assets/icon/mail.png";
   return "/assets/character/avatar.png";
 }
 

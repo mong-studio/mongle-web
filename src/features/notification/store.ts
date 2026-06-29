@@ -88,7 +88,12 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
         .filter((notification) => !notification.is_read)
         .map((notification) => ({
           id: `server-${notification.notification_id}`,
-          type: notification.type === "reflection" ? "reflection" : "resident",
+          type:
+            notification.type === "reflection"
+              ? "reflection"
+              : notification.type === "feed"
+                ? "feed"
+                : "resident",
           title: notification.title,
           body: notification.content,
           createdAt: new Date(notification.created_at).getTime(),

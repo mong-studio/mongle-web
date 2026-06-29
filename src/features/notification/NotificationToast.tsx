@@ -80,7 +80,9 @@ function ToastCard({ item }: { item: NotificationToastItem }) {
           item.avatarUrl ??
           (item.type === "reflection"
             ? "/assets/icon/calendar.png"
-            : "/assets/character/avatar.png")
+            : item.type === "feed"
+              ? "/assets/icon/mail.png"
+              : "/assets/character/avatar.png")
         }
         alt=""
         className="notifToastAvatar"
