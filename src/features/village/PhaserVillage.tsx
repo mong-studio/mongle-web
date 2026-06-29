@@ -239,7 +239,6 @@ class VillageScene extends Phaser.Scene {
   private hoveredResidentNpc: { state: ResidentNpcState; label: string } | null = null;
   private lastObjectHintSignature = "";
   private mapBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
-  private missingAssets: string[] = [];
 
   constructor(
     sceneKey: string,
@@ -318,9 +317,6 @@ class VillageScene extends Phaser.Scene {
       this.fitCamera(map);
       this.scale.on(Phaser.Scale.Events.RESIZE, () => this.fitCamera(map));
       this.configureCameraControls();
-      if (this.missingAssets.length > 0) {
-        console.warn("Mongle map loaded with missing assets", this.missingAssets);
-      }
       this.signalReady();
     } catch (error) {
       console.error("Mongle map failed to load", error);
@@ -341,10 +337,8 @@ class VillageScene extends Phaser.Scene {
     for (const tileset of map.tilesets) {
       try {
         tilesets.push(await loadTilesetMeta(tileset.source, tileset.firstgid));
-      } catch (error) {
-        this.missingAssets.push(
-          `${tileset.source}: ${error instanceof Error ? error.message : "load failed"}`,
-        );
+      } catch {
+        // Tiled에 남아 있는 임시 tileset은 렌더링에서 제외한다.
       }
     }
     return tilesets.sort((a, b) => a.firstgid - b.firstgid);
