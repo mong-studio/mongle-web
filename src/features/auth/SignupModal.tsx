@@ -7,6 +7,7 @@ import {
   signup as signupRequest,
   toUserMessage,
 } from "./api.js";
+import { getLatestEligibleBirthDateInputValue, isAtLeastSignupAge } from "./birthDate.js";
 import "./SignupModal.css";
 
 const AGREEMENTS = [
@@ -33,6 +34,8 @@ const CONSENT_LINKS: Record<"privacy" | "ai", string> = {
   ai: "https://spiffy-beach-2f1.notion.site/AI-387cfd3302278056b526e1a2ee9bc13d?source=copy_link",
 };
 
+const VERIFICATION_CODE_LENGTH = 6;
+
 type SignupModalProps = {
   open: boolean;
   onClose: () => void;
@@ -54,7 +57,9 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
   const [codeTimer, setCodeTimer] = useState(0);
   const codeTimerRef = useRef<ReturnType<typeof setInterval>>();
   const [verified, setVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
+  const [failedVerificationCode, setFailedVerificationCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [agree, setAgree] = useState({ terms: false, privacy: false, ai: false });
   const [toast, setToast] = useState("");
@@ -72,7 +77,9 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       setSending(false);
       setCodeSent(false);
       setVerified(false);
+      setVerifying(false);
       setVerificationToken("");
+      setFailedVerificationCode("");
       setSubmitting(false);
       setAgree({ terms: false, privacy: false, ai: false });
       setToast("");
@@ -85,6 +92,14 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
   }, [open]);
 
   const pwMismatch = pw2.length > 0 && pw !== pw2;
+  const normalizedCode = code.trim().toUpperCase();
+  const canVerifyCode =
+    codeSent &&
+    !verified &&
+    !verifying &&
+    normalizedCode.length === VERIFICATION_CODE_LENGTH &&
+    normalizedCode !== failedVerificationCode;
+  const maxBirthDate = getLatestEligibleBirthDateInputValue();
 
   function showToast(msg: string) {
     setToast(msg);
@@ -102,6 +117,10 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
     try {
       await requestEmailVerification(email.trim());
       setCodeSent(true);
+      setCode("");
+      setVerified(false);
+      setVerificationToken("");
+      setFailedVerificationCode("");
       showToast("인증 코드를 보냈어요! 메일함을 확인해주세요");
       setCooldown(30);
       cooldownRef.current = setInterval(() => {
@@ -136,17 +155,23 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       showToast("먼저 코드를 발송해주세요");
       return;
     }
-    if (code.trim().length < 4) {
+    if (normalizedCode.length !== VERIFICATION_CODE_LENGTH) {
       showToast("인증 코드를 정확히 입력해주세요");
       return;
     }
+    if (normalizedCode === failedVerificationCode) return;
+    setVerifying(true);
     try {
-      const result = await confirmEmailVerification(email.trim(), code.trim().toUpperCase());
+      const result = await confirmEmailVerification(email.trim(), normalizedCode);
       setVerificationToken(result.verification_token);
       setVerified(true);
+      setFailedVerificationCode("");
       showToast("이메일 인증 완료! ✿");
     } catch (err) {
+      setFailedVerificationCode(normalizedCode);
       showToast(toUserMessage(err));
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -192,16 +217,9 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
       showToast("생년월일을 입력해주세요");
       return;
     }
-    {
-      const today = new Date();
-      const b = new Date(birth);
-      let age = today.getFullYear() - b.getFullYear();
-      const m = today.getMonth() - b.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
-      if (age < 14) {
-        showToast("생년월일을 확인해 주세요 (만 14세 이상 가입 가능)");
-        return;
-      }
+    if (!isAtLeastSignupAge(birth)) {
+      showToast("생년월일을 확인해 주세요 (만 14세 이상 가입 가능)");
+      return;
     }
     if (!agree.terms || !agree.privacy) {
       showToast("필수 약관에 동의해주세요");
@@ -289,6 +307,8 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
                   setEmail(e.target.value);
                   setVerified(false);
                   setCodeSent(false);
+                  setVerificationToken("");
+                  setFailedVerificationCode("");
                 }}
                 placeholder="user@example.com"
               />
@@ -330,7 +350,7 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
               <input
                 className={`suInput suInput--code${verified ? " suInput--verified" : ""}`}
                 value={code}
-                maxLength={6}
+                maxLength={VERIFICATION_CODE_LENGTH}
                 autoComplete="one-time-code"
                 disabled={verified}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -340,9 +360,9 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
                 type="button"
                 className="suAmberBtn"
                 onClick={handleVerifyCode}
-                disabled={verified}
+                disabled={!canVerifyCode}
               >
-                인증 확인
+                {verifying ? "확인 중…" : "인증 확인"}
               </button>
             </div>
 
@@ -418,30 +438,13 @@ export function SignupModal({ open, onClose, onComplete }: SignupModalProps) {
                   <img src="/assets/auth/flower.png" alt="" className="suLabelImg" />
                   생년월일
                 </div>
-                <div className="suDateWrap">
-                  <input
-                    className={`suInput suDateInput${birth ? " filled" : ""}`}
-                    type="date"
-                    value={birth}
-                    onChange={(e) => setBirth(e.target.value)}
-                  />
-                  <span className="suDateCaret">
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <rect x="3" y="4.5" width="18" height="17" rx="3" />
-                      <path d="M3 9h18M8 2.5v4M16 2.5v4" />
-                    </svg>
-                  </span>
-                </div>
+                <input
+                  className={`suInput suDateInput${birth ? " filled" : ""}`}
+                  type="date"
+                  value={birth}
+                  max={maxBirthDate}
+                  onChange={(e) => setBirth(e.target.value)}
+                />
               </div>
             </div>
 

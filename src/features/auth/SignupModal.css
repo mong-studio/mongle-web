@@ -374,32 +374,11 @@
   font-size: 12px;
 }
 
-/* ── Date input ── */
-.suDateWrap {
-  position: relative;
-}
 .suDateInput {
   color: var(--su-placeholder);
 }
 .suDateInput.filled {
   color: var(--su-ink);
-}
-.suDateInput::-webkit-calendar-picker-indicator {
-  position: absolute;
-  right: 0;
-  width: 44px;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-.suDateCaret {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  display: flex;
-  color: var(--su-caret);
 }
 
 /* ── Agreements box ── */

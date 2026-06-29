@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { JOB_OPTIONS as JOBS } from "../../shared/jobs.js";
 import { useBackdropDismiss } from "../../shared/ui/useBackdropDismiss.js";
 import { completeKakaoSignup, toUserMessage } from "./api.js";
+import { getLatestEligibleBirthDateInputValue, isAtLeastSignupAge } from "./birthDate.js";
 import { AI_CONSENT, ConsentDetailModal, PRIVACY_CONSENT } from "./ConsentDetailModal.js";
 import { useAuthStore } from "./store.js";
 import "./SignupModal.css";
@@ -23,6 +24,7 @@ export function KakaoOnboardingModal({ open, signupToken, onClose, onComplete }:
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const maxBirthDate = getLatestEligibleBirthDateInputValue();
 
   useEffect(() => {
     if (!open) {
@@ -57,16 +59,9 @@ export function KakaoOnboardingModal({ open, signupToken, onClose, onComplete }:
       showToast("생년월일을 입력해주세요");
       return;
     }
-    {
-      const today = new Date();
-      const b = new Date(birth);
-      let age = today.getFullYear() - b.getFullYear();
-      const m = today.getMonth() - b.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
-      if (age < 14) {
-        showToast("생년월일을 확인해 주세요 (만 14세 이상 가입 가능)");
-        return;
-      }
+    if (!isAtLeastSignupAge(birth)) {
+      showToast("생년월일을 확인해 주세요 (만 14세 이상 가입 가능)");
+      return;
     }
     if (!agree.terms || !agree.privacy) {
       showToast("필수 약관에 동의해주세요");
@@ -159,6 +154,7 @@ export function KakaoOnboardingModal({ open, signupToken, onClose, onComplete }:
                 className={`suInput suDateInput${birth ? " filled" : ""}`}
                 type="date"
                 value={birth}
+                max={maxBirthDate}
                 onChange={(e) => setBirth(e.target.value)}
               />
             </div>

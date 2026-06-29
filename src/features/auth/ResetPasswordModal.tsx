@@ -8,6 +8,8 @@ import {
 } from "./api.js";
 import "./SignupModal.css";
 
+const VERIFICATION_CODE_LENGTH = 6;
+
 type ResetPasswordModalProps = {
   open: boolean;
   onClose: () => void;
@@ -22,7 +24,9 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
   const [sending, setSending] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
+  const [failedVerificationCode, setFailedVerificationCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -36,7 +40,9 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
       setSending(false);
       setCodeSent(false);
       setVerified(false);
+      setVerifying(false);
       setVerificationToken("");
+      setFailedVerificationCode("");
       setSubmitting(false);
       setToast("");
       clearTimeout(toastTimer.current);
@@ -44,6 +50,13 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
   }, [open]);
 
   const pwMismatch = pw2.length > 0 && pw !== pw2;
+  const normalizedCode = code.trim().toUpperCase();
+  const canVerifyCode =
+    codeSent &&
+    !verified &&
+    !verifying &&
+    normalizedCode.length === VERIFICATION_CODE_LENGTH &&
+    normalizedCode !== failedVerificationCode;
 
   function showToast(msg: string) {
     setToast(msg);
@@ -61,6 +74,10 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
     try {
       await requestPasswordResetCode(email.trim());
       setCodeSent(true);
+      setCode("");
+      setVerified(false);
+      setVerificationToken("");
+      setFailedVerificationCode("");
       showToast("인증 코드를 보냈어요! 메일함을 확인해주세요");
     } catch (err) {
       showToast(toUserMessage(err));
@@ -74,17 +91,23 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
       showToast("먼저 코드를 발송해주세요");
       return;
     }
-    if (code.trim().length < 4) {
+    if (normalizedCode.length !== VERIFICATION_CODE_LENGTH) {
       showToast("인증 코드를 정확히 입력해주세요");
       return;
     }
+    if (normalizedCode === failedVerificationCode) return;
+    setVerifying(true);
     try {
-      const result = await confirmPasswordResetCode(email.trim(), code.trim().toUpperCase());
+      const result = await confirmPasswordResetCode(email.trim(), normalizedCode);
       setVerificationToken(result.verification_token);
       setVerified(true);
+      setFailedVerificationCode("");
       showToast("이메일 인증 완료! ✿");
     } catch (err) {
+      setFailedVerificationCode(normalizedCode);
       showToast(toUserMessage(err));
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -195,6 +218,8 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
               setEmail(e.target.value);
               setVerified(false);
               setCodeSent(false);
+              setVerificationToken("");
+              setFailedVerificationCode("");
             }}
             placeholder="가입한 이메일을 입력해주세요"
           />
@@ -217,8 +242,9 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
           <input
             className={`suInput suInput--code${verified ? " suInput--verified" : ""}`}
             value={code}
-            maxLength={6}
+            maxLength={VERIFICATION_CODE_LENGTH}
             autoComplete="one-time-code"
+            disabled={verified}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="ABCDEF"
           />
@@ -226,9 +252,9 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
             type="button"
             className="suAmberBtn"
             onClick={handleVerifyCode}
-            disabled={verified}
+            disabled={!canVerifyCode}
           >
-            인증 확인
+            {verifying ? "확인 중…" : "인증 확인"}
           </button>
         </div>
         {verified && (
