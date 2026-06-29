@@ -2,9 +2,22 @@ import { apiClient } from "../../shared/api/client.js";
 
 type ApiEnvelope<T> = {
   status: string;
-  result: T;
+  result: T | null;
   error: unknown;
 };
+
+type TodoChatJobRef = {
+  job_id: string;
+};
+
+type TodoChatResult = TodoChatFollowUpResult | TodoChatOutOfScopeResult | TodoGenerateResult;
+type TodoChatPendingEnvelope = {
+  status: "pending";
+  result: TodoChatJobRef;
+  error: unknown;
+};
+type TodoChatFinalEnvelope = ApiEnvelope<TodoChatResult>;
+type TodoChatResponse = TodoChatResult | TodoChatPendingEnvelope | TodoChatFinalEnvelope;
 
 type TaskCandidatePayload = {
   title: string;
@@ -104,22 +117,55 @@ function unwrapApiResult<T>(body: T | ApiEnvelope<T>): T {
     if (envelope.status !== "done") {
       throw new Error(extractErrorMessage(envelope.error, "서버 응답이 완료 상태가 아니에요."));
     }
+    if (!envelope.result) {
+      throw new Error("서버 응답에 결과가 없어요.");
+    }
     return envelope.result;
   }
   return body as T;
 }
 
+function isPendingEnvelope(body: TodoChatResponse): body is TodoChatPendingEnvelope {
+  return (
+    !!body &&
+    typeof body === "object" &&
+    (body as { status?: unknown }).status === "pending" &&
+    !!(body as { result?: unknown }).result &&
+    typeof (body as { result: { job_id?: unknown } }).result.job_id === "string"
+  );
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 export async function chatTodos(payload: {
   message: string;
   thread_id?: string | null;
-}): Promise<TodoChatFollowUpResult | TodoChatOutOfScopeResult | TodoGenerateResult> {
-  const { data } = await apiClient.post<
-    | TodoChatFollowUpResult
-    | TodoChatOutOfScopeResult
-    | TodoGenerateResult
-    | ApiEnvelope<TodoChatFollowUpResult | TodoChatOutOfScopeResult | TodoGenerateResult>
-  >("/todos/chat/", payload);
-  return unwrapApiResult(data);
+}): Promise<TodoChatResult> {
+  const { data } = await apiClient.post<TodoChatResponse>("/todos/chat/", payload);
+  if (isPendingEnvelope(data)) {
+    const { result } = data;
+    return pollTodoChatJob(result.job_id);
+  }
+  return unwrapApiResult<TodoChatResult>(data);
+}
+
+async function pollTodoChatJob(jobId: string): Promise<TodoChatResult> {
+  const deadline = Date.now() + 180_000;
+  while (Date.now() < deadline) {
+    await wait(2_000);
+    const { data } = await apiClient.get<
+      ApiEnvelope<TodoChatFollowUpResult | TodoChatOutOfScopeResult | TodoGenerateResult>
+    >(`/todos/chat/${jobId}/`);
+    if (data.status === "done") {
+      return unwrapApiResult(data);
+    }
+    if (data.status === "error") {
+      throw new Error(extractErrorMessage(data.error, "플랜 생성에 실패했어요."));
+    }
+  }
+  throw new Error("플랜 생성 시간이 초과됐어요.");
 }
 
 export async function savePlannerTodos(payload: PlannerSavePayload): Promise<PlannerSaveResponse> {
