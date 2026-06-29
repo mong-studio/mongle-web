@@ -22,6 +22,9 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
   const [sending, setSending] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  // 마지막으로 인증 시도한 코드. 같은 코드로 다시 누르지 못하게 막는다(코드가 바뀌면 자동 재활성).
+  const [triedCode, setTriedCode] = useState("");
   const [verificationToken, setVerificationToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState("");
@@ -36,6 +39,8 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
       setSending(false);
       setCodeSent(false);
       setVerified(false);
+      setVerifying(false);
+      setTriedCode("");
       setVerificationToken("");
       setSubmitting(false);
       setToast("");
@@ -61,6 +66,7 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
     try {
       await requestPasswordResetCode(email.trim());
       setCodeSent(true);
+      setTriedCode("");
       showToast("인증 코드를 보냈어요! 메일함을 확인해주세요");
     } catch (err) {
       showToast(toUserMessage(err));
@@ -70,14 +76,10 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
   }
 
   async function handleVerifyCode() {
-    if (!codeSent) {
-      showToast("먼저 코드를 발송해주세요");
-      return;
-    }
-    if (code.trim().length < 4) {
-      showToast("인증 코드를 정확히 입력해주세요");
-      return;
-    }
+    // 코드 미발송·형식 미달·같은 코드 재시도는 버튼 비활성으로 막으므로 여기선 중복 호출만 방어.
+    if (verifying || verified) return;
+    setTriedCode(code.trim());
+    setVerifying(true);
     try {
       const result = await confirmPasswordResetCode(email.trim(), code.trim().toUpperCase());
       setVerificationToken(result.verification_token);
@@ -85,6 +87,8 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
       showToast("이메일 인증 완료! ✿");
     } catch (err) {
       showToast(toUserMessage(err));
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -195,6 +199,7 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
               setEmail(e.target.value);
               setVerified(false);
               setCodeSent(false);
+              setTriedCode("");
             }}
             placeholder="가입한 이메일을 입력해주세요"
           />
@@ -226,9 +231,15 @@ export function ResetPasswordModal({ open, onClose, onComplete }: ResetPasswordM
             type="button"
             className="suAmberBtn"
             onClick={handleVerifyCode}
-            disabled={verified}
+            disabled={
+              verified ||
+              !codeSent ||
+              verifying ||
+              code.trim().length < 4 ||
+              code.trim() === triedCode
+            }
           >
-            인증 확인
+            {verifying ? "확인 중…" : "인증 확인"}
           </button>
         </div>
         {verified && (
