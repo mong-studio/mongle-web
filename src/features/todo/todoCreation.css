@@ -133,6 +133,12 @@
   box-shadow: var(--bd-sh-pop);
 }
 
+.boardPanel--result {
+  width: 900px;
+  height: 620px;
+  padding: 30px 36px 34px;
+}
+
 .tdPageIn {
   animation: tdPageIn 0.32s ease both;
 }
@@ -422,13 +428,19 @@
 /* ── Right: 직접 적기 ── */
 .boardAddRow {
   display: flex;
+  align-items: flex-start;
   gap: 14px;
   margin-bottom: 18px;
 }
 
-.boardInput {
+.boardInputWrap {
+  position: relative;
   flex: 1;
   min-width: 0;
+}
+
+.boardInput {
+  width: 100%;
   border: 2px solid var(--bd-border);
   border-radius: 14px;
   padding: 14px 18px;
@@ -445,14 +457,33 @@
   border-color: var(--bd-accent);
 }
 
+.boardInput.isLimit {
+  border-color: var(--bd-accent);
+}
+
 .boardInput::placeholder {
   color: var(--bd-ink-faint);
   opacity: 1;
 }
 
+.boardInputCounter {
+  position: absolute;
+  top: 62px;
+  right: 8px;
+  color: var(--bd-ink-faint);
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.boardInputCounter.isLimit {
+  color: var(--bd-accent-deep);
+}
+
 /* 직접 추가 = 마을 공용 앰버 버튼(소형) */
 .boardAddBtn {
   flex: none;
+  height: 55px;
   cursor: pointer;
   padding: 0 30px;
   border-radius: 14px;
@@ -874,7 +905,20 @@
 /* ── Result page (확정 TODO + 캐릭터 퀘스트) ── */
 .boardResultHeader {
   text-align: center;
+  flex: none;
   margin-bottom: 12px;
+}
+
+.boardPanel--result .boardHeader {
+  margin-bottom: 16px;
+}
+
+.boardPanel--result .boardTitle {
+  font-size: 38px;
+}
+
+.boardPanel--result .boardHeaderFlower {
+  height: 44px;
 }
 
 .boardResultSub {
@@ -885,6 +929,25 @@
   margin-top: 10px;
   color: var(--bd-ink-soft);
   font-size: 15px;
+}
+
+.boardPanel--result .boardBody {
+  flex: 1;
+}
+
+.boardPanel--result .boardGenerated {
+  min-height: 0;
+}
+
+.boardPanel--result .boardFooter {
+  margin-top: 22px;
+}
+
+.boardPanel--result .boardSaveBtn {
+  width: 420px;
+  padding: 15px 0;
+  font-size: 24px;
+  border-radius: 16px;
 }
 
 .boardQuestRow {

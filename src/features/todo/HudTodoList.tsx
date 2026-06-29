@@ -1,7 +1,7 @@
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
 import type { TodoItem } from "./todoCreation.js";
 import "./HudTodoList.css";
@@ -10,6 +10,16 @@ type HudTodoListProps = {
   todos: TodoItem[];
   tagColors: Record<string, string>;
   onAddTodo: () => void;
+  onCompleteTodo: (todoId: string) => void;
+  onFailTodo: (todoId: string) => void;
+};
+
+type HudTodoRowProps = {
+  todo: TodoItem;
+  tagColors: Record<string, string>;
+  isTooltipOpen: boolean;
+  onTooltipToggle: (todoId: string, shouldOpen: boolean) => void;
+  onTooltipClose: () => void;
   onCompleteTodo: (todoId: string) => void;
   onFailTodo: (todoId: string) => void;
 };
@@ -41,6 +51,151 @@ function getHudTagStyle(todo: TodoItem, tag: string): CSSProperties {
   };
 }
 
+function HudTodoRow({
+  todo,
+  tagColors,
+  isTooltipOpen,
+  onTooltipToggle,
+  onTooltipClose,
+  onCompleteTodo,
+  onFailTodo,
+}: HudTodoRowProps) {
+  const titleRef = useRef<HTMLParagraphElement>(null);
+  const [isTitleOverflowing, setIsTitleOverflowing] = useState(false);
+  const isDone = todo.status === "done";
+  const isFailed = todo.status === "failed";
+  const isClosed = isDone || isFailed;
+  const tags = getDisplayTags(todo.tags);
+  const tagTodo = {
+    ...todo,
+    tagColors: { ...tagColors, ...todo.tagColors },
+  };
+  const canShowTooltip = isTitleOverflowing;
+
+  const updateTitleOverflow = useCallback(() => {
+    const titleElement = titleRef.current;
+    if (!titleElement) {
+      return;
+    }
+
+    setIsTitleOverflowing(titleElement.scrollWidth > titleElement.clientWidth);
+  }, []);
+
+  useEffect(() => {
+    const titleElement = titleRef.current;
+    if (!titleElement) {
+      return;
+    }
+
+    updateTitleOverflow();
+    const resizeObserver = new ResizeObserver(updateTitleOverflow);
+    resizeObserver.observe(titleElement);
+
+    return () => resizeObserver.disconnect();
+  }, [updateTitleOverflow]);
+
+  useEffect(() => {
+    updateTitleOverflow();
+  });
+
+  useEffect(() => {
+    if (isTooltipOpen && !canShowTooltip) {
+      onTooltipClose();
+    }
+  }, [canShowTooltip, isTooltipOpen, onTooltipClose]);
+
+  return (
+    <li
+      className={[
+        isDone ? "isDone" : "",
+        isFailed ? "isFailed" : "",
+        isTooltipOpen && canShowTooltip ? "isTooltipOpen" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          onTooltipClose();
+        }
+      }}
+    >
+      <DeleteConfirmDialog
+        title="할일을 완료할까요?"
+        description="완료하면 다시 되돌릴 수 없어요."
+        confirmLabel="완료"
+        onConfirm={() => onCompleteTodo(todo.id)}
+        trigger={
+          <button
+            type="button"
+            className="hudTodoCheck"
+            aria-label={`${todo.title} 완료`}
+            aria-pressed={isDone}
+            disabled={isClosed}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {isDone ? (
+              <CheckRoundedIcon className="hudTodoCheckIcon" aria-hidden="true" />
+            ) : isFailed ? (
+              <CloseRoundedIcon className="hudTodoFailIcon" aria-hidden="true" />
+            ) : null}
+            <span className="srOnly">{isDone ? "완료됨" : isFailed ? "포기됨" : "미완료"}</span>
+          </button>
+        }
+      />
+      <button
+        type="button"
+        className="hudTodoContentButton"
+        aria-expanded={canShowTooltip ? isTooltipOpen : undefined}
+        onClick={() => onTooltipToggle(todo.id, canShowTooltip && !isTooltipOpen)}
+      >
+        <p className="hudTodoTitle" ref={titleRef}>
+          {todo.title}
+        </p>
+        {canShowTooltip ? (
+          <span className="hudTodoTooltip" aria-hidden={!isTooltipOpen}>
+            {todo.title}
+          </span>
+        ) : null}
+        {todo.assignedQuest?.content ? (
+          <p className="hudTodoQuest">
+            <b>{todo.assignedQuest.characterName ?? "캐릭터"}</b>
+            <span>{todo.assignedQuest.content}</span>
+          </p>
+        ) : null}
+      </button>
+      {tags.length ? (
+        <div className="hudTodoTags">
+          {tags.map((tag) => (
+            <small key={tag} style={getHudTagStyle(tagTodo, tag)}>
+              #{tag}
+            </small>
+          ))}
+        </div>
+      ) : null}
+      {!isClosed ? (
+        <DeleteConfirmDialog
+          trigger={
+            <button
+              type="button"
+              className="hudTodoFailButton"
+              aria-label={`${todo.title} 포기`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              포기
+            </button>
+          }
+          title="포기할까요?"
+          description="정말로 포기할까요? 포기 기록은 남아요."
+          confirmLabel="포기하기"
+          onConfirm={() => onFailTodo(todo.id)}
+        />
+      ) : isFailed ? (
+        <span className="hudTodoFailedBadge">포기</span>
+      ) : null}
+    </li>
+  );
+}
+
 export function HudTodoList({
   todos,
   tagColors,
@@ -49,7 +204,7 @@ export function HudTodoList({
   onFailTodo,
 }: HudTodoListProps) {
   const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
-  const [dismissedTooltipId, setDismissedTooltipId] = useState<string | null>(null);
+  const closeTooltip = useCallback(() => setOpenTooltipId(null), []);
   const visibleTodos = todos.filter((todo) => todo.status !== "candidate");
 
   return (
@@ -59,123 +214,19 @@ export function HudTodoList({
       </div>
       <ul>
         {visibleTodos.map((todo) => {
-          const isDone = todo.status === "done";
-          const isFailed = todo.status === "failed";
-          const isClosed = isDone || isFailed;
-          const tags = getDisplayTags(todo.tags);
-          const tagTodo = {
-            ...todo,
-            tagColors: { ...tagColors, ...todo.tagColors },
-          };
-          const isTooltipOpen = openTooltipId === todo.id;
-
           return (
-            <li
+            <HudTodoRow
               key={todo.id}
-              className={[
-                isDone ? "isDone" : "",
-                isFailed ? "isFailed" : "",
-                isTooltipOpen ? "isTooltipOpen" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              onBlur={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget)) {
-                  setOpenTooltipId(null);
-                  setDismissedTooltipId(null);
-                }
+              todo={todo}
+              tagColors={tagColors}
+              isTooltipOpen={openTooltipId === todo.id}
+              onTooltipToggle={(todoId, shouldOpen) => {
+                setOpenTooltipId(shouldOpen ? todoId : null);
               }}
-              onMouseEnter={() => {
-                if (dismissedTooltipId !== todo.id) {
-                  setOpenTooltipId(todo.id);
-                }
-              }}
-              onMouseLeave={() => {
-                setOpenTooltipId(null);
-                setDismissedTooltipId(null);
-              }}
-            >
-              <DeleteConfirmDialog
-                title="할일을 완료할까요?"
-                description="완료하면 다시 되돌릴 수 없어요."
-                confirmLabel="완료"
-                onConfirm={() => onCompleteTodo(todo.id)}
-                trigger={
-                  <button
-                    type="button"
-                    className="hudTodoCheck"
-                    aria-label={`${todo.title} 완료`}
-                    aria-pressed={isDone}
-                    disabled={isClosed}
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    {isDone ? (
-                      <CheckRoundedIcon className="hudTodoCheckIcon" aria-hidden="true" />
-                    ) : isFailed ? (
-                      <CloseRoundedIcon className="hudTodoFailIcon" aria-hidden="true" />
-                    ) : null}
-                    <span className="srOnly">
-                      {isDone ? "완료됨" : isFailed ? "포기됨" : "미완료"}
-                    </span>
-                  </button>
-                }
-              />
-              <button
-                type="button"
-                className="hudTodoContentButton"
-                aria-expanded={isTooltipOpen}
-                onClick={() => {
-                  setOpenTooltipId((current) => {
-                    if (current === todo.id) {
-                      setDismissedTooltipId(todo.id);
-                      return null;
-                    }
-                    setDismissedTooltipId(null);
-                    return todo.id;
-                  });
-                }}
-              >
-                <p className="hudTodoTitle">{todo.title}</p>
-                <span className="hudTodoTooltip" aria-hidden={!isTooltipOpen}>
-                  {todo.title}
-                </span>
-                {todo.assignedQuest?.content ? (
-                  <p className="hudTodoQuest">
-                    <b>{todo.assignedQuest.characterName ?? "캐릭터"}</b>
-                    <span>{todo.assignedQuest.content}</span>
-                  </p>
-                ) : null}
-              </button>
-              {tags.length ? (
-                <div className="hudTodoTags">
-                  {tags.map((tag) => (
-                    <small key={tag} style={getHudTagStyle(tagTodo, tag)}>
-                      #{tag}
-                    </small>
-                  ))}
-                </div>
-              ) : null}
-              {!isClosed ? (
-                <DeleteConfirmDialog
-                  trigger={
-                    <button
-                      type="button"
-                      className="hudTodoFailButton"
-                      aria-label={`${todo.title} 포기`}
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      포기
-                    </button>
-                  }
-                  title="포기할까요?"
-                  description="정말로 포기할까요? 포기 기록은 남아요."
-                  confirmLabel="포기하기"
-                  onConfirm={() => onFailTodo(todo.id)}
-                />
-              ) : isFailed ? (
-                <span className="hudTodoFailedBadge">포기</span>
-              ) : null}
-            </li>
+              onTooltipClose={closeTooltip}
+              onCompleteTodo={onCompleteTodo}
+              onFailTodo={onFailTodo}
+            />
           );
         })}
         {visibleTodos.length === 0 ? (

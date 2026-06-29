@@ -11,6 +11,8 @@ export const TAG_COLORS = [
   "#5AA4A0",
 ];
 
+const TAG_NAME_MAX_LENGTH = 10;
+
 type TagEditorFormProps = {
   name: string;
   color: string;
@@ -30,6 +32,9 @@ export function TagEditorForm({
   onCancel,
   confirmLabel = "저장",
 }: TagEditorFormProps) {
+  const nameLength = name.length;
+  const isNameAtLimit = nameLength >= TAG_NAME_MAX_LENGTH;
+
   return (
     <div
       style={{
@@ -42,24 +47,48 @@ export function TagEditorForm({
         gap: 9,
       }}
     >
-      <input
-        value={name}
-        onChange={(e) => onNameChange(e.target.value.slice(0, 10))}
-        maxLength={10}
-        placeholder="태그 이름 (최대 10자)"
-        style={{
-          width: "100%",
-          boxSizing: "border-box",
-          padding: "8px 11px",
-          borderRadius: "var(--r-md)",
-          border: "2px solid var(--line-soft)",
-          background: "var(--cream-0)",
-          color: "var(--ink-1)",
-          fontFamily: "var(--font-display)",
-          fontSize: 15,
-          outline: "none",
-        }}
-      />
+      <div>
+        <input
+          value={name}
+          onChange={(e) => onNameChange(e.target.value.slice(0, TAG_NAME_MAX_LENGTH))}
+          maxLength={TAG_NAME_MAX_LENGTH}
+          placeholder={`태그 이름 (최대 ${TAG_NAME_MAX_LENGTH}자)`}
+          aria-describedby="tagNameLimitMeta"
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            padding: "8px 11px",
+            borderRadius: "var(--r-md)",
+            border: isNameAtLimit ? "2px solid var(--accent)" : "2px solid var(--line-soft)",
+            background: "var(--cream-0)",
+            color: "var(--ink-1)",
+            fontFamily: "var(--font-display)",
+            fontSize: 15,
+            outline: "none",
+          }}
+        />
+        <div
+          id="tagNameLimitMeta"
+          aria-live="polite"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 8,
+            minHeight: 15,
+            marginTop: 5,
+            fontFamily: "var(--font-display)",
+            fontSize: 12,
+            lineHeight: 1,
+          }}
+        >
+          <span style={{ color: "var(--accent)" }}>
+            {isNameAtLimit ? `최대 ${TAG_NAME_MAX_LENGTH}자까지 입력 가능해요.` : ""}
+          </span>
+          <span style={{ color: isNameAtLimit ? "var(--accent)" : "var(--ink-3)" }}>
+            {nameLength}/{TAG_NAME_MAX_LENGTH}
+          </span>
+        </div>
+      </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         {TAG_COLORS.map((c) => (
           <button

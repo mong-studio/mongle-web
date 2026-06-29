@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { TagItem } from "../../shared/tags/types.js";
 import { TagPicker } from "../../shared/ui/tags/TagPicker.js";
 import { toYMDStr } from "./calEngine.js";
 import { DateRangePicker } from "./DateRangePicker.js";
 import { SingleDatePicker } from "./SingleDatePicker.js";
+import {
+  CALENDAR_DESCRIPTION_LIMIT_MESSAGE,
+  CALENDAR_DESCRIPTION_MAX_LENGTH,
+  CALENDAR_TITLE_LIMIT_MESSAGE,
+  CALENDAR_TITLE_MAX_LENGTH,
+} from "./textLimits.js";
 import "./AddEventForm.css";
 
 type Props = {
@@ -46,13 +52,21 @@ export function AddEventForm({
   const [end, setEnd] = useState(initialDate);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const titleLimitId = useId();
+  const descriptionLimitId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const canSubmit = !!title.trim() && !saving;
+  const isTitleLimitReached = title.length >= CALENDAR_TITLE_MAX_LENGTH;
+  const isDescriptionLimitReached = description.length >= CALENDAR_DESCRIPTION_MAX_LENGTH;
+  const canSubmit =
+    !!title.trim() &&
+    title.length <= CALENDAR_TITLE_MAX_LENGTH &&
+    description.length <= CALENDAR_DESCRIPTION_MAX_LENGTH &&
+    !saving;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -99,32 +113,62 @@ export function AddEventForm({
         })}
       </fieldset>
 
-      <input
-        ref={inputRef}
-        className="aefInput"
-        value={title}
-        onChange={(e) => setTitle(e.target.value.slice(0, 20))}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") void submit();
-          if (e.key === "Escape") {
-            // 모달을 닫지 말고 추가 폼만 접는다.
-            e.stopPropagation();
-            onCancel();
-          }
-        }}
-        maxLength={20}
-        placeholder="무엇을 할까요?"
-      />
+      <div className="aefField">
+        <div className="aefControlWrap">
+          <input
+            ref={inputRef}
+            className="aefInput"
+            value={title}
+            onChange={(e) => setTitle(e.target.value.slice(0, CALENDAR_TITLE_MAX_LENGTH))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void submit();
+              if (e.key === "Escape") {
+                // 모달을 닫지 말고 추가 폼만 접는다.
+                e.stopPropagation();
+                onCancel();
+              }
+            }}
+            maxLength={CALENDAR_TITLE_MAX_LENGTH}
+            placeholder="무엇을 할까요?"
+            aria-describedby={isTitleLimitReached ? titleLimitId : undefined}
+            aria-invalid={title.length > CALENDAR_TITLE_MAX_LENGTH}
+          />
+          <span className={`aefCounter title${isTitleLimitReached ? " warn" : ""}`}>
+            {title.length}/{CALENDAR_TITLE_MAX_LENGTH}
+          </span>
+        </div>
+        {isTitleLimitReached && (
+          <p id={titleLimitId} className="aefLimitMessage" role="alert">
+            {CALENDAR_TITLE_LIMIT_MESSAGE}
+          </p>
+        )}
+      </div>
 
       {kind === "schedule" && (
-        <textarea
-          className="aefTextarea"
-          value={description}
-          onChange={(e) => setDescription(e.target.value.slice(0, 200))}
-          maxLength={200}
-          placeholder="설명 (선택)"
-          rows={3}
-        />
+        <div className="aefField">
+          <div className="aefControlWrap">
+            <textarea
+              className="aefTextarea"
+              value={description}
+              onChange={(e) =>
+                setDescription(e.target.value.slice(0, CALENDAR_DESCRIPTION_MAX_LENGTH))
+              }
+              maxLength={CALENDAR_DESCRIPTION_MAX_LENGTH}
+              placeholder="설명 (선택)"
+              rows={3}
+              aria-describedby={isDescriptionLimitReached ? descriptionLimitId : undefined}
+              aria-invalid={description.length > CALENDAR_DESCRIPTION_MAX_LENGTH}
+            />
+            <span className={`aefCounter desc${isDescriptionLimitReached ? " warn" : ""}`}>
+              {description.length}/{CALENDAR_DESCRIPTION_MAX_LENGTH}
+            </span>
+          </div>
+          {isDescriptionLimitReached && (
+            <p id={descriptionLimitId} className="aefLimitMessage" role="alert">
+              {CALENDAR_DESCRIPTION_LIMIT_MESSAGE}
+            </p>
+          )}
+        </div>
       )}
 
       <TagPicker
