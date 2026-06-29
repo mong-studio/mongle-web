@@ -84,6 +84,17 @@ function normalizeReflection(record: ReflectionRecord): ReflectionEntry {
   };
 }
 
+function normalizeTodoStatus(status: string): ReflectionTodo["status"] {
+  const normalizedStatus = status.toUpperCase();
+  if (normalizedStatus === "COMPLETED") {
+    return "done";
+  }
+  if (normalizedStatus === "FAILED") {
+    return "failed";
+  }
+  return "saved";
+}
+
 function normalizeContextTodos(context: ReflectionContextResponse): ReflectionTodo[] {
   return [
     ...context.completed_todos.map((todo) => ({
@@ -95,10 +106,20 @@ function normalizeContextTodos(context: ReflectionContextResponse): ReflectionTo
     ...context.incomplete_todos.map((todo) => ({
       id: todo.todo_id,
       title: todo.content,
-      status: "saved" as const,
+      status: normalizeTodoStatus(todo.status),
       dueDate: todo.todo_date,
     })),
   ];
+}
+
+function getTodoSummary(todoItems: ReflectionTodo[]) {
+  const completed = todoItems.filter((todo) => todo.status === "done").length;
+  const failed = todoItems.filter((todo) => todo.status === "failed").length;
+  return {
+    completed,
+    failed,
+    incomplete: todoItems.length - completed - failed,
+  };
 }
 
 function getApiErrorCode(error: unknown) {
@@ -491,8 +512,7 @@ export function ReflectionModal({
   const regretLimitWarning = limitWarningField === "regret";
   const canSaveReflection = Boolean(canSubmit);
   const dateLabel = formatKoreanDate(reflectionDate);
-  const completedCount = reflectionTodos.filter((todo) => todo.status === "done").length;
-  const incompleteCount = reflectionTodos.length - completedCount;
+  const todoSummary = getTodoSummary(reflectionTodos);
   const visibleReadOnlyEntry = isPrimaryPage ? primaryEntry : historyPageEntry;
 
   function renderTodoRows(
@@ -510,11 +530,14 @@ export function ReflectionModal({
         ) : (
           todoItems.map((todo) => {
             const done = todo.status === "done";
+            const failed = todo.status === "failed";
+            const statusClassName = done ? "isDone" : failed ? "isFailed" : "";
+            const statusLabel = done ? "완료" : failed ? "포기" : "미완료";
             return (
               <li key={todo.id}>
-                <span className={`reflectionCheck ${done ? "isDone" : ""}`}>{done ? "✓" : ""}</span>
+                <span className={`reflectionCheck ${statusClassName}`}>{done ? "✓" : ""}</span>
                 <strong>{todo.title}</strong>
-                <em className={done ? "isDone" : ""}>{done ? "완료" : "미완료"}</em>
+                <em className={statusClassName}>{statusLabel}</em>
               </li>
             );
           })
@@ -594,8 +617,7 @@ export function ReflectionModal({
     }
 
     const entryTodos = contextTodosByDate[entry.date];
-    const entryTodoCount = entryTodos?.filter((todo) => todo.status === "done").length ?? 0;
-    const entryIncompleteCount = entryTodos ? entryTodos.length - entryTodoCount : 0;
+    const entryTodoSummary = entryTodos ? getTodoSummary(entryTodos) : null;
 
     return (
       <>
@@ -622,8 +644,15 @@ export function ReflectionModal({
               </h3>
               {entryTodos ? (
                 <p>
-                  <span>완료 {entryTodoCount}</span>
-                  <span>미완료 {entryIncompleteCount}</span>
+                  <span className="reflectionTodoHeadCompleted">
+                    완료 {entryTodoSummary?.completed ?? 0}
+                  </span>
+                  <span className="reflectionTodoHeadIncomplete">
+                    미완료 {entryTodoSummary?.incomplete ?? 0}
+                  </span>
+                  <span className="reflectionTodoHeadFailed">
+                    포기 {entryTodoSummary?.failed ?? 0}
+                  </span>
                 </p>
               ) : null}
             </div>
@@ -785,8 +814,13 @@ export function ReflectionModal({
                     오늘의 TODO
                   </h3>
                   <p>
-                    <span>완료 {completedCount}</span>
-                    <span>미완료 {incompleteCount}</span>
+                    <span className="reflectionTodoHeadCompleted">
+                      완료 {todoSummary.completed}
+                    </span>
+                    <span className="reflectionTodoHeadIncomplete">
+                      미완료 {todoSummary.incomplete}
+                    </span>
+                    <span className="reflectionTodoHeadFailed">포기 {todoSummary.failed}</span>
                   </p>
                 </div>
                 <ul className="reflectionTodoList">
