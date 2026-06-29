@@ -19,6 +19,8 @@ type Props = {
   onTodosChanged?: () => void;
   // 할일 체크(완료) 시 메인화면과 동일한 보상 처리를 위임한다.
   onCompleteTodo: (todoId: string, title: string, dueDate: string) => Promise<void>;
+  // 지난 미완료 할일 연장 시 토큰 차감·잔액 갱신·안내를 위임한다.
+  onExtendTodo: (todoId: string, newDate: string, title: string) => Promise<void>;
 };
 
 function mergeById<T>(prev: T[], next: T[], key: keyof T): T[] {
@@ -34,6 +36,7 @@ export function CalendarModal({
   onOpenLogin,
   onTodosChanged,
   onCompleteTodo,
+  onExtendTodo,
 }: Props) {
   const [todos, setTodos] = useState<CalTodo[]>([]);
   const [schedules, setSchedules] = useState<CalSchedule[]>([]);
@@ -192,6 +195,24 @@ export function CalendarModal({
     [onTodosChanged],
   );
 
+  const handleExtendEvent = useCallback(
+    async (id: string, newDate: string) => {
+      if (!id.startsWith("todo-")) return;
+      const todoId = id.slice(5);
+      const title = baseEvents.find((e) => e.id === id)?.title ?? "할일";
+      // App 이 토큰 차감·잔액 갱신·안내·HUD 동기화를 담당한다. 실패 시 throw 되어 로컬 상태는 그대로.
+      await onExtendTodo(todoId, newDate, title);
+      // 성공: 캘린더 로컬 상태도 새 날짜·진행 중으로 옮긴다(지난 날짜 목록에서 사라진다).
+      setTodos((prev) =>
+        prev.map((t) =>
+          t.todo_id === todoId ? { ...t, todo_date: newDate, status: "IN_PROGRESS" } : t,
+        ),
+      );
+      onTodosChanged?.();
+    },
+    [baseEvents, onExtendTodo, onTodosChanged],
+  );
+
   const handleEditEvent = useCallback(
     async (
       id: string,
@@ -286,6 +307,7 @@ export function CalendarModal({
             onAddEvent={handleAddEvent}
             onDeleteEvent={handleDeleteEvent}
             onFailEvent={handleFailEvent}
+            onExtendEvent={handleExtendEvent}
             onEditEvent={handleEditEvent}
             onCreateTag={createTag}
             onDeleteTag={deleteTag}

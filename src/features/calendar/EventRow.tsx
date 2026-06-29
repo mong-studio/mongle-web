@@ -4,10 +4,14 @@ import { DeleteConfirmDialog } from "../../shared/ui/DeleteConfirmDialog.js";
 import { Tag } from "../../shared/ui/Tag/Tag.js";
 import { Check } from "./CalendarCore.js";
 import type { CalEvent } from "./calEngine.js";
-import { serialToMD } from "./calEngine.js";
+import { canExtendTodo, serialToMD } from "./calEngine.js";
 import { EventEditForm } from "./EventEditForm.js";
+import { ExtendTodoDialog } from "./ExtendTodoDialog.js";
 import type { TagItem } from "./types.js";
 import "./EventRow.css";
+
+// 지난 미완료 TODO 연장에 사용하는 토큰 수(백엔드 TODO_EXTENSION_TOKEN_COST 와 일치).
+const EXTEND_TOKEN_COST = 4;
 
 type Props = {
   ev: CalEvent;
@@ -16,6 +20,7 @@ type Props = {
   onToggle: () => void;
   onDelete: () => Promise<void>;
   onFail: () => Promise<void>;
+  onExtend?: (newDate: string) => Promise<void>;
   onEdit: (
     title: string,
     tagId: number | null,
@@ -56,6 +61,7 @@ export function EventRow({
   onToggle,
   onDelete,
   onFail,
+  onExtend,
   onEdit,
   onCreateTag,
   onDeleteTag,
@@ -68,6 +74,8 @@ export function EventRow({
   const isSchedule = !!ev.scheduleId;
   const isFailed = !!ev.failed;
   const isPastTodo = !isSchedule && ev.s < todaySr;
+  // 지난 미완료(진행 중·포기) 할일은 토큰을 써서 오늘 이후로 연장할 수 있다.
+  const canExtend = !!onExtend && canExtendTodo(ev, todaySr);
   // 일정(schedule)만 수정 가능. 할일(TODO)은 항상 수정 불가.
   const canEdit = isSchedule;
   // 휴지통 버튼 동작:
@@ -183,9 +191,9 @@ export function EventRow({
             <Tag color={ev.color} bg={ev.bg} label={ev.tagLabel} />
           </div>
         </div>
-        {!isFailed && (canEdit || action) && (
+        {(canExtend || (!isFailed && (canEdit || action))) && (
           <div className="eventRowActions">
-            {canEdit && (
+            {!isFailed && canEdit && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
@@ -207,7 +215,7 @@ export function EventRow({
                 </svg>
               </button>
             )}
-            {action && (
+            {!isFailed && action && (
               <DeleteConfirmDialog
                 trigger={
                   <button
@@ -232,6 +240,17 @@ export function EventRow({
                 }
                 confirmLabel={action === "fail" ? "포기하기" : undefined}
                 onConfirm={() => void (action === "fail" ? handleFail() : handleDelete())}
+              />
+            )}
+            {canExtend && onExtend && (
+              <ExtendTodoDialog
+                tokenCost={EXTEND_TOKEN_COST}
+                onConfirm={onExtend}
+                trigger={
+                  <button type="button" className="eventRowExtendButton" aria-label="연장">
+                    연장
+                  </button>
+                }
               />
             )}
           </div>

@@ -194,3 +194,13 @@ export function catFromHex(hex: string): CatKey {
   }
   return best;
 }
+
+/**
+ * 지난 미완료(진행 중·포기) 할일인지 — 연장 버튼 노출 조건.
+ * 일정(schedule)·완료(done)·오늘/미래 할일은 제외한다.
+ */
+export function canExtendTodo(ev: CalEvent, todaySr: number): boolean {
+  const isSchedule = !!ev.scheduleId;
+  const isPastTodo = !isSchedule && ev.s < todaySr;
+  return !!ev.todoId && isPastTodo && !ev.done;
+}

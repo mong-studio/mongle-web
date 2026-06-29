@@ -21,6 +21,7 @@ type CalendarWindowProps = {
   ) => Promise<void>;
   onDeleteEvent: (id: string) => Promise<void>;
   onFailEvent: (id: string) => Promise<void>;
+  onExtendEvent?: (id: string, newDate: string) => Promise<void>;
   onEditEvent: (
     id: string,
     title: string,
@@ -43,6 +44,7 @@ export function CalendarWindow({
   onAddEvent,
   onDeleteEvent,
   onFailEvent,
+  onExtendEvent,
   onEditEvent,
   onCreateTag,
   onDeleteTag,
@@ -275,6 +277,7 @@ export function CalendarWindow({
             onAddEvent={onAddEvent}
             onDeleteEvent={onDeleteEvent}
             onFailEvent={onFailEvent}
+            onExtendEvent={onExtendEvent}
             onEditEvent={onEditEvent}
             onCreateTag={onCreateTag}
             onDeleteTag={onDeleteTag}
