@@ -133,6 +133,12 @@
   box-shadow: var(--bd-sh-pop);
 }
 
+.boardPanel--result {
+  width: 900px;
+  height: 620px;
+  padding: 30px 36px 34px;
+}
+
 .tdPageIn {
   animation: tdPageIn 0.32s ease both;
 }
@@ -899,7 +905,20 @@
 /* ── Result page (확정 TODO + 캐릭터 퀘스트) ── */
 .boardResultHeader {
   text-align: center;
+  flex: none;
   margin-bottom: 12px;
+}
+
+.boardPanel--result .boardHeader {
+  margin-bottom: 16px;
+}
+
+.boardPanel--result .boardTitle {
+  font-size: 38px;
+}
+
+.boardPanel--result .boardHeaderFlower {
+  height: 44px;
 }
 
 .boardResultSub {
@@ -910,6 +929,25 @@
   margin-top: 10px;
   color: var(--bd-ink-soft);
   font-size: 15px;
+}
+
+.boardPanel--result .boardBody {
+  flex: 1;
+}
+
+.boardPanel--result .boardGenerated {
+  min-height: 0;
+}
+
+.boardPanel--result .boardFooter {
+  margin-top: 22px;
+}
+
+.boardPanel--result .boardSaveBtn {
+  width: 420px;
+  padding: 15px 0;
+  font-size: 24px;
+  border-radius: 16px;
 }
 
 .boardQuestRow {

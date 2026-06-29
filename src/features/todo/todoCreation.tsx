@@ -37,6 +37,8 @@ export type TodoCommitResult = {
 const QUEST_DAILY_LIMIT = 5;
 const BOARD_NATURAL_WIDTH = 1240;
 const BOARD_NATURAL_HEIGHT = 1080;
+const RESULT_NATURAL_WIDTH = 900;
+const RESULT_NATURAL_HEIGHT = 620;
 const MAYOR_PROMPT_MAX_LENGTH = 200;
 const TODO_TITLE_MAX_LENGTH = 20;
 
@@ -153,6 +155,10 @@ export function TodoCreation({
   const wrapStyle = {
     width: `${BOARD_NATURAL_WIDTH * scale}px`,
     height: `${BOARD_NATURAL_HEIGHT * scale}px`,
+  };
+  const resultWrapStyle = {
+    width: `${RESULT_NATURAL_WIDTH * scale}px`,
+    height: `${RESULT_NATURAL_HEIGHT * scale}px`,
   };
   const panelStyle = { transform: `scale(${scale})` };
 
@@ -775,8 +781,8 @@ export function TodoCreation({
 
       {/* ── PAGE 1: 저장 결과(확정 TODO + 캐릭터 퀘스트) ── */}
       {page === 1 && (
-        <div className="tdScaleWrap" style={wrapStyle}>
-          <div className="boardPanel tdPageIn" ref={modalRef} style={panelStyle}>
+        <div className="tdScaleWrap" style={resultWrapStyle}>
+          <div className="boardPanel boardPanel--result tdPageIn" ref={modalRef} style={panelStyle}>
             {onClose && (
               <button type="button" className="boardClose" onClick={onClose} aria-label="닫기">
                 <BoardCloseIcon />
