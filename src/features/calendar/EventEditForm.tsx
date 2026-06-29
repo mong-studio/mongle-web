@@ -1,11 +1,17 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { TagItem } from "../../shared/tags/types.js";
 import { TagPicker } from "../../shared/ui/tags/TagPicker.js";
 import type { CalEvent } from "./calEngine.js";
 import { serialToYMDStr } from "./calEngine.js";
 import { DateRangePicker } from "./DateRangePicker.js";
 import { SingleDatePicker } from "./SingleDatePicker.js";
+import {
+  CALENDAR_DESCRIPTION_LIMIT_MESSAGE,
+  CALENDAR_DESCRIPTION_MAX_LENGTH,
+  CALENDAR_TITLE_LIMIT_MESSAGE,
+  CALENDAR_TITLE_MAX_LENGTH,
+} from "./textLimits.js";
 import "./EventEditForm.css";
 
 const staggerItem = {
@@ -51,8 +57,16 @@ export function EventEditForm({
   const [tagId, setTagId] = useState<number | null>(matchedTag);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const titleLimitId = useId();
+  const descriptionLimitId = useId();
 
-  const canSave = !!title.trim() && !saving;
+  const isTitleLimitReached = title.length >= CALENDAR_TITLE_MAX_LENGTH;
+  const isDescriptionLimitReached = description.length >= CALENDAR_DESCRIPTION_MAX_LENGTH;
+  const canSave =
+    !!title.trim() &&
+    title.length <= CALENDAR_TITLE_MAX_LENGTH &&
+    description.length <= CALENDAR_DESCRIPTION_MAX_LENGTH &&
+    !saving;
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -71,39 +85,59 @@ export function EventEditForm({
   return (
     <motion.div variants={staggerItem} className="eventEditForm">
       <div className="eefField">
-        <input
-          className="eefInput"
-          value={title}
-          onChange={(e) => setTitle(e.target.value.slice(0, 20))}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") void handleSave();
-            if (e.key === "Escape") {
-              // 모달을 닫지 말고 수정 폼만 접는다.
-              e.stopPropagation();
-              onClose();
-            }
-          }}
-          maxLength={20}
-          placeholder="제목"
-        />
-        <span className={`eefCounter title${title.length >= 20 ? " warn" : ""}`}>
-          {title.length}/20
-        </span>
+        <div className="eefControlWrap">
+          <input
+            className="eefInput"
+            value={title}
+            onChange={(e) => setTitle(e.target.value.slice(0, CALENDAR_TITLE_MAX_LENGTH))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") void handleSave();
+              if (e.key === "Escape") {
+                // 모달을 닫지 말고 수정 폼만 접는다.
+                e.stopPropagation();
+                onClose();
+              }
+            }}
+            maxLength={CALENDAR_TITLE_MAX_LENGTH}
+            placeholder="제목"
+            aria-describedby={isTitleLimitReached ? titleLimitId : undefined}
+            aria-invalid={title.length > CALENDAR_TITLE_MAX_LENGTH}
+          />
+          <span className={`eefCounter title${isTitleLimitReached ? " warn" : ""}`}>
+            {title.length}/{CALENDAR_TITLE_MAX_LENGTH}
+          </span>
+        </div>
+        {isTitleLimitReached && (
+          <p id={titleLimitId} className="eefLimitMessage" role="alert">
+            {CALENDAR_TITLE_LIMIT_MESSAGE}
+          </p>
+        )}
       </div>
 
       {isSchedule && (
         <div className="eefField">
-          <textarea
-            className="eefTextarea"
-            value={description}
-            onChange={(e) => setDescription(e.target.value.slice(0, 200))}
-            maxLength={200}
-            placeholder="설명 (선택)"
-            rows={3}
-          />
-          <span className={`eefCounter desc${description.length >= 200 ? " warn" : ""}`}>
-            {description.length}/200
-          </span>
+          <div className="eefControlWrap">
+            <textarea
+              className="eefTextarea"
+              value={description}
+              onChange={(e) =>
+                setDescription(e.target.value.slice(0, CALENDAR_DESCRIPTION_MAX_LENGTH))
+              }
+              maxLength={CALENDAR_DESCRIPTION_MAX_LENGTH}
+              placeholder="설명 (선택)"
+              rows={3}
+              aria-describedby={isDescriptionLimitReached ? descriptionLimitId : undefined}
+              aria-invalid={description.length > CALENDAR_DESCRIPTION_MAX_LENGTH}
+            />
+            <span className={`eefCounter desc${isDescriptionLimitReached ? " warn" : ""}`}>
+              {description.length}/{CALENDAR_DESCRIPTION_MAX_LENGTH}
+            </span>
+          </div>
+          {isDescriptionLimitReached && (
+            <p id={descriptionLimitId} className="eefLimitMessage" role="alert">
+              {CALENDAR_DESCRIPTION_LIMIT_MESSAGE}
+            </p>
+          )}
         </div>
       )}
 

@@ -10,6 +10,12 @@
 }
 
 .eefField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.eefControlWrap {
   position: relative;
 }
 
@@ -29,7 +35,7 @@
 .eefTextarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 9px 12px;
+  padding: 9px 12px 24px;
   border-radius: var(--r-sm);
   border: 2px solid var(--line-soft);
   background: var(--cream-1);
@@ -57,7 +63,16 @@
   bottom: 8px;
 }
 .eefCounter.warn {
-  color: var(--sun);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.eefLimitMessage {
+  margin: 0 5px;
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .eefTagRow {
@@ -70,8 +85,8 @@
   margin: 0;
   padding: 7px 10px;
   border-radius: var(--r-sm);
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--c-danger-bg);
+  color: var(--c-danger-text);
   font-family: var(--font-body);
   font-size: 12px;
 }

@@ -82,7 +82,7 @@ export function TagEditorForm({
           }}
         >
           <span style={{ color: "var(--accent)" }}>
-            {isNameAtLimit ? `최대 ${TAG_NAME_MAX_LENGTH}자까지 가능해요.` : ""}
+            {isNameAtLimit ? `최대 ${TAG_NAME_MAX_LENGTH}자까지 입력 가능해요.` : ""}
           </span>
           <span style={{ color: isNameAtLimit ? "var(--accent)" : "var(--ink-3)" }}>
             {nameLength}/{TAG_NAME_MAX_LENGTH}

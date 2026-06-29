@@ -48,10 +48,20 @@
   height: 0;
 }
 
+.aefField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.aefControlWrap {
+  position: relative;
+}
+
 .aefInput {
   width: 100%;
   box-sizing: border-box;
-  padding: 11px 14px;
+  padding: 11px 58px 11px 14px;
   border-radius: var(--r-md);
   border: 2px solid var(--line-soft);
   background: var(--cream-1);
@@ -64,7 +74,7 @@
 .aefTextarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 9px 12px;
+  padding: 9px 12px 24px;
   border-radius: var(--r-md);
   border: 2px solid var(--line-soft);
   background: var(--cream-1);
@@ -76,12 +86,43 @@
   line-height: 1.5;
 }
 
+.aefCounter {
+  position: absolute;
+  right: 12px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+.aefCounter.title {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.aefCounter.desc {
+  bottom: 8px;
+}
+
+.aefCounter.warn {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.aefLimitMessage {
+  margin: 0 5px;
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .aefError {
   margin: 0 0 4px;
   padding: 9px 12px;
   border-radius: var(--r-sm);
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--c-danger-bg);
+  color: var(--c-danger-text);
   font-family: var(--font-body);
   font-size: 13px;
 }

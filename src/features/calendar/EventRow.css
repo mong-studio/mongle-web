@@ -149,8 +149,8 @@
   margin: 2px 0 0;
   padding: 6px 10px;
   border-radius: var(--r-sm);
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--c-danger-bg);
+  color: var(--c-danger-text);
   font-family: var(--font-body);
   font-size: 12px;
 }
