@@ -27,7 +27,7 @@ export const TUTORIAL_TABS: TutorialTab[] = [
     pages: [
       {
         title: "몽글마을에 오신 걸 환영해요",
-        illustration: "/assets/mongle_chief.png",
+        illustration: "/assets/tutorial/mongle_profile.png",
         bubble: "반가워요!\n몽글마을에 온 걸 환영해요!",
         bubbleName: "몽글이장님",
         paragraphs: [
@@ -72,7 +72,7 @@ export const TUTORIAL_TABS: TutorialTab[] = [
         paragraphs: [
           "집중이 필요할 땐 포모도로 타이머를 이용해봐요",
           "25분의 집중 시간과 5분의 휴식 시간을 반복하여 집중력을 유지하는 데 도움을 줘요",
-          "타이머를 초기화 하고싶으면 타이머를 정지한 후 초기화 버튼을 누르면 돼요",
+          "타이머를 초기화하고 싶다면 타이머를 먼저 정지한 뒤 초기화 버튼을 눌러주세요",
         ],
       },
       {
@@ -80,10 +80,10 @@ export const TUTORIAL_TABS: TutorialTab[] = [
         title: "오늘의 할 일",
         illustration: "/assets/tutorial/main_todo.png",
         paragraphs: [
-          "오늘의 할 일 게시판에서 오늘 수행항 TODO 목록과 연결된 퀘스트를 확인해요",
+          "오늘의 할 일 게시판에서 오늘 수행할 TODO 목록과 연결된 퀘스트를 확인해요",
           "오늘 하기 어려운 일은 포기 버튼을 눌러 포기할 수 있어요",
           "할 일을 완료했다면 체크박스를 눌러 완료한 일을 체크해요",
-          "(한 번 체크하면 취소할 수 없으니 주위해주세요!)",
+          "(한 번 체크하면 취소할 수 없으니 주의해주세요!)",
           "'할 일 추가' 버튼을 눌러 새로운 TODO를 추가할 수 있어요",
         ],
       },
@@ -105,7 +105,7 @@ export const TUTORIAL_TABS: TutorialTab[] = [
     pages: [
       {
         eyebrow: "달력",
-        title: "달력에서 일정 한 눈에 보기",
+        title: "달력에서 일정 한눈에 보기",
         illustration: "/assets/tutorial/calendar.jpeg",
         paragraphs: [
           "날짜별 할 일과 일정을 캘린더에서 한눈에 볼 수 있어요.",
@@ -122,7 +122,7 @@ export const TUTORIAL_TABS: TutorialTab[] = [
           "날짜를 선택한 뒤 + 버튼을 누르면 새 할 일이나 일정을 등록할 수 있어요.",
           "할 일은 하루에 끝내는 한 가지 일이에요.",
           "일정은 시작일과 종료일이 있는 계획이에요.",
-          "태그를 선택하여 더 보기 쉽게 정리할 수 있어요",
+          "태그를 선택하면 더 보기 쉽게 정리할 수 있어요",
           "지난 날짜에는 새 할 일이나 일정을 등록할 수 없어요.",
         ],
       },
@@ -198,10 +198,10 @@ export const TUTORIAL_TABS: TutorialTab[] = [
       },
       {
         eyebrow: "오늘의 TODO",
-        title: "TODO를 저장해요",
+        title: "오늘의 할 일을 등록해요",
         illustration: "/assets/tutorial/todo_quest.png",
         paragraphs: [
-          "정리된 TODO를 확인한 뒤 오늘의 TODO에 저장할 수 있어요.",
+          "정리된 TODO를 확인한 뒤 오늘의 할 일에 등록할 수 있어요.",
           "원하는 TODO에는 태그를 적용하거나 퀘스트를 연결할 수 있어요.",
           "퀘스트를 연결하면 주민이 랜덤으로 배정되고, 작은 미션이 함께 생겨요.",
           "캐릭터 퀘스트는 하루 최대 5개까지 만들 수 있어요.",
@@ -222,7 +222,7 @@ export const TUTORIAL_TABS: TutorialTab[] = [
           "무엇부터 해야 할지 막막할 때 이장님과 대화해보세요.",
           "목표를 말하면 이장님이 기간, 우선순위, 반복 여부를 물어보며 계획을 정리해줘요.",
           "대화로 큰 목표를 작은 할 일로 나눌 수 있어요.",
-          "대화 중 화면을 나가면 내용이 저장되지 않으니 주의해주세요.",
+          "대화 중 화면을 나가면 내용이 저장되지 않으니 주의해주세요!.",
         ],
       },
       {
@@ -260,7 +260,7 @@ export const TUTORIAL_TABS: TutorialTab[] = [
         paragraphs: [
           "게시물을 눌러 자세히 보고 좋아요를 누를 수 있어요.",
           "댓글을 달면 사과 3개가 사용돼요.",
-          "댓글을 남기면 주민이 잠시 뒤 답글을 달아줘요.",
+          "댓글을 남기면 주민이 잠시 뒤 답글을 남겨줘요.",
           "주민 프로필을 누르면 그동안 올린 피드를 모아볼 수 있어요.",
           "내 마을의 피드는 친구에게 공유할 수 있어요.",
         ],
