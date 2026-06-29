@@ -44,8 +44,9 @@ export const apiClient = axios.create({
 
 - 일반 응답: `{ kind: "candidates", ... }`
 - envelope 응답: `{ status: "done", result: {...}, error: null }`
+- 비동기 job 응답: `{ status: "pending", result: { job_id }, error: null }`
 
-`todoApi.ts`, `plannerApi.ts`는 `unwrapApiResult`로 envelope를 풀어 사용한다. `status !== "done"`이면 에러로 처리한다.
+`todoApi.ts`, `plannerApi.ts`는 `unwrapApiResult`로 envelope를 풀어 사용한다. 플래너 chat은 `pending`이면 job 조회 API를 폴링하고, `done`이면 결과를 화면 모델로 변환한다.
 
 ## 주요 도메인별 API
 
@@ -70,7 +71,8 @@ export const apiClient = axios.create({
 
 | 동작 | 메서드 | 프론트 경로 | 실제 URL |
 | --- | --- | --- | --- |
-| 멀티턴 대화 | POST | `/todos/chat/` | `/api/v1/todos/chat/` |
+| 멀티턴 대화 job 생성 | POST | `/todos/chat/` | `/api/v1/todos/chat/` |
+| 멀티턴 대화 job 조회 | GET | `/todos/chat/{jobId}/` | `/api/v1/todos/chat/{jobId}/` |
 | 생성 플랜 확정 저장 | POST | `/todos/planner-confirm/` | `/api/v1/todos/planner-confirm/` |
 
 `/todos/planner-confirm/`은 플래너 챗봇에서 사용자가 `계획 저장`을 눌렀을 때 호출하는 로그인 사용자용 저장 API다. 요청에는 일반 인증 헤더만 사용하고, 백엔드는 현재 로그인 사용자를 기준으로 TODO와 일정을 저장한다. `/todos/commit/`은 AI 내부 commit 계약을 위해 남겨두며 브라우저에서 직접 호출하지 않는다.
@@ -79,10 +81,11 @@ export const apiClient = axios.create({
 
 1. 사용자가 메시지를 입력한다.
 2. 프론트가 `/todos/chat/`에 `{ message, thread_id }`를 보낸다.
-3. 응답이 `follow_up`이면 질문 말풍선을 추가하고 같은 `thread_id`로 대화를 이어간다.
-4. 응답이 `candidates`이면 `todos`와 `calendar_events`를 좌측 생성된 플랜 영역에 표시한다.
-5. 사용자가 `계획 저장`을 누르면 생성 결과 전체를 `/todos/planner-confirm/`으로 보낸다.
-6. 저장 응답의 `todos`만 오늘의 할일 HUD에 반영하고, `calendar_events.length`는 일정 저장 개수로 전달한다.
+3. 응답이 `pending`이면 `/todos/chat/{jobId}/`를 2초 간격으로 폴링한다.
+4. 최종 응답이 `follow_up`이면 질문 말풍선을 추가하고 같은 `thread_id`로 대화를 이어간다.
+5. 최종 응답이 `candidates`이면 `todos`와 `calendar_events`를 좌측 생성된 플랜 영역에 표시한다.
+6. 사용자가 `계획 저장`을 누르면 생성 결과 전체를 `/todos/planner-confirm/`으로 보낸다.
+7. 저장 응답의 `todos`만 오늘의 할일 HUD에 반영하고, `calendar_events.length`는 일정 저장 개수로 전달한다.
 
 현재 payload 형태:
 
