@@ -38,6 +38,7 @@ const QUEST_DAILY_LIMIT = 5;
 const BOARD_NATURAL_WIDTH = 1240;
 const BOARD_NATURAL_HEIGHT = 1080;
 const MAYOR_PROMPT_MAX_LENGTH = 200;
+const TODO_TITLE_MAX_LENGTH = 20;
 
 // 행마다 색깔 핀을 번갈아(디자인 시안의 압정 모티프).
 const PIN_CYCLE = ["red_pin", "blue_pin", "green_pin", "todo_pin_icon"];
@@ -69,6 +70,10 @@ function createId(prefix: string) {
 
 function isImeComposing(event: React.KeyboardEvent<HTMLInputElement>) {
   return event.nativeEvent.isComposing || event.key === "Process" || event.keyCode === 229;
+}
+
+function truncateTodoTitle(value: string) {
+  return value.slice(0, TODO_TITLE_MAX_LENGTH);
 }
 
 // 항목당 태그 1개(백엔드 Todo.tag FK가 단일). 캘린더와 동일한 유저 태그를 공유한다.
@@ -193,6 +198,8 @@ export function TodoCreation({
   const questAvailable = Math.max(0, QUEST_DAILY_LIMIT - usedQuestsToday - selectedQuestCount);
   const sentenceLength = sentence.length;
   const isSentenceAtLimit = sentenceLength >= MAYOR_PROMPT_MAX_LENGTH;
+  const manualTextLength = manualText.length;
+  const isManualTextAtLimit = manualTextLength >= TODO_TITLE_MAX_LENGTH;
 
   // AI가 제안한 태그 문자열을 유저의 실제 태그에 이름으로 매칭. 없으면 null.
   const matchTagId = (names: string[] | undefined): number | null => {
@@ -225,15 +232,23 @@ export function TodoCreation({
   function addTodo() {
     if (blockedWhileBusy()) return;
     // 백엔드 content 는 최대 20자라, 입력 maxLength 와 더불어 안전망으로 한 번 더 자른다.
-    const name = manualText.trim().slice(0, 20);
+    const name = truncateTodoTitle(manualText.trim());
     if (!name) return;
     setTodos((prev) => [...prev, { id: createId("td"), name, tagId: selectedTagId, quest: false }]);
     setManualText("");
     setSelectedTagId(null);
   }
 
+  function updateManualText(value: string) {
+    const next = truncateTodoTitle(value);
+    if (value.length > TODO_TITLE_MAX_LENGTH) {
+      showToast(`할 일은 ${TODO_TITLE_MAX_LENGTH}자까지만 쓸 수 있어요.`);
+    }
+    setManualText(next);
+  }
+
   function updateTodoName(id: string, name: string) {
-    const trimmed = name.slice(0, 20);
+    const trimmed = truncateTodoTitle(name);
     setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, name: trimmed } : todo)));
   }
 
@@ -243,8 +258,9 @@ export function TodoCreation({
     if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) return;
     const input = event.currentTarget;
     const hasSelection = input.selectionStart !== input.selectionEnd;
-    if (input.value.length >= 20 && !hasSelection) {
-      showToast("할 일은 20자까지만 쓸 수 있어요.");
+    if (input.value.length >= TODO_TITLE_MAX_LENGTH && !hasSelection) {
+      event.preventDefault();
+      showToast(`할 일은 ${TODO_TITLE_MAX_LENGTH}자까지만 쓸 수 있어요.`);
     }
   }
 
@@ -310,7 +326,7 @@ export function TodoCreation({
       }
       const items = [...result.todos, ...result.calendar_events].map((t) => ({
         id: createId("ai"),
-        name: t.title,
+        name: truncateTodoTitle(t.title),
         tagId: matchTagId(t.tags),
         quest: false,
       }));
@@ -549,21 +565,33 @@ export function TodoCreation({
                     />
                   </div>
                   <div className="boardAddRow">
-                    <input
-                      className="boardInput"
-                      value={manualText}
-                      maxLength={20}
-                      onChange={(e) => setManualText(e.target.value)}
-                      disabled={aiLoading || isBusy}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          if (isImeComposing(e)) return;
-                          e.preventDefault();
-                          addTodo();
-                        }
-                      }}
-                      placeholder="할 일을 적어주세요 (최대 20자)"
-                    />
+                    <div className="boardInputWrap">
+                      <input
+                        className={`boardInput${isManualTextAtLimit ? " isLimit" : ""}`}
+                        value={manualText}
+                        maxLength={TODO_TITLE_MAX_LENGTH}
+                        onChange={(e) => updateManualText(e.target.value)}
+                        disabled={aiLoading || isBusy}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            if (isImeComposing(e)) return;
+                            e.preventDefault();
+                            addTodo();
+                            return;
+                          }
+                          warnTodoNameLimit(e);
+                        }}
+                        placeholder={`할 일을 적어주세요 (최대 ${TODO_TITLE_MAX_LENGTH}자)`}
+                        aria-describedby="boardManualCounter"
+                      />
+                      <span
+                        id="boardManualCounter"
+                        className={`boardInputCounter${isManualTextAtLimit ? " isLimit" : ""}`}
+                        aria-live="polite"
+                      >
+                        {manualTextLength}/{TODO_TITLE_MAX_LENGTH}
+                      </span>
+                    </div>
                     <button type="button" className="boardAddBtn" onClick={addTodo}>
                       추가
                     </button>
@@ -643,7 +671,7 @@ export function TodoCreation({
                               value={todo.name}
                               onChange={(event) => updateTodoName(todo.id, event.target.value)}
                               onKeyDown={warnTodoNameLimit}
-                              maxLength={20}
+                              maxLength={TODO_TITLE_MAX_LENGTH}
                               disabled={rowLocked}
                               aria-label="TODO 항목 수정"
                             />

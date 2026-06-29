@@ -422,13 +422,19 @@
 /* ── Right: 직접 적기 ── */
 .boardAddRow {
   display: flex;
+  align-items: flex-start;
   gap: 14px;
   margin-bottom: 18px;
 }
 
-.boardInput {
+.boardInputWrap {
+  position: relative;
   flex: 1;
   min-width: 0;
+}
+
+.boardInput {
+  width: 100%;
   border: 2px solid var(--bd-border);
   border-radius: 14px;
   padding: 14px 18px;
@@ -445,14 +451,33 @@
   border-color: var(--bd-accent);
 }
 
+.boardInput.isLimit {
+  border-color: var(--bd-accent);
+}
+
 .boardInput::placeholder {
   color: var(--bd-ink-faint);
   opacity: 1;
 }
 
+.boardInputCounter {
+  position: absolute;
+  top: 62px;
+  right: 8px;
+  color: var(--bd-ink-faint);
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.boardInputCounter.isLimit {
+  color: var(--bd-accent-deep);
+}
+
 /* 직접 추가 = 마을 공용 앰버 버튼(소형) */
 .boardAddBtn {
   flex: none;
+  height: 55px;
   cursor: pointer;
   padding: 0 30px;
   border-radius: 14px;
