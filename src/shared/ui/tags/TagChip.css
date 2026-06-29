@@ -2,6 +2,17 @@
   display: inline-flex;
   align-items: center;
   overflow: hidden;
+  border-radius: 999px;
+  box-sizing: border-box;
+  transition: filter 0.11s;
+}
+
+.tagChip:hover {
+  filter: brightness(1.04);
+}
+
+.tagChip:active {
+  filter: brightness(0.98);
 }
 
 .tagChipSelect {

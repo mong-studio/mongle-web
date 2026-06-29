@@ -471,7 +471,7 @@ export function TodoCreation({
                 className="boardHeaderFlower"
                 aria-hidden="true"
               />
-              <h1 className="boardTitle">오늘의 마을 게시판</h1>
+              <h1 className="boardTitle">오늘의 할 일을 적어보아요</h1>
               <img
                 src="/assets/todo/flower_cluster_right.png"
                 alt=""

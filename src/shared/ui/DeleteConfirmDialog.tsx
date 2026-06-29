@@ -1,6 +1,6 @@
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import type { ReactElement, ReactNode, SyntheticEvent } from "react";
-import { cloneElement, isValidElement } from "react";
+import { cloneElement, isValidElement, useState } from "react";
 
 type DeleteConfirmDialogProps = {
   trigger: ReactNode;
@@ -27,10 +27,9 @@ function stopDialogEvent(event: SyntheticEvent) {
 
 function stopTriggerEvent(event: SyntheticEvent) {
   event.stopPropagation();
-  event.nativeEvent.stopImmediatePropagation?.();
 }
 
-function withStoppedTriggerEvents(trigger: ReactNode): ReactNode {
+function withStoppedTriggerEvents(trigger: ReactNode, openDialog: () => void): ReactNode {
   if (!isValidElement<TriggerEventProps>(trigger)) {
     return trigger;
   }
@@ -63,6 +62,10 @@ function withStoppedTriggerEvents(trigger: ReactNode): ReactNode {
     },
     onClick: (event: SyntheticEvent) => {
       element.props.onClick?.(event);
+      if (!event.isDefaultPrevented()) {
+        event.preventDefault();
+        openDialog();
+      }
       stopTriggerEvent(event);
     },
   });
@@ -75,9 +78,13 @@ export function DeleteConfirmDialog({
   onConfirm,
   confirmLabel = "삭제",
 }: DeleteConfirmDialogProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <AlertDialog.Root>
-      <AlertDialog.Trigger asChild>{withStoppedTriggerEvents(trigger)}</AlertDialog.Trigger>
+    <AlertDialog.Root open={open} onOpenChange={setOpen}>
+      <AlertDialog.Trigger asChild>
+        {withStoppedTriggerEvents(trigger, () => setOpen(true))}
+      </AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay
           onClick={stopDialogEvent}

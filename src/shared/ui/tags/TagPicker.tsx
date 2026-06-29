@@ -62,6 +62,12 @@ export function TagPicker({
     if (id !== null) onSelect(id);
   };
 
+  const deleteTag = async (id: number) => {
+    await onDeleteTag(id);
+    if (selectedId === id) onSelect(null);
+    if (editingId === id) setEditingId(null);
+  };
+
   return (
     <div
       className={`tagPicker${pinNewButton ? " isNewPinned" : ""}${creating ? " isCreating" : ""}`}
@@ -74,7 +80,7 @@ export function TagPicker({
             selected={selectedId === t.id}
             onSelect={() => onSelect(selectedId === t.id ? null : t.id)}
             onEdit={() => startEdit(t)}
-            onDelete={() => void onDeleteTag(t.id)}
+            onDelete={() => void deleteTag(t.id)}
           />
         ))}
       </div>

@@ -14,7 +14,7 @@ export function TagChip({ tag, selected, onSelect, onEdit, onDelete }: Props) {
   const fg = selected ? tag.color : "var(--ink-3)";
   return (
     <div
-      className="calTagGroup tagChip"
+      className="tagChip"
       style={{
         border: selected ? `2px solid ${tag.color}` : "2px solid var(--line-soft)",
         background: selected ? `${tag.color}22` : "var(--cream-0)",
