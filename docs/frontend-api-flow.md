@@ -81,7 +81,7 @@ export const apiClient = axios.create({
 
 1. 사용자가 메시지를 입력한다.
 2. 프론트가 `/todos/chat/`에 `{ message, thread_id }`를 보낸다.
-3. 응답이 `pending`이면 `/todos/chat/{jobId}/`를 2초 간격으로 폴링한다.
+3. 응답이 `pending`이면 `/todos/chat/{jobId}/`를 2초 간격으로 최대 6분 폴링한다.
 4. 최종 응답이 `follow_up`이면 질문 말풍선을 추가하고 같은 `thread_id`로 대화를 이어간다.
 5. 최종 응답이 `candidates`이면 `todos`와 `calendar_events`를 좌측 생성된 플랜 영역에 표시한다.
 6. 사용자가 `계획 저장`을 누르면 생성 결과 전체를 `/todos/planner-confirm/`으로 보낸다.

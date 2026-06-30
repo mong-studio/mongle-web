@@ -19,6 +19,9 @@ type TodoChatPendingEnvelope = {
 type TodoChatFinalEnvelope = ApiEnvelope<TodoChatResult>;
 type TodoChatResponse = TodoChatResult | TodoChatPendingEnvelope | TodoChatFinalEnvelope;
 
+const TODO_CHAT_POLL_INTERVAL_MS = 2_000;
+const TODO_CHAT_POLL_TIMEOUT_MS = 360_000;
+
 type TaskCandidatePayload = {
   title: string;
   due_date: string;
@@ -152,9 +155,9 @@ export async function chatTodos(payload: {
 }
 
 async function pollTodoChatJob(jobId: string): Promise<TodoChatResult> {
-  const deadline = Date.now() + 180_000;
+  const deadline = Date.now() + TODO_CHAT_POLL_TIMEOUT_MS;
   while (Date.now() < deadline) {
-    await wait(2_000);
+    await wait(TODO_CHAT_POLL_INTERVAL_MS);
     const { data } = await apiClient.get<
       ApiEnvelope<TodoChatFollowUpResult | TodoChatOutOfScopeResult | TodoGenerateResult>
     >(`/todos/chat/${jobId}/`);
