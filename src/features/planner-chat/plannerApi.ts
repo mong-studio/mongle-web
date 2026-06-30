@@ -20,7 +20,7 @@ type TodoChatFinalEnvelope = ApiEnvelope<TodoChatResult>;
 type TodoChatResponse = TodoChatResult | TodoChatPendingEnvelope | TodoChatFinalEnvelope;
 
 const TODO_CHAT_POLL_INTERVAL_MS = 2_000;
-const TODO_CHAT_POLL_TIMEOUT_MS = 360_000;
+const TODO_CHAT_POLL_TIMEOUT_MS = 600_000;
 
 type TaskCandidatePayload = {
   title: string;
