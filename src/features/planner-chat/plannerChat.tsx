@@ -185,6 +185,7 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
     }
 
     setIsBusy(true);
+    let shouldCloseAfterSave = false;
     try {
       const result = await savePlannerTodos({
         todos: generatedPlan.todos,
@@ -228,10 +229,14 @@ export function PlannerChat({ onClose, onNotice, onTodosSaved }: PlannerChatProp
       onNotice(
         `${savedTodoItems.length}개의 오늘 할 일과 ${result.calendar_events.length}개의 일정이 저장됐어요.`,
       );
+      shouldCloseAfterSave = true;
     } catch (error) {
       onNotice(`플랜 저장 실패: ${error instanceof Error ? error.message : "원인 미상"}`);
     } finally {
       setIsBusy(false);
+    }
+    if (shouldCloseAfterSave) {
+      onClose();
     }
   }
 
