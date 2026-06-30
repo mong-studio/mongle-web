@@ -81,7 +81,7 @@ export function FeedPost({
             placeholder={post.heroPlaceholder}
             imageUrl={post.imageUrl}
             width="100%"
-            height={232}
+            height={340}
             tint={th.rowBg}
             radius={18}
           />

@@ -247,7 +247,7 @@ export function PostScreen({
               placeholder="사진"
               imageUrl={post.img_url}
               width="100%"
-              height={240}
+              height={340}
               tint={th.rowBg}
               radius={18}
             />
